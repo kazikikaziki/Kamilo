@@ -1,0 +1,338 @@
+<html lang="ja">
+<head>
+	<meta content="text/html; charset=sjis" http-equiv="content-type">
+	<title>KEngine Boot Strap</title>
+	<style type="text/css">
+		body {
+			font-family: Tahoma,Arial,sans-serif;
+			margin: 16px auto;
+			padding: 0px 24px 16px 24px;
+		}
+		hr {
+			padding: 0;
+			border: none;
+			border-top: medium double #444444;
+			text-align: center;
+		}
+		table {
+			border: solid 1px;
+			border-collapse: collapse;
+		}
+		td {
+			border: solid 1px;
+			border-collapse: collapse;
+		}
+		i {
+			color: #666666;
+		}
+		a {
+		#	font-family: courier,Arial,sans-serif;
+			font-weight: bold;
+		}
+		.warning {
+			font-weight: bold;
+			color: #ff4444;
+		}
+	</style>
+</head>
+
+
+<body>
+<h1>KEngine Boot Strap</h1>
+
+<br>
+<br>
+<br>
+
+<!--------------------------------------------------------------->
+<hr>
+<h2>同梱ファイルの説明</h2>
+
+<p>
+<a href="source/" target="_blank">source/</a><br>
+KEngine のソースコード
+</p>
+
+
+<p>
+<a href="html/" target="_blank">html/</a><br>
+Doxygen で生成したドキュメント。
+<blockquote>
+※このフォルダが存在しなかったり中身が空っぽの場合は<b>自分でドキュメントを生成する</b>必要があります。<br>
+生成方法については後述の「<a href="#1000">ドキュメントを生成する</a>」を参照してください。<br>
+生成が成功すれば <a href="html/index.html" target="_blank">html/index.html</a> から各 API の説明やチュートリアルを見ることができます。
+</blockquote>
+
+
+<p>
+<a href="mo.h" target="_blank">mo.h</a><br>
+インクルードするべきファイル
+</p>
+
+
+<p>
+<a href="CMakeLists.txt" target="_blank">CMakeLists.txt</a><br>
+CMake 向けのプロジェクト設定ファイル<br>
+CMake でこのファイルを開いて実行すると Visual Studio 向けのソリューションファイル .sln を作ることができる
+</p>
+
+<p>
+<a href="doxygen.txt" target="_blank">doxygen.txt</a><br>
+doxygen でドキュメント設定ファイル<br>
+Doxwizard でこのファイルを開いて実行するとライブラリドキュメントが生成される
+</p>
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+<!--------------------------------------------------------------->
+<hr>
+<h2><a name="1000"/>ドキュメントを生成する</a></h2>
+
+<p>
+KEngine のヘルプはすべてソースコード内のコメントに Doxygen 形式で書いてあります。<br>
+ソースコードを直接読んでもよいのですが、より見やすい形式で読みたい場合は
+ドキュメント生成ツール Doxygen を使ってください。<a href="http://marupeke296.com/DOXY_No1_Introduction.html" target="_blank">Doxygenの導入</a>
+</p>
+
+
+
+<ul>
+	<li><p>
+		Doxygen をダウンロードしてインストールする<br>
+		<a href="http://www.doxygen.jp/install.html" target="_blank">http://www.doxygen.jp/install.html</a><br>
+	</p></li>
+	
+	<li><p>
+		Doxywizerd を実行する
+	</p></li>
+
+	<li><p>
+		<b>Step 1: Specify the working directory from ...</b><br>
+		と書いてある部分の <b>[Select]</b> をクリックするか、
+		[File|Open] メニューを選んで <a href="doxygen.txt" target="_blank">doxygen.txt</a> を開く<br>
+	</li>
+
+	<li><p>
+		<b>Step 2: Configure doxygen using the ...</b><br>
+		と書いてある部分の下に [Wizard][Expert][Run] というタブが並んでいるので、 <br>
+		<b>[Run]</b> タブを選んで <b>[Run doxygen]</b> をクリックすると構築が始まる。<br>
+		しばらくたつと終了し、"html" フォルダのなかに大量の html ファイルができているはず<br>
+	</p></li>
+	
+	<li><p>生成物を確認する<br>
+		<b>[Show HTML output]</b> をクリックするかエクスプローラーで <a href="html/index.html" target="_blank">html/index.html</a> を開き、<br>
+		キュメントができていることを確認する<br>
+	</p></li>
+</ul>
+
+
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+<!--------------------------------------------------------------->
+<hr>
+<h2>CMake で Visual Studio のソリューションファイル (.sln) を生成する</h2>
+
+<p>
+このプロジェクトソースは Visual Studio などのプロジェクトファイルを含んでいません。
+ソースコードからビルドするには、まず <b>CMake</b> を実行して Visual Studio の .sln ファイルを作る必要があります。
+</p>
+
+
+<br>
+<h3>CMake をインストールする</h3>
+<blockquote>
+	公式サイトから CMake をダウンロードしてインストールしてください。
+	どのファイルをダウンロードするか迷う場合はとりあえず
+	<b>Windows win64-x64 Installer</b> にしておけば間違いありません<br>
+	<a href="https://cmake.org/download/">https://cmake.org/download/</a>
+</blockquote>
+
+
+<br>
+<h3>CMake を起動する</h3>
+<blockquote>
+	スタートメニューから <b>CMake (cmake gui)</b> を起動してください。
+</blockquote>
+
+
+<br>
+<h3>入力フォルダを指定する</h3>
+<blockquote>
+	CMake のウィンドウの <b>[Where is the source code]</b> に CMakeLists.txt が置いてあるフォルダを指定します<br>
+	<span class="warning">※日本語を含むフォルダ名はエラーになります</span><br>
+	<span class="warning">※CMakeLists.txt は複数個あるので間違えないようにしてください。</span><br>
+	ここではトップレベル（あなたが今読んでいるHTMLファイルが置いてあるフォルダ）にある CMakeLists.txt を使います。<br>
+</blockquote>
+
+
+<br>
+<h3><a name="2000"/>出力フォルダを指定する</a></h3>
+<blockquote>
+	CMake のウィンドウの <b>[Where to build the binaries]</b> に出力先フォルダを指定します<br>
+	<span class="warning">※日本語を含むフォルダ名はエラーになります</span><br>
+	ここで指定したフォルダの中に .sln や .vcxproj といったファイルが生成されることになります
+</blockquote>
+
+
+<br>
+<h3>Configure する</h3>
+<ul>
+	<li>
+		<b>[Configure]</b> をクリックする
+		<p>
+			初回設定ウィンドウが出てきます。<br>
+			<span class="warning">既に一度 Configure を実行している場合、このウィンドウは出てきません</span><br>
+			もう一度設定ウィンドウを出したい場合はメニューから <b>[File][Delete Cache]</b> を選んでキャッシュを削除してください。
+		</p>
+	</li>
+
+
+	<li>
+		<b>[Specify the generator for this project]</b> で開発環境を選ぶ
+		<p>
+			ここでは <b>Visual Studio 15 2017</b> または <b>Visual Studio 16 2019</b> を選んでください。
+			<span class="warning">それ以外の開発環境には対応していません</span>
+		</p>
+	</li>
+
+
+	<li>
+		<b>[Optional platform generator] でプラットフォームを選ぶ</b><br>
+		<p>
+			<span class="warning">必ず Win32 を選んでください</span><br>
+			空白のままでも先に進むことができますが、
+			Visual Studio のバージョンによっては <b>x64</b> になってしまう場合があります。<br>
+		</p>
+	</li>
+
+
+	<li>
+	<b>[Finish]</b> をクリックして設定を終える
+	</li>
+</ul>
+
+
+<br>
+<h3>プロジェクト固有のオプションを設定する</h3>
+<blockquote>
+	<b>Configure</b> を終えると CMake の処理が始まり、しばらくするとウィンドウ中央部分のリストに
+	CMAKE_CONFIGURATION_TYPES などの設定項目が出てきます<br>
+	<br>
+	ここで、必要に応じて <b>KENG_DIRECTX_SDK_2004</b> にチェックを入れておいてください<br>
+	<br>
+	★DirectX SDK Oct 2004 を使う場合にチェックを入れます。<br>
+	★DirectX SDK Oct 2004 と June 2010 以降とではヘッダファイル DxErr.h の名前が異なります。<br>
+	　それを切り替えるためのスイッチです
+</blockquote>
+
+
+
+<br>
+<h3>Generate する</h3>
+<blockquote>
+	<b>[Generate]</b> ボタンをクリックしてください。<br>
+	成功すれば、「<a href="#2000">出力フォルダを指定する</a>」で指定した場所にプロジェクトファイルが作成されます
+</blockquote>
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<hr>
+<h2>Visual Studio でビルド実行する</h2>
+
+
+
+
+<h3>.sln ファイルを開く (Visual Studio)</h3>
+<blockquote>
+	CMake での手順を正しく行えば、出力フォルダの中に .sln ファイルが出来上がっているはずです。
+	それを Visual Studio で開いてください
+</blockquote>
+
+
+
+<h3>プロジェクトをビルド＆実行する (Visual Studio)</h3>
+<blockquote>
+	CMake で作成したソリューションは、デフォルトで <b>ALL_BUILD</b> プロジェクトが選択されていますが、
+	このまま <b>[F5]</b> でビルド＆実行しようとするとビルドは成功するものの、実行ができずに<span class="warning">エラーになります</span><br>
+	<br>
+	ソリューションエクスプローラで目的のプロジェクトを右クリックし、
+	<b>[スタートアッププロジェクトに設定する]</b>を選んでおくか、または
+	目的のプロジェクトを右クリックして <b>[デバッグ][新しいインスタンス]</b> で実行してください<br>
+	<br>
+	以下に、よくあるエラーの対処法を示しておきます<br>
+
+	<hr>
+	<ul>
+		<li>
+			<b>ALL_BUILD を開始できない</b>
+			<blockquote>
+				CMake で作成したソリューションは、デフォルトで <b>ALL_BUILD</b> プロジェクトが選択されていますが、
+				このまま F5 でビルド＆実行しようとするとビルドは成功するものの、実行ができずに<span class="warning">エラーになります</span><br>
+				<br>
+				ソリューションエクスプローラで目的のプロジェクトを右クリックし、
+				<b>[スタートアッププロジェクトに設定する]</b>を選んでおくか、または
+				目的のプロジェクトを右クリックして <b>[デバッグ][新しいインスタンス]</b> で実行してください
+			</blockquote>
+		</li>
+		
+		<li><b>d3dx9.h がインクルードできない</b>
+			<blockquote>
+				DirectX SDK のインクルードフォルダにパスが通っているか確認してください。<br>
+				「d3d9.h のインクルードはできるのに d3dx9.h はできないぞ」という場合、
+				DirectX ではなく Windows SDK のインクルードフォルダを見ている可能性があります。
+				その場合は DirectX のパスが Windows SDK よりも優先されるようにしてください。
+			</blockquote>
+		</li>
+
+		<li>
+			<b>リンカエラーが発生する</b>
+			<blockquote>
+				DirectX SDK のライブラリフォルダにパスが通っているか確認してください。<br>
+			</blockquote>
+		</li>
+	</ul>
+</blockquote>
+
+
+
+
+
+
+
+
+<br>
+<br>
+<br>
+
+
+<!--------------------------------------------------------------->
+<hr>
+Heliodor<br>
+<a href="http://helio-dor.net">http://helio-dor.net</a><br>
+<br>
+Ci-en<br>
+<a href="https://ci-en.dlsite.com/creator/59">https://ci-en.dlsite.com/creator/59</a><br>
+
+</body>
+
+</html>
+
