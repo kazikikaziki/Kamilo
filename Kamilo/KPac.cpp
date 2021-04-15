@@ -19,7 +19,7 @@ public:
 	}
 	bool open(KOutputStream &output) {
 		output_ = output;
-		return false;
+		return output_.isOpen();
 	}
 	virtual bool addEntryFromFileName(const KPath &entry_name, const KPath &filename) {
 		KReader *file = KReader::createFromFileName(filename.u8());
