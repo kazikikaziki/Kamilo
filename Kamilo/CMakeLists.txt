@@ -6,7 +6,7 @@ project(Kamilo)
 
 
 # よくつかうマクロをインクルード
-include("CMake_kamilo.txt")
+include("CMake_heliodor.txt")
 
 
 
