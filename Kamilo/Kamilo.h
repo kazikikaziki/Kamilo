@@ -8,6 +8,8 @@
 #include "keng_gameext.h"
 
 #include "CApp.h"
+#include "COutline.h"
+
 #include "KAction.h"
 #include "KAnimation.h"
 #include "KAny.h"
