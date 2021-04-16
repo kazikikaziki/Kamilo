@@ -1,15 +1,14 @@
 ﻿# coding: utf8
 cmake_minimum_required(VERSION 3.0)
 
+# プロジェクト名
+set(m_project_name "MySampleProject")
 
+# Kamilo が置いてある場所
+set(m_path_kamilo "Kamilo")
 
-#===================================================================================
-# 値設定
-#===================================================================================
-set(m_project_name "SampleProject") # プロジェクト名
-
-set(m_path_kamilo "Kamilo")  # Kamilo が置いてある場所
-set(m_path_game "Game") # ゲーム本体が置いてある場所
+# ゲーム本体が置いてある場所
+set(m_path_game "Game")
 
 
 #===================================================================================
