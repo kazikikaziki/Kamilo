@@ -1,14 +1,17 @@
 ﻿#include "KCamera.h"
 #include "KInspector.h"
 #include "KInternal.h"
+#include "KScreen.h"
 #include "keng_game.h"
 
 namespace Kamilo {
 
 
 KCamera::KCamera() {
-	int w=640, h=480;
-	KVideo::getViewport(nullptr, nullptr, &w, &h);
+	int w, h;
+	KScreen::getGameSize(&w, &h); // ゲームの基本解像度で初期化する
+//	KScreen::getGuiSize(&w, &h); // GUI解像度で初期化する
+//	KVideo::getViewport(0, 0, &w, &h); // 現在の描画領域サイズで初期化する
 	m_Data.size_w = (float)w;
 	m_Data.size_h = (float)h;
 	update_projection_matrix();
