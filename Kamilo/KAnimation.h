@@ -68,13 +68,13 @@ public:
 	int findPageByMark(int mark) const; ///< 指定したマーカーがついているページを返す
 	int getMainClipPage(int *out_pageframe=nullptr) const; ///< アニメクリップを再生中の場合、そのページ番号を返す
 	bool isMainClipPlaying(const char *name_or_alias, KPath *post_next_clip=nullptr, int *post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
-	void setMainClipName(const char *name, bool keep=false); ///< クリップ名を指定してアニメをセットする
-	void setMainClipAlias(const char *alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
-	void setMainClip(KClipRes *clip, bool keep=false); ///< クリップオブジェクトを指定してアニメをセットする
+	bool setMainClipName(const char *name, bool keep=false); ///< クリップ名を指定してアニメをセットする
+	bool setMainClipAlias(const char *alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
+	bool setMainClip(KClipRes *clip, bool keep=false); ///< クリップオブジェクトを指定してアニメをセットする
 	void setMainClipCallback(KPlaybackCallback *cb); ///< アニメの再生状態に応じてコールバックが呼ばれるようにする
 	void tickTracks();
-	void setAlias(const char *alias, const char *name);
-	const char * getClipNameByAlias(const char *alias) const;
+	void setAlias(const KPath &alias, const KPath &name);
+	const char * getClipNameByAlias(const KPath &alias) const;
 	void setSpeedScale(float speed, bool current_clip_only=false); ///< アニメ速度の倍率を設定する
 	float getSpeedScale() const;
 	bool getCurrentParameterBool(const char *name) const; ///< アニメクリップの Parameters タグで指定された値を得る

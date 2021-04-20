@@ -567,32 +567,30 @@ bool KAnimation::isMainClipPlaying(const char *name_or_alias, KPath *post_next_c
 /// @param name アタッチするアニメクリップの名前
 /// @param keep 既に同じアニメが設定されている場合の挙動を決める。
 ///             true なら既存のアニメがそのまま進行する。false ならリスタートする
-void KAnimation::setMainClipName(const char *name, bool keep) {
+bool KAnimation::setMainClipName(const char *name, bool keep) {
 	KClipRes *clip = KBank::getAnimationBank()->find_clip(name);
-	setMainClip(clip, keep);
+	return setMainClip(clip, keep);
 }
-void KAnimation::setMainClipAlias(const char *alias, bool keep) {
+bool KAnimation::setMainClipAlias(const char *alias, bool keep) {
 	// 空文字列が指定された場合はクリップを外す
 	if (KStringUtils::isEmpty(alias)) {
-		setMainClip(nullptr);
-		return;
+		return setMainClip(nullptr);
 	}
 	// エイリアスから元のクリップ名を得る
 	KPath name = m_AliasMap[alias];
 	if (name.empty()) {
 		KLog::printWarning("Animation alias named '%s' does not exist", alias);
-		setMainClip(nullptr);
-		return;
+		return setMainClip(nullptr);
 	}
 	// 新しいクリップを設定する
 	KClipRes *clip = KBank::getAnimationBank()->find_clip(name.u8());
-	setMainClip(clip, keep);
+	return setMainClip(clip, keep);
 }
-void KAnimation::setMainClip(KClipRes *clip, bool keep) {
+bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 	// 同じアニメが既に再生中の場合は何もしない
 	if (keep && clip) {
 		if (m_MainPlayback->mClip == clip) {
-			return;
+			return false;
 		}
 	}
 
@@ -654,6 +652,7 @@ void KAnimation::setMainClip(KClipRes *clip, bool keep) {
 		// コマンド送信
 		m_MainPlayback->playbackSignal();
 	}
+	return true;
 }
 void KAnimation::setMainClipCallback(KPlaybackCallback *cb) {
 	m_MainPlayback->mCB = cb;
@@ -672,10 +671,10 @@ void KAnimation::tickTracks() {
 		}
 	}
 }
-void KAnimation::setAlias(const char *alias, const char *name) {
+void KAnimation::setAlias(const KPath &alias, const KPath &name) {
 	m_AliasMap[alias] = name;
 }
-const char * KAnimation::getClipNameByAlias(const char *alias) const {
+const char * KAnimation::getClipNameByAlias(const KPath &alias) const {
 	auto it = m_AliasMap.find(alias);
 	if (it != m_AliasMap.end()) {
 		return it->second.u8();
