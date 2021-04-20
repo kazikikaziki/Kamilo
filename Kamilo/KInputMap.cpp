@@ -1208,7 +1208,7 @@ public:
 	void addAppButton(const char *button, KButtonFlags flags) {
 		m_app_buttons->addButton(button, flags);
 	}
-	void addButton(const char *button, KButtonFlags flags) {
+	void addGameButton(const char *button, KButtonFlags flags) {
 		m_game_buttons->addButton(button, flags);
 	}
 	bool isAppButtonDown(const char *button) const {
@@ -1217,17 +1217,14 @@ public:
 	bool getAppButtonDown(const char *button) const {
 		return m_app_buttons->getButtonDown(button, nullptr);
 	};
-	bool isButtonDown(const char *button) const {
+	bool isGameButtonDown(const char *button) const {
 		return m_game_buttons->isButtonDown(button, nullptr);
 	}
-	bool getButtonDown(const char *button) const {
+	bool getGameButtonDown(const char *button) const {
 		return m_game_buttons->getButtonDown(button, nullptr);
 	};
 	int isConflict(const char *button1, const char *button2) const {
 		return m_game_buttons->isConflict(button1, button2);
-	}
-	int getButtonCount() const {
-		return m_game_buttons->getButtonCount();
 	}
 	void unbindByTag(const char *button, int tag) {
 		KButtonItem *btn = m_game_buttons->findButtonItem(button);
@@ -1358,6 +1355,7 @@ public:
 static CInputMap *g_InputMap = nullptr;
 
 void KInputMap::install() {
+	K__Assert(g_InputMap == nullptr);
 	g_InputMap = new CInputMap();
 }
 void KInputMap::uninstall() {
@@ -1367,7 +1365,7 @@ void KInputMap::uninstall() {
 	}
 }
 
-/// アプリケーションボタン（ポーズ中に影響されない）を登録する
+/// アプリケーションボタン（ポーズに影響されない）を登録する
 /// @node ここで登録するのは仮想ボタンであり、まだどの物理キーにもバインドされていない。
 /// この仮想ボタンを物理キーに関連付けるためには bindAppKey を使う 
 /// （アプリケーションボタンにバインドできるのはキーボードのキーのみ）
@@ -1375,10 +1373,14 @@ void KInputMap::addAppButton(const char *button, KButtonFlags flags) {
 	K__Assert(g_InputMap);
 	g_InputMap->addAppButton(button, flags);
 }
+
+/// ゲームボタン（ポーズに影響されない）が押された状態になっているか？
 bool KInputMap::isAppButtonDown(const char *button) {
 	K__Assert(g_InputMap);
 	return g_InputMap->isAppButtonDown(button);
 }
+
+/// アプリボタン（ポーズに影響されない）がたった今押されたか？
 bool KInputMap::getAppButtonDown(const char *button) {
 	K__Assert(g_InputMap);
 	return g_InputMap->getAppButtonDown(button);
@@ -1388,22 +1390,40 @@ bool KInputMap::getAppButtonDown(const char *button) {
 /// @node ここで登録するのは仮想ボタンであり、まだどの物理キーにもバインドされていない。
 /// この仮想ボタンを物理キーに関連付けるためにはバインド関数を使う
 /// @see bindKeyboardKey, bindJoystickKey, bindJoystickAxis, bindJoystickPov, bindMouseKey, bindKeySequence
-void KInputMap::addButton(const char *button, KButtonFlags flags) {
+void KInputMap::addGameButton(const char *button, KButtonFlags flags) {
 	K__Assert(g_InputMap);
-	g_InputMap->addButton(button, flags);
+	g_InputMap->addGameButton(button, flags);
 }
+
+/// ゲームボタン（ポーズに影響される）が押された状態になっているか？
+bool KInputMap::isGameButtonDown(const char *button) {
+	K__Assert(g_InputMap);
+	return g_InputMap->isGameButtonDown(button);
+}
+
+/// ゲームボタン（ポーズに影響される）がたった今押されたか？
+bool KInputMap::getGameButtonDown(const char *button) {
+	K__Assert(g_InputMap);
+	return g_InputMap->getGameButtonDown(button);
+}
+
+/// 指定されたボタンが押された状態になっているか？
+/// （アプリボタンとゲームボタンのどちらにも対応する）
 bool KInputMap::isButtonDown(const char *button) {
-	K__Assert(g_InputMap);
-	return g_InputMap->isButtonDown(button);
+	return isAppButtonDown(button) || isGameButtonDown(button);
 }
+
+/// 指定されたボタンががたった今押されたか？
+/// （アプリボタンとゲームボタンのどちらにも対応する）
 bool KInputMap::getButtonDown(const char *button) {
-	K__Assert(g_InputMap);
-	return g_InputMap->getButtonDown(button);
+	return getAppButtonDown(button) || getGameButtonDown(button);
 }
-int KInputMap::getButtonCount() {
-	K__Assert(g_InputMap);
-	return g_InputMap->getButtonCount();
-}
+
+
+
+
+
+
 
 /// addAppButton で登録した仮想ボタンに対してキーボードのキーをバインドする
 void KInputMap::bindAppKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods) {

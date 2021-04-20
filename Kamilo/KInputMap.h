@@ -74,13 +74,23 @@ class KInputMap {
 public:
 	static void install();
 	static void uninstall();
+
 	static void addAppButton(const char *button, KButtonFlags flags=0);
 	static bool isAppButtonDown(const char *button);
 	static bool getAppButtonDown(const char *button);
-	static void addButton(const char *button, KButtonFlags flags=0);
+
+	static void addGameButton(const char *button, KButtonFlags flags=0);
+	static bool isGameButtonDown(const char *button);
+	static bool getGameButtonDown(const char *button);
+
 	static bool isButtonDown(const char *button);
 	static bool getButtonDown(const char *button);
-	static int getButtonCount();
+
+	// 互換性
+	static void addButton(const char *button, KButtonFlags flags=0) {
+		addGameButton(button, flags);
+	}
+
 	static void bindAppKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE);
 	static void bindKeyboardKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE, int tag=0);
 	static void bindJoystickKey(const char *button, KJoystick::Button joybtn, int tag=0);
