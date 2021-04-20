@@ -7,6 +7,7 @@
 #include "KLocalTime.h"
 #include "KScreen.h"
 #include "KRes.h" // KBank
+#include "KWindow.h"
 
 namespace Kamilo {
 
@@ -32,6 +33,9 @@ public:
 		m_index = 0;
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this); // KInspectorCallback
+
+		// 独自の PtrScr を使う（＝Windows標準の PrtScr を無効化する）
+		KWindow::setAttribute(KWindow::ATTR_KILL_SNAPSHOT, true);
 	}
 	virtual void on_manager_signal(KSig &sig) override {
 		if (sig.check(KSignalType_WINDOW_KEY_DOWN)) {
