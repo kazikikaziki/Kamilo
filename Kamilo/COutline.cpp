@@ -54,9 +54,21 @@ static KSHADERID _GetTextShader() {
 	return g_TextShader;
 }
 
+COutline::COutline() {
+}
 void COutline::apply(KNode *node) {
 	KDrawable *drawable = KDrawable::of(node);
 	K__ASSERT_RETURN(drawable);
 	drawable->setGrouping(true);
 	drawable->getGroupingMaterial()->shader = _GetTextShader();
+	drawable->getGroupingMaterial()->cb = this;
+}
+void COutline::unapply(KNode *node) {
+	KDrawable *drawable = KDrawable::of(node);
+	K__ASSERT_RETURN(drawable);
+	drawable->getGroupingMaterial()->shader = nullptr;
+	drawable->getGroupingMaterial()->cb = nullptr;
+}
+void COutline::onMaterial_SetShaderVariable(const KMaterial *material) {
+	KVideo::setShaderFloatArray("outline_color", m_Color.floats(), 4);
 }

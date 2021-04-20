@@ -1,7 +1,11 @@
 ﻿#pragma once
 #include "Kamilo.h"
 
-class COutline {
+class COutline: public Kamilo::KMaterialCallback {
 public:
-	static void apply(Kamilo::KNode *node);
+	Kamilo::KColor m_Color;
+	COutline();
+	void apply(Kamilo::KNode *node);
+	void unapply(Kamilo::KNode *node);
+	virtual void onMaterial_SetShaderVariable(const Kamilo::KMaterial *material) override;
 };
