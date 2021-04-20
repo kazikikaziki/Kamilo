@@ -314,201 +314,344 @@ int KSceneManager::getSceneParamInt(const char *key) {
 
 
 
-
-
-
-
-
-
-static void _XorString(char *s, size_t len, const char *key) {
-	K_assert(s);
-	K_assert(key && key[0]); // 長さ１以上の文字列であること
-	K_assert(len > 0);
-	size_t keylen = strlen(key);
-	for (size_t i=0; i<len; i++) {
-		s[i] = s[i] ^ key[i % keylen];
+class CUserDataImpl: public KInspectorCallback {
+	static std::string encryptString(const std::string &data, const std::string &key) {
+		std::string s = data;
+		xorString((char*)s.data(), s.size(), key.c_str());
+		return s;
 	}
-}
-
-void KDataAct::attach(KNode *node) {
-	node->setAction(new KDataAct());
-}
-KDataAct * KDataAct::of(KNode *node) {
-	if (node) {
-		return node->getActionT<KDataAct*>();
+	static std::string decryptString(const std::string &data, const std::string &key) {
+		std::string s = data;
+		xorString((char*)s.data(), s.size(), key.c_str());
+		return s;
 	}
-	return nullptr;
-}
-KDataAct::KDataAct() {
-}
-void KDataAct::_clear(const KPathList &keys) {
-	for (auto it=keys.begin(); it!=keys.end(); ++it) {
-		const KPath &k = *it;
-		auto kit = m_tags.find(k);
-		if (kit != m_tags.end()) {
-			m_tags.erase(kit);
-		}
-		m_values.remove(k.u8());
-	}
-}
-void KDataAct::clearValues() {
-	m_values.clear();
-	m_tags.clear();
-}
-void KDataAct::clearValuesByTag(int tag) {
-	KPathList keys;
-	for (auto it=m_tags.begin(); it!=m_tags.end(); ++it) {
-		if (it->second == tag) {
-			keys.push_back(it->first);
+	static void xorString(char *s, size_t len, const char *key) {
+		K_assert(s);
+		K_assert(key && key[0]); // 長さ１以上の文字列であること
+		K_assert(len > 0);
+		size_t keylen = strlen(key);
+		for (size_t i=0; i<len; i++) {
+			s[i] = s[i] ^ key[i % keylen];
 		}
 	}
-	_clear(keys);
-}
-void KDataAct::clearValuesByPrefix(const char *prefix) {
-	KPathList keys;
-	for (int i=0; i<m_values.size(); i++) {
-		const char *key = m_values.getName(i);
-		if (KStringUtils::startsWith(key, prefix)) {
-			keys.push_back(key);
+
+public:
+	KNamedValues m_Values;
+	std::unordered_map<KPath, int> m_Tags;
+
+	CUserDataImpl() {
+		KEngine::addInspectorCallback(this);
+	}
+	virtual void onInspectorGui() override {
+		int ww = (int)ImGui::GetContentRegionAvail().x;
+		int w = KMath::min(64, ww/3);
+		int id = 0;
+		ImGui::Indent();
+		for (int i=0; i<m_Values.size(); i++) {
+			const char *key = m_Values.getName(i);
+			const char *val = m_Values.getString(i);
+			char val_u8[256];
+			strcpy_s(val_u8, sizeof(val_u8), val);
+			ImGui::PushID(KImGui::KImGui_ID(id));
+			ImGui::PushItemWidth((float)w);
+			if (ImGui::InputText("", val_u8, sizeof(val_u8))) {
+				m_Values.setString(key, KPath::fromUtf8(val_u8).u8());
+			}
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
+			ImGui::Text("%s", key);
+			ImGui::PopID();
+			id++;
+		}
+		ImGui::Unindent();
+	}
+
+	void _clear(const KPathList &keys) {
+		for (auto it=keys.begin(); it!=keys.end(); ++it) {
+			const KPath &k = *it;
+			auto kit = m_Tags.find(k);
+			if (kit != m_Tags.end()) {
+				m_Tags.erase(kit);
+			}
+			m_Values.remove(k.u8());
 		}
 	}
-	_clear(keys);
-}
-int KDataAct::getKeys(KPathList *keys) const {
-	if (keys) {
-		for (int i=0; i<m_values.size(); i++) {
-			const char *key = m_values.getName(i);
-			keys->push_back(key);
-		}
+	void clearValues() {
+		m_Values.clear();
+		m_Tags.clear();
 	}
-	return m_values.size();
-}
-bool KDataAct::hasKey(const KPath &key) const {
-	return m_values.getString(key.u8()) != nullptr;
-}
-KPath KDataAct::getStr(const KPath &key, const KPath &def) const {
-	return m_values.getString(key.u8(), def.u8());
-}
-void KDataAct::setStr(const KPath &key, const KPath &val, int tag) {
-	m_values.setString(key.u8(), val.u8());
-	m_tags[key] = tag;
-}
-bool KDataAct::saveToFileEx(const KNamedValues *nv, const KPath &filename, const char *password) {
-	bool ret = false;
+	void clearValuesByTag(int tag) {
+		KPathList keys;
+		for (auto it=m_Tags.begin(); it!=m_Tags.end(); ++it) {
+			if (it->second == tag) {
+				keys.push_back(it->first);
+			}
+		}
+		_clear(keys);
+	}
+	void clearValuesByPrefix(const char *prefix) {
+		KPathList keys;
+		for (int i=0; i<m_Values.size(); i++) {
+			const char *key = m_Values.getName(i);
+			if (KStringUtils::startsWith(key, prefix)) {
+				keys.push_back(key);
+			}
+		}
+		_clear(keys);
+	}
+	int getKeys(KPathList *keys) const {
+		if (keys) {
+			for (int i=0; i<m_Values.size(); i++) {
+				const char *key = m_Values.getName(i);
+				keys->push_back(key);
+			}
+		}
+		return m_Values.size();
+	}
+	bool hasKey(const KPath &key) const {
+		return m_Values.getString(key.u8()) != nullptr;
+	}
+	KPath getString(const KPath &key, const KPath &def) const {
+		return m_Values.getString(key.u8(), def.u8());
+	}
+	void setString(const KPath &key, const KPath &val, int tag) {
+		m_Values.setString(key.u8(), val.u8());
+		m_Tags[key] = tag;
+	}
+	bool saveToFileEx(const KNamedValues *nv, const KPath &filename, const char *password) {
+		bool ret = false;
 	
-	KOutputStream output = KOutputStream::fromFileName(filename.u8());
-	if (output.isOpen()) {
+		KOutputStream output = KOutputStream::fromFileName(filename.u8());
+		if (output.isOpen()) {
+			std::string u8 = nv->saveToString();
+			if (password && password[0]) {
+				u8 = encryptString(u8, password);
+			}
+			if (!u8.empty()) {
+				output.write(u8.data(), u8.size());
+			}
+			ret = true;
+		}
+		return ret;
+	}
+	bool saveToFile(const KPath &filename, const char *password) {
+		return saveToFileEx(&m_Values, filename, password);
+	}
+	bool saveToFileCompress(const KPath &filename) {
+		return saveToFileCompressEx(&m_Values, filename);
+	}
+	bool saveToFileCompressEx(const KNamedValues *nv, const KPath &filename) {
+		if (nv == nullptr) return false;
 		std::string u8 = nv->saveToString();
-		if (password && password[0]) {
-			_XorString(&u8[0], u8.size(), password); // encode
-		}
-		if (!u8.empty()) {
-			output.write(u8.data(), u8.size());
-		}
-		ret = true;
-	}
-	return ret;
-}
-bool KDataAct::saveToFile(const KPath &filename, const char *password) {
-	return saveToFileEx(&m_values, filename, password);
-}
-bool KDataAct::loadFromFile(const KPath &filename, const char *password) {
-	return peekFile(filename, password, &m_values);
-}
-bool KDataAct::loadFromFileCompress(const KPath &filename) {
-	return loadFromFileCompressEx(&m_values, filename);
-}
-bool KDataAct::saveToFileCompress(const KPath &filename) {
-	return saveToFileCompressEx(&m_values, filename);
-}
-bool KDataAct::saveToFileCompressEx(const KNamedValues *nv, const KPath &filename) {
-	if (nv == nullptr) return false;
-	std::string u8 = nv->saveToString();
-	if (u8.empty()) return false;
+		if (u8.empty()) return false;
 
-	std::string zbin = KZlib::compress_raw(u8, 1);
-	if (zbin.empty()) return false;
+		std::string zbin = KZlib::compress_raw(u8, 1);
+		if (zbin.empty()) return false;
 
-	KOutputStream output = KOutputStream::fromFileName(filename.u8());
-	if (output.isOpen()) {
-		output.writeUint16((uint16_t)u8.size());
-		output.writeUint16((uint16_t)zbin.size());
-		output.write(zbin.data(), zbin.size());
-		return true;
-	}
-	return false;
-}
-bool KDataAct::loadFromFileCompressEx(KNamedValues *nv, const KPath &filename) const {
-	KReader *file = KReader::createFromFileName(filename.u8());
-	if (file == nullptr) return false;
-
-	uint16_t uzsize = file->read_uint16();
-	uint16_t zsize  = file->read_uint16();
-	std::string zbin = file->read_bin(zsize);
-	file->drop();
-
-	std::string text_u8 = KZlib::uncompress_raw(zbin, uzsize);
-	text_u8.push_back(0); // 終端文字を追加
-	if (nv) {
-		return nv->loadFromString(text_u8.c_str(), filename.u8());
-	} else {
-		return true;
-	}
-}
-bool KDataAct::loadFromNamedValues(const KNamedValues *nv) {
-	if (nv) {
-		m_values.clear();
-		m_values.append(nv);
-		return true;
-	}
-	return false;
-}
-bool KDataAct::peekFile(const KPath &filename, const char *password, KNamedValues *nv) const {
-	bool ret = false;
-	KReader *file = KReader::createFromFileName(filename.u8());
-	if (file) {
-		std::string u8 = file->read_bin();
-		if (password && password[0]) {
-			_XorString(&u8[0], u8.size(), password); // decode
+		KOutputStream output = KOutputStream::fromFileName(filename.u8());
+		if (output.isOpen()) {
+			output.writeUint16((uint16_t)u8.size());
+			output.writeUint16((uint16_t)zbin.size());
+			output.write(zbin.data(), zbin.size());
+			return true;
 		}
-		if (nv) {
-			nv->loadFromString(u8.c_str(), filename.u8());
-		}
+		return false;
+	}
+	bool loadFromFile(const KPath &filename, const char *password) {
+		return peekFile(filename, password, &m_Values);
+	}
+	bool loadFromFileCompress(const KPath &filename) {
+		return loadFromFileCompressEx(&m_Values, filename);
+	}
+	bool loadFromFileCompressEx(KNamedValues *nv, const KPath &filename) const {
+		KReader *file = KReader::createFromFileName(filename.u8());
+		if (file == nullptr) return false;
+
+		uint16_t uzsize = file->read_uint16();
+		uint16_t zsize  = file->read_uint16();
+		std::string zbin = file->read_bin(zsize);
 		file->drop();
-		ret = true;
-	}
-	return ret;
-}
-void KDataAct::onInspector() {
-	int ww = (int)ImGui::GetContentRegionAvail().x;
-	int w = KMath::min(64, ww/3);
-	int id = 0;
-	ImGui::Indent();
-	for (int i=0; i<m_values.size(); i++) {
-		const char *key = m_values.getName(i);
-		const char *val = m_values.getString(i);
-		char val_u8[256];
-		strcpy_s(val_u8, sizeof(val_u8), val);
-		ImGui::PushID(KImGui::KImGui_ID(id));
-		ImGui::PushItemWidth((float)w);
-		if (ImGui::InputText("", val_u8, sizeof(val_u8))) {
-			m_values.setString(key, KPath::fromUtf8(val_u8).u8());
+
+		std::string text_u8 = KZlib::uncompress_raw(zbin, uzsize);
+		text_u8.push_back(0); // 終端文字を追加
+		if (nv) {
+			return nv->loadFromString(text_u8.c_str(), filename.u8());
+		} else {
+			return true;
 		}
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		ImGui::Text("%s", key);
-		ImGui::PopID();
-		id++;
 	}
-	ImGui::Unindent();
+	bool loadFromNamedValues(const KNamedValues *nv) {
+		if (nv) {
+			m_Values.clear();
+			m_Values.append(nv);
+			return true;
+		}
+		return false;
+	}
+	bool peekFile(const KPath &filename, const char *password, KNamedValues *nv) const {
+		bool ret = false;
+		KReader *file = KReader::createFromFileName(filename.u8());
+		if (file) {
+			std::string u8 = file->read_bin();
+			if (password && password[0]) {
+				u8 = decryptString(u8, password);
+			}
+			if (nv) {
+				nv->loadFromString(u8.c_str(), filename.u8());
+			}
+			file->drop();
+			ret = true;
+		}
+		return ret;
+	}
+};
+
+
+static CUserDataImpl *g_UserData = nullptr;
+
+
+void KUserData::install() {
+	K__Assert(g_UserData == nullptr);
+	g_UserData = new CUserDataImpl();
+}
+void KUserData::uninstall() {
+	if (g_UserData) {
+		delete g_UserData;
+		g_UserData = nullptr;
+	}
+}
+void KUserData::clearValues() {
+	K__Assert(g_UserData);
+	g_UserData->clearValues();
+}
+void KUserData::clearValuesByTag(int tag) {
+	K__Assert(g_UserData);
+	g_UserData->clearValuesByTag(tag);
+}
+void KUserData::clearValuesByPrefix(const char *prefix) {
+	K__Assert(g_UserData);
+	g_UserData->clearValuesByPrefix(prefix);
+}
+KPath KUserData::getString(const KPath &key, const KPath &def) {
+	K__Assert(g_UserData);
+	return g_UserData->getString(key, def);
+}
+void KUserData::setString(const KPath &key, const KPath &val, int tag) {
+	K__Assert(g_UserData);
+	g_UserData->setString(key, val, tag);
+}
+bool KUserData::hasKey(const KPath &key) {
+	K__Assert(g_UserData);
+	return g_UserData->hasKey(key);
+}
+int KUserData::getKeys(KPathList *keys) {
+	K__Assert(g_UserData);
+	return g_UserData->getKeys(keys);
+}
+int KUserData::getInt(const KPath &key, int def) {
+	KPath s = getString(key);
+	return KStringUtils::toInt(s.u8(), def);
+}
+void KUserData::setInt(const KPath &key, int val, int tag) {
+	KPath pval = KPath::fromFormat("%d", val);
+	setString(key, pval, tag);
+}
+bool KUserData::saveToFile(const KPath &filename, const char *password) {
+	K__Assert(g_UserData);
+	return g_UserData->saveToFile(filename, password);
+}
+bool KUserData::saveToFileCompress(const KPath &filename) {
+	K__Assert(g_UserData);
+	return g_UserData->saveToFileCompress(filename);
+}
+bool KUserData::loadFromFile(const KPath &filename, const char *password) {
+	K__Assert(g_UserData);
+	return g_UserData->loadFromFile(filename, password);
+}
+bool KUserData::loadFromFileCompress(const KPath &filename) {
+	K__Assert(g_UserData);
+	return g_UserData->loadFromFileCompress(filename);
+}
+bool KUserData::peekFile(const KPath &filename, const char *password, KNamedValues *nv) {
+	K__Assert(g_UserData);
+	return g_UserData->peekFile(filename, password, nv);
 }
 
 
 
-// KShadowAct
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static KShadow::GlobalSettings g_GlobalShadowSettings;
+
+class CShadowMgr: public KManagerTmpl<KShadow>, public KInspectorCallback {
+public:
+	CShadowMgr() {
+		KEngine::addInspectorCallback(this);
+	}
+	virtual void onCompAdded(KNode *node, KShadow *comp) override {
+		comp->_EnterAction();
+	}
+	virtual void onCompRemoving(KNode *node, KShadow *comp) override {
+		comp->_ExitAction();
+	}
+	virtual void on_manager_appframe() override {
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
+			it->second->_StepSystemAction();
+		}
+	}
+	virtual void on_manager_nodeinspector(KNode *node) override {
+		KShadow *comp = getComp(node);
+		comp->_Inspector();
+	}
+
+	// KInspectorCallback
+	virtual void onInspectorGui() override {
+		bool changed = false;
+		if (ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&g_GlobalShadowSettings.color))) {
+			changed = true;
+		}
+		if (KDebugGui::K_DebugGui_InputBlend("Blend", &g_GlobalShadowSettings.blend)) {
+			changed = true;
+		}
+		if (ImGui::DragInt("Vertices", &g_GlobalShadowSettings.vertexCount)) {
+			g_GlobalShadowSettings.vertexCount = KMath::max(3, g_GlobalShadowSettings.vertexCount);
+			changed = true;
+		}
+		if (ImGui::DragFloat("Max Height", &g_GlobalShadowSettings.maxAltitude)) {
+			changed = true;
+		}
+		if (ImGui::Checkbox("Scale by height", &g_GlobalShadowSettings.scaleByAltitude)) {
+			changed = true;
+		}
+	}
+};
+
+
+
+
+static CShadowMgr *g_ShadowMgr = nullptr;
+
+
+
+
+// KShadow
 #define SHADOW_BASIC_RADIUS  64
 
-static void kk_MakeCircleMesh(KMesh *mesh, const KVec2 &radius, int numvertices, const KColor &center_color, const KColor &outer_color) {
+static void _MakeCircleMesh(KMesh *mesh, const KVec2 &radius, int numvertices, const KColor &center_color, const KColor &outer_color) {
 	K_assert(mesh);
 	K_assert(numvertices >= 3);
 	mesh->clear();
@@ -537,22 +680,33 @@ static void kk_MakeCircleMesh(KMesh *mesh, const KVec2 &radius, int numvertices,
 	}
 }
 
-static KShadowAct::GlobalSettings g_GlobalShadowSettings;
 
-KShadowAct::GlobalSettings * KShadowAct::globalSettings() {
+KShadow::GlobalSettings * KShadow::globalSettings() {
 	return &g_GlobalShadowSettings;
 }
 
-void KShadowAct::attach(KNode *node) {
-	node->setAction(new KShadowAct());
+void KShadow::install() {
+	K__Assert(g_ShadowMgr == nullptr);
+	g_ShadowMgr = new CShadowMgr();
 }
-KShadowAct * KShadowAct::of(KNode *node) {
-	if (node) {
-		return node->getActionT<KShadowAct*>();
+void KShadow::uninstall() {
+	if (g_ShadowMgr) {
+		g_ShadowMgr->drop();
+		g_ShadowMgr = nullptr;
 	}
-	return nullptr;
 }
-KShadowAct::KShadowAct() {
+void KShadow::attach(KNode *node) {
+	KShadow *co = new KShadow();
+	g_ShadowMgr->addComp(node, co);
+	co->drop();
+}
+KShadow * KShadow::of(KNode *node) {
+	return g_ShadowMgr->getComp(node);
+}
+
+
+
+KShadow::KShadow() {
 	m_item.radius_x = g_GlobalShadowSettings.defaultRadiusX;
 	m_item.radius_y = g_GlobalShadowSettings.defaultRadiusY;
 	m_item.scale = 1.0f;
@@ -562,7 +716,7 @@ KShadowAct::KShadowAct() {
 	m_item.enabled = true;
 	m_item.delay = 2; // 最初のフレームでは、まだ影の描画に必要な情報が取得できていないので、念のために数フレーム経過してから表示するようにする
 }
-void KShadowAct::onEnterAction() {
+void KShadow::_EnterAction() {
 	KNode *self = getSelf();
 
 	self->setTransformInherit(false);
@@ -578,21 +732,18 @@ void KShadowAct::onEnterAction() {
 
 	KMeshDrawable::attach(self);
 	KMesh *mesh = KMeshDrawable::of(self)->getMesh();
-	kk_MakeCircleMesh(mesh, KVec2(SHADOW_BASIC_RADIUS, SHADOW_BASIC_RADIUS), g_GlobalShadowSettings.vertexCount, center_color, outer_color);
+	_MakeCircleMesh(mesh, KVec2(SHADOW_BASIC_RADIUS, SHADOW_BASIC_RADIUS), g_GlobalShadowSettings.vertexCount, center_color, outer_color);
 	KMeshDrawable::of(self)->getSubMesh(0)->material.blend = g_GlobalShadowSettings.blend;
 	m_item.shadow_tex_name = KPath::fromFormat("__shadowtex_%x", self->getId());
 }
-void KShadowAct::onExitAction() {
+void KShadow::_ExitAction() {
 	// 影専用のテクスチャを消す
 	KBank::getTextureBank()->removeTexture(m_item.shadow_tex_name);
 }
-void KShadowAct::onStepSystemAction() {
+void KShadow::_StepSystemAction() {
 	update();
 }
-void KShadowAct::onStepAction() {
-//	update();
-}
-void KShadowAct::update() {
+void KShadow::update() {
 	const KVec3 identity_scale(1, 1, 1);
 	const KVec3 zero_scale(0, 0, 0);
 
@@ -713,9 +864,9 @@ void KShadowAct::update() {
 		}
 	}
 }
-void KShadowAct::onInspector() {
+void KShadow::_Inspector() {
 	if (ImGui::CollapsingHeader("Global Settings")) {
-		inspector_global();
+		g_ShadowMgr->onInspectorGui();
 	}
 
 	bool mod = false;
@@ -738,57 +889,35 @@ void KShadowAct::onInspector() {
 		update();
 	}
 }
-void KShadowAct::inspector_global() {
-#ifndef NO_IMGUI
-	bool changed = false;
-	if (ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&g_GlobalShadowSettings.color))) {
-		changed = true;
-	}
-	if (KDebugGui::K_DebugGui_InputBlend("Blend", &g_GlobalShadowSettings.blend)) {
-		changed = true;
-	}
-	if (ImGui::DragInt("Vertices", &g_GlobalShadowSettings.vertexCount)) {
-		g_GlobalShadowSettings.vertexCount = KMath::max(3, g_GlobalShadowSettings.vertexCount);
-		changed = true;
-	}
-	if (ImGui::DragFloat("Max Height", &g_GlobalShadowSettings.maxAltitude)) {
-		changed = true;
-	}
-	if (ImGui::Checkbox("Scale by height", &g_GlobalShadowSettings.scaleByAltitude)) {
-		changed = true;
-	}
-#endif // !NO_IMGUI
-}
-
-void KShadowAct::setOffset(const KVec3 &value) {
+void KShadow::setOffset(const KVec3 &value) {
 	m_item.offset = value;
 }
-void KShadowAct::setRadius(float horz, float vert) {
+void KShadow::setRadius(float horz, float vert) {
 	m_item.radius_x = horz;
 	m_item.radius_y = vert;
 }
-void KShadowAct::getRadius(float *horz, float *vert) const {
+void KShadow::getRadius(float *horz, float *vert) const {
 	if (horz) *horz = m_item.radius_x;
 	if (vert) *vert = m_item.radius_y;
 }
-void KShadowAct::setScaleFactor(float value) {
+void KShadow::setScaleFactor(float value) {
 	m_item.scale = value;
 }
-void KShadowAct::setScaleByHeight(bool value, float maxheight) {
+void KShadow::setScaleByHeight(bool value, float maxheight) {
 	m_item.scale_by_height = value;
 	m_item.max_height = maxheight;
 }
-void KShadowAct::setUseSprite(bool value) {
+void KShadow::setUseSprite(bool value) {
 	m_item.use_sprite = value;
 }
-void KShadowAct::setMatrix(const KMatrix4 &matrix) {
+void KShadow::setMatrix(const KMatrix4 &matrix) {
 	KNode *self = getSelf();
 	KDrawable *renderer = KDrawable::of(self);
 	if (renderer) {
 		renderer->setLocalTransform(matrix);
 	}
 }
-bool KShadowAct::getAltitude(float *alt) {
+bool KShadow::getAltitude(float *alt) {
 	KNode *self = getSelf();
 	KNode *owner = self->getParent();
 	KVec3 wpos = owner->getWorldPosition();
@@ -820,7 +949,7 @@ bool KShadowAct::getAltitude(float *alt) {
 	// 地面がない。奈落。
 	return false;
 }
-bool KShadowAct::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
+bool KShadow::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
 	K_assert(out_pos);
 	KNode *self = getSelf();
 	KNode *owner = self->getParent();
@@ -900,32 +1029,45 @@ bool KShadowAct::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out
 
 
 
+static KManagerTmpl<KGizmoAct> *g_GizmoMgr = nullptr;
 
 
 #pragma region KGizmoAct
-void KGizmoAct::attach(KNode *node) {
-	node->setAction(new KGizmoAct());
+void KGizmoAct::install() {
+	K__Assert(g_GizmoMgr == nullptr);
+	g_GizmoMgr = new KManagerTmpl<KGizmoAct>();
+}
+void KGizmoAct::uninstall() {
+	if (g_GizmoMgr) {
+		g_GizmoMgr->drop();
+		g_GizmoMgr = nullptr;
+	}
 }
 KGizmoAct * KGizmoAct::of(KNode *node) {
-	if (node) {
-		return node->getActionT<KGizmoAct*>();
+	return g_GizmoMgr->getComp(node);
+}
+void KGizmoAct::attach(KNode *node) {
+	KGizmoAct *giz = new KGizmoAct();
+	{
+		KNode *gizmo = KNode::create();
+		gizmo->setParent(node);
+		gizmo->setName("$gizmo");
+		KMeshDrawable::attach(gizmo);
+		g_GizmoMgr->addComp(node, giz);
+		gizmo->drop();
 	}
-	return nullptr;
+	giz->drop();
 }
-KGizmoAct * KGizmoAct::cast(KAction *act) {
-	return dynamic_cast<KGizmoAct*>(act);
-}
-
 
 KGizmoAct::KGizmoAct() {
 }
-void KGizmoAct::onEnterAction() {
-	KNode *self = getSelf();
-	KMeshDrawable::attach(self);
+KMeshDrawable * KGizmoAct::getGizmoMeshDrawable() {
+	KNode *self = getNode();
+	KNode *mesh_node = self->findChild("$gizmo");
+	return KMeshDrawable::of(mesh_node);
 }
 void KGizmoAct::clear() {
-	KNode *self = getSelf();
-	KMeshDrawable *co = KMeshDrawable::of(self);
+	KMeshDrawable *co = getGizmoMeshDrawable();
 	KMesh *mesh = co ? co->getMesh() : nullptr;
 	if (mesh) {
 		mesh->clear();
@@ -938,8 +1080,7 @@ void KGizmoAct::addLine(const KVec3 &a, const KVec3 &b, const KColor32 &color) {
 	addLine(a, b, color, color);
 }
 void KGizmoAct::addLine(const KVec3 &a, const KVec3 &b, const KColor32 &color_a, const KColor32 &color_b) {
-	KNode *self = getSelf();
-	KMeshDrawable *co = KMeshDrawable::of(self);
+	KMeshDrawable *co = getGizmoMeshDrawable();
 	KMesh *mesh = co ? co->getMesh() : nullptr;
 	if (mesh) {
 		m_MeshBuf.resize2(mesh, 2, 0);
@@ -951,8 +1092,7 @@ void KGizmoAct::addLine(const KVec3 &a, const KVec3 &b, const KColor32 &color_a,
 	}
 }
 void KGizmoAct::addRegularPolygon(const KVec3 &pos, float radius, int count, float start_degrees, const KColor32 &fill_color, const KColor32 &outline_color) {
-	KNode *self = getSelf();
-	KMeshDrawable *co = KMeshDrawable::of(self);
+	KMeshDrawable *co = getGizmoMeshDrawable();
 	KMesh *mesh = co ? co->getMesh() : nullptr;
 	if (mesh && count >= 2) {
 		m_MeshBuf.resize2(mesh, count+1, 0);

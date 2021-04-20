@@ -17,6 +17,94 @@
 
 namespace Kamilo {
 
+
+
+
+
+
+class KComp: public KRef {
+	KNode *m_Node;
+public:
+	KComp() {
+		m_Node = nullptr;
+	}
+	virtual ~KComp() {
+		K_assert(m_Node == nullptr); // 正しく解放されていれば、すでにノードからは切り離されているはず
+	}
+	KNode * getNode() {
+		return m_Node;
+	}
+	void _setNode(KNode *node) {
+		// CComp は KNode によって保持される可能性がある。
+		// 循環ロック防止のために KNode の参照カウンタは変更しないでおく
+		m_Node = node;
+	}
+};
+
+
+
+// TComp は CComp の継承であること!!!
+template <class TComp> class KManagerTmpl: public KManager {
+protected:
+	std::unordered_map<KNode*, TComp*> m_Nodes;
+
+public:
+	KManagerTmpl() {
+		KEngine::addManager(this);
+	}
+	virtual ~KManagerTmpl() {
+		K_assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
+	}
+	virtual void on_manager_detach(KNode *node) override {
+		delComp(node);
+	}
+	virtual bool on_manager_isattached(KNode *node) override {
+		return getComp(node) != nullptr;
+	}
+
+	virtual void onCompAdded(KNode *node, TComp *comp) {}
+	virtual void onCompRemoving(KNode *node, TComp *comp) {}
+
+	void addComp(KNode *node, TComp *comp) {
+		K_assert(node);
+		K_assert(comp);
+		delComp(node);
+		m_Nodes[node] = comp;
+		comp->_setNode(node);
+		comp->grab();
+		onCompAdded(node, comp);
+	}
+	void delComp(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			TComp *comp = it->second;
+			onCompRemoving(node, comp);
+			comp->_setNode(nullptr);
+			comp->drop();
+			m_Nodes.erase(it);
+		}
+	}
+	TComp * getComp(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			return it->second;
+		}
+		return nullptr;
+	}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 class KScene {
 public:
 	explicit KScene() {}
@@ -78,54 +166,39 @@ public:
 
 
 
-class KDataAct: public KAction {
+class KUserData {
 public:
-	static void attach(KNode *node);
-	static KDataAct * of(KNode *node);
-public:
-	KDataAct();
-	virtual void onInspector() override;
-	void clearValues(); /// すべての値を削除する
-	void clearValuesByTag(int tag); /// 指定されたタグの値をすべて削除する
-	void clearValuesByPrefix(const char *prefix); /// 指定された文字で始まる名前の値をすべて削除する
-	KPath getStr(const KPath &key, const KPath &def="") const; /// 文字列を得る
-	void setStr(const KPath &key, const KPath &val, int tag=0); /// 文字列を設定する
-	bool hasKey(const KPath &key) const; /// キーが存在するかどうか
-	int getKeys(KPathList *keys) const; /// 全てのキーを得る
-
-	int getInt(const KPath &key, int def=0) const {
-		KPath s = getStr(key);
-		return KStringUtils::toInt(s.u8(), def);
-	}
-	void setInt(const KPath &key, int val, int tag=0) {
-		KPath pval = KPath::fromFormat("%d", val);
-		setStr(key, pval, tag);
-	}
+	static void install();
+	static void uninstall();
+	static void clearValues(); /// すべての値を削除する
+	static void clearValuesByTag(int tag); /// 指定されたタグの値をすべて削除する
+	static void clearValuesByPrefix(const char *prefix); /// 指定された文字で始まる名前の値をすべて削除する
+	static KPath getString(const KPath &key, const KPath &def=""); /// 文字列を得る
+	static void setString(const KPath &key, const KPath &val, int tag=0); /// 文字列を設定する
+	static bool hasKey(const KPath &key); /// キーが存在するかどうか
+	static int getKeys(KPathList *keys); /// 全てのキーを得る
+	static int getInt(const KPath &key, int def=0);
+	static void setInt(const KPath &key, int val, int tag=0);
 
 	/// 値を保存する。password に文字列を指定した場合はファイルを暗号化する
-	bool saveToFile(const KPath &filename, const char *password="");
-	bool saveToFileCompress(const KPath &filename);
+	static bool saveToFile(const KPath &filename, const char *password="");
+	static bool saveToFileCompress(const KPath &filename);
 
 	/// 値をロードする。暗号化されている場合は password を指定する必要がある
-	bool loadFromFile(const KPath &filename, const char *password="");
-	bool loadFromFileCompress(const KPath &filename);
+	static bool loadFromFile(const KPath &filename, const char *password="");
+	static bool loadFromFileCompress(const KPath &filename);
 
 	/// 実際にロードせずに、保存内容だけを見る
-	bool peekFile(const KPath &filename, const char *password, KNamedValues *nv) const;
-private:
-	void _clear(const KPathList &keys);
-	bool saveToFileEx(const KNamedValues *nv, const KPath &filename, const char *password);
-	bool saveToFileCompressEx(const KNamedValues *nv, const KPath &filename);
-	bool loadFromFileCompressEx(KNamedValues *nv, const KPath &filename) const;
-	bool loadFromNamedValues(const KNamedValues *nv);
-
-	KNamedValues m_values;
-	std::unordered_map<KPath, int> m_tags;
+	static bool peekFile(const KPath &filename, const char *password, KNamedValues *nv);
 };
 
 
+
+
+
+
 /// 2D用の簡易影管理
-class KShadowAct: public KAction {
+class KShadow: public KComp {
 public:
 	struct GlobalSettings {
 		KColor color; // 影の色
@@ -159,38 +232,14 @@ public:
 		}
 	};
 
+	static void install();
+	static void uninstall();
 	static void attach(KNode *node);
-	static KShadowAct * of(KNode *node);
+	static KShadow * of(KNode *node);
 	static GlobalSettings * globalSettings();
 public:
-	KShadowAct();
-	virtual void onEnterAction() override;
-	virtual void onExitAction() override;
-	virtual void onStepAction() override;
-	virtual void onStepSystemAction() override;
-	virtual void onInspector() override;
+	KShadow();
 
-	/// 地上での影の表示位置
-	void setOffset(const KVec3 &value);
-
-	/// 楕円影の標準サイズ
-	/// @see setScaleFactor
-	void setRadius(float horz, float vert);
-	void getRadius(float *horz, float *vert) const;
-
-	/// 楕円影のスケーリング
-	/// @see setRadius
-	void setScaleFactor(float value);
-
-	/// スプライト影の変形
-	void setMatrix(const KMatrix4 &matrix);
-
-	/// スプライト影を使う
-	void setUseSprite(bool value);
-
-	void setScaleByHeight(bool value, float maxheight=0);
-	bool getAltitude(float *altitude);
-private:
 	struct ITEM {
 		KVec3 offset;
 		EID shadow_e;
@@ -218,10 +267,36 @@ private:
 			delay = 0;
 		}
 	};
-	void update();
-	void inspector_global();
-	bool compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt);
 	ITEM m_item;
+	/// 地上での影の表示位置
+	void setOffset(const KVec3 &value);
+
+	/// 楕円影の標準サイズ
+	/// @see setScaleFactor
+	void setRadius(float horz, float vert);
+	void getRadius(float *horz, float *vert) const;
+
+	/// 楕円影のスケーリング
+	/// @see setRadius
+	void setScaleFactor(float value);
+
+	/// スプライト影の変形
+	void setMatrix(const KMatrix4 &matrix);
+
+	/// スプライト影を使う
+	void setUseSprite(bool value);
+
+	void setScaleByHeight(bool value, float maxheight=0);
+	bool getAltitude(float *altitude);
+
+	KNode * getSelf() { return getNode(); }
+	void _EnterAction();
+	void _ExitAction();
+	void _StepSystemAction();
+	void _Inspector();
+	void update();
+	bool compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt);
+
 };
 
 
@@ -242,24 +317,14 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-class KGizmoAct: public KAction {
+class KGizmoAct: public KComp {
 public:
+	static void install();
+	static void uninstall();
 	static void attach(KNode *node);
 	static KGizmoAct * of(KNode *node);
-	static KGizmoAct * cast(KAction *act);
 public:
 	KGizmoAct();
-	virtual void onEnterAction() override;
-
 	void clear();
 
 	// 直線
@@ -269,7 +334,9 @@ public:
 
 	// 正多角形
 	void addRegularPolygon(const KVec3 &pos, float radius, int count, float start_degrees=0, const KColor32 &outline_color=KColor32::WHITE, const KColor32 &fill_color=KColor32::ZERO);
+
 private:
+	KMeshDrawable * getGizmoMeshDrawable();
 	CMeshBuf m_MeshBuf;
 };
 
