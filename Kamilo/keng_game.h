@@ -259,6 +259,87 @@ public:
 	}
 };
 
+
+
+
+class KComp: public KRef {
+	KNode *m_Node;
+public:
+	KComp() {
+		m_Node = nullptr;
+	}
+	virtual ~KComp() {
+		K_assert(m_Node == nullptr); // 正しく解放されていれば、すでにノードからは切り離されているはず
+	}
+	KNode * getNode() {
+		return m_Node;
+	}
+	void _setNode(KNode *node) {
+		// CComp は KNode によって保持される可能性がある。
+		// 循環ロック防止のために KNode の参照カウンタは変更しないでおく
+		m_Node = node;
+	}
+};
+
+
+
+// TComp は CComp の継承であること!!!
+template <class TComp> class KManagerTmpl: public KManager {
+protected:
+	std::unordered_map<KNode*, TComp*> m_Nodes;
+
+public:
+	KManagerTmpl() {
+		KEngine::addManager(this);
+	}
+	virtual ~KManagerTmpl() {
+		K_assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
+	}
+	virtual void on_manager_detach(KNode *node) override {
+		delComp(node);
+	}
+	virtual bool on_manager_isattached(KNode *node) override {
+		return getComp(node) != nullptr;
+	}
+
+	virtual void onCompAdded(KNode *node, TComp *comp) {}
+	virtual void onCompRemoving(KNode *node, TComp *comp) {}
+
+	void addComp(KNode *node, TComp *comp) {
+		K_assert(node);
+		K_assert(comp);
+		delComp(node);
+		m_Nodes[node] = comp;
+		comp->_setNode(node);
+		comp->grab();
+		onCompAdded(node, comp);
+	}
+	void delComp(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			TComp *comp = it->second;
+			onCompRemoving(node, comp);
+			comp->_setNode(nullptr);
+			comp->drop();
+			m_Nodes.erase(it);
+		}
+	}
+	TComp * getComp(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			return it->second;
+		}
+		return nullptr;
+	}
+};
+
+
+
+
+
+
+
+
 struct KEngineDef {
 	KEngineDef() {
 		use_inspector = true;
