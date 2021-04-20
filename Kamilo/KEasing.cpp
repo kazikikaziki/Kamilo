@@ -129,7 +129,7 @@ float KEasing::inQuart01(float t) {
 float KEasing::outQuart01(float t) {
 	t = _clamp01(t);
 	float T = 1.0f - t;
-	return T * T * T * T - 1.0f;
+	return 1.0f - T * T * T * T;
 }
 float KEasing::inOutQuart01(float t) {
 	return (t < 0.5f) ?
@@ -143,7 +143,7 @@ float KEasing::inQuint01(float t) {
 float KEasing::outQuint01(float t) {
 	t = _clamp01(t);
 	float T = 1.0f - t;
-	return T * T * T * T * T - 1.0f;
+	return 1.0f - T * T * T * T * T;
 }
 float KEasing::inOutQuint01(float t) {
 	return (t < 0.5f) ?
