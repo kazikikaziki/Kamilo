@@ -1798,10 +1798,19 @@ void KDebugGui::K_DebugGui_NodePosition(KNode *node) {
 	if (1) {
 		KNode *cam = KCamera::findCameraFor(node);
 		if (cam) {
+			// ウィンドウ上で１ドットずれている点は、ワールド座標でどのくらいずれる？
+			KVec3 v0 = KScreen::windowClientToScreenPoint(KVec3(0, 0, 0));
+			KVec3 v1 = KScreen::windowClientToScreenPoint(KVec3(1, 0, 0));
+			KVec3 w0 = KCamera::of(cam)->getView2WorldPoint(v0);
+			KVec3 w1 = KCamera::of(cam)->getView2WorldPoint(v1);
+			KVec3 delta = w1 - w0;
+			/*
 			float projW = KCamera::of(cam)->getProjectionW();
 			float projH = KCamera::of(cam)->getProjectionH();
 			float projVal = KMath::min(projW, projH);
 			speed = projVal * 0.002f;
+			*/
+			speed = delta.getLength() * 4.0f;
 		}
 	}
 	if (ImGui::DragFloat3("Pos", (float*)&pos, speed)) {
