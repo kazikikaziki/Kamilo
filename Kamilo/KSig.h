@@ -20,6 +20,7 @@ public:
 	void setFloat(const char *key, float val)         { setAny(key, val); }
 	void setColor(const char *key, const KColor &val) { setAny(key, val); }
 	void setString(const char *key, const char *val)  { setAny(key, val); }
+	void setString(const char *key, const std::string &val) { setAny(key, val.c_str()); }
 	void setNode(const char *key, KNode *val)         { setAny(key, val); }
 	void setPointer(const char *key, void *val)       { setAny(key, val); }
 	const KAny & get(const char *key);
@@ -28,6 +29,7 @@ public:
 	float getFloat(const char *key, float def=0.0f);
 	KColor getColor(const char *key, const KColor &def=KColor::ZERO);
 	const char * getString(const char *key, const char *def=nullptr);
+	std::string getStringStd(const char *key, const std::string &def="");
 	KNode * getNode(const char *key);
 	void * getPointer(const char *key);
 	bool empty() const;

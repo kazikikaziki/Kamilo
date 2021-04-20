@@ -69,6 +69,10 @@ float KSig::getFloat(const char *key, float def) {
 const char * KSig::getString(const char *key, const char *def) {
 	return get(key).getString(def);
 }
+std::string KSig::getStringStd(const char *key, const std::string &def) {
+	const char *s = get(key).getString(def.c_str());
+	return s ? s : "";
+}
 KColor KSig::getColor(const char *key, const KColor &def) {
 	return get(key).getColor(def);
 }

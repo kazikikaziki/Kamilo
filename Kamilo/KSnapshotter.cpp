@@ -15,22 +15,20 @@ namespace Kamilo {
 
 
 class CSnapshot: public KManager, public KInspectorCallback {
-	mutable KPath m_next_output_name;
-	KPath m_texture_name;
-	KPath m_capture_filename;
-	KPath m_last_saved_filename;
-	bool m_do_shot;
-	KPath m_basename;
-	int m_index;
-	bool m_with_time;
-	bool m_with_frame;
+	KPath m_TargetTextureName;
+	KPath m_LastOutputFileName;
+	bool m_DoShot;
+	mutable KPath m_NextOutputFileName; // 次の出力ファイルを決めておく
+	KPath m_OutputFileName; // 実際の出力ファイル名
+	KPath m_BaseOutputName; // 出力ファイルの基本名
+	bool m_WithTime; // 出力ファイル名に時刻を含める
+	bool m_WithFrameNumber; // 出力ファイル名にフレーム番号を含める
 public:
 	CSnapshot() {
-		m_with_time  = false;
-		m_with_frame = false;
-		m_basename = "__snapshot";
-		m_do_shot = false;
-		m_index = 0;
+		m_WithTime  = false;
+		m_WithFrameNumber = false;
+		m_BaseOutputName = "__snapshot";
+		m_DoShot = false;
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this); // KInspectorCallback
 
@@ -41,70 +39,70 @@ public:
 		if (sig.check(KSignalType_WINDOW_KEY_DOWN)) {
 			// ウィンドウイベントは別スレッドから飛んでくる場合があることに注意
 			if (sig.getInt("key") == KKeyboard::KEY_SNAPSHOT) {
-				m_do_shot = true;
+				m_DoShot = true;
 			}
 			return;
 		}
 	}
 	virtual void on_manager_start() override {
-		m_with_time  = true;
-		m_with_frame = true;
-		m_do_shot = false;
+		m_WithTime  = true;
+		m_WithFrameNumber = true;
+		m_DoShot = false;
 	}
 	virtual void on_manager_appframe() override {
 		// システムノードとして登録されている場合に呼ばれる。
 		// デバッグ用の強瀬ポーズの影響を受けず（ゲームが停止していても）常に呼ばれる
 		// KNode の KNode::FLAG_SYSTEM フラグが有効になっているノードでのみ呼ばれる
-		if (m_do_shot) {
+		if (m_DoShot) {
 			capture("");
-			captureNow(m_capture_filename.u8());
-			m_do_shot = false;
+			captureNow(m_OutputFileName.u8());
+			m_DoShot = false;
 		}
 	}
 	virtual void onInspectorGui() override { // KInspectorCallback
-		if (m_with_time || m_with_frame) {
+		if (m_WithTime || m_WithFrameNumber) {
 			// ファイル名にフレーム番号または時刻を含んでいる。
 			// 時間によってファイル名が変化するため GUI を表示しているあいだは常に更新する
-			m_next_output_name.clear(); // consumed this name
+			m_NextOutputFileName.clear(); // consumed this name
 		}
 		ImGui::Text("Next output file: ");
 		ImGui::Text("%s", getNextName().u8());
-		if (ImGui::Checkbox("Include local time", &m_with_time)) {
-			m_next_output_name.clear(); // consumed this name
+		if (ImGui::Checkbox("Include local time", &m_WithTime)) {
+			m_NextOutputFileName.clear(); // consumed this name
 		}
-		if (ImGui::Checkbox("Include frame number", &m_with_frame)) {
-			m_next_output_name.clear(); // consumed this name
+		if (ImGui::Checkbox("Include frame number", &m_WithFrameNumber)) {
+			m_NextOutputFileName.clear(); // consumed this name
 		}
 		if (ImGui::Button("Snap shot!")) {
-			m_do_shot = true;
+			m_DoShot = true;
 		}
-		if (KFiles::exists(m_last_saved_filename)) {
+		if (KFiles::exists(m_LastOutputFileName)) {
 			char s[256];
-			sprintf_s(s, sizeof(s), "Open: %s", m_last_saved_filename.u8());
+			sprintf_s(s, sizeof(s), "Open: %s", m_LastOutputFileName.u8());
 			if (ImGui::Button(s)) {
-				K__ShellOpenU8(m_last_saved_filename.u8());
+				K__ShellOpenU8(m_LastOutputFileName.u8());
 			}
 		}
 	}
 	void capture(const char *_filename) {
 		KPath filename = _filename;
 		if (filename.empty()) {
-			m_capture_filename = getNextName();
-			m_next_output_name.clear(); // consumed this name
+			m_OutputFileName = getNextName();
+			m_NextOutputFileName.clear(); // consumed this name
 		} else {
-			m_capture_filename = filename;
+			m_OutputFileName = filename;
 		}
 	}
 	void captureNow(const char *_filename) {
 		KPath filename = _filename;
 		if (filename.empty()) {
 			filename = getNextName();
-			m_next_output_name.clear(); // consumed this name
+			m_NextOutputFileName.clear(); // consumed this name
 		}
 
-		if (!m_texture_name.empty()) {
+		if (!m_TargetTextureName.empty()) {
 			// キャプチャするテクスチャが指定されている
-			KTEXID texid = KBank::getTextureBank()->getTexture(m_texture_name);
+			KTEXID texid = KBank::getTextureBank()->getTexture(m_TargetTextureName);
 			KTexture *tex = KVideo::findTexture(texid);
 			if (tex) {
 				KImage img = tex->exportTextureImage();
@@ -114,46 +112,46 @@ public:
 				output.write(png.data(), png.size());
 
 				KLog::printInfo("Texture image saved %s", filename.getFullPath().u8());
-				m_last_saved_filename = filename;
+				m_LastOutputFileName = filename;
 			}
 		} else {
 			// キャプチャ対象が未指定
 			// 既定の画面を書き出す
 			KScreen::postExportScreenTexture(filename); // 次回更新時に保存される。本当に保存されるか確定できないのでログはまだ出さない
-			m_last_saved_filename = filename;
+			m_LastOutputFileName = filename;
 		}
 	}
 	void setCaptureTargetRenderTexture(const char *texname) {
-		m_texture_name = texname;
+		m_TargetTextureName = texname;
 	}
 	const KPath & getNextName() const {
-		if (m_next_output_name.empty()) {
-			KPath name = m_basename;
+		if (m_NextOutputFileName.empty()) {
+			KPath name = m_BaseOutputName;
 
 			// 時刻情報を付加する
-			if (m_with_time) {
+			if (m_WithTime) {
 				std::string mb = KLocalTime::now().format("(%y%m%d-%H%M%S)");
 				KPath time = KPath::fromUtf8(mb.c_str());
 				name = name.joinString(time);
 			}
 
 			// フレーム番号を付加する
-			if (m_with_frame) {
+			if (m_WithFrameNumber) {
 				KPath frame = KPath::fromFormat("[04%d]", getFrameNumber());
 				name = name.joinString(frame);
 			}
 
 			// ファイル名を作成
-			m_next_output_name = name.joinString(".png");
+			m_NextOutputFileName = name.joinString(".png");
 
 			// 重複を確認する。重複していればインデックス番号を付加する
 			int num = 1;
-			while (KFiles::exists(m_next_output_name)) {
-				m_next_output_name = KPath::fromFormat("%s_%d.png", name.u8(), num);
+			while (KFiles::exists(m_NextOutputFileName)) {
+				m_NextOutputFileName = KPath::fromFormat("%s_%d.png", name.u8(), num);
 				num++;
 			}
 		}
-		return m_next_output_name;
+		return m_NextOutputFileName;
 	}
 	int getFrameNumber() const {
 		return KEngine::getStatus(KEngine::ST_FRAME_COUNT_GAME);
