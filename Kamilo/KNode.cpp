@@ -757,7 +757,7 @@ void KNode::setSpecular(const KColor &value) {
 	m_RenderData.specular = value;
 }
 void KNode::setAlpha(float alpha) {
-	m_RenderData.diffuse.a = alpha;
+	m_RenderData.diffuse.a = KMath::clampf(alpha, 0.0f, 1.0f);
 }
 float KNode::getAlpha() const {
 	return m_RenderData.diffuse.a;
