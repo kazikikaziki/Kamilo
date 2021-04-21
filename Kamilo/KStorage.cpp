@@ -394,6 +394,12 @@ public:
 		}
 	}
 	KInputStream createReader(const char *filename, bool should_exists) {
+		// 絶対パスで指定されている場合は普通のファイルとして開く
+		if (!KPath(filename).isRelative()) {
+			KInputStream file = KInputStream::fromFileName(filename);
+			return file;
+		}
+
 		if (m_archives.empty()) {
 			// ローダーが一つも設定されていない。
 			// 一番基本的な方法で開く
