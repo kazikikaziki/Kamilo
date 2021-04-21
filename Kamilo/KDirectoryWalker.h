@@ -8,9 +8,9 @@ class KDirectoryWalker {
 public:
 	struct Item {
 		std::wstring namew;
-		std::wstring pathw;
-		std::string nameu; // utf8
-		std::string pathu;
+		std::wstring parentw;
+		std::string nameu; // ファイル名部分 (utf8)
+		std::string parentu; // 親ディレクトリ (utf8)
 		bool isdir;
 	};
 	

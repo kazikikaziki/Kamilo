@@ -33,9 +33,9 @@ void KDirectoryWalker::scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std:
 			if (fdata.cFileName[0] != L'.') {
 				Item fitem;
 				fitem.namew = fdata.cFileName;
-				fitem.pathw = wdir;
+				fitem.parentw = wdir;
 				fitem.nameu = K__WideToUtf8Std(fitem.namew);
-				fitem.pathu = K__WideToUtf8Std(fitem.pathw);
+				fitem.parentu = K__WideToUtf8Std(fitem.parentw);
 				fitem.isdir = (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 				list.push_back(fitem);
 			}
@@ -52,16 +52,16 @@ void KDirectoryWalker::scanW(const wchar_t *wtop, const wchar_t *wdir, Callback 
 	for (auto it=list.begin(); it!=list.end(); ++it) {
 		if (it->isdir) {
 			bool enter = false;
-			cb->onDir(it->nameu.c_str(), it->pathu.c_str(), &enter);
+			cb->onDir(it->nameu.c_str(), it->parentu.c_str(), &enter);
 			if (enter) {
 				wchar_t wsub[MAX_PATH] = {0};
 				wcscpy_s(wsub, MAX_PATH, wdir);
 				PathAppendW(wsub, it->namew.c_str());
 				scanW(wtop, wsub, cb);
-				cb->onDirExit(it->nameu.c_str(), it->pathu.c_str());
+				cb->onDirExit(it->nameu.c_str(), it->parentu.c_str());
 			}
 		} else {
-			cb->onFile(it->nameu.c_str(), it->pathu.c_str());
+			cb->onFile(it->nameu.c_str(), it->parentu.c_str());
 		}
 	}
 }

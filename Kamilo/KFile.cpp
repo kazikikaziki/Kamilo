@@ -137,7 +137,7 @@ static bool K_file__RemoveEmptyDirectoryTreeW(const wchar_t *wdir) {
 		if (it->isdir) {
 			wchar_t wsub[MAX_PATH] = {0};
 			PathAppendW(wsub, wdir);
-			PathAppendW(wsub, it->pathw.c_str());
+			PathAppendW(wsub, it->parentw.c_str());
 			PathAppendW(wsub, it->namew.c_str());
 			all_ok &= K_file__RemoveEmptyDirectoryTreeW(wsub);
 		}
@@ -168,7 +168,7 @@ static bool K_file__RemoveNonDirFilesInDirectoryW(const wchar_t *wdir, bool subd
 	for (auto it=list.begin(); it!=list.end(); ++it) {
 		wchar_t wsub[MAX_PATH] = {0};
 		PathAppendW(wsub, wdir);
-		PathAppendW(wsub, it->pathw.c_str());
+		PathAppendW(wsub, it->parentw.c_str());
 		PathAppendW(wsub, it->namew.c_str());
 		if (it->isdir) {
 			if (subdir) {
