@@ -464,12 +464,11 @@ void Test_reader() {
 }
 void Test_writer() {
 	std::string s;
-	KWriter *w = KWriter::createFromMemory(&s);
-	K__Assert(w->write("abc", 3) == 3);
-	K__Assert(w->write(" ",   1) == 1);
-	K__Assert(w->write("def", 3) == 3);
+	KOutputStream w = KOutputStream::fromMemory(&s);
+	K__Assert(w.write("abc", 3) == 3);
+	K__Assert(w.write(" ",   1) == 1);
+	K__Assert(w.write("def", 3) == 3);
 	K__Assert(s.compare("abc def") == 0);
-	w->drop();
 }
 } // Test
 

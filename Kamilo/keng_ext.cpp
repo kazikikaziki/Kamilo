@@ -1003,10 +1003,10 @@ public:
 			scan_cells(sheet_xml, cb);
 		}
 	}
-	bool loadFromFile(KReader *file, const char *xlsx_name) {
+	bool loadFromFile(KInputStream &file, const char *xlsx_name) {
 		m_row_elements.clear();
 
-		if (file == nullptr) {
+		if (!file.isOpen()) {
 			KLog::printError("E_INVALID_ARGUMENT");
 			return false;
 		}
@@ -1014,7 +1014,7 @@ public:
 		// XMLS ファイルを ZIP として開く
 		bool ok = false;
 		{
-			KUnzipper zr(KInputStream::fromReader(file));
+			KUnzipper zr(file);
 			ok = loadFromZipAsXlsx(zr, xlsx_name);
 		}
 		return ok;
@@ -1303,16 +1303,14 @@ const KPath & KExcelFile::getFileName() const {
 	m_name = m_impl->getFileName();
 	return m_name;
 }
-bool KExcelFile::loadFromFile(KReader *file, const char *xlsx_name) {
+bool KExcelFile::loadFromFile(KInputStream &file, const char *xlsx_name) {
 	return m_impl->loadFromFile(file, xlsx_name);
 }
 bool KExcelFile::loadFromFileName(const char *name) {
 	bool ok = false;
-	KReader *file = KReader::createFromFileName(name);
-	if (file) {
+	KInputStream file = KInputStream::fromFileName(name);
+	if (file.isOpen()) {
 		ok = m_impl->loadFromFile(file, name);
-		file->drop();
-		file = nullptr;
 	}
 	if (!ok) {
 		m_impl->clear();
@@ -1321,11 +1319,9 @@ bool KExcelFile::loadFromFileName(const char *name) {
 }
 bool KExcelFile::loadFromMemory(const void *bin, size_t size, const char *name) {
 	bool ok = false;
-	KReader *file = KReader::createFromMemory(bin, size);
-	if (file) {
+	KInputStream file = KInputStream::fromMemory(bin, size);
+	if (file.isOpen()) {
 		ok = m_impl->loadFromFile(file, name);
-		file->drop();
-		file = nullptr;
 	}
 	if (!ok) {
 		m_impl->clear();
@@ -1625,7 +1621,7 @@ bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, c
 	m_impl = nullptr;
 	return false;
 }
-bool KTable::loadFromFile(KReader *xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
+bool KTable::loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
 	KExcelFile excel;
 	if (excel.loadFromFile(xmls, filename)) {
 		if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {

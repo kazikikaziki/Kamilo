@@ -329,7 +329,7 @@ public:
 	const KPath & getFileName() const;
 
 	/// .XLSX ファイルをロードする
-	bool loadFromFile(KReader *file, const char *xlsx_name);
+	bool loadFromFile(KInputStream &file, const char *xlsx_name);
 	bool loadFromFileName(const char *name);
 	bool loadFromMemory(const void *bin, size_t size, const char *name);
 
@@ -459,7 +459,7 @@ public:
 	/// @param sheetname シート名
 	/// @param top_cell_text テーブル範囲の左上にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左上とする
 	/// @param btm_cell_text テーブル範囲の左下（右下ではない）にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左下とする
-	bool loadFromFile(KReader *xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
+	bool loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
 
 	/// テーブルを作成する。詳細は loadFromExcelFile を参照
 	/// @param xlsx_bin  .xlsx ファイルのバイナリデータ
