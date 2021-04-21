@@ -16,7 +16,7 @@
 #include "KLua.h"
 #include "KDebug.h"
 #include "KString.h"
-#include "KFile.h"
+#include "KStream.h"
 #include "KImGui.h"
 #include "KLog.h"
 #include "KXml.h"
@@ -377,7 +377,7 @@ private:
 class KExcel {
 public:
 	/// excel オブジェクトのセル文字列を XML 形式でエクスポートする
-	static bool exportXml(const KExcelFile &excel, KWriter *output, bool comment=true);
+	static bool exportXml(const KExcelFile &excel, KOutputStream &output, bool comment=true);
 
 	/// .xlsx ファイルをロードし、セル文字列を XML 形式でエクスポートする
 	static void exportXml(const char *input_xlsx_filename, const char *output_xml_filename, bool comment=true);
@@ -651,23 +651,21 @@ public:
 	}
 	virtual bool loadFromFile(const char *filename) {
 		bool success = false;
-		KReader *file = KReader::createFromFileName(filename);
-		if (file) {
-			std::string xml_bin = file->read_bin();
+		KInputStream file = KInputStream::fromFileName(filename);
+		if (file.isOpen()) {
+			std::string xml_bin = file.readBin();
 			std::string xml_u8 = KConv::toUtf8(xml_bin);
 			if (! xml_u8.empty()) {
 				success = loadFromString(xml_u8.c_str(), filename);
 			}
-			file->drop();
 		}
 		return success;
 	}
 	virtual void saveToFile(const char *filename, bool pack_in_attr=false) const {
-		KWriter *file = KWriter::createFromFileName(filename);
-		if (file) {
+		KOutputStream file = KOutputStream::fromFileName(filename);
+		if (file.isOpen()) {
 			std::string xml_u8 = saveToString(pack_in_attr);
-			file->write(xml_u8.c_str(), xml_u8.size());
-			file->drop();
+			file.write(xml_u8.c_str(), xml_u8.size());
 		}
 	}
 	virtual void append(const KNamedValues *nv) {

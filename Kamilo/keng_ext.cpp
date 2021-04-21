@@ -619,7 +619,7 @@ bool KExcel::decodeCellName(const char *s, int *col, int *row) {
 
 	return false;
 }
-bool KExcel::exportXml(const KExcelFile &excel, KWriter *output, bool comment) {
+bool KExcel::exportXml(const KExcelFile &excel, KOutputStream &output, bool comment) {
 	class CB: public KExcelScanCellsCallback {
 	public:
 		std::string &dest_;
@@ -664,7 +664,7 @@ bool KExcel::exportXml(const KExcelFile &excel, KWriter *output, bool comment) {
 		}
 	};
 	if (excel.empty()) return false;
-	if (output == nullptr) return false;
+	if (!output.isOpen()) return false;
 	
 	std::string s;
 	s += "<?xml version='1.0' encoding='utf-8'>\n";
@@ -695,7 +695,7 @@ bool KExcel::exportXml(const KExcelFile &excel, KWriter *output, bool comment) {
 		s += "\n\n";
 	}
 	s += "</excel>\n";
-	output->write(s.data(), s.size()); // UTF8
+	output.write(s.data(), s.size()); // UTF8
 	return true;
 }
 void KExcel::exportXml(const char *input_xlsx_filename, const char *output_xml_filename, bool comment) {
@@ -705,13 +705,10 @@ void KExcel::exportXml(const char *input_xlsx_filename, const char *output_xml_f
 		return;
 	}
 
-	KWriter *outFile = KWriter::createFromFileName(output_xml_filename);
-	if (outFile == nullptr) {
-		return;
+	KOutputStream outFile = KOutputStream::fromFileName(output_xml_filename);
+	if (outFile.isOpen()) {
+		exportXml(excel, outFile, comment);
 	}
-
-	exportXml(excel, outFile, comment);
-	outFile->drop();
 }
 std::string KExcel::exportText(const KExcelFile &excel) {
 	if (excel.empty()) return "";

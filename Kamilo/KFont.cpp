@@ -890,10 +890,9 @@ void Test_font_printInfo(const char *output_dir, const char *filename) {
 	std::string msg_u8;
 	std::string bin;
 	{
-		KReader *file = KReader::createFromFileName(filename);
-		if (file) {
-			bin = file->read_bin();
-			file->drop();
+		KInputStream file = KInputStream::fromFileName(filename);
+		if (file.isOpen()) {
+			bin = file.readBin();
 		}
 	}
 
@@ -1048,7 +1047,8 @@ void KPlatformFonts::scan() {
 	KPathList files = KFiles::scanFiles(font_dir);
 	for (auto it=files.begin(); it!=files.end(); ++it) {
 		KPath filename = font_dir.join(*it);
-		std::string bin = KReader::readBinFromFileName(filename.u8());
+		KInputStream file = KInputStream::fromFileName(filename.u8());
+		std::string bin = file.readBin();
 		int numfonts = KFont::getFontCollectionCount(bin.data(), bin.size());
 		for (int i=0; i<numfonts; i++) {
 			// Wingding などのシンボルテキストはロードできない。
