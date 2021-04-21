@@ -159,14 +159,12 @@ public:
 		return loadFromFileCompressEx(&m_Values, filename);
 	}
 	bool loadFromFileCompressEx(KNamedValues *nv, const KPath &filename) const {
-		KReader *file = KReader::createFromFileName(filename.u8());
-		if (file == nullptr) return false;
+		KInputStream file = KInputStream::fromFileName(filename.u8());
+		if (!file.isOpen()) return false;
 
-		uint16_t uzsize = file->read_uint16();
-		uint16_t zsize  = file->read_uint16();
-		std::string zbin = file->read_bin(zsize);
-		file->drop();
-
+		uint16_t uzsize = file.readUint16();
+		uint16_t zsize  = file.readUint16();
+		std::string zbin = file.readBin(zsize);
 		std::string text_u8 = KZlib::uncompress_raw(zbin, uzsize);
 		text_u8.push_back(0); // 終端文字を追加
 		if (nv) {
@@ -185,16 +183,15 @@ public:
 	}
 	bool peekFile(const KPath &filename, const char *password, KNamedValues *nv) const {
 		bool ret = false;
-		KReader *file = KReader::createFromFileName(filename.u8());
-		if (file) {
-			std::string u8 = file->read_bin();
+		KInputStream file = KInputStream::fromFileName(filename.u8());
+		if (file.isOpen()) {
+			std::string u8 = file.readBin();
 			if (password && password[0]) {
 				u8 = decryptString(u8, password);
 			}
 			if (nv) {
 				nv->loadFromString(u8.c_str(), filename.u8());
 			}
-			file->drop();
 			ret = true;
 		}
 		return ret;
