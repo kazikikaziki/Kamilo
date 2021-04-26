@@ -8,6 +8,9 @@
 #include "KAny.h"
 #include <algorithm> // std::sort
 
+
+#define IGNORE_REMOVING_NODES 1
+
 namespace Kamilo {
 
 
@@ -417,9 +420,11 @@ KNode * KNode::findChild(const KName &name, const KTag &tag) const {
 	lock();
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 		KNode *sub = *it;
+		#if IGNORE_REMOVING_NODES
 		if (sub->hasFlag(KNode::FLAG__MARK_REMOVE)) {
 			continue; // 削除マークがついている場合は、もう削除済みとして扱う
 		}
+		#endif
 		bool nameOK = false;
 		bool tagOK = false;
 		if (name.empty() || sub->hasName(name)) {
@@ -448,9 +453,11 @@ KNode * KNode::findChildInTree(const KName &name, const KTag &tag) const {
 KNode * KNode::findChildInTree_unsafe(const KName &name, const KTag &tag) const {
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 		KNode *sub = *it;
+		#if IGNORE_REMOVING_NODES
 		if (sub->hasFlag(KNode::FLAG__MARK_REMOVE)) {
 			continue; // 削除マークがついている場合は、もう削除済みとして扱う
 		}
+		#endif
 		bool name_ok = name.empty() || sub->hasName(name);
 		bool tag_ok = tag.empty() || sub->hasTag(tag);
 		if (name_ok && tag_ok) {
@@ -1540,9 +1547,11 @@ public:
 		if (start == nullptr) {
 			start = getRoot();
 		}
+		#if IGNORE_REMOVING_NODES
 		if (start->hasFlag(KNode::FLAG__MARK_REMOVE)) {
 			return nullptr; // 削除マークがついている場合は、もう削除済みとして扱う
 		}
+		#endif
 		KNode *node = start->findChildInTree(name);
 		if (node) {
 			return node;
@@ -1550,10 +1559,12 @@ public:
 		return nullptr;
 	}
 	KNode * findNodeByPath(const KNode *start, const char *path) const {
+		#if IGNORE_REMOVING_NODES
 		// start が削除マーク付きツリー内にある場合は、もう削除済みとして扱う
 		if (start && start->hasFlagInTreeAny(KNode::FLAG__MARK_REMOVE)) {
 			return nullptr;
 		}
+		#endif
 
 		KNode *ret = nullptr;
 		lock();
@@ -1582,11 +1593,13 @@ public:
 		if (node == nullptr) return false;
 		if (KStringUtils::isEmpty(path)) return false;
 
+		#if IGNORE_REMOVING_NODES
 		// 削除マークがついている場合は、もう削除済みとして扱う
 		if (node->hasFlag(KNode::FLAG__MARK_REMOVE)) {
 			return false;
 		}
-
+		#endif
+		
 		// 与えられたパスの末尾部分と自分の名前が一致しないとダメ
 		const char *last = KPathUtils::K_PathGetLast(path);
 		if (!node->hasName(last)) {
