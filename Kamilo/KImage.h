@@ -163,6 +163,7 @@ public:
 	/// 画像のコピーを作成する
 	/// @note 複製には必ず clone() を用いる。代入記号 = は参照コピーになる
 	KImage clone() const;
+	KImage cloneRect(int x, int y, int w, int h);
 
 	/// 画像の png フォーマット表現を返す。
 	/// @param png_compress_level PNGの圧縮レベルを指定する。0で無圧縮、9で最大圧縮
