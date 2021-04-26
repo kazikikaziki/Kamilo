@@ -74,6 +74,17 @@ macro(heliodor_link_d3d9)
 		else()
 			target_link_libraries(${PROJECT_NAME} "dxerr.lib")
 		endif()
+		# http://springhead.info/wiki/index.php
+		# Visual Studio 2012でXINPUTにまつわるエラーが出る場合
+		#
+		# Window7 以前のOSでの実行で、
+		# 「コンピュータに XINPUT1_4.dll がないため、プログラムを開始できません。…」
+		# というエラーが発生する場合は、ビルドのプロパティで、
+		#   [リンカー]-[入力]-[追加の依存ファイル] に XINPUT9_1_0.LIB を
+		#   [リンカー]-[入力]-[特定の既定のライブラリの無視] に XINPUT.LIB を
+		# 指定してください。
+		# Windows8 以降のOSでは発生しないと思いますが、確認はしていません。
+		target_link_libraries(${PROJECT_NAME} "xinput9_1_0.lib")
 	endif()
 endmacro()
 
