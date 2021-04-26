@@ -29,7 +29,7 @@ static const char *g_OutlineHLSL =
 	"		float b = tex2D(samMain, uv + float2( dx, 0)).a; \n"
 	"		float c = tex2D(samMain, uv + float2(-dx, 0)).a; \n"
 	"		float d = tex2D(samMain, uv + float2(0, -dy)).a; \n"
-	"		float e = tex2D(samMain, uv + float2(0,  dx)).a; \n"
+	"		float e = tex2D(samMain, uv + float2(0,  dy)).a; \n"
 	"		if (b+c+d+e > 0) { color = outline_color; } \n"
 	"	} \n"
 	"	if (color.a > 0) { \n"
