@@ -23,7 +23,7 @@ class KQuat;
 class KAction;
 class KSig;
 
-static const char *SIG_UNBINDTREE = "SIG_NODETREE_UNBINDTREE";
+static const char *K_SIG_UNBINDTREE = "K_SIG_NODETREE_UNBINDTREE";
 
 #pragma region EID
 /// @internal
