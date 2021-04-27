@@ -32,6 +32,7 @@ endmacro()
 ##############################################################################
 macro(heliodor_definitions)
 	if (MSVC)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_WIN32_DISABLE_GAMEPAD) # imgui に XInput をリンクさせないようにする ==> imgui/imgui_impl_win32.cpp
 		target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 		target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX) # avoiding min and max macro in windows library
 	endif()
@@ -45,13 +46,13 @@ endmacro()
 ##############################################################################
 macro(heliodor_link_win32)
 	if (MSVC)
-		target_link_libraries(${PROJECT_NAME} "winmm.lib")    # mmsystem.h
-		target_link_libraries(${PROJECT_NAME} "imm32.lib")    # imm.h (by ImGui)
-		target_link_libraries(${PROJECT_NAME} "shlwapi.lib")  # shlwapi.h
-		target_link_libraries(${PROJECT_NAME} "comctl32.lib") # commctrl.h
-		target_link_libraries(${PROJECT_NAME} "dbghelp.lib")  # dbghelp.h
-		target_link_libraries(${PROJECT_NAME} "user32.lib")
-		target_link_libraries(${PROJECT_NAME} "legacy_stdio_definitions.lib") # For compatibility with vsnprintf at dxerr.dll
+	#	target_link_libraries(${PROJECT_NAME} "winmm.lib")    # mmsystem.h
+	#	target_link_libraries(${PROJECT_NAME} "imm32.lib")    # imm.h (by ImGui)
+	#	target_link_libraries(${PROJECT_NAME} "shlwapi.lib")  # shlwapi.h
+	#	target_link_libraries(${PROJECT_NAME} "comctl32.lib") # commctrl.h
+	#	target_link_libraries(${PROJECT_NAME} "dbghelp.lib")  # dbghelp.h
+	#	target_link_libraries(${PROJECT_NAME} "user32.lib")
+	#	target_link_libraries(${PROJECT_NAME} "legacy_stdio_definitions.lib") # For compatibility with vsnprintf at dxerr.dll
 	endif()
 endmacro()
 
@@ -63,11 +64,11 @@ endmacro()
 ##############################################################################
 macro(heliodor_link_d3d9)
 	if (MSVC)
-		target_link_libraries(${PROJECT_NAME} "d3d9.lib")
-		target_link_libraries(${PROJECT_NAME} "d3dx9.lib")
-		target_link_libraries(${PROJECT_NAME} "dsound.lib")
-		target_link_libraries(${PROJECT_NAME} "dxguid.lib")
-		target_link_libraries(${PROJECT_NAME} "dxerr9.lib") # DirextX SDK 2004 Oct
+	#	target_link_libraries(${PROJECT_NAME} "d3d9.lib")
+	#	target_link_libraries(${PROJECT_NAME} "d3dx9.lib")
+	#	target_link_libraries(${PROJECT_NAME} "dsound.lib")
+	#	target_link_libraries(${PROJECT_NAME} "dxguid.lib")
+	#	target_link_libraries(${PROJECT_NAME} "dxerr9.lib") # DirextX SDK 2004 Oct
 		# http://springhead.info/wiki/index.php
 		# Visual Studio 2012でXINPUTにまつわるエラーが出る場合
 		#
@@ -78,7 +79,7 @@ macro(heliodor_link_d3d9)
 		#   [リンカー]-[入力]-[特定の既定のライブラリの無視] に XINPUT.LIB を
 		# 指定してください。
 		# Windows8 以降のOSでは発生しないと思いますが、確認はしていません。
-		target_link_libraries(${PROJECT_NAME} "xinput9_1_0.lib")
+	#	target_link_libraries(${PROJECT_NAME} "xinput9_1_0.lib")
 	endif()
 endmacro()
 

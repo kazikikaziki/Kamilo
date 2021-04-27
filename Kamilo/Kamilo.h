@@ -69,6 +69,48 @@
 #include "KZip.h"
 #include "KXml.h"
 
+
+#ifndef KENG_DISABLE_PRAGMA_LINK
+#pragma comment(lib, "winmm.lib")   // mmsystem.h
+#pragma comment(lib, "imm32.lib")   // imm.h (by ImGui)
+#pragma comment(lib, "shlwapi.lib") // shlwapi.h
+#pragma comment(lib, "comctl32.lib")// commctrl.h
+#pragma comment(lib, "dbghelp.lib") // dbghelp.h
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "legacy_stdio_definitions.lib") // For compatibility with vsnprintf at dxerr.dll
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dxerr9.lib") // DirextX SDK 2004 Oct
+// http://springhead.info/wiki/index.php
+// Visual Studio 2012でXINPUTにまつわるエラーが出る場合
+//
+// Window7 以前のOSでの実行で、
+// 「コンピュータに XINPUT1_4.dll がないため、プログラムを開始できません。…」
+// というエラーが発生する場合は、ビルドのプロパティで、
+//   [リンカー]-[入力]-[追加の依存ファイル] に XINPUT9_1_0.LIB を
+//   [リンカー]-[入力]-[特定の既定のライブラリの無視] に XINPUT.LIB を
+// 指定してください。
+// Windows8 以降のOSでは発生しないと思いますが、確認はしていません。
+// #pragma comment(lib, "xinput9_1_0.lib")
+#endif
+
+
+// 自力でビルドするときのヒント
+// プリプロセッサとして定義するもの
+//	_CRT_SECURE_NO_WARNINGS
+//	NOMINMAX
+//	IMGUI_IMPL_WIN32_DISABLE_GAMEPAD (XInput をリンクさせないため ==> imgui/imgui_impl_win32.cpp)
+
+
+
+
+
+
+
+
+
 /** @mainpage KEngine 導入方法
 
 @tableofcontents
