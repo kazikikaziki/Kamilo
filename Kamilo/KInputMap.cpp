@@ -942,8 +942,13 @@ public:
 				// キーリピートありなら連続入力処理する
 				if (btn->m_flags & KButtonFlag_REPEAT) {
 					if (btn->m_timestamp_nextrepeat <= now_msec) { // オートリピート開始時刻を過ぎている？
-						btn->m_repeat = true; // オートリピート発動
-						btn->m_timestamp_nextrepeat += AUTOREPEAT_INTERVAL_MSEC; // 次回のオートリピート時刻
+						int delta = now_msec - btn->m_timestamp_nextrepeat;
+						if (delta < AUTOREPEAT_INTERVAL_MSEC*2) {
+							btn->m_repeat = true; // オートリピート発動
+							btn->m_timestamp_nextrepeat += AUTOREPEAT_INTERVAL_MSEC; // 次回のオートリピート時刻
+						} else {
+							// あまりにも時間が経ちすぎているのでリピート無効
+						}
 					}
 				}
 			}
