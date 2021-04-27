@@ -2797,7 +2797,7 @@ bool KVideo::init(void *hWnd, void *d3d9, void *d3ddev9) {
 	}
 	// ERR
 	g_Video.shutdown();
-	return nullptr;
+	return false;
 }
 void KVideo::shutdown() {
 	g_Video.shutdown();

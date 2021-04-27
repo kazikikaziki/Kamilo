@@ -1,4 +1,5 @@
 ﻿#include "KVec.h"
+#include "KMath.h"
 #include "KInternal.h"
 
 #define VEC_ERROR() K__ERROR_MSG("Invalid vector operation")

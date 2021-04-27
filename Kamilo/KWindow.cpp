@@ -59,6 +59,7 @@ public:
 
 
 #define WND_CHECK   if (m_hWnd == nullptr) K__Error("No window: %s", __FUNCTION__);
+static const wchar_t *CLASS_NAME = L"K_WND_CLASS_NAME";
 
 static LRESULT CALLBACK _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -131,7 +132,6 @@ class CWin32Window {
 			SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 	}
 public:
-	static constexpr wchar_t *CLASS_NAME = L"K_WND_CLASS_NAME";
 	static constexpr int HOTKEY_SNAPSHOT_DESKTOP = 1;
 	static constexpr int HOTKEY_SNAPSHOT_CLIENT  = 2;
 	KWindow::Callback *m_cb;
