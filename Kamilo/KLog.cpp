@@ -2,7 +2,6 @@
 #include <mutex>
 #include <queue>
 #include <assert.h>
-#include <varargs.h> // va_list, va_start, va_end
 #include <Windows.h> // OutputDebugStringW
 #include "KInternal.h"
 
