@@ -368,7 +368,7 @@ public:
 	virtual ~KSpriteBank() {}
 
 	/// 新しいスプライトを追加する
-	virtual bool addSpriteFromDesc(const KPath &name, KSpriteAuto &sp, bool update_mesh=true) = 0;
+	virtual bool addSpriteFromDesc(const KPath &name, KSpriteAuto sp, bool update_mesh=true) = 0;
 	virtual bool addSpriteFromTextureRect(const KPath &spr_name, const KPath &tex_name, int x, int y, int w, int h, int ox, int oy) = 0;
 
 	/// 新しいスプライトとテクスチャを追加する
@@ -417,7 +417,7 @@ public:
 	virtual ~KShaderBank() {}
 	virtual KPath getShaderName(KSHADERID shader) const = 0;
 	virtual KPathList getShaderNameList() const = 0;
-	virtual void addShader(const KPath &name, KShaderAuto &shader) = 0;
+	virtual void addShader(const KPath &name, KShaderAuto shader) = 0;
 
 	/// HLSL で定義されたシェーダーを追加する
 	virtual KSHADERID addShaderFromHLSL(const KPath &name, const char *code) = 0;

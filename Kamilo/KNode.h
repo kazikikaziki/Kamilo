@@ -23,6 +23,7 @@ class KQuat;
 class KAction;
 class KSig;
 
+static const char *SIG_UNBINDTREE = "SIG_NODETREE_UNBINDTREE";
 
 #pragma region EID
 /// @internal
@@ -462,7 +463,6 @@ public:
 
 class KNodeTree {
 public:
-	static constexpr char *SIG_UNBINDTREE = "SIG_NODETREE_UNBINDTREE";
 	static void install();
 	static void uninstall();
 	static bool isInstalled();

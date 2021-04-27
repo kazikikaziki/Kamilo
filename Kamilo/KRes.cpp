@@ -2001,7 +2001,7 @@ public:
 		}
 		return nullptr;
 	}
-	virtual bool addSpriteFromDesc(const KPath &name, KSpriteAuto &sp, bool update_mesh) override {
+	virtual bool addSpriteFromDesc(const KPath &name, KSpriteAuto sp, bool update_mesh) override {
 		if (name.empty()) return false;
 		if (hasSprite(name)) return false;
 
@@ -2191,7 +2191,7 @@ public:
 		m_mutex.unlock();
 		return result;
 	}
-	virtual void addShader(const KPath &name, KShaderAuto &shader) override {
+	virtual void addShader(const KPath &name, KShaderAuto shader) override {
 		m_mutex.lock();
 		{
 			auto it = m_items.find(name);

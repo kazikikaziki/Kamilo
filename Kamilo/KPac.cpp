@@ -282,7 +282,7 @@ public:
 		seekFirst_unsafe();
 		for (int i=0; i<index; i++) {
 			if (!seekNext_unsafe(nullptr)) {
-				return false;
+				return std::string();
 			}
 		}
 		std::string data;
