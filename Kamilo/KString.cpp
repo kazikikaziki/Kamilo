@@ -10,6 +10,8 @@
 namespace Kamilo {
 
 
+static const char *EMPTY_STR = ""; // mStr を nullptr にしないために使う
+
 #pragma region KStringView
 bool KStringView::isPathDelim(char c) {
 	return c=='/' || c=='\\';

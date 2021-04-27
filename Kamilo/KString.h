@@ -17,11 +17,11 @@
 namespace Kamilo {
 
 static const char * TOKEN_DELIMITERS = "\n\r\t ";
+static const char *K_UTF8BOM_STR = "\xEF\xBB\xBF";
+static const int   K_UTF8BOM_LEN = 3;
 
 class KStringUtils {
 public:
-	static constexpr char *K_UTF8BOM_STR = "\xEF\xBB\xBF";
-	static constexpr int   K_UTF8BOM_LEN = 3;
 
 	/// sprintf を std::string に対応させたもの
 	static std::string K_sprintf(const char *fmt, ...);
@@ -323,7 +323,6 @@ public:
 	__nodiscard__ std::vector<KStringView> splitLines(bool skip_empty_lines=true, bool _trim=true) const;
 protected:
 	static const int NUMSTRLEN = 32; // max numeric string length
-	static constexpr char *EMPTY_STR = ""; // mStr を nullptr にしないために使う
 	static bool isPathDelim(char c);
 	void set_view(const char *s, int len); // len = string length (excluding null terminator)
 	void set_view(const char *s, const char *e);
