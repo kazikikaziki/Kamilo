@@ -15,13 +15,8 @@
 #ifdef K_USE_D3D9
 #	include <d3d9.h>
 #	include <d3dx9.h>
-#	ifdef KENG_DIRECTX_SDK2004
-#		include <dxerr9.h> // dxerr9.lib
-#		define _DXGetErrorStringW(hr)  DXGetErrorString9W(hr)
-#	else
-#		include <dxerr.h> // dxerr.lib
-#		define _DXGetErrorStringW(hr)  DXGetErrorStringW(hr)
-#	endif
+#	include <dxerr9.h> // dxerr9.lib
+#	define _DXGetErrorStringW(hr)  DXGetErrorString9W(hr)
 #endif
 
 

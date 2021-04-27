@@ -67,13 +67,7 @@ macro(heliodor_link_d3d9)
 		target_link_libraries(${PROJECT_NAME} "d3dx9.lib")
 		target_link_libraries(${PROJECT_NAME} "dsound.lib")
 		target_link_libraries(${PROJECT_NAME} "dxguid.lib")
-		
-		if (KENG_DIRECTX_SDK2004)
-			target_link_libraries(${PROJECT_NAME} "dxerr9.lib") # DirextX SDK 2004 Oct
-			target_compile_definitions(${PROJECT_NAME} PRIVATE KENG_DIRECTX_SDK2004) # KENG_DIRECTX_SDK2004
-		else()
-			target_link_libraries(${PROJECT_NAME} "dxerr.lib")
-		endif()
+		target_link_libraries(${PROJECT_NAME} "dxerr9.lib") # DirextX SDK 2004 Oct
 		# http://springhead.info/wiki/index.php
 		# Visual Studio 2012でXINPUTにまつわるエラーが出る場合
 		#
