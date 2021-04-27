@@ -10,6 +10,10 @@ project("Game")
 #==================================================
 # 対象ファイルのリストを作成
 #==================================================
+
+# ALL_BUILD, ZERO_CHECK をフォルダ CMakePredefinedTargets にまとめる
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+
 file(GLOB m_files "./*.*")
 
 
