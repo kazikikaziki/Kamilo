@@ -372,7 +372,7 @@ public:
 
 	// 例外ファイルを消す
 	static void removeExceptionFile(const char *filename) {
-		DeleteFile(filename);
+		DeleteFileA(filename);
 	}
 
 	static void printModules(FILE *strm) {
