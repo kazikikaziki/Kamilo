@@ -68,8 +68,8 @@ add_library(${PROJECT_NAME} STATIC
 #==================================================
 # CMakeのオプション項目に表示する値
 #==================================================
-heliodor_set_option(KENG_NO_ASSERT         FALSE BOOL "Define 'KENG_NO_ASSERT' to remove all assertion calls") # assert の無効化
-heliodor_set_option(KENG_NO_STRICT_CHECK   FALSE BOOL "Define 'KENG_NO_STRICT_CHECK' to avoid strict checking code") # 検証コードの無効化
+#heliodor_set_option(KENG_NO_ASSERT         FALSE BOOL "Define 'KENG_NO_ASSERT' to remove all assertion calls") # assert の無効化
+#heliodor_set_option(KENG_NO_STRICT_CHECK   FALSE BOOL "Define 'KENG_NO_STRICT_CHECK' to avoid strict checking code") # 検証コードの無効化
 
 
 
@@ -77,12 +77,12 @@ heliodor_set_option(KENG_NO_STRICT_CHECK   FALSE BOOL "Define 'KENG_NO_STRICT_CH
 #==================================================
 # マクロを定義
 #==================================================
-if (KENG_NO_ASSERT)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE KENG_NO_ASSERT)
-endif()
-if (KENG_NO_STRICT_CHECK)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE KENG_NO_STRICT_CHECK)
-endif()
+#if (KENG_NO_ASSERT)
+#	target_compile_definitions(${PROJECT_NAME} PRIVATE KENG_NO_ASSERT)
+#endif()
+#if (KENG_NO_STRICT_CHECK)
+#	target_compile_definitions(${PROJECT_NAME} PRIVATE KENG_NO_STRICT_CHECK)
+#endif()
 
 
 
