@@ -32,7 +32,7 @@
 
 // ログ自身のアサート
 // （K_assert は再帰呼び出しになる可能性があるので使わない）
-#ifndef KENG_NO_ASSERT
+#ifdef _DEBUG
 #  define K__LOGLOG_ASSERT(x)     (!(x) ? DebugBreak() : (void)0)
 #else
 #  define K__LOGLOG_ASSERT(x)

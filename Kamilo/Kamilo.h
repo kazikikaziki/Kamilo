@@ -167,8 +167,6 @@
 	<li>「構成プロパティ/C/C++/プリプロセッサ」を選び、以下のマクロを追加する</li>
 	<li><code><b>_CRT_SECURE_NO_WARNINGS</b></code>: strcpy などの古い関数で警告が発生しないようにする</li>
 	<li><code><b>NOMINMAX</b></code>: Windows.h のマクロ min, max が std::min, std::max と競合しないようにする</li>
-	<li><code><b>KENG_NO_STRICT_CHECK</b></code>: テスト用のコードを排除してコンパイルする</li>
-	<li><code><b>KENG_NO_ASSERT</b></code>: ライブラリ内の assert 命令をすべて無効化する</li>
 </ul>
 
 
@@ -279,8 +277,6 @@ Windowdsデスクトップアプリの作成手順についての公式の説明
 <ul>
 <li>_CRT_SECURE_NO_WARNINGS: strcpy などの古い関数で警告が発生しないようにする</li>
 <li>NOMINMAX: Windows.h のマクロ min, max が std::min, std::max と競合しないようにする</li>
-<li>KENG_NO_STRICT_CHECK: テスト用のコードを排除してコンパイルする</li>
-<li>KENG_NO_ASSERT: ライブラリ内の assert 命令をすべて無効化する</li>
 </ul>
 
 

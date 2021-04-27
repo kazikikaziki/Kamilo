@@ -8,9 +8,7 @@
 #include <string>
 
 
-/// assert の代わり。評価に失敗した場合はエラー処理をする
-/// KENG_NO_ASSERT の設定により x 自体が削除される
-#ifndef KENG_NO_ASSERT
+#ifdef _DEBUG
 #  define K_assert(x)  K_verify(x)
 #else
 #  define K_assert(x)  ((void)0)
