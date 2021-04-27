@@ -12,6 +12,7 @@
 #include "KColor.h"
 #include "KMatrix.h"
 #include "KQuat.h"
+#include "KSig.h"
 
 #define NODE_NAME 0
 
@@ -23,7 +24,7 @@ class KQuat;
 class KAction;
 class KSig;
 
-static const char *K_SIG_UNBINDTREE = "K_SIG_NODETREE_UNBINDTREE";
+K_DECL_SIGNAL(K_SIG_NODE_UNBINDTREE);
 
 #pragma region EID
 /// @internal

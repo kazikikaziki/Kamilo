@@ -11,6 +11,7 @@
 #include "KRef.h"
 #include "KNode.h"
 #include "KInspector.h"
+#include "KSig.h"
 
 #if 1
 #	define K_OPENMP 0
@@ -36,94 +37,93 @@ class KEntityFilterCallback;
 class KScreen;
 
 #pragma region signals
-#define K_DECL_SIGNAL(X)  static const char *X = #X;
 
 // no params
-K_DECL_SIGNAL(KSignalType_WINDOW_WINDOW_CLOSING);
+K_DECL_SIGNAL(K_SIG_WINDOW_WINDOW_CLOSING);
 
 // "x": position x (int)
 // "y": position y (int)
-K_DECL_SIGNAL(KSignalType_WINDOW_WINDOW_MOVE);
+K_DECL_SIGNAL(K_SIG_WINDOW_WINDOW_MOVE);
 
 // "x": client size x (int)
 // "y": client size y (int)
-K_DECL_SIGNAL(KSignalType_WINDOW_WINDOW_SIZE);
+K_DECL_SIGNAL(K_SIG_WINDOW_WINDOW_SIZE);
 
 // "x": client x(int)
 // "y": client y(int)
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_ENTER);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_ENTER);
 
 // no params
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_EXIT);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_EXIT);
 
 // "x": client x(int)
 // "y": client y(int)
 // "delta": wheel delta(int)
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_WHEEL);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_WHEEL);
 
 // "x": client x(int)
 // "y": client y(int)
 // "button": mouse button (int) 0=left, 1=right, 2=middle
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_MOVE);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_MOVE);
 
 // "x": client x (int)
 // "y": client y (int)
 // "button": mouse button (int) 0=left, 1=right, 2=middle
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_DOWN);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_DOWN);
 
 // "x": client x (int)
 // "y": client y (int)
 // "button": mouse button 0=left, 1=right, 2=middle
-K_DECL_SIGNAL(KSignalType_WINDOW_MOUSE_UP);
+K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_UP);
 
 // "key"  : KKeyboard::Key (int)
 // "shift": with shift key (bool)
 // "ctrl" : with ctrl key(bool)
 // "alt"  : with alt key(bool)
-K_DECL_SIGNAL(KSignalType_WINDOW_KEY_DOWN);
-K_DECL_SIGNAL(KSignalType_WINDOW_KEY_UP);
+K_DECL_SIGNAL(K_SIG_WINDOW_KEY_DOWN);
+K_DECL_SIGNAL(K_SIG_WINDOW_KEY_UP);
 
 // chr: wchar_t (int)
-K_DECL_SIGNAL(KSignalType_WINDOW_KEY_CHAR);
+K_DECL_SIGNAL(K_SIG_WINDOW_KEY_CHAR);
 
 // "file_u8": file name in utf8 (string)
 // "index": current file index (int)
 // "total": num files (int)
-K_DECL_SIGNAL(KSignalType_WINDOW_DROPFILE);
+K_DECL_SIGNAL(K_SIG_WINDOW_DROPFILE);
 
 // no params
-K_DECL_SIGNAL(KSignalType_WINDOW_VIDEO_DEVICE_LOST);
-K_DECL_SIGNAL(KSignalType_WINDOW_VIDEO_DEVICE_RESET);
+K_DECL_SIGNAL(K_SIG_WINDOW_VIDEO_DEVICE_LOST);
+K_DECL_SIGNAL(K_SIG_WINDOW_VIDEO_DEVICE_RESET);
 
 
 
 /// ゲームループが開始または再開された
 // no params
-K_DECL_SIGNAL(KSignalType_ENGINE_PLAY);
+K_DECL_SIGNAL(K_SIG_ENGINE_PLAY);
 
 /// ステップ実行した
 // no params
-K_DECL_SIGNAL(KSignalType_ENGINE_PLAYPAUSE);
+K_DECL_SIGNAL(K_SIG_ENGINE_PLAYPAUSE);
 
 /// 一時停止した
 // no params
-K_DECL_SIGNAL(KSignalType_ENGINE_PAUSE);
+K_DECL_SIGNAL(K_SIG_ENGINE_PAUSE);
 
 /// フルスクリーンに変更した
 /// @see KEngine::setFullscreen()
 // no params
-K_DECL_SIGNAL(KSignalType_ENGINE_FULLSCREEN);
+K_DECL_SIGNAL(K_SIG_ENGINE_FULLSCREEN);
 
 /// ウィンドウモードに変更した
 /// @see KEngine::restoreWindow()
 // no params
-K_DECL_SIGNAL(KSignalType_ENGINE_WINDOWED);
+K_DECL_SIGNAL(K_SIG_ENGINE_WINDOWED);
 
 /// エンティティのインスペクターを描画しようとしている
 /// このタイミングで ImGui を使うと
 /// インスペクター上に独自のボタン類を追加することができる
 /// "node": target node (KNode*)
-K_DECL_SIGNAL(KSignalType_INSPECTOR_ENTITY);
+K_DECL_SIGNAL(K_SIG_INSPECTOR_ENTITY);
 
 /// KTextureBank::findTexture でテクスチャを取得しようとした時、 modifier が指定されていればこのコールバックが呼ばれる。
 /// newtex には取得しようとしたテクスチャ basetex のコピーが入っているので、modifier の値に応じて newtex の画像を書き換える
@@ -133,12 +133,12 @@ K_DECL_SIGNAL(KSignalType_INSPECTOR_ENTITY);
 /// "basetexname": string  元になるテクスチャの名前
 /// "basetex"    : KTEXID  元になるテクスチャ
 /// "modifier"   : int     適用するエフェクトの種類。何番のときに何のエフェクトをかけるかはユーザー定義。（ただし0はエフェクトなしとして予約済み）
-K_DECL_SIGNAL(KSignalType_TEXBANK_MODIFIER);
+K_DECL_SIGNAL(K_SIG_TEXBANK_MODIFIER);
 
 /// 新しいアニメクリップがセットされた
 // "target"  : KNode*
 // "clipname": string
-K_DECL_SIGNAL(KSignalType_ANIMATION_NEWCLIP);
+K_DECL_SIGNAL(K_SIG_ANIMATION_NEWCLIP);
 
 /// アニメ進行によって、ユーザー定義コマンドが登録されているフレームに達したときに呼ばれる
 // "target"  : KNode*
@@ -146,19 +146,19 @@ K_DECL_SIGNAL(KSignalType_ANIMATION_NEWCLIP);
 // "val"     : string
 // "clipname": string
 // "clipptr" : KClipRes
-K_DECL_SIGNAL(KSignalType_ANIMATION_COMMAND);
+K_DECL_SIGNAL(K_SIG_ANIMATION_COMMAND);
 
 /// APPキーとして登録したボタンが押された時に呼ばれる
 /// @see KInputMapAct::addButton
 /// "button": string
-K_DECL_SIGNAL(KSignalType_INPUT_APP_BUTTON);
+K_DECL_SIGNAL(K_SIG_INPUT_APP_BUTTON);
 
 // 衝突シグナル
 // "hitbox1" : KHitbox* (as KNode*) 
 // "hitbox2" : KHitbox* (as KNode*)
-K_DECL_SIGNAL(KSignalType_HITBOX_ENTER);
-K_DECL_SIGNAL(KSignalType_HITBOX_STAY);
-K_DECL_SIGNAL(KSignalType_HITBOX_EXIT);
+K_DECL_SIGNAL(K_SIG_HITBOX_ENTER);
+K_DECL_SIGNAL(K_SIG_HITBOX_STAY);
+K_DECL_SIGNAL(K_SIG_HITBOX_EXIT);
 
 
 #pragma endregion // signals

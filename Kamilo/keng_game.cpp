@@ -218,7 +218,7 @@ public:
 
 		// イベント送信
 		{
-			KSig sig(KSignalType_ENGINE_FULLSCREEN);
+			KSig sig(K_SIG_ENGINE_FULLSCREEN);
 			broadcastSignal(sig);
 		}
 		return true;
@@ -260,7 +260,7 @@ public:
 
 		// イベント送信
 		{
-			KSig sig(KSignalType_ENGINE_WINDOWED);
+			KSig sig(K_SIG_ENGINE_WINDOWED);
 			broadcastSignal(sig);
 		}
 		return true;
@@ -771,7 +771,7 @@ public:
 	void play() {
 		m_clock.play();
 		{
-			KSig sig(KSignalType_ENGINE_PLAY);
+			KSig sig(K_SIG_ENGINE_PLAY);
 			broadcastSignal(sig);
 		}
 	}
@@ -786,14 +786,14 @@ public:
 		// ステップ実行
 		m_clock.playStep();
 		{
-			KSig sig(KSignalType_ENGINE_PLAYPAUSE);
+			KSig sig(K_SIG_ENGINE_PLAYPAUSE);
 			broadcastSignal(sig);
 		}
 	}
 	void pause() {
 		m_clock.pause();
 		{
-			KSig sig(KSignalType_ENGINE_PAUSE);
+			KSig sig(K_SIG_ENGINE_PAUSE);
 			broadcastSignal(sig);
 		}
 	}
@@ -890,11 +890,11 @@ public:
 
 	#pragma region KWindow::Callback
 	void onWindowClosing() {
-		KSig sig(KSignalType_WINDOW_WINDOW_CLOSING);
+		KSig sig(K_SIG_WINDOW_WINDOW_CLOSING);
 		broadcastSignal(sig);
 	}
 	void onWindowDropFile(int index, int total, const char *filename_u8) {
-		KSig sig(KSignalType_WINDOW_DROPFILE);
+		KSig sig(K_SIG_WINDOW_DROPFILE);
 		sig.setString("file_u8", filename_u8);
 		sig.setInt("index", index);
 		sig.setInt("total", total);
@@ -904,7 +904,7 @@ public:
 	}
 	void onWindowResize(int x, int y) {
 		KLog::printInfo("onWindowResize %d %d", x, y);
-		KSig sig(KSignalType_WINDOW_WINDOW_SIZE);
+		KSig sig(K_SIG_WINDOW_WINDOW_SIZE);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		broadcastSignal(sig);
@@ -913,17 +913,17 @@ public:
 		m_signal_mutex.unlock();
 	}
 	void onWindowMouseEnter(int x, int y) {
-		KSig sig(KSignalType_WINDOW_MOUSE_ENTER);
+		KSig sig(K_SIG_WINDOW_MOUSE_ENTER);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		broadcastSignal(sig);
 	}
 	void onWindowMouseExit() {
-		KSig sig(KSignalType_WINDOW_MOUSE_EXIT);
+		KSig sig(K_SIG_WINDOW_MOUSE_EXIT);
 		broadcastSignal(sig);
 	}
 	void onWindowMouseMove(int x, int y, int btn) {
-		KSig sig(KSignalType_WINDOW_MOUSE_MOVE);
+		KSig sig(K_SIG_WINDOW_MOUSE_MOVE);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		sig.setInt("button", btn);
@@ -931,21 +931,21 @@ public:
 	//	broadcastSignal(sig);
 	}
 	void onWindowMouseWheel(int x, int y, int delta) {
-		KSig sig(KSignalType_WINDOW_MOUSE_WHEEL);
+		KSig sig(K_SIG_WINDOW_MOUSE_WHEEL);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		sig.setInt("delta", delta);
 		broadcastSignal(sig);
 	}
 	void onWindowMouseButtonDown(int x, int y, int btn) {
-		KSig sig(KSignalType_WINDOW_MOUSE_DOWN);
+		KSig sig(K_SIG_WINDOW_MOUSE_DOWN);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		sig.setInt("button", btn);
 		broadcastSignal(sig);
 	}
 	void onWindowMouseButtonUp(int x, int y, int btn) {
-		KSig sig(KSignalType_WINDOW_MOUSE_UP);
+		KSig sig(K_SIG_WINDOW_MOUSE_UP);
 		sig.setInt("x", x);
 		sig.setInt("y", y);
 		sig.setInt("button", btn);
@@ -956,7 +956,7 @@ public:
 		// ゲーム側への入力とはみなさない。無視する
 		if (ImGui::GetCurrentContext()) {
 			if (!ImGui::IsAnyItemActive()) {
-				KSig sig(KSignalType_WINDOW_KEY_DOWN);
+				KSig sig(K_SIG_WINDOW_KEY_DOWN);
 				sig.setInt("key", key);
 				broadcastSignal(sig);
 			}
@@ -988,7 +988,7 @@ public:
 		// ImGui に入力受付状態になっているアイテムがある（テキストボックスなど）なら
 		// ゲーム側への入力とはみなさない。無視する
 		if (ImGui::GetCurrentContext() && !ImGui::IsAnyItemActive()) {
-			KSig sig(KSignalType_WINDOW_KEY_UP);
+			KSig sig(K_SIG_WINDOW_KEY_UP);
 			sig.setInt("key", key);
 			broadcastSignal(sig);
 		}
@@ -997,7 +997,7 @@ public:
 		// ImGui に入力受付状態になっているアイテムがある（テキストボックスなど）なら
 		// ゲーム側への入力とはみなさない。無視する
 		if (ImGui::GetCurrentContext() && !ImGui::IsAnyItemActive()) {
-			KSig sig(KSignalType_WINDOW_KEY_CHAR);
+			KSig sig(K_SIG_WINDOW_KEY_CHAR);
 			sig.setInt("chr", wc);
 			broadcastSignal(sig);
 		}

@@ -31,7 +31,7 @@ public:
 		m_locked = 0;
 	}
 	virtual void on_manager_signal(KSig &sig) override {
-		if (sig.check(KSignalType_WINDOW_MOUSE_DOWN)) {
+		if (sig.check(K_SIG_WINDOW_MOUSE_DOWN)) {
 			// マウスボタンが押された。
 			// 左ボタンかつ修飾キーを押していない場合に限ってドラッグ開始チェックする
 			int btn = sig.getInt("button");
@@ -49,7 +49,7 @@ public:
 			return;
 		}
 
-		if (sig.check(KSignalType_WINDOW_MOUSE_MOVE)) {
+		if (sig.check(K_SIG_WINDOW_MOUSE_MOVE)) {
 			if (m_dragging) {
 				int btn = sig.getInt("button");
 				// 念のためにボタン状態は常にチェックしておく。
@@ -70,7 +70,7 @@ public:
 			return;
 		}
 
-		if (sig.check(KSignalType_WINDOW_MOUSE_UP)) {
+		if (sig.check(K_SIG_WINDOW_MOUSE_UP)) {
 			m_dragging = false;
 			return;
 		}

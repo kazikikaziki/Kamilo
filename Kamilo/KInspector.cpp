@@ -718,7 +718,7 @@ public:
 		}
 
 		if (1) {
-			KSig sig(KSignalType_INSPECTOR_ENTITY);
+			KSig sig(K_SIG_INSPECTOR_ENTITY);
 			sig.setNode("node", node);
 			KEngine::broadcastSignal(sig);
 		}

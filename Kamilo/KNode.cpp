@@ -1491,7 +1491,7 @@ public:
 	}
 	void _on_node_removing(KNode *node) {
 		// ノードツリーから削除される直前であることを通知する
-		KSig sig(K_SIG_UNBINDTREE);
+		KSig sig(K_SIG_NODE_UNBINDTREE);
 		sig.setNode("node", node);
 		broadcastSignal(sig);
 	}

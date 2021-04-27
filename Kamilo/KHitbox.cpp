@@ -537,19 +537,19 @@ private:
 		}
 	}
 	void onHitboxEnter(KHitPair &pair) {
-		KSig sig(KSignalType_HITBOX_ENTER);
+		KSig sig(K_SIG_HITBOX_ENTER);
 		sig.setNode("hitbox1", pair.m_Object1.node);
 		sig.setNode("hitbox2", pair.m_Object2.node);
 		KNodeTree::broadcastSignal(sig);
 	}
 	void onHitboxStay(KHitPair &pair) {
-		KSig sig(KSignalType_HITBOX_STAY);
+		KSig sig(K_SIG_HITBOX_STAY);
 		sig.setNode("hitbox1", pair.m_Object1.node);
 		sig.setNode("hitbox2", pair.m_Object2.node);
 		KNodeTree::broadcastSignal(sig);
 	}
 	void onHitboxExit(KHitPair &pair) {
-		KSig sig(KSignalType_HITBOX_EXIT);
+		KSig sig(K_SIG_HITBOX_EXIT);
 		sig.setNode("hitbox1", pair.m_Object1.node);
 		sig.setNode("hitbox2", pair.m_Object2.node);
 		KNodeTree::broadcastSignal(sig);

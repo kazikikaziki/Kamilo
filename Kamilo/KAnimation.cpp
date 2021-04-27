@@ -189,7 +189,7 @@ public:
 				// コマンドを通知する
 				const KNamedValues &nv = key->user_parameters;
 				for (int i=0; i<nv.size(); i++) {
-					KSig sig(KSignalType_ANIMATION_COMMAND);
+					KSig sig(K_SIG_ANIMATION_COMMAND);
 					sig.setNode("target", mTarget);
 					sig.setString("cmd", nv.getName(i));
 					sig.setString("val", nv.getString(i));
@@ -637,7 +637,7 @@ bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 		}
 		// 新しいクリップが設定されたことを通知
 		if (1) {
-			KSig sig(KSignalType_ANIMATION_NEWCLIP);
+			KSig sig(K_SIG_ANIMATION_NEWCLIP);
 			sig.setNode("target", getNode());
 			sig.setString("clipname", clip->getName());
 			KNodeTree::broadcastSignal(sig);

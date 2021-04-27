@@ -36,7 +36,7 @@ public:
 		KWindow::setAttribute(KWindow::ATTR_KILL_SNAPSHOT, true);
 	}
 	virtual void on_manager_signal(KSig &sig) override {
-		if (sig.check(KSignalType_WINDOW_KEY_DOWN)) {
+		if (sig.check(K_SIG_WINDOW_KEY_DOWN)) {
 			// ウィンドウイベントは別スレッドから飛んでくる場合があることに注意
 			if (sig.getInt("key") == KKeyboard::KEY_SNAPSHOT) {
 				m_DoShot = true;

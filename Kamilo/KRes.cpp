@@ -1154,7 +1154,7 @@ public:
 		// 念のため、空っぽのテクスチャではなく元画像のコピーで初期化しておく
 		KTEXID newtex = addTextureFromTexture(modname, basetex);
 		{
-			KSig sig(KSignalType_TEXBANK_MODIFIER);
+			KSig sig(K_SIG_TEXBANK_MODIFIER);
 			sig.setNode("node", node_for_mod);
 			sig.setPointer("newtex", (void*)newtex);
 			sig.setString("basetexname", name.u8());

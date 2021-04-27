@@ -323,7 +323,7 @@ public:
 	/// @param should_exist
 	///        見つからない時にエラーを出すかどうか
 	/// @param node_for_mod 
-	///        KSignalType_TEXBANK_MODIFIER イベントの node に渡される値
+	///        K_SIG_TEXBANK_MODIFIER イベントの node に渡される値
 	virtual KTEXID findTexture(const KPath &name, int modifier=0, bool should_exist=true, KNode *node_for_mod=NULL) = 0;
 
 	/// 指定された名前に一致するテクスチャが登録されているかどうかを調べる

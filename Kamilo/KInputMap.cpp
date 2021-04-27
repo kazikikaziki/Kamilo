@@ -1186,7 +1186,7 @@ public:
 			const char *name = btn->get_name();
 			KButtonFlags flags = btn->get_flags();
 			if (m_app_buttons->getButtonDown(name, nullptr)) {
-				KSig sig(KSignalType_INPUT_APP_BUTTON);
+				KSig sig(K_SIG_INPUT_APP_BUTTON);
 				sig.setString("button", name);
 				KEngine::broadcastSignal(sig);
 			}

@@ -27,7 +27,7 @@ public:
 		}
 	}
 	virtual void on_manager_signal(KSig &sig) override {
-		if (sig.check(KSignalType_WINDOW_MOUSE_MOVE)) {
+		if (sig.check(K_SIG_WINDOW_MOUSE_MOVE)) {
 			m_Time = K__ClockMsec32();
 			if (m_Hiding) {
 				m_Hiding = false;

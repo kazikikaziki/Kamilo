@@ -162,7 +162,7 @@ public:
 		KEngine::addManager(this);
 	}
 	virtual void on_manager_signal(KSig &sig) override {
-		if (sig.check(KSignalType_WINDOW_KEY_DOWN)) {
+		if (sig.check(K_SIG_WINDOW_KEY_DOWN)) {
 			// ウィンドウイベントは別スレッドから飛んでくる場合があることに注意
 			// ビデオモードの変更などは必ずメインスレッドで行うようにしておく
 			KKeyboard::Key key = (KKeyboard::Key)sig.getInt("key");
