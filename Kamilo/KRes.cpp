@@ -2556,15 +2556,9 @@ public:
 		m_fontnames.push_back(alias);
 		return true;
 	}
-	virtual bool addFontFromFileName(const char *alias, const char *_filename, int ttc_index, bool should_exists, KFont *out_font) override {
-		// ファイル名が省略されている場合は、登録用の名前 alias がそのままファイル名になっていると仮定する
-		KPath filename(_filename);
-		if (filename.empty()) {
-			filename = alias;
-		}
-
+	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
-		std::string bin = KStorage::getGlobal().loadBinary(filename.u8(), should_exists);
+		std::string bin = KStorage::getGlobal().loadBinary(filename, should_exists);
 		if (!bin.empty()) {
 			KFont font = KFont::createFromMemory(bin.data(), bin.size());
 			if (font.isOpen()) {
@@ -2577,16 +2571,11 @@ public:
 			}
 		}
 		if (should_exists) {
-			KLog::printError(u8"E_FONT: フォントファイル '%s' のロードに失敗しました", filename.u8());
+			KLog::printError(u8"E_FONT: フォントファイル '%s' のロードに失敗しました", filename);
 		}
 		return false;
 	}
-	virtual bool addFontFromInstalledFonts(const char *alias, const char *_filename, int ttc_index, bool should_exists, KFont *out_font) override {
-		// ファイル名が省略されている場合は、登録用の名前 alias がそのままファイル名になっていると仮定する
-		KPath filename(_filename);
-		if (filename.empty()) {
-			filename = alias;
-		}
+	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
 		KPath sysfont = KPlatformFonts::getFontDirectory().join(filename);
 		KFont font = KFont::createFromFileName(sysfont.u8(), ttc_index);
@@ -2599,7 +2588,7 @@ public:
 			}
 		}
 		if (should_exists) {
-			KLog::printError(u8"E_FONT: フォントファイル '%s' はシステムにインストールされていません", filename.u8());
+			KLog::printError(u8"E_FONT: フォントファイル '%s' はシステムにインストールされていません", filename);
 		}
 		return false;
 	}
@@ -4900,14 +4889,13 @@ public:
 };
 
 // Edgeから直接アニメを作成する
-bool K_makeClip(KClipRes **out_clip, const KPath &edge_name, const KPath clip_name) {
+bool K_makeClip(KClipRes **out_clip, KInputStream &edge_file, const KPath &edge_name, const KPath clip_name) {
 	// Edge ファイルをロードする
 	// 無視ページやレイヤを削除した状態で取得するため、
 	// KEdgeDocument::loadFromFile ではなく KGameEdgeBuilder を使う
 	KEdgeDocument edge;
-	KInputStream edgefile = KStorage::getGlobal().getInputStream(edge_name.u8());
-	if (edgefile.isOpen()) {
-		KGameEdgeBuilder::loadFromStream(&edge, edgefile, edge_name.u8());
+	if (edge_file.isOpen()) {
+		KGameEdgeBuilder::loadFromStream(&edge, edge_file, edge_name.u8());
 	}
 
 	// Edge の各ページ、レイヤーのラベル情報を得る

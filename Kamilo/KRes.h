@@ -476,8 +476,8 @@ public:
 	///  addFontFromInstalledFonts("msgothic_ui", "msgothic.ttc", 1);
 	///  addFontFromInstalledFonts("msgothic_p",  "msgothic.ttc", 2);
 	/// @endcode
-	virtual bool addFontFromFileName(const char *alias, const char *filename=NULL, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
-	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename=NULL, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
+	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
+	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
 
 	/// 指定されたフォントを追加する。内部で参照カウンタを増やす
 	/// 古い同名フォントがある場合は、古いフォントを削除してから追加する。
@@ -762,7 +762,7 @@ public:
 
 
 // Edgeから直接アニメを作成する
-bool K_makeClip(KClipRes **out_clip, const KPath &edge_name, const KPath clip_name);
+bool K_makeClip(KClipRes **out_clip, KInputStream &edge_file, const KPath &edge_name, const KPath clip_name);
 
 
 class KBank {
