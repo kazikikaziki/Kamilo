@@ -2556,6 +2556,22 @@ public:
 		m_fontnames.push_back(alias);
 		return true;
 	}
+	virtual bool addFontFromStream(const char *alias, KInputStream &input, const char *filename, int ttc_index, KFont *out_font) override {
+		// ファイルをロード
+		std::string bin = input.readBin();
+		if (!bin.empty()) {
+			KFont font = KFont::createFromMemory(bin.data(), bin.size());
+			if (font.isOpen()) {
+				if (addFont(alias, font)) {
+					if (out_font) {
+						*out_font = font;
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
 		std::string bin = KStorage::getGlobal().loadBinary(filename, should_exists);

@@ -476,8 +476,9 @@ public:
 	///  addFontFromInstalledFonts("msgothic_ui", "msgothic.ttc", 1);
 	///  addFontFromInstalledFonts("msgothic_p",  "msgothic.ttc", 2);
 	/// @endcode
-	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
-	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index=0, bool should_exists=true, KFont *out_font=NULL) = 0;
+	virtual bool addFontFromStream(const char *alias, KInputStream &input, const char *filename, int ttc_index, KFont *out_font) = 0;
+	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
+	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
 
 	/// 指定されたフォントを追加する。内部で参照カウンタを増やす
 	/// 古い同名フォントがある場合は、古いフォントを削除してから追加する。
