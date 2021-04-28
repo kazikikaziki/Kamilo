@@ -884,7 +884,7 @@ bool KShaderRes::loadFromHLSL(const char *name, const char *code) {
 }
 bool KShaderRes::loadFromHLSL(const char *name) {
 	bool result = false;
-	KInputStream input = KStorage::getInputStream(name);
+	KInputStream input = KStorage::getGlobal().getInputStream(name);
 	if (input.isOpen()) {
 		std::string code = input.readBin();
 		if (loadFromHLSL(name, code.c_str())) {
@@ -912,7 +912,7 @@ bool KFontRes::loadFromFont(KFont &font) {
 bool KFontRes::loadFromFileName(const char *filename, int ttc_index) {
 	release();
 	// ファイルをロード
-	std::string bin = KStorage::loadBinary(filename, false);
+	std::string bin = KStorage::getGlobal().loadBinary(filename, false);
 	if (!bin.empty()) {
 		KFont font = KFont::createFromMemory(bin.data(), bin.size());
 		if (font.isOpen()) {
@@ -2215,7 +2215,7 @@ public:
 	}
 	virtual KSHADERID addShaderFromHLSL(const char *filename) override {
 		KSHADERID sh = nullptr;
-		KInputStream input = KStorage::getInputStream(filename);
+		KInputStream input = KStorage::getGlobal().getInputStream(filename);
 		if (input.isOpen()) {
 			std::string code = input.readBin();
 			sh = addShaderFromHLSL(filename, code.c_str());
@@ -2566,7 +2566,7 @@ public:
 		}
 
 		// ファイルをロード
-		std::string bin = KStorage::loadBinary(filename.u8(), should_exists);
+		std::string bin = KStorage::getGlobal().loadBinary(filename.u8(), should_exists);
 		if (!bin.empty()) {
 			KFont font = KFont::createFromMemory(bin.data(), bin.size());
 			if (font.isOpen()) {
@@ -3406,8 +3406,8 @@ KImgPackR KGameImagePack::loadPackR_fromCache(const char *imageListName, KImage 
 	KPath metaName = KPath(imageListName).joinString(".meta");
 	KPath pngName = KPath(imageListName).joinString(".png");
 
-	std::string metaData = KStorage::loadBinary(metaName.u8(), false);
-	std::string pngData = KStorage::loadBinary(pngName.u8(), false);
+	std::string metaData = KStorage::getGlobal().loadBinary(metaName.u8(), false);
+	std::string pngData = KStorage::getGlobal().loadBinary(pngName.u8(), false);
 
 	if (metaData.size() == 0) {
 		KLog::printError("Failed to read KImgPackR meta-data: %s", metaName.u8()); 
@@ -4259,7 +4259,7 @@ private:
 	bool getTextureImage(KImage &result_image, const char *image_name, const char *filter) const {
 		// 画像をロード
 		if (!KStringUtils::isEmpty(image_name)) {
-			std::string bin = KStorage::loadBinary(image_name, true);
+			std::string bin = KStorage::getGlobal().loadBinary(image_name, true);
 			if (bin.empty()) {
 				KLog::printError("Failed to read binary: %s", image_name);
 				return false;
@@ -4636,7 +4636,7 @@ public:
 		// 無視ページやレイヤを削除した状態で取得するため、
 		// KEdgeDocument::loadFromFile ではなく KGameEdgeBuilder を使う
 		KEdgeDocument edge;
-		KInputStream edgefile = KStorage::getInputStream(edge_name.u8());
+		KInputStream edgefile = KStorage::getGlobal().getInputStream(edge_name.u8());
 		if (!edgefile.isOpen()) {
 			KLog::printError(
 				u8"E_FILELOADER_EDGEANINODE: "
@@ -4768,7 +4768,7 @@ public:
 				// ページ内のすべてのレイヤを重ねたものを１枚のスプライトとして扱う
 				if (externEdgeName && externEdgeName[0] && externEdgePage >= 0) {
 					KPath tmp_edge_name = KGamePath::evalPath(KPath(externEdgeName), xml_name, ".edg"); // リソース内の絶対パスに直す
-					KInputStream tmp_file = KStorage::getInputStream(tmp_edge_name.u8());
+					KInputStream tmp_file = KStorage::getGlobal().getInputStream(tmp_edge_name.u8());
 					if (!tmp_file.isOpen()) {
 						KLog::printError(
 							u8"E_FILELOADER_EDGEANINODE: "
@@ -4907,7 +4907,7 @@ bool K_makeClip(KClipRes **out_clip, const KPath &edge_name, const KPath clip_na
 	// 無視ページやレイヤを削除した状態で取得するため、
 	// KEdgeDocument::loadFromFile ではなく KGameEdgeBuilder を使う
 	KEdgeDocument edge;
-	KInputStream edgefile = KStorage::getInputStream(edge_name.u8());
+	KInputStream edgefile = KStorage::getGlobal().getInputStream(edge_name.u8());
 	if (edgefile.isOpen()) {
 		KGameEdgeBuilder::loadFromStream(&edge, edgefile, edge_name.u8());
 	}
@@ -5001,7 +5001,7 @@ public:
 	bool loadShader(const char *name, const char *xml_name) {
 		// ファイル内容をロード
 		// UTF8で保存されているという前提で、バイナリ無変換で文字列化する
-		std::string hlsl_u8 = KStorage::loadBinary(name);
+		std::string hlsl_u8 = KStorage::getGlobal().loadBinary(name);
 		KSHADERID sid = KBank::getShaderBank()->addShaderFromHLSL(name, hlsl_u8.c_str());
 		if (sid) {
 			KBank::getShaderBank()->setTag(sid, xml_name); // 作成元の .xres ファイル名タグを追加
@@ -5032,13 +5032,13 @@ public:
 	}
 	virtual void loadFromFile(const char *xml_name, bool should_exists) override {
 		// ファイルの有無を調べる
-		if (!KStorage::contains(xml_name)) {
+		if (!KStorage::getGlobal().contains(xml_name)) {
 			if (should_exists) {
 				KLog::printError(u8"E_XRES_FILE_NOT_FOUND: %s", xml_name);
 			}
 			return;
 		}
-		std::string raw_text = KStorage::loadBinary(xml_name, should_exists);
+		std::string raw_text = KStorage::getGlobal().loadBinary(xml_name, should_exists);
 		loadFromText(raw_text.c_str(), xml_name);
 	}
 	virtual void loadFromText(const char *raw_text, const char *xml_name) override {

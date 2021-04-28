@@ -758,7 +758,7 @@ public:
 	KSOUNDID playStreaming(const KPath &name, bool looping, int group_id) {
 		if (m_master_mute) return 0;
 
-		std::string bin = KStorage::loadBinary(name.u8());
+		std::string bin = KStorage::getGlobal().loadBinary(name.u8());
 		if (bin.empty()) {
 			K__Error("Failed to open asset file: %s", name.u8());
 			return 0;
@@ -783,7 +783,7 @@ public:
 	KSOUNDID playOneShot(const KPath &name, int group_id) {
 		if (m_master_mute) return 0;
 		if (! m_snd.isPooled(name)) {
-			std::string bin = KStorage::loadBinary(name.u8());
+			std::string bin = KStorage::getGlobal().loadBinary(name.u8());
 			if (bin.empty()) {
 				K__Error("Failed to open file: %s", name.u8());
 				return 0;

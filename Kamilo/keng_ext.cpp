@@ -2092,7 +2092,7 @@ lua_State * KLuaBank::queryScript(const char *name, bool reload) {
 
 	lua_State *ls = findScript(name);
 	if (ls == nullptr) {
-		std::string bin = KStorage::loadBinary(name);
+		std::string bin = KStorage::getGlobal().loadBinary(name);
 		if (addScript(name, bin.data(), bin.size())) {
 			ls = findScript(name);
 		}

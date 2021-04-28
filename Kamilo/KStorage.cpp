@@ -438,48 +438,55 @@ public:
 	}
 }; // CFileLoaderImpl
 
-static CFileLoaderImpl g_FileLoader;
+static KStorage g_Storage;
 
 #pragma region KStorage
+KStorage & KStorage::getGlobal() {
+	return g_Storage;
+}
+
+KStorage::KStorage() {
+	m_Impl = std::shared_ptr<CFileLoaderImpl>(new CFileLoaderImpl());
+}
 void KStorage::clear() {
-	return g_FileLoader.clear();
+	return m_Impl->clear();
 }
 void KStorage::addArchive(KArchive *cb) {
-	return g_FileLoader.addArchive(cb);
+	return m_Impl->addArchive(cb);
 }
 bool KStorage::addFolder(const char *dir) {
-	return g_FileLoader.addFolder(dir);
+	return m_Impl->addFolder(dir);
 }
 bool KStorage::addZipFile(const char *filename, const char *password) {
-	return g_FileLoader.addZipFile(filename, password);
+	return m_Impl->addZipFile(filename, password);
 }
 bool KStorage::addPacFile(const char *filename) {
-	return g_FileLoader.addPacFile(filename);
+	return m_Impl->addPacFile(filename);
 }
 bool KStorage::addEmbeddedFiles() {
-	return g_FileLoader.addEmbeddedFiles();
+	return m_Impl->addEmbeddedFiles();
 }
 bool KStorage::addEmbeddedPacFileLoader(const char *filename) {
-	return g_FileLoader.addEmbeddedPacFileLoader(filename);
+	return m_Impl->addEmbeddedPacFileLoader(filename);
 }
 KReader * KStorage::createReader(const char *filename, bool should_exists) {
-	KInputStream strm = g_FileLoader.createReader(filename, should_exists);
+	KInputStream strm = m_Impl->createReader(filename, should_exists);
 	return KReader::createFromStream(strm);
 }
 KInputStream KStorage::getInputStream(const char *filename, bool should_exists) {
-	return g_FileLoader.createReader(filename, should_exists);
+	return m_Impl->createReader(filename, should_exists);
 }
 std::string KStorage::loadBinary(const char *filename, bool should_exists) {
-	return g_FileLoader.loadBinary(filename, should_exists);
+	return m_Impl->loadBinary(filename, should_exists);
 }
 bool KStorage::contains(const char *filename) {
-	return g_FileLoader.contains(filename);
+	return m_Impl->contains(filename);
 }
 KArchive * KStorage::getLoader(int index) {
-	return g_FileLoader.getLoader(index);
+	return m_Impl->getLoader(index);
 }
 int KStorage::getLoaderCount() {
-	return g_FileLoader.getLoaderCount();
+	return m_Impl->getLoaderCount();
 }
 #pragma endregion // KStorage
 
