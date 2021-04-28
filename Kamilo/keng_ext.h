@@ -15,6 +15,7 @@
 #include "KVideo.h"
 #include "KLua.h"
 #include "KDebug.h"
+#include "KStorage.h"
 #include "KString.h"
 #include "KStream.h"
 #include "KImGui.h"
@@ -953,6 +954,7 @@ public:
 	KLuaBank();
 	~KLuaBank();
 
+	void setStorage(KStorage &storage);
 	void setCallback(KLuaBankCallback *cb);
 
 	lua_State * addEmptyScript(const char *name);
@@ -968,6 +970,7 @@ private:
 	std::unordered_map<std::string, lua_State *> m_items;
 	mutable std::recursive_mutex m_mutex;
 	KLuaBankCallback *m_cb;
+	KStorage m_storage;
 };
 
 

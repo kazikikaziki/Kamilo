@@ -150,7 +150,6 @@ public:
 		KImGui::KImGui_Shutdown();
 		KBank::uninstall();
 		KScreen::uninstall();
-		KStorage::getGlobal().clear();
 		KJoystick::shutdown();
 		KSoundPlayer::shutdown();
 		KWindow::shutdown();

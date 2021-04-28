@@ -3,6 +3,8 @@
 
 namespace Kamilo {
 
+class KStorage;
+
 struct K__SOUNDID {
 	int dummy;
 };
@@ -20,6 +22,7 @@ typedef int KAudioFlags;
 class KAudioPlayer {
 public:
 	static void install();
+	static void install(KStorage &storage);
 	static void uninstall();
 
 	/// 現在のサウンドグループ数を返す

@@ -461,6 +461,7 @@ public:
 	int m_solo_group; // KAudioFlag_SOLO が設定されてているグループ番号。未設定ならば -1
 	float m_master_volume;
 	bool m_master_mute;
+	KStorage m_storage;
 
 	CAudioPlayer() {
 		m_master_volume = 1.0f;
@@ -758,7 +759,7 @@ public:
 	KSOUNDID playStreaming(const KPath &name, bool looping, int group_id) {
 		if (m_master_mute) return 0;
 
-		std::string bin = KStorage::getGlobal().loadBinary(name.u8());
+		std::string bin = m_storage.loadBinary(name.u8());
 		if (bin.empty()) {
 			K__Error("Failed to open asset file: %s", name.u8());
 			return 0;
@@ -783,7 +784,7 @@ public:
 	KSOUNDID playOneShot(const KPath &name, int group_id) {
 		if (m_master_mute) return 0;
 		if (! m_snd.isPooled(name)) {
-			std::string bin = KStorage::getGlobal().loadBinary(name.u8());
+			std::string bin = m_storage.loadBinary(name.u8());
 			if (bin.empty()) {
 				K__Error("Failed to open file: %s", name.u8());
 				return 0;
@@ -907,6 +908,10 @@ static CAudioPlayer *g_AudioPlayer = nullptr;
 
 void KAudioPlayer::install() {
 	g_AudioPlayer = new CAudioPlayer();
+}
+void KAudioPlayer::install(KStorage &storage) {
+	g_AudioPlayer = new CAudioPlayer();
+	g_AudioPlayer->m_storage = storage;
 }
 void KAudioPlayer::uninstall() {
 	if (g_AudioPlayer)  {

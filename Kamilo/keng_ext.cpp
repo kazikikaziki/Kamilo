@@ -2020,6 +2020,9 @@ KLuaBank::KLuaBank() {
 KLuaBank::~KLuaBank() {
 	clear();
 }
+void KLuaBank::setStorage(KStorage &storage) {
+	m_storage = storage;
+}
 void KLuaBank::setCallback(KLuaBankCallback *cb) {
 	m_cb = cb;
 }
@@ -2092,7 +2095,7 @@ lua_State * KLuaBank::queryScript(const char *name, bool reload) {
 
 	lua_State *ls = findScript(name);
 	if (ls == nullptr) {
-		std::string bin = KStorage::getGlobal().loadBinary(name);
+		std::string bin = m_storage.loadBinary(name);
 		if (addScript(name, bin.data(), bin.size())) {
 			ls = findScript(name);
 		}
