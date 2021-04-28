@@ -882,9 +882,8 @@ bool KShaderRes::loadFromHLSL(const char *name, const char *code) {
 	mShaderId = sh;
 	return true;
 }
-bool KShaderRes::loadFromHLSL(const char *name) {
+bool KShaderRes::loadFromStream(KInputStream &input, const char *name) {
 	bool result = false;
-	KInputStream input = KStorage::getGlobal().getInputStream(name);
 	if (input.isOpen()) {
 		std::string code = input.readBin();
 		if (loadFromHLSL(name, code.c_str())) {
@@ -909,10 +908,10 @@ bool KFontRes::loadFromFont(KFont &font) {
 	mFont = font;
 	return true;
 }
-bool KFontRes::loadFromFileName(const char *filename, int ttc_index) {
+bool KFontRes::loadFromStream(KInputStream &input, int ttc_index) {
 	release();
 	// ファイルをロード
-	std::string bin = KStorage::getGlobal().loadBinary(filename, false);
+	std::string bin = input.readBin();
 	if (!bin.empty()) {
 		KFont font = KFont::createFromMemory(bin.data(), bin.size());
 		if (font.isOpen()) {
@@ -2213,12 +2212,11 @@ public:
 		}
 		return sid;
 	}
-	virtual KSHADERID addShaderFromHLSL(const char *filename) override {
+	virtual KSHADERID addShaderFromStream(KInputStream &input, const char *name) override {
 		KSHADERID sh = nullptr;
-		KInputStream input = KStorage::getGlobal().getInputStream(filename);
 		if (input.isOpen()) {
 			std::string code = input.readBin();
-			sh = addShaderFromHLSL(filename, code.c_str());
+			sh = addShaderFromHLSL(name, code.c_str());
 		}
 		return sh;
 	}

@@ -253,7 +253,7 @@ public:
 	void clear();
 	KSHADERID getId();
 	bool loadFromHLSL(const char *name, const char *code);
-	bool loadFromHLSL(const char *name);
+	bool loadFromStream(KInputStream &input, const char *name);
 	virtual void release() override;
 
 private:
@@ -270,7 +270,7 @@ public:
 	virtual ~KFontRes();
 	virtual void release() override;
 	bool loadFromFont(KFont &font);
-	bool loadFromFileName(const char *filename, int ttc_index=0);
+	bool loadFromStream(KInputStream &input, int ttc_index=0);
 	bool loadFromSystemFontDirectory(const char *filename, int ttc_index=0);
 private:
 	KFont mFont;
@@ -421,7 +421,7 @@ public:
 
 	/// HLSL で定義されたシェーダーを追加する
 	virtual KSHADERID addShaderFromHLSL(const KPath &name, const char *code) = 0;
-	virtual KSHADERID addShaderFromHLSL(const char *filename) = 0;
+	virtual KSHADERID addShaderFromStream(KInputStream &input, const char *filename) = 0;
 
 	/// GLSL で定義されたシェーダーを追加する
 	virtual KSHADERID addShaderFromGLSL(const KPath &name, const char *vs_code, const char *fs_code) = 0;
