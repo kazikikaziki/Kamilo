@@ -121,7 +121,7 @@ public:
 		KPathUtils::K_PathPushLast(realname, sizeof(realname), dir_.c_str());
 		KPathUtils::K_PathPushLast(realname, sizeof(realname), name);
 
-		// KReader を取得
+		// KInputStream を取得
 		KInputStream file = KInputStream::fromFileName(realname);
 		if (file.isOpen()) {
 			K__DebugPrint("%s: %s ==> OK", __FUNCTION__, realname);
