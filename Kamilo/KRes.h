@@ -13,6 +13,7 @@ namespace Kamilo {
 class KEngine;
 class KFont;
 class KNode;
+class KStorage;
 
 class KResource: public virtual KRef {
 public:
@@ -594,10 +595,10 @@ public:
 	/// paths: ファイル名とフォルダ名の情報
 	/// cellsize: ブロック化サイズ。キャッシュファイルを保存する時に使う。
 	/// flags: キャッシュ生成用のフラグ。キャッシュファイルを保存する時に使う。
-	static bool loadSpriteList(KSpriteList *sprites, const char *imageListName);
+	static bool loadSpriteList(KStorage &storage, KSpriteList *sprites, const char *imageListName);
 
 	static void makeSpritelistFromPack(const KImgPackR &pack, const KImage &pack_image, const KPath &tex_name, KSpriteList *sprites);
-	static KImgPackR loadPackR_fromCache(const char *imageListName, KImage *image);
+	static KImgPackR loadPackR_fromCache(KStorage &storage, const char *imageListName, KImage *image);
 };
 
 
@@ -753,7 +754,7 @@ public:
 
 class KXresLoader: public virtual KRef {
 public:
-	static KXresLoader * create(CXresLoaderCallback *cb);
+	static KXresLoader * create(KStorage &storage, CXresLoaderCallback *cb);
 	virtual void loadFromFile(const char *xml_name, bool should_exists) = 0;
 	virtual void loadFromText(const char *raw_text, const char *xml_name) = 0;
 };

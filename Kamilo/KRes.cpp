@@ -2574,16 +2574,10 @@ public:
 	}
 	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
-		std::string bin = KStorage::getGlobal().loadBinary(filename, should_exists);
-		if (!bin.empty()) {
-			KFont font = KFont::createFromMemory(bin.data(), bin.size());
-			if (font.isOpen()) {
-				if (addFont(alias, font)) {
-					if (out_font) {
-						*out_font = font;
-					}
-					return true;
-				}
+		KInputStream input = KInputStream::fromFileName(filename);
+		if (input.isOpen()) {
+			if (addFontFromStream(alias, input, filename, ttc_index, out_font)) {
+				return true;
 			}
 		}
 		if (should_exists) {
@@ -3398,7 +3392,7 @@ void KGameImagePack::makeSpritelistFromPack(const KImgPackR &pack, const KImage 
 }
 
 // imageListName には元データのファイル名を指定する。例えば "player/player.edg" など
-KImgPackR KGameImagePack::loadPackR_fromCache(const char *imageListName, KImage *result_image) {
+KImgPackR KGameImagePack::loadPackR_fromCache(KStorage &storage, const char *imageListName, KImage *result_image) {
 	if (result_image == nullptr) {
 		return KImgPackR();
 	}
@@ -3409,8 +3403,8 @@ KImgPackR KGameImagePack::loadPackR_fromCache(const char *imageListName, KImage 
 	KPath metaName = KPath(imageListName).joinString(".meta");
 	KPath pngName = KPath(imageListName).joinString(".png");
 
-	std::string metaData = KStorage::getGlobal().loadBinary(metaName.u8(), false);
-	std::string pngData = KStorage::getGlobal().loadBinary(pngName.u8(), false);
+	std::string metaData = storage.loadBinary(metaName.u8(), false);
+	std::string pngData = storage.loadBinary(pngName.u8(), false);
 
 	if (metaData.size() == 0) {
 		KLog::printError("Failed to read KImgPackR meta-data: %s", metaName.u8()); 
@@ -3432,9 +3426,9 @@ KImgPackR KGameImagePack::loadPackR_fromCache(const char *imageListName, KImage 
 	}
 	return packR;
 }
-bool KGameImagePack::loadSpriteList(KSpriteList *sprites, const char *imageListName) {
+bool KGameImagePack::loadSpriteList(KStorage &storage, KSpriteList *sprites, const char *imageListName) {
 	KImage tex_image;
-	KImgPackR packR = loadPackR_fromCache(imageListName, &tex_image);
+	KImgPackR packR = loadPackR_fromCache(storage, imageListName, &tex_image);
 	if (packR.empty()) {
 		KLog::printError("Failed to load packR: %s", imageListName);
 		return false;
@@ -4109,15 +4103,17 @@ struct CONTENTS {
 
 // <Texture>
 class CXresTexture {
-	CXresLoaderCallback *mCallback;
+	CXresLoaderCallback *m_Callback;
+	KStorage m_Storage;
 public:
 	CXresTexture() {
-		mCallback = nullptr;
+		m_Callback = nullptr;
 	}
-	void setup(CXresLoaderCallback *cb) {
+	void setup(KStorage &storage, CXresLoaderCallback *cb) {
 		K__ASSERT_RETURN(KBank::getTextureBank()); 
-		K__ASSERT_RETURN(KBank::getSpriteBank()); 
-		mCallback = cb;
+		K__ASSERT_RETURN(KBank::getSpriteBank());
+		m_Storage = storage;
+		m_Callback = cb;
 	}
 
 	// <Texture> ノードを処理する
@@ -4134,7 +4130,7 @@ public:
 	}
 
 private:
-	bool load_TextureNodeEx(KXmlElement *xTex, const char *xml_name, CONTENTS *contents) const {
+	bool load_TextureNodeEx(KXmlElement *xTex, const char *xml_name, CONTENTS *contents) {
 		if (!xTex->hasTag("Texture")) {
 			return false; // <Texture> ではない
 		}
@@ -4259,10 +4255,10 @@ private:
 		return true;
 	}
 
-	bool getTextureImage(KImage &result_image, const char *image_name, const char *filter) const {
+	bool getTextureImage(KImage &result_image, const char *image_name, const char *filter) {
 		// 画像をロード
 		if (!KStringUtils::isEmpty(image_name)) {
-			std::string bin = KStorage::getGlobal().loadBinary(image_name, true);
+			std::string bin = m_Storage.loadBinary(image_name, true);
 			if (bin.empty()) {
 				KLog::printError("Failed to read binary: %s", image_name);
 				return false;
@@ -4275,8 +4271,8 @@ private:
 		}
 
 		// フィルタを適用
-		if (filter && mCallback) {
-			if (!mCallback->onImageFilter(filter, result_image)) {
+		if (filter && m_Callback) {
+			if (!m_Callback->onImageFilter(filter, result_image)) {
 				KLog::printError("Unknown image filter: %s", filter);
 			}
 		}
@@ -4472,10 +4468,12 @@ public:
 
 // <EdgeSprites>
 class CXresEdgeSprite {
+	KStorage m_Storage;
 public:
 	CXresEdgeSprite() {
 	}
-	void setup() {
+	void setup(KStorage &storage) {
+		m_Storage = storage;
 		K__ASSERT_RETURN(KBank::getTextureBank()); 
 		K__ASSERT_RETURN(KBank::getSpriteBank()); 
 	}
@@ -4522,7 +4520,7 @@ public:
 		// sprites には .edg ファイル内のページとレイヤーのうち、無視属性でないすべての絵がはいる。
 		// 無視属性かどうかの判定は KGameEdgeBuilder::isIgnorablePage 等を参照すること
 		KSpriteList sprites;
-		if (!KGameImagePack::loadSpriteList(&sprites, edge_name.u8())) {
+		if (!KGameImagePack::loadSpriteList(m_Storage, &sprites, edge_name.u8())) {
 			KLog::printError(u8"E_FILELOADER_EDGESPRITENODE: <EdgeSprites> で指定されたファイル '%s' からはスプライトを生成できませんでした: %s(%d)",
 				edge_name.u8(), xml_name, xEdgeSprites->getLineNumber()
 			);
@@ -4591,12 +4589,14 @@ public:
 
 
 class CXresEdgeAnimation {
+	KStorage m_Storage;
 public:
 	CXresEdgeAnimation() {
 	}
-	void setup() {
-		K__ASSERT_RETURN(KBank::getSpriteBank()); 
-		K__ASSERT_RETURN(KBank::getAnimationBank()); 
+	void setup(KStorage &storage) {
+		K__ASSERT_RETURN(KBank::getSpriteBank());
+		K__ASSERT_RETURN(KBank::getAnimationBank());
+		m_Storage = storage;
 	}
 	// <EdgeAnimation> ノードを処理する
 	bool load_EdgeAnimationNode(KXmlElement *xEdgeAnimation, const char *xml_name, KClipRes **out_clip) {
@@ -4639,7 +4639,7 @@ public:
 		// 無視ページやレイヤを削除した状態で取得するため、
 		// KEdgeDocument::loadFromFile ではなく KGameEdgeBuilder を使う
 		KEdgeDocument edge;
-		KInputStream edgefile = KStorage::getGlobal().getInputStream(edge_name.u8());
+		KInputStream edgefile = m_Storage.getInputStream(edge_name.u8());
 		if (!edgefile.isOpen()) {
 			KLog::printError(
 				u8"E_FILELOADER_EDGEANINODE: "
@@ -4771,7 +4771,7 @@ public:
 				// ページ内のすべてのレイヤを重ねたものを１枚のスプライトとして扱う
 				if (externEdgeName && externEdgeName[0] && externEdgePage >= 0) {
 					KPath tmp_edge_name = KGamePath::evalPath(KPath(externEdgeName), xml_name, ".edg"); // リソース内の絶対パスに直す
-					KInputStream tmp_file = KStorage::getGlobal().getInputStream(tmp_edge_name.u8());
+					KInputStream tmp_file = m_Storage.getInputStream(tmp_edge_name.u8());
 					if (!tmp_file.isOpen()) {
 						KLog::printError(
 							u8"E_FILELOADER_EDGEANINODE: "
@@ -4958,11 +4958,13 @@ bool K_makeClip(KClipRes **out_clip, KInputStream &edge_file, const KPath &edge_
 
 
 class CXresShader {
+	KStorage m_Storage;
 public:
 	CXresShader() {
 	}
-	void setup() {
+	void setup(KStorage &storage) {
 		K__ASSERT_RETURN(KBank::getShaderBank());
+		m_Storage = storage;
 	}
 	// <Shader> ノードを処理する
 	bool load_ShaderNode(KXmlElement *xShader, const char *xml_name) {
@@ -5003,7 +5005,7 @@ public:
 	bool loadShader(const char *name, const char *xml_name) {
 		// ファイル内容をロード
 		// UTF8で保存されているという前提で、バイナリ無変換で文字列化する
-		std::string hlsl_u8 = KStorage::getGlobal().loadBinary(name);
+		std::string hlsl_u8 = m_Storage.loadBinary(name);
 		KSHADERID sid = KBank::getShaderBank()->addShaderFromHLSL(name, hlsl_u8.c_str());
 		if (sid) {
 			KBank::getShaderBank()->setTag(sid, xml_name); // 作成元の .xres ファイル名タグを追加
@@ -5021,26 +5023,28 @@ class CXresLoaderImpl: public KXresLoader {
 	CXresEdgeAnimation mXresEdgeAnimation;
 	CXresShader mXresShader;
 	CXresLoaderCallback *mCB;
+	KStorage m_Storage;
 public:
 	CXresLoaderImpl() {
 	}
-	void setup(CXresLoaderCallback *cb) {
-		mXresTexture.setup(cb);
+	void setup(KStorage &storage, CXresLoaderCallback *cb) {
+		m_Storage = storage;
+		mXresTexture.setup(storage, cb);
 		mXresClip.setup();
-		mXresEdgeSprite.setup();
-		mXresEdgeAnimation.setup();
-		mXresShader.setup();
+		mXresEdgeSprite.setup(storage);
+		mXresEdgeAnimation.setup(storage);
+		mXresShader.setup(storage);
 		mCB = cb;
 	}
 	virtual void loadFromFile(const char *xml_name, bool should_exists) override {
 		// ファイルの有無を調べる
-		if (!KStorage::getGlobal().contains(xml_name)) {
+		if (!m_Storage.contains(xml_name)) {
 			if (should_exists) {
 				KLog::printError(u8"E_XRES_FILE_NOT_FOUND: %s", xml_name);
 			}
 			return;
 		}
-		std::string raw_text = KStorage::getGlobal().loadBinary(xml_name, should_exists);
+		std::string raw_text = m_Storage.loadBinary(xml_name, should_exists);
 		loadFromText(raw_text.c_str(), xml_name);
 	}
 	virtual void loadFromText(const char *raw_text, const char *xml_name) override {
@@ -5104,9 +5108,9 @@ public:
 	}
 };
 
-KXresLoader * KXresLoader::create(CXresLoaderCallback *cb) {
+KXresLoader * KXresLoader::create(KStorage &storage, CXresLoaderCallback *cb) {
 	CXresLoaderImpl *impl = new CXresLoaderImpl();
-	impl->setup(cb);
+	impl->setup(storage, cb);
 	return impl;
 }
 
