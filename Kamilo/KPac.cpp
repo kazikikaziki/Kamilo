@@ -22,13 +22,12 @@ public:
 		return output_.isOpen();
 	}
 	virtual bool addEntryFromFileName(const KPath &entry_name, const KPath &filename) {
-		KReader *file = KReader::createFromFileName(filename.u8());
-		if (file == nullptr) {
+		KInputStream file = KInputStream::fromFileName(filename.u8());
+		if (!file.isOpen()) {
 			K__Error(u8"E_PAC_WRITE: ファイル '%s' をロードできないため pac ファイルに追加しませんでした", filename.u8());
 			return false;
 		}
-		std::string bin = file->read_bin();
-		file->drop();
+		std::string bin = file.readBin();
 		return addEntryFromMemory(entry_name, bin.data(), bin.size());
 	}
 	bool addEntryFromMemory(const KPath &entry_name, const void *data, size_t size) {

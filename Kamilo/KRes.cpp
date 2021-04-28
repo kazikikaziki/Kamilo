@@ -884,13 +884,12 @@ bool KShaderRes::loadFromHLSL(const char *name, const char *code) {
 }
 bool KShaderRes::loadFromHLSL(const char *name) {
 	bool result = false;
-	KReader *r = KStorage::createReader(name);
-	if (r) {
-		std::string code = r->read_bin();
+	KInputStream input = KStorage::getInputStream(name);
+	if (input.isOpen()) {
+		std::string code = input.readBin();
 		if (loadFromHLSL(name, code.c_str())) {
 			result = true;
 		}
-		r->drop();
 	}
 	return result;
 }
@@ -2216,11 +2215,10 @@ public:
 	}
 	virtual KSHADERID addShaderFromHLSL(const char *filename) override {
 		KSHADERID sh = nullptr;
-		KReader *r = KStorage::createReader(filename);
-		if (r) {
-			std::string code = r->read_bin();
+		KInputStream input = KStorage::getInputStream(filename);
+		if (input.isOpen()) {
+			std::string code = input.readBin();
 			sh = addShaderFromHLSL(filename, code.c_str());
-			K_Drop(r);
 		}
 		return sh;
 	}
@@ -3785,7 +3783,6 @@ private:
 
 
 
-#if EXPORT_CONTENTS_DEBUG_DATA
 class CAutoFile {
 public:
 	FILE *fp_;
@@ -3807,7 +3804,6 @@ public:
 	}
 };
 static CAutoFile g_autolog("__contents.csv");
-#endif
 
 
 
@@ -3938,8 +3934,7 @@ private:
 				KPath nameInBank = KPath(bankDir).join(name);
 				K_FileCopy(nameInData.u8(), nameInBank.u8(), true);
 #endif
-#if EXPORT_CONTENTS_DEBUG_DATA
-				if (1) {
+				if (EXPORT_CONTENTS_DEBUG_DATA) {
 					KEdgeDocument doc;
 					if (doc.loadFromFileName(nameInData.u8())) {
 						for (int p=0; p<doc.getPageCount(); p++) {
@@ -3953,7 +3948,6 @@ private:
 						}
 					}
 				}
-#endif
 				KLog::printInfo("Import: %s", name);
 				return true;
 			} else {
@@ -3964,21 +3958,20 @@ private:
 			KPath nameInData = KPath(dataDir).join(name);
 			KPath nameInBank = KPath(bankDir).join(name);
 			if (K_FileCopy(nameInData.u8(), nameInBank.u8(), true)) {
-#if EXPORT_CONTENTS_DEBUG_DATA
-				if (KPath(name).hasExtension(".png")) {
-					KPath path = KPath(dataDir).join(name);
-					KReader *r = KReader::createFromFileName(path.u8());
-					if (r) {
-						uint8_t buf[32];
-						r->read(buf, sizeof(buf));
-						int w = 0, h = 0;
-						KCorePng::readsize(buf, sizeof(buf), &w, &h);
-						std::string s = KStringUtils::K_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "png", 0, 0, w, h, w * h * 4);
-						g_autolog.write(s.c_str());
-						r->drop();
+				if (EXPORT_CONTENTS_DEBUG_DATA) {
+					if (KPath(name).hasExtension(".png")) {
+						KPath path = KPath(dataDir).join(name);
+						KInputStream r = KInputStream::fromFileName(path.u8());
+						if (r.isOpen()) {
+							uint8_t buf[32];
+							r.read(buf, sizeof(buf));
+							int w = 0, h = 0;
+							KCorePng::readsize(buf, sizeof(buf), &w, &h);
+							std::string s = KStringUtils::K_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "png", 0, 0, w, h, w * h * 4);
+							g_autolog.write(s.c_str());
+						}
 					}
 				}
-#endif
 				KLog::printInfo("Import: %s", name);
 				return true;
 			} else {
