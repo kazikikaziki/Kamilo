@@ -124,7 +124,7 @@ public:
 		// KInputStream を取得
 		KInputStream file = KInputStream::fromFileName(realname);
 		if (file.isOpen()) {
-			K__DebugPrint("%s: %s ==> OK", __FUNCTION__, realname);
+			K__OutputDebugString( __FUNCTION__, ": ", realname, " ==> OK");
 			return file;
 		}
 		return KInputStream();
