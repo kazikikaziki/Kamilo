@@ -19,9 +19,9 @@ namespace Kamilo {
 
 
 #pragma region KXmlElement
-static bool _LoadTinyXml(const char *xlmtext_u8, const char *debug_name, tinyxml2::XMLDocument *tinyxml2_doc, std::string *errmsg) {
-	if (KStringUtils::isEmpty(xlmtext_u8)) {
-		*errmsg = KStringUtils::K_sprintf(u8"E_XML: Xml document has no text: %s", debug_name);
+static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug_name, tinyxml2::XMLDocument *tinyxml2_doc, std::string *errmsg) {
+	if (xlmtext_u8.empty()) {
+		*errmsg = KStringUtils::K_sprintf(u8"E_XML: Xml document has no text: %s", debug_name.c_str());
 		return false;
 	}
 
@@ -33,7 +33,7 @@ static bool _LoadTinyXml(const char *xlmtext_u8, const char *debug_name, tinyxml
 	// For example, Japanese systems traditionally use SHIFT-JIS encoding.
 	// Text encoded as SHIFT-JIS can not be read by TinyXML. 
 	// A good text editor can import SHIFT-JIS and then save as UTF-8.
-	tinyxml2::XMLError xerr = tinyxml2_doc->Parse(K__SkipUtf8Bom(xlmtext_u8));
+	tinyxml2::XMLError xerr = tinyxml2_doc->Parse(K__SkipUtf8Bom(xlmtext_u8.c_str()));
 	if (xerr == tinyxml2::XML_SUCCESS) {
 		*errmsg = "";
 		return true;
@@ -274,31 +274,31 @@ public:
 	}
 };
 
-KXmlElement * KXmlElement::create(const char *tag) {
+KXmlElement * KXmlElement::create(const std::string &tag) {
 	CXNode *xnode = new CXNode();
-	xnode->setTag(tag ? tag : "");
+	xnode->setTag(tag.c_str());
 	return xnode;
 }
-KXmlElement * KXmlElement::createFromFileName(const char *filename) {
+KXmlElement * KXmlElement::createFromFileName(const std::string &filename) {
 	KXmlElement *elm = nullptr;
 	KInputStream input = KInputStream::fromFileName(filename);
 	elm = createFromStream(input, filename);
 	return elm;
 }
-KXmlElement * KXmlElement::createFromStream(KInputStream &input, const char *filename) {
+KXmlElement * KXmlElement::createFromStream(KInputStream &input, const std::string &filename) {
 	if (!input.isOpen()) {
-		K__Error("file is nullptr: %s", filename);
+		K__Error("file is nullptr: %s", filename.c_str());
 		return nullptr;
 	}
 	std::string bin = input.readBin();
 	if (bin.empty()) {
-		K__Error("file is empty: %s", filename);
+		K__Error("file is empty: %s", filename.c_str());
 		return nullptr;
 	}
 	return createFromString(bin.data(), filename);
 }
 
-KXmlElement * KXmlElement::createFromString(const char *xmlTextU8, const char *filename) {
+KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const std::string &filename) {
 	tinyxml2::XMLDocument tiDoc;
 	std::string tiErrMsg;
 	if (_LoadTinyXml(xmlTextU8, filename, &tiDoc, &tiErrMsg)) {

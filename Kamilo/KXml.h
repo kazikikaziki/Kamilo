@@ -12,7 +12,7 @@ namespace Kamilo {
 /// @see K_createXmlElementFromFileName
 class KXmlElement: public virtual KRef {
 public:
-	static KXmlElement * create(const char *tag=nullptr);
+	static KXmlElement * create(const std::string &tag="");
 
 	/// XMLテキストからXMLエレメントツリーを構築し、そのルートエレメントを返す。
 	/// 例えば "<node1><aaa/></node1><node2><bbb/></node2>" をパースしたとき、
@@ -20,10 +20,10 @@ public:
 	/// ※ドキュメントに対応する
 	/// KXmlElement はすべてを XMLエレメントとして扱うため、<?xml ?> などのドキュメント宣言は解析せずアクセスもできない
 	/// ドキュメント宣言が必要な場合は別の方法で自力で取得する必要がある
-	static KXmlElement * createFromString(const char *xml_u8, const char *filename);
+	static KXmlElement * createFromString(const std::string &xml_u8, const std::string &filename);
 
-	static KXmlElement * createFromStream(KInputStream &input, const char *filename);
-	static KXmlElement * createFromFileName(const char *filename);
+	static KXmlElement * createFromStream(KInputStream &input, const std::string &filename);
+	static KXmlElement * createFromFileName(const std::string &filename);
 
 public:
 	virtual const char *getTag() const = 0;

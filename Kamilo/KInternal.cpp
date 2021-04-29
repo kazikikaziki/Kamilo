@@ -309,21 +309,18 @@ std::string K__sprintf_std(const char *fmt, ...) {
 	va_end(args);
 	return result;
 }
-
-std::string K__PathJoin(const char *p1, const char *p2) {
-	std::string s1 = p1;
-	std::string s2 = p2;
+std::string K__PathJoin(const std::string &s1, const std::string &s2) {
 	if (s1.empty()) return s2;
 	if (s2.empty()) return s1;
 	return s1 + "/" + s2;
 }
-std::string K__PathRenameExtension(const char *path, const char *ext) {
-	char t[300] = {0};
-	strcpy(t, path);
-	char *s = strrchr(t, '.');
-	if (s) *s = '\0';
-	strcat(s, ext);
-	return t;
+std::string K__PathRenameExtension(const std::string &path, const std::string &ext) {
+	size_t pos = path.rfind('.');
+	if (pos != std::string::npos) {
+		return path.substr(0, pos) + ext;
+	} else {
+		return path + ext;
+	}
 }
 int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path) {
 	K__Assert(path1);

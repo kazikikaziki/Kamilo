@@ -1797,22 +1797,24 @@ public:
 			}
 		}
 		if (row1 == 0) {
-			KPath cell = KExcelFile::encodeCellName(col0, row0);
 			KLog::printError(u8"E_EXCEL_MISSING_TABLE_END: シート '%s' のセル '%s' に対応する終端セル '%s' が見つかりません",
 				sheet_name, top_cell_text, bottom_cell_text);
 			return false;
 		}
-		KLog::printVerbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text, KExcelFile::encodeCellName(col0, row0).u8());
-
+		{
+			std::string s = KExcelFile::encodeCellName(col0, row0);
+			KLog::printVerbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text, s.c_str());
+		}
 		// 開始セルの右隣からは、カラム名の定義が続く
 		KPathList cols;
 		{
 			int c = col0 + 1;
 			while (1) {
-				KPath cellstr = m_excel.getDataString(sheet, c, row0);
+				std::string cellstr = m_excel.getDataString(sheet, c, row0);
 				if (cellstr.empty()) break;
 				cols.push_back(cellstr);
-				KLog::printVerbose("ID CELL '%s' FOUND AT %s", cellstr.u8(), KExcelFile::encodeCellName(col0, row0).u8());
+				std::string s = KExcelFile::encodeCellName(col0, row0);
+				KLog::printVerbose("ID CELL '%s' FOUND AT %s", cellstr.c_str(), s.c_str());
 				c++;
 			}
 			if (cols.empty()) {

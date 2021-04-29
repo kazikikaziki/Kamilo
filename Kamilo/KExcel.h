@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "KString.h"
+#include <string>
 #include <memory>
 
 namespace Kamilo {
@@ -22,11 +22,10 @@ class CCoreExcelReader; // internal class
 class KExcelFile {
 public:
 	///行列インデックス（0起算）から "A1" や "AB12" などのセル名を得る
-	static bool encodeCellName(int col, int row, KPath *name);
-	static KPath encodeCellName(int col, int row);
+	static std::string encodeCellName(int col, int row);
 
 	/// "A1" や "AB12" などのセル名から、行列インデックス（0起算）を取得する
-	static bool decodeCellName(const char *s, int *col, int *row);
+	static bool decodeCellName(const std::string &s, int *col, int *row);
 
 public:
 	KExcelFile();
@@ -34,12 +33,12 @@ public:
 	bool empty() const;
 
 	/// 元のファイル名を返す
-	const KPath & getFileName() const;
+	std::string getFileName() const;
 
 	/// .XLSX ファイルをロードする
 	bool loadFromFile(KInputStream &file, const char *xlsx_name);
-	bool loadFromFileName(const char *name);
-	bool loadFromMemory(const void *bin, size_t size, const char *name);
+	bool loadFromFileName(const std::string &name);
+	bool loadFromMemory(const void *bin, size_t size, const std::string &name);
 
 	/// シート数を返す
 	int getSheetCount() const;
@@ -49,7 +48,7 @@ public:
 	int getSheetByName(const char *name) const;
 
 	/// シート名を得る
-	KPath getSheetName(int sheet) const;
+	std::string getSheetName(int sheet) const;
 
 	/// シート内で有効なセルの存在する範囲を得る。みつかれば true を返す
 	/// sheet   : シート番号（ゼロ起算）
@@ -82,7 +81,7 @@ public:
 
 private:
 	std::shared_ptr<CCoreExcelReader> m_impl;
-	mutable KPath m_name;
+	mutable std::string m_name;
 };
 
 

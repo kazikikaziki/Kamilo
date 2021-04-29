@@ -36,7 +36,7 @@ static bool _ShouldEscapeString(const char *s) {
 }
 
 // ZIP 内のファイルを探してインデックスを返す
-static int _FindZipEntry(KUnzipper &zr, const char *name) {
+static int _FindZipEntry(KUnzipper &zr, const std::string &name) {
 	int num = zr.getEntryCount();
 	for (int i=0; i<num; i++) {
 		std::string s;
@@ -47,7 +47,7 @@ static int _FindZipEntry(KUnzipper &zr, const char *name) {
 	}
 	return -1;
 }
-static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const char *zipname, const char *entry_name) {
+static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const std::string &zip_name, const std::string &entry_name) {
 	if (!zr.isOpen()) {
 		KLog::printError("E_INVALID_ARGUMENT");
 		return nullptr;
@@ -56,20 +56,20 @@ static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const char *zipname, const c
 	// XLSX の XML は常に UTF-8 で書いてある。それを信用する
 	int fileid = _FindZipEntry(zr, entry_name);
 	if (fileid < 0) {
-		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name, zipname);
+		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 		return nullptr;
 	}
 
 	std::string xml_u8;
 	if (!zr.getEntryData(fileid, "", &xml_u8)) {
-		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name, zipname);
+		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 		return nullptr;
 	}
 
-	KPath doc_name = KPath(zipname).join(entry_name);
-	KXmlElement *xdoc = KXmlElement::createFromString(xml_u8.c_str(), doc_name.u8());
+	std::string doc_name = K__PathJoin(zip_name, entry_name);
+	KXmlElement *xdoc = KXmlElement::createFromString(xml_u8, doc_name);
 	if (xdoc == nullptr) {
-		KLog::printError("E_XML: Failed to read xml document: '%s' from archive '%s'", entry_name, zipname);
+		KLog::printError("E_XML: Failed to read xml document: '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 	}
 	return xdoc;
 }
@@ -112,13 +112,13 @@ public:
 	bool empty() const {
 		return m_worksheets.empty();
 	}
-	const char * getFileName() const {
-		return m_filename.c_str();
+	std::string getFileName() const {
+		return m_filename;
 	}
 	int getSheetCount() const {
 		return (int)m_worksheets.size();
 	}
-	const char * getSheetName(int sheetId) const {
+	std::string getSheetName(int sheetId) const {
 		const KXmlElement *root_elm = m_workbook_doc->getNode(0);
 		K__Assert(root_elm);
 
@@ -143,7 +143,7 @@ public:
 			}
 			idx++;
 		}
-		return nullptr;
+		return "";
 	}
 	int getSheetByName(const char *name) const {
 		const KXmlElement *root_elm = m_workbook_doc->getNode(0);
@@ -283,7 +283,7 @@ public:
 			scan_cells(sheet_xml, cb);
 		}
 	}
-	bool loadFromFile(KInputStream &file, const char *xlsx_name) {
+	bool loadFromFile(KInputStream &file, const std::string &xlsx_name) {
 		m_row_elements.clear();
 
 		if (!file.isOpen()) {
@@ -300,7 +300,7 @@ public:
 		return ok;
 	}
 
-	bool loadFromZipAsXlsx(KUnzipper &zr, const char *xlsx_name) {
+	bool loadFromZipAsXlsx(KUnzipper &zr, const std::string &xlsx_name) {
 		// 文字列テーブルを取得
 		const KXmlElement *strings_doc = _LoadXmlFromZip(zr, xlsx_name, "xl/sharedStrings.xml");
 		if (strings_doc) {
@@ -574,20 +574,14 @@ private:
 
 
 #pragma region KExcelFile
-KPath KExcelFile::encodeCellName(int col, int row) {
-	KPath s;
-	encodeCellName(col, row, &s);
-	return s;
-}
-bool KExcelFile::encodeCellName(int col, int row, KPath *name) {
-	if (col < 0) return false;
-	if (row < 0) return false;
+std::string KExcelFile::encodeCellName(int col, int row) {
+	if (col < 0) return "";
+	if (row < 0) return "";
 	if (col < EXCEL_ALPHABET_NUM) {
 		char c = (char)('A' + col);
 		char s[256];
 		sprintf_s(s, sizeof(s), "%c%d", c, 1+row);
-		if (name) *name = KPath(s);
-		return true;
+		return s;
 	}
 	if (col < EXCEL_ALPHABET_NUM*EXCEL_ALPHABET_NUM) {
 		char c1 = (char)('A' + (col / EXCEL_ALPHABET_NUM));
@@ -596,14 +590,13 @@ bool KExcelFile::encodeCellName(int col, int row, KPath *name) {
 		K__Assert(isalpha(c1));
 		K__Assert(isalpha(c2));
 		sprintf_s(s, sizeof(s), "%c%c%d", c1, c2, 1+row);
-		if (name) *name = KPath(s);
-		return true;
+		return s;
 	}
-	return false;
+	return "";
 }
 /// "A2" や "AM244" などのセル番号を int の組にデコードする
-bool KExcelFile::decodeCellName(const char *s, int *col, int *row) {
-	if (s==nullptr || s[0]=='\0') return false;
+bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
+	if (s.empty()) return false;
 	int c = -1;
 	int r = -1;
 
@@ -612,7 +605,7 @@ bool KExcelFile::decodeCellName(const char *s, int *col, int *row) {
 		// 例えば "A1" や "Z42" など。
 		c = toupper(s[0]) - 'A';
 		K__Assert(0 <= c && c < EXCEL_ALPHABET_NUM);
-		r = strtol(s + 1, nullptr, 0);
+		r = strtol(s.c_str() + 1, nullptr, 0);
 		r--; // １起算 --> 0起算
 
 	} else if (isalpha(s[0]) && isalpha(s[1]) && isdigit(s[2])) {
@@ -623,7 +616,7 @@ bool KExcelFile::decodeCellName(const char *s, int *col, int *row) {
 		K__Assert(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
 		K__Assert(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
 		c = idx1 * EXCEL_ALPHABET_NUM + idx2;
-		r = strtol(s + 2, nullptr, 0);
+		r = strtol(s.c_str() + 2, nullptr, 0);
 		r--; // １起算 --> 0起算
 	}
 	if (c >= 0 && r >= 0) {
@@ -649,14 +642,14 @@ KExcelFile::KExcelFile() {
 bool KExcelFile::empty() const {
 	return m_impl->empty();
 }
-const KPath & KExcelFile::getFileName() const {
+std::string KExcelFile::getFileName() const {
 	m_name = m_impl->getFileName();
 	return m_name;
 }
 bool KExcelFile::loadFromFile(KInputStream &file, const char *xlsx_name) {
 	return m_impl->loadFromFile(file, xlsx_name);
 }
-bool KExcelFile::loadFromFileName(const char *name) {
+bool KExcelFile::loadFromFileName(const std::string &name) {
 	bool ok = false;
 	KInputStream file = KInputStream::fromFileName(name);
 	if (file.isOpen()) {
@@ -667,7 +660,7 @@ bool KExcelFile::loadFromFileName(const char *name) {
 	}
 	return ok;
 }
-bool KExcelFile::loadFromMemory(const void *bin, size_t size, const char *name) {
+bool KExcelFile::loadFromMemory(const void *bin, size_t size, const std::string &name) {
 	bool ok = false;
 	KInputStream file = KInputStream::fromMemory(bin, size);
 	if (file.isOpen()) {
@@ -684,7 +677,7 @@ int KExcelFile::getSheetCount() const {
 int KExcelFile::getSheetByName(const char *name) const {
 	return m_impl->getSheetByName(name);
 }
-KPath KExcelFile::getSheetName(int sheet) const {
+std::string KExcelFile::getSheetName(int sheet) const {
 	return m_impl->getSheetName(sheet);
 }
 bool KExcelFile::getSheetDimension(int sheet, int *col, int *row, int *colcount, int *rowcount) const {
@@ -757,9 +750,9 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 	s += K__sprintf_std("<excel numsheets='%d'>\n", getSheetCount());
 	for (int iSheet=0; iSheet<getSheetCount(); iSheet++) {
 		int col=0, row=0, nCol=0, nRow=0;
-		KPath sheet_name = getSheetName(iSheet);
+		std::string sheet_name = getSheetName(iSheet);
 		getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
-		s += K__sprintf_std("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.u8(), col, row, nCol, nRow);
+		s += K__sprintf_std("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.c_str(), col, row, nCol, nRow);
 		{
 			CB cb(s);
 			scanCells(iSheet, &cb);
@@ -771,7 +764,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		}
 		s += "</sheet>";
 		if (with_comment) {
-			s += K__sprintf_std("<!-- %s -->", sheet_name.u8());
+			s += K__sprintf_std("<!-- %s -->", sheet_name.c_str());
 		}
 		s += "\n\n";
 	}

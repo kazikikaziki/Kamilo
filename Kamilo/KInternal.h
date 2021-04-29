@@ -89,11 +89,11 @@ std::string K__GetCurrentDirU8();
 void K__SetCurrentDirU8(const std::string &dir);
 bool K__ShellOpenU8(const char *path_u8); ///< 指定されたファイルまたはフォルダをシステム標準の方法で開く
 char * K__strptime_l(const char *str, const char *fmt, struct tm *out_tm, const char *_locale);
+
 std::string K__vsprintf_std(const char *fmt, va_list args);
 std::string K__sprintf_std(const char *fmt, ...);
-
-std::string K__PathJoin(const char *p1, const char *p2);
-std::string K__PathRenameExtension(const char *path, const char *ext);
+std::string K__PathJoin(const std::string &s1, const std::string &s2);
+std::string K__PathRenameExtension(const std::string &path, const std::string &ext);
 int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path);
 
 bool K__iswprint(wchar_t wc); // 印字文字（空白を含む）
