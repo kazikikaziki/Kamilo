@@ -38,6 +38,8 @@ bool K__IsDebuggerPresent();
 void K__Dialog(const char *u8);
 void K__Notify(const char *u8);
 
+
+
 void K__RawPrintf(const char *fmt_u8, ...);
 void K__DebugPrint(const char *fmt_u8, ...);
 void K__Print(const char *fmt_u8, ...);
@@ -137,5 +139,42 @@ float K__Max(float a, float b);
 float K__Lerp(float a, float b, float t);
 int K__Min(int a, int b);
 int K__Max(int a, int b);
+
+
+
+
+struct _StrW {
+	_StrW() {
+	}
+	_StrW(int x) {
+		ws = std::to_wstring(x);
+	}
+	_StrW(float x) {
+		ws = std::to_wstring(x);
+	}
+	_StrW(const std::string &u8) {
+		ws = K__Utf8ToWideStd(u8);
+	}
+	_StrW(const std::wstring &x) {
+		ws = x;
+	}
+	std::wstring ws;
+};
+
+void _OutputW(const std::wstring &ws);
+
+// Win32 の OutputDebugString に可変引数を渡せるようにしたもの。
+// デバッガーの「出力ウィンドウ」に対してだけ文字列を出力する
+template <class... Args> void K__OutputDebugString(Args... args) {
+	_StrW arglist[] = {args...};
+	int numargs = sizeof...(args);
+	std::wstring ws;
+	for (int i=0; i<numargs; i++) {
+		ws += arglist[i].ws;
+	}
+	_OutputW(ws);
+	_OutputW(L"\n");
+}
+
 
 } // namespace

@@ -32,6 +32,11 @@ void K__SetWarningHook(void (*hook)(const char *u8)) {
 void K__SetErrorHook(void (*hook)(const char *u8)) {
 	g_ErrorHook = hook;
 }
+void _OutputW(const std::wstring &ws) {
+	OutputDebugStringW(ws.c_str());
+}
+
+
 void K__RawPrintf(const char *fmt_u8, ...) {
 	// 無限再帰防止のため、いかなるライブラリ関数も呼んではいけない (K_assert 含む)
 	char s[1024 * 4];
@@ -398,8 +403,21 @@ FILE * K__fopen_u8(const char *path_u8, const char *mode_u8) {
 	MultiByteToWideChar(CP_UTF8, 0, path_u8, -1, wpath, MAX_PATH);
 	MultiByteToWideChar(CP_UTF8, 0, mode_u8, -1, wmode, MAX_PATH);
 	FILE *file = nullptr;
-	_wfopen_s(&file, wpath, wmode);
-	return file;
+	errno_t err = _wfopen_s(&file, wpath, wmode);
+	// errno constants
+	// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
+	if (err == 0) {
+		return file;
+	}
+	if (err == ENOENT) {
+		// 指定された名前のファイルが存在しない
+		K__OutputDebugString("No file named \"", path_u8, "\"");
+	}
+	if (err == EACCES) {
+		// 指定されたモードでアクセスできない
+		K__OutputDebugString("Permission denied \"", path_u8, "\"");
+	}
+	return nullptr;
 }
 std::string K__GetExecDirU8() {
 	wchar_t wpath[MAX_PATH] = {0};
