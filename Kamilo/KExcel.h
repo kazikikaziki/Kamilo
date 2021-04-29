@@ -212,7 +212,9 @@ private:
 	std::shared_ptr<Impl> m_impl;
 };
 
-
+namespace Test {
+void Test_excel(const std::string &filename);
+}
 
 
 } // namespace

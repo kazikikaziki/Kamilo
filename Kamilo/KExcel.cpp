@@ -1182,4 +1182,34 @@ bool KTable::getDataSource(int col, int row, int *col_in_file, int *row_in_file)
 #pragma endregion // KTable
 
 
+namespace Test {
+
+void Test_excel(const std::string &filename) {
+	KExcelFile ef;
+	ef.loadFromFileName(filename.c_str());
+
+	int xoff, yoff, xcnt, ycnt;
+	if (ef.getSheetDimension(0, &xoff, &yoff, &xcnt, &ycnt)) {
+		std::string text;
+		for (int y=yoff; y<yoff+ycnt; y++) {
+			bool with_comma = false;
+			for (int x=xoff; x<xoff+xcnt; x++) {
+				std::string s = ef.getDataString(0, x, y);
+				if (with_comma) {
+					text += ", " + s;
+				} else {
+					text += s;
+					with_comma = true;
+				}
+			}
+			text += "\n";
+		}
+		KOutputStream os = KOutputStream::fromFileName(filename + ".txt");
+		os.writeString(text);
+	}
+}
+
+} // Test
+
+
 } // namespace
