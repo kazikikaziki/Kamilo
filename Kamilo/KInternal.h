@@ -135,5 +135,7 @@ float K__RadToDeg(float rad);
 float K__Min(float a, float b);
 float K__Max(float a, float b);
 float K__Lerp(float a, float b, float t);
+int K__Min(int a, int b);
+int K__Max(int a, int b);
 
 } // namespace

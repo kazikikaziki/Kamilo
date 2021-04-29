@@ -839,6 +839,12 @@ float K__Lerp(float a, float b, float t) {
 	t = (t < 0.0f) ? 0.0f : (t < 1.0f) ? t : 1.0f;
 	return a + (b - a) * t;
 }
+int K__Min(int a, int b) {
+	return a<b ? a : b;
+}
+int K__Max(int a, int b) {
+	return a>b ? a : b;
+}
 
 
 } // namespace

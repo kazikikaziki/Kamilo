@@ -26,6 +26,7 @@
 #include "KDrawable.h"
 #include "KEasing.h"
 #include "KEmbeddedFiles.h"
+#include "KExcel.h"
 #include "KFile.h"
 #include "KFont.h"
 #include "KHitbox.h"
