@@ -76,213 +76,6 @@ static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const char *zipname, const c
 
 
 
-#pragma region KExcel
-KPath KExcel::encodeCellName(int col, int row) {
-	KPath s;
-	encodeCellName(col, row, &s);
-	return s;
-}
-bool KExcel::encodeCellName(int col, int row, KPath *name) {
-	if (col < 0) return false;
-	if (row < 0) return false;
-	if (col < EXCEL_ALPHABET_NUM) {
-		char c = (char)('A' + col);
-		char s[256];
-		sprintf_s(s, sizeof(s), "%c%d", c, 1+row);
-		if (name) *name = KPath(s);
-		return true;
-	}
-	if (col < EXCEL_ALPHABET_NUM*EXCEL_ALPHABET_NUM) {
-		char c1 = (char)('A' + (col / EXCEL_ALPHABET_NUM));
-		char c2 = (char)('A' + (col % EXCEL_ALPHABET_NUM));
-		char s[256];
-		K__Assert(isalpha(c1));
-		K__Assert(isalpha(c2));
-		sprintf_s(s, sizeof(s), "%c%c%d", c1, c2, 1+row);
-		if (name) *name = KPath(s);
-		return true;
-	}
-	return false;
-}
-/// "A2" や "AM244" などのセル番号を int の組にデコードする
-bool KExcel::decodeCellName(const char *s, int *col, int *row) {
-	if (s==nullptr || s[0]=='\0') return false;
-	int c = -1;
-	int r = -1;
-
-	if (isalpha(s[0]) && isdigit(s[1])) {
-		// セル番号が [A-Z][0-9].* にマッチしている。
-		// 例えば "A1" や "Z42" など。
-		c = toupper(s[0]) - 'A';
-		K__Assert(0 <= c && c < EXCEL_ALPHABET_NUM);
-		r = strtol(s + 1, nullptr, 0);
-		r--; // １起算 --> 0起算
-
-	} else if (isalpha(s[0]) && isalpha(s[1]) && isdigit(s[2])) {
-		// セル番号が [A-Z][A-Z][0-9].* にマッチしている。
-		// 例えば "AA42" や "KZ1217" など
-		int idx1 = toupper(s[0]) - 'A';
-		int idx2 = toupper(s[1]) - 'A';
-		K__Assert(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
-		K__Assert(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
-		c = idx1 * EXCEL_ALPHABET_NUM + idx2;
-		r = strtol(s + 2, nullptr, 0);
-		r--; // １起算 --> 0起算
-	}
-	if (c >= 0 && r >= 0) {
-		// ここで、セル範囲として 0xFFFFF が入る可能性に注意。(LibreOffice Calc で現象を確認）
-		// 0xFFFFF 以上の値が入っていたら範囲取得失敗とみなす
-		if (r >= 0xFFFFF) {
-			return false;
-		}
-		K__Assert(0 <= c && c < EXCEL_COL_LIMIT);
-		K__Assert(0 <= r && r < EXCEL_ROW_LIMIT);
-		if (col) *col = c;
-		if (row) *row = r;
-		return true;
-	}
-
-	return false;
-}
-bool KExcel::exportXml(const KExcelFile &excel, KOutputStream &output, bool comment) {
-	class CB: public KExcelScanCellsCallback {
-	public:
-		std::string &dest_;
-		int last_row_;
-		int last_col_;
-		
-		CB(std::string &s): dest_(s) {
-			last_row_ = -1;
-			last_col_ = -1;
-		}
-		virtual void onCell(int col, int row, const char *s) override {
-			if (s==nullptr || s[0]=='\0') return;
-			K__Assert(last_row_ <= row); // 行番号は必ず前回と等しいか、大きくなる
-			if (last_row_ != row) {
-				if (last_row_ >= 0) { // 行タグを閉じる
-					dest_ += "</row>\n";
-				}
-				if (last_row_ < 0 || last_row_ + 1 < row) {
-					// 行番号が飛んでいる場合のみ列番号を付加する
-					dest_ += KStringUtils::K_sprintf("\t<row r='%d'>", row);
-				} else {
-					// インクリメントで済む場合は行番号を省略
-					dest_ += "\t<row>";
-				}
-				last_row_ = row;
-				last_col_ = -1;
-			}
-			if (last_col_ < 0 || last_col_ + 1 < col) {
-				// 列番号が飛んでいる場合のみ列番号を付加する
-				dest_ += KStringUtils::K_sprintf("<c i='%d'>", col);
-			} else {
-				// インクリメントで済む場合は列番号を省略
-				dest_ += "<c>";
-			}
-			if (_ShouldEscapeString(s)) { // xml禁止文字が含まれているなら CDATA 使う
-				dest_ += KStringUtils::K_sprintf("<![CDATA[%s]]>", s);
-			} else {
-				dest_ += s;
-			}
-			dest_ += "</c>";
-			last_col_ = col;
-		}
-	};
-	if (excel.empty()) return false;
-	if (!output.isOpen()) return false;
-	
-	std::string s;
-	s += "<?xml version='1.0' encoding='utf-8'>\n";
-	if (comment) {
-		s += u8"<!-- <sheet> タグは「シート」に対応する。 left, top, cols, rows 属性にはそれぞれ、シート内で値が入っているセル範囲の左、上、行数、列数が入る -->\n";
-		s += u8"<!-- <row> タグは各シートの「行」に対応する。 <row> の r 属性には 0 起算での行番号が入る。ただし直前の <row> の次の行だった場合 r 属性は省略される -->\n";
-		s += u8"<!-- <c> タグは、それぞれの行 <row> 内にある「セル」に対応する。 i 属性には 0 起算での列番号が入る。ただし、直前の <c> の次の列だった場合 i 属性は省略される -->\n";
-	}
-	s += KStringUtils::K_sprintf("<excel numsheets='%d'>\n", excel.getSheetCount());
-	for (int iSheet=0; iSheet<excel.getSheetCount(); iSheet++) {
-		int col=0, row=0, nCol=0, nRow=0;
-		KPath sheet_name = excel.getSheetName(iSheet);
-		excel.getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
-		s += KStringUtils::K_sprintf("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.u8(), col, row, nCol, nRow);
-		{
-			CB cb(s);
-			excel.scanCells(iSheet, &cb);
-			if (cb.last_row_ >= 0) {
-				s += "</row>\n"; // 最終行を閉じる
-			} else {
-				// セルを一つも出力していないので <row> を閉じる必要もない
-			}
-		}
-		s += "</sheet>";
-		if (comment) {
-			s += KStringUtils::K_sprintf("<!-- %s -->", sheet_name.u8());
-		}
-		s += "\n\n";
-	}
-	s += "</excel>\n";
-	output.write(s.data(), s.size()); // UTF8
-	return true;
-}
-void KExcel::exportXml(const char *input_xlsx_filename, const char *output_xml_filename, bool comment) {
-	KExcelFile excel;
-	excel.loadFromFileName(input_xlsx_filename);
-	if (excel.empty()) {
-		return;
-	}
-
-	KOutputStream outFile = KOutputStream::fromFileName(output_xml_filename);
-	if (outFile.isOpen()) {
-		exportXml(excel, outFile, comment);
-	}
-}
-std::string KExcel::exportText(const KExcelFile &excel) {
-	if (excel.empty()) return "";
-	std::string s;
-	for (int iSheet=0; iSheet<excel.getSheetCount(); iSheet++) {
-		int col=0, row=0, nCol=0, nRow=0;
-		KPath sheet_name = excel.getSheetName(iSheet);
-		excel.getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
-		s += "\n";
-		s += "============================================================================\n";
-		s += std::string(sheet_name.u8()) + "\n";
-		s += "============================================================================\n";
-		int blank_lines = 0;
-		for (int r=0; r<nRow; r++) {
-			bool has_cell = false;
-			for (int c=0; c<nCol; c++) {
-				const char *str = excel.getDataString(iSheet, c, r);
-				if (str && str[0]) {
-					if (blank_lines >= 1) {
-						s += "\n";
-						blank_lines = 0;
-					}
-					if (has_cell) s += ", ";
-					std::string ss = str;
-					_EscapeString(ss);
-					s += ss;
-					has_cell = true;
-				}
-			}
-			if (has_cell) {
-				s += "\n";
-			} else {
-				blank_lines++;
-			}
-		}
-	}
-	return s;
-}
-std::string KExcel::exportText(const char *xlsx_filenamee) {
-	KExcelFile excel;
-	if (excel.loadFromFileName(xlsx_filenamee)) {
-		return exportText(excel);
-	}
-	return "";
-}
-#pragma endregion // KExcel
-
-
-
 class CCoreExcelReader {
 	static const int ROW_LIMIT = 10000;
 
@@ -636,7 +429,7 @@ private:
 
 	// "A1" や "AB12" などのセル番号から、行列インデックスを取得する
 	bool parse_cell_position(const char *ss, int *col, int *row) const {
-		return KExcel::decodeCellName(ss, col, row);
+		return KExcelFile::decodeCellName(ss, col, row);
 	}
 	void scan_cells(const KXmlElement *sheet_xml, KExcelScanCellsCallback *cb) const {
 		if (sheet_xml == nullptr) return;
@@ -780,6 +573,75 @@ private:
 
 
 #pragma region KExcelFile
+KPath KExcelFile::encodeCellName(int col, int row) {
+	KPath s;
+	encodeCellName(col, row, &s);
+	return s;
+}
+bool KExcelFile::encodeCellName(int col, int row, KPath *name) {
+	if (col < 0) return false;
+	if (row < 0) return false;
+	if (col < EXCEL_ALPHABET_NUM) {
+		char c = (char)('A' + col);
+		char s[256];
+		sprintf_s(s, sizeof(s), "%c%d", c, 1+row);
+		if (name) *name = KPath(s);
+		return true;
+	}
+	if (col < EXCEL_ALPHABET_NUM*EXCEL_ALPHABET_NUM) {
+		char c1 = (char)('A' + (col / EXCEL_ALPHABET_NUM));
+		char c2 = (char)('A' + (col % EXCEL_ALPHABET_NUM));
+		char s[256];
+		K__Assert(isalpha(c1));
+		K__Assert(isalpha(c2));
+		sprintf_s(s, sizeof(s), "%c%c%d", c1, c2, 1+row);
+		if (name) *name = KPath(s);
+		return true;
+	}
+	return false;
+}
+/// "A2" や "AM244" などのセル番号を int の組にデコードする
+bool KExcelFile::decodeCellName(const char *s, int *col, int *row) {
+	if (s==nullptr || s[0]=='\0') return false;
+	int c = -1;
+	int r = -1;
+
+	if (isalpha(s[0]) && isdigit(s[1])) {
+		// セル番号が [A-Z][0-9].* にマッチしている。
+		// 例えば "A1" や "Z42" など。
+		c = toupper(s[0]) - 'A';
+		K__Assert(0 <= c && c < EXCEL_ALPHABET_NUM);
+		r = strtol(s + 1, nullptr, 0);
+		r--; // １起算 --> 0起算
+
+	} else if (isalpha(s[0]) && isalpha(s[1]) && isdigit(s[2])) {
+		// セル番号が [A-Z][A-Z][0-9].* にマッチしている。
+		// 例えば "AA42" や "KZ1217" など
+		int idx1 = toupper(s[0]) - 'A';
+		int idx2 = toupper(s[1]) - 'A';
+		K__Assert(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
+		K__Assert(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
+		c = idx1 * EXCEL_ALPHABET_NUM + idx2;
+		r = strtol(s + 2, nullptr, 0);
+		r--; // １起算 --> 0起算
+	}
+	if (c >= 0 && r >= 0) {
+		// ここで、セル範囲として 0xFFFFF が入る可能性に注意。(LibreOffice Calc で現象を確認）
+		// 0xFFFFF 以上の値が入っていたら範囲取得失敗とみなす
+		if (r >= 0xFFFFF) {
+			return false;
+		}
+		K__Assert(0 <= c && c < EXCEL_COL_LIMIT);
+		K__Assert(0 <= r && r < EXCEL_ROW_LIMIT);
+		if (col) *col = c;
+		if (row) *row = r;
+		return true;
+	}
+
+	return false;
+}
+
+
 KExcelFile::KExcelFile() {
 	m_impl = std::make_shared<CCoreExcelReader>();
 }
@@ -836,350 +698,88 @@ bool KExcelFile::getCellByText(int sheet, const char *s, int *col, int *row) con
 void KExcelFile::scanCells(int sheet, KExcelScanCellsCallback *cb) const {
 	m_impl->scanCells(sheet, cb);
 }
+std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
+	class CB: public KExcelScanCellsCallback {
+	public:
+		std::string &dest_;
+		int last_row_;
+		int last_col_;
+		
+		CB(std::string &s): dest_(s) {
+			last_row_ = -1;
+			last_col_ = -1;
+		}
+		virtual void onCell(int col, int row, const char *s) override {
+			if (s==nullptr || s[0]=='\0') return;
+			K__Assert(last_row_ <= row); // 行番号は必ず前回と等しいか、大きくなる
+			if (last_row_ != row) {
+				if (last_row_ >= 0) { // 行タグを閉じる
+					dest_ += "</row>\n";
+				}
+				if (last_row_ < 0 || last_row_ + 1 < row) {
+					// 行番号が飛んでいる場合のみ列番号を付加する
+					dest_ += KStringUtils::K_sprintf("\t<row r='%d'>", row);
+				} else {
+					// インクリメントで済む場合は行番号を省略
+					dest_ += "\t<row>";
+				}
+				last_row_ = row;
+				last_col_ = -1;
+			}
+			if (last_col_ < 0 || last_col_ + 1 < col) {
+				// 列番号が飛んでいる場合のみ列番号を付加する
+				dest_ += KStringUtils::K_sprintf("<c i='%d'>", col);
+			} else {
+				// インクリメントで済む場合は列番号を省略
+				dest_ += "<c>";
+			}
+			if (_ShouldEscapeString(s)) { // xml禁止文字が含まれているなら CDATA 使う
+				dest_ += KStringUtils::K_sprintf("<![CDATA[%s]]>", s);
+			} else {
+				dest_ += s;
+			}
+			dest_ += "</c>";
+			last_col_ = col;
+		}
+	};
+	if (empty()) return "";
+	
+	std::string s;
+	if (with_header) {
+		s += "<?xml version='1.0' encoding='utf-8'>\n";
+	}
+	if (with_comment) {
+		s += u8"<!-- <sheet> タグは「シート」に対応する。 left, top, cols, rows 属性にはそれぞれ、シート内で値が入っているセル範囲の左、上、行数、列数が入る -->\n";
+		s += u8"<!-- <row> タグは各シートの「行」に対応する。 <row> の r 属性には 0 起算での行番号が入る。ただし直前の <row> の次の行だった場合 r 属性は省略される -->\n";
+		s += u8"<!-- <c> タグは、それぞれの行 <row> 内にある「セル」に対応する。 i 属性には 0 起算での列番号が入る。ただし、直前の <c> の次の列だった場合 i 属性は省略される -->\n";
+	}
+	s += KStringUtils::K_sprintf("<excel numsheets='%d'>\n", getSheetCount());
+	for (int iSheet=0; iSheet<getSheetCount(); iSheet++) {
+		int col=0, row=0, nCol=0, nRow=0;
+		KPath sheet_name = getSheetName(iSheet);
+		getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
+		s += KStringUtils::K_sprintf("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.u8(), col, row, nCol, nRow);
+		{
+			CB cb(s);
+			scanCells(iSheet, &cb);
+			if (cb.last_row_ >= 0) {
+				s += "</row>\n"; // 最終行を閉じる
+			} else {
+				// セルを一つも出力していないので <row> を閉じる必要もない
+			}
+		}
+		s += "</sheet>";
+		if (with_comment) {
+			s += KStringUtils::K_sprintf("<!-- %s -->", sheet_name.u8());
+		}
+		s += "\n\n";
+	}
+	s += "</excel>\n";
+	return s;
+}
 #pragma endregion // KExcelFile
 
 
-#pragma region KTable
-class KTable::Impl {
-	KExcelFile m_excel;
-	KPathList m_colnames; // 列の名前
-	int m_sheet;   // 選択中のテーブルを含んでいるシートのインデックス
-	int m_leftcol;   // テーブルの左端の列インデックス
-	int m_toprow;    // テーブルの開始マークのある行インデックス
-	int m_bottomrow; // テーブルの終端マークのある行インデックス
-public:
-	Impl() {
-		m_sheet = -1;
-		m_leftcol = 0;
-		m_toprow = 0;
-		m_bottomrow = 0;
-	}
-	~Impl() {
-		_unload();
-	}
-	bool empty() const {
-		return m_excel.empty();
-	}
-	bool _loadFromExcelFile(const KExcelFile &file) {
-		m_excel = file;
-		return !file.empty();
-	}
-	void _unload() {
-		m_excel = KExcelFile(); // claer
-		m_sheet = -1;
-		m_leftcol = 0;
-		m_toprow = 0;
-		m_bottomrow = 0;
-	}
-	bool _selectTable(const char *sheet_name, const char *top_cell_text, const char *bottom_cell_text) {
-		m_sheet = -1;
-		m_leftcol = 0;
-		m_toprow = 0;
-		m_bottomrow = 0;
-
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: Null data");
-			return false;
-		}
-
-		int sheet = 0;
-		int col0 = 0;
-		int col1 = 0;
-		int row0 = 0;
-		int row1 = 0;
-
-		// シートを探す
-		sheet = m_excel.getSheetByName(sheet_name);
-		if (sheet < 0) {
-			KLog::printError(u8"E_EXCEL: シート '%s' が見つかりません", sheet_name);
-			return false;
-		}
-
-		// 開始セルを探す
-		if (! m_excel.getCellByText(sheet, top_cell_text, &col0, &row0)) {
-			KLog::printError(u8"E_EXCEL_MISSING_TABLE_BEGIN: シート '%s' にはテーブル開始セル '%s' がありません", 
-				sheet_name, top_cell_text);
-			return false;
-		}
-	//	KLog::printVerbose("TOP CELL '%s' FOUND AT %s", top_cell_text.u8(), KExcel::encodeCellName(col0, row0).u8());
-
-		// セルの定義範囲
-		int dim_row_top = 0;
-		int dim_row_cnt = 0;
-		if (! m_excel.getSheetDimension(sheet, nullptr, &dim_row_top, nullptr, &dim_row_cnt)) {
-			KLog::printError(u8"E_EXCEL_MISSING_SHEET_DIMENSION: シート '%s' のサイズが定義されていません", sheet_name);
-			return false;
-		}
-
-		// 終了セルを探す
-		// 終了セルは開始セルと同じ列で、開始セルよりも下の行にあるはず
-		for (int i=row0+1; i<dim_row_top+dim_row_cnt; i++) {
-			const char *s = m_excel.getDataString(sheet, col0, i);
-			if (strcmp(bottom_cell_text, s) == 0) {
-				row1 = i;
-				break;
-			}
-		}
-		if (row1 == 0) {
-			KPath cell = KExcel::encodeCellName(col0, row0);
-			KLog::printError(u8"E_EXCEL_MISSING_TABLE_END: シート '%s' のセル '%s' に対応する終端セル '%s' が見つかりません",
-				sheet_name, top_cell_text, bottom_cell_text);
-			return false;
-		}
-		KLog::printVerbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text, KExcel::encodeCellName(col0, row0).u8());
-
-		// 開始セルの右隣からは、カラム名の定義が続く
-		KPathList cols;
-		{
-			int c = col0 + 1;
-			while (1) {
-				KPath cellstr = m_excel.getDataString(sheet, c, row0);
-				if (cellstr.empty()) break;
-				cols.push_back(cellstr);
-				KLog::printVerbose("ID CELL '%s' FOUND AT %s", cellstr.u8(), KExcel::encodeCellName(col0, row0).u8());
-				c++;
-			}
-			if (cols.empty()) {
-				KLog::printError(u8"E_EXCEL_MISSING_COLUMN_HEADER: シート '%s' のテーブル '%s' にはカラムヘッダがありません", 
-					sheet_name, top_cell_text);
-			}
-			col1 = c;
-		}
-
-		// テーブル読み取りに成功した
-		m_colnames = cols;
-		m_sheet  = sheet;
-		m_toprow    = row0;
-		m_bottomrow = row1;
-		m_leftcol   = col0;
-		return true;
-	}
-	KPath getColumnName(int col) const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return KPath::Empty;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return KPath::Empty;
-		}
-		if (col < 0 || (int)m_colnames.size() <= col) {
-			return KPath::Empty;
-		}
-		return m_colnames[col];
-	}
-	int getDataColIndexByName(const KPath &column_name) const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return -1;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return -1;
-		}
-		for (size_t i=0; i<m_colnames.size(); i++) {
-			if (m_colnames[i].compare(column_name) == 0) {
-				return (int)i;
-			}
-		}
-		return -1;
-	}
-	int getDataColCount() const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return 0;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return 0;
-		}
-		return (int)m_colnames.size();
-	}
-	int getDataRowCount() const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return 0;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return 0;
-		}
-		// 開始行と終了行の間にある行数
-		int rows = m_bottomrow - m_toprow - 1;
-		K__Assert(rows > 0);
-
-		return rows;
-	}
-	const char * getRowMarker(int data_row) const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return nullptr;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return nullptr;
-		}
-		if (data_row < 0) return nullptr;
-
-		int col = m_leftcol; // 行マーカーは一番左の列にあるものとする。（一番左のデータ列の、さらにひとつ左側）
-		int row = m_toprow + 1 + data_row;
-		return m_excel.getDataString(m_sheet, col, row);
-	}
-	const char * getDataString(int data_col, int data_row) const {
-		if (m_excel.empty()) {
-			KLog::printError("E_EXCEL: No table loaded");
-			return nullptr;
-		}
-		if (m_sheet < 0) {
-			KLog::printError("E_EXCEL: No table selected");
-			return nullptr;
-		}
-		if (data_col < 0) return nullptr;
-		if (data_row < 0) return nullptr;
-
-		// 一番左の列 (m_leftcol) は開始・終端キーワードを置くためにある。
-		// ほかに文字が入っていてもコメント扱いで無視される。
-		// 実際のデータはその右隣の列から開始する
-		if (data_col >= m_leftcol + 1 + (int)m_colnames.size()) return nullptr;
-		int col = m_leftcol + 1 + data_col;
-
-		// 一番上の行（m_toprow) は開始キーワードとカラム名を書くためにある。
-		// 実際のデータ行はそのひとつ下から始まる
-		if (data_row >= m_bottomrow) return nullptr;
-		int row = m_toprow + 1 + data_row;
-
-		return m_excel.getDataString(m_sheet, col, row);
-	}
-	int getDataInt(int data_col, int data_row, int def) const {
-		const char *s = getDataString(data_col, data_row);
-		// 実数形式で記述されている値を整数として取り出す可能性
-		float f = 0.0f;
-		if (KStringUtils::toFloatTry(s, &f)) {
-			return (int)f;
-		}
-		// 8桁の16進数を取り出す可能性。この場合は符号なしで取り出しておかないといけない
-		unsigned int u = 0;
-		if (KStringUtils::toUintTry(s, &u)) {
-			return (int)u;
-		}
-		// 普通の整数として取り出す
-		int i = 0;
-		if (KStringUtils::toIntTry(s, &i)) {
-			return i;
-		}
-		return def;
-	}
-	float getDataFloat(int data_col, int data_row, float def) const {
-		const char *s = getDataString(data_col, data_row);
-		return KStringUtils::toFloat(s, def);
-	}
-	bool getDataSource(int data_col, int data_row, int *col_in_file, int *row_in_file) const {
-		if (data_col < 0) return false;
-		if (data_row < 0) return false;
-		if (col_in_file) *col_in_file = m_leftcol + 1 + data_col;
-		if (row_in_file) *row_in_file = m_toprow  + 1 + data_row;
-		return true;
-	}
-};
-
-
-KTable::KTable() {
-	m_impl = nullptr;
-}
-bool KTable::empty() const {
-	return m_impl->empty();
-}
-bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
-	auto impl = std::make_shared<Impl>();
-	if (impl->_loadFromExcelFile(excel)) {
-		const char *top = (top_cell_text && top_cell_text[0]) ? top_cell_text : "@BEGIN";
-		const char *btm = (btm_cell_text && btm_cell_text[0]) ? btm_cell_text : "@END";
-		if (impl->_selectTable(sheetname, top, btm)) {
-			m_impl = impl;
-			return true;
-		}
-	}
-	m_impl = nullptr;
-	return false;
-}
-bool KTable::loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
-	KExcelFile excel;
-	if (excel.loadFromFile(xmls, filename)) {
-		if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {
-			return true;
-		}
-	}
-	m_impl = nullptr;
-	return false;
-}
-bool KTable::loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
-	if (xlsx_bin && xlsx_size > 0) {
-		KExcelFile excel;
-		if (excel.loadFromMemory(xlsx_bin, xlsx_size, filename)) {
-			if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {
-				return true;
-			}
-		}
-	}
-	m_impl = nullptr;
-	return false;
-}
-
-int KTable::getDataColIndexByName(const char *column_name) const {
-	if (m_impl) {
-		return m_impl->getDataColIndexByName(column_name);
-	}
-	return 0;
-}
-KPath KTable::getColumnName(int col) const {
-	if (m_impl) {
-		return m_impl->getColumnName(col);
-	}
-	return KPath::Empty;
-}
-int KTable::getDataColCount() const {
-	if (m_impl) {
-		return m_impl->getDataColCount();
-	}
-	return 0;
-}
-int KTable::getDataRowCount() const {
-	if (m_impl) {
-		return m_impl->getDataRowCount();
-	}
-	return 0;
-}
-const char * KTable::getRowMarker(int row) const {
-	if (m_impl) {
-		return m_impl->getRowMarker(row);
-	}
-	return nullptr;
-}
-const char * KTable::getDataString(int col, int row) const {
-	if (m_impl) {
-		return m_impl->getDataString(col, row);
-	}
-	return nullptr;
-}
-int KTable::getDataInt(int col, int row, int def) const {
-	if (m_impl) {
-		return m_impl->getDataInt(col, row, def);
-	}
-	return def;
-}
-float KTable::getDataFloat(int col, int row, float def) const {
-	if (m_impl) {
-		return m_impl->getDataFloat(col, row, def);
-	}
-	return def;
-}
-bool KTable::getDataSource(int col, int row, int *col_in_file, int *row_in_file) const {
-	if (m_impl && m_impl->getDataSource(col, row, col_in_file, row_in_file)) {
-		return true;
-	}
-	return false;
-}
-#pragma endregion // KTable
 
 
 namespace Test {
