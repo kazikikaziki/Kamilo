@@ -71,6 +71,8 @@ void K__Replace(std::string &s, int start, int count, const char *str);
 void K__Replace(std::string &s, const char *before, const char *after);
 void K__ReplaceW(wchar_t *s, wchar_t before, wchar_t after);
 void K__ReplaceA(char *s, char before, char after);
+bool K__strtof(const std::string &s, float *val);
+bool K__strtoi(const std::string &s, int *val);
 bool K__strtof(const char *s, float *val);
 bool K__strtoi(const char *s, int *val);
 bool K__strtoui32(const char *s, uint32_t *val);

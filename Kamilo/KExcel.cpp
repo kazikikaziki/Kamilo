@@ -19,10 +19,10 @@ namespace Kamilo {
 
 // 文字列 s を xml に組み込めるようにする
 static void _EscapeString(std::string &s) {
-	KStringUtils::replace(s, "\\", "\\\\");
-	KStringUtils::replace(s, "\"", "\\\"");
-	KStringUtils::replace(s, "\n", "\\n");
-	KStringUtils::replace(s, "\r", "");
+	K__Replace(s, "\\", "\\\\");
+	K__Replace(s, "\"", "\\\"");
+	K__Replace(s, "\n", "\\n");
+	K__Replace(s, "\r", "");
 	if (s.find(',') != std::string::npos) {
 		s.insert(0, "\"");
 		s.append("\"");
@@ -390,7 +390,8 @@ private:
 		if (tp == TP_STRINGID) {
 			// val は文字列ID (整数) を表している。
 			// 対応する文字列を文字列テーブルから探す
-			int sid = KStringUtils::toInt(val);
+			int sid = -1;
+			K__strtoi(val, &sid);
 			K__Assert(sid >= 0);
 			auto it = m_strings.find(sid);
 			if (it != m_strings.end()) {
@@ -718,7 +719,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 				}
 				if (last_row_ < 0 || last_row_ + 1 < row) {
 					// 行番号が飛んでいる場合のみ列番号を付加する
-					dest_ += KStringUtils::K_sprintf("\t<row r='%d'>", row);
+					dest_ += K__sprintf_std("\t<row r='%d'>", row);
 				} else {
 					// インクリメントで済む場合は行番号を省略
 					dest_ += "\t<row>";
@@ -728,13 +729,13 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 			}
 			if (last_col_ < 0 || last_col_ + 1 < col) {
 				// 列番号が飛んでいる場合のみ列番号を付加する
-				dest_ += KStringUtils::K_sprintf("<c i='%d'>", col);
+				dest_ += K__sprintf_std("<c i='%d'>", col);
 			} else {
 				// インクリメントで済む場合は列番号を省略
 				dest_ += "<c>";
 			}
 			if (_ShouldEscapeString(s)) { // xml禁止文字が含まれているなら CDATA 使う
-				dest_ += KStringUtils::K_sprintf("<![CDATA[%s]]>", s);
+				dest_ += K__sprintf_std("<![CDATA[%s]]>", s);
 			} else {
 				dest_ += s;
 			}
@@ -753,12 +754,12 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		s += u8"<!-- <row> タグは各シートの「行」に対応する。 <row> の r 属性には 0 起算での行番号が入る。ただし直前の <row> の次の行だった場合 r 属性は省略される -->\n";
 		s += u8"<!-- <c> タグは、それぞれの行 <row> 内にある「セル」に対応する。 i 属性には 0 起算での列番号が入る。ただし、直前の <c> の次の列だった場合 i 属性は省略される -->\n";
 	}
-	s += KStringUtils::K_sprintf("<excel numsheets='%d'>\n", getSheetCount());
+	s += K__sprintf_std("<excel numsheets='%d'>\n", getSheetCount());
 	for (int iSheet=0; iSheet<getSheetCount(); iSheet++) {
 		int col=0, row=0, nCol=0, nRow=0;
 		KPath sheet_name = getSheetName(iSheet);
 		getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
-		s += KStringUtils::K_sprintf("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.u8(), col, row, nCol, nRow);
+		s += K__sprintf_std("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.u8(), col, row, nCol, nRow);
 		{
 			CB cb(s);
 			scanCells(iSheet, &cb);
@@ -770,7 +771,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		}
 		s += "</sheet>";
 		if (with_comment) {
-			s += KStringUtils::K_sprintf("<!-- %s -->", sheet_name.u8());
+			s += K__sprintf_std("<!-- %s -->", sheet_name.u8());
 		}
 		s += "\n\n";
 	}
@@ -787,26 +788,9 @@ namespace Test {
 void Test_excel(const std::string &filename) {
 	KExcelFile ef;
 	ef.loadFromFileName(filename.c_str());
-
-	int xoff, yoff, xcnt, ycnt;
-	if (ef.getSheetDimension(0, &xoff, &yoff, &xcnt, &ycnt)) {
-		std::string text;
-		for (int y=yoff; y<yoff+ycnt; y++) {
-			bool with_comma = false;
-			for (int x=xoff; x<xoff+xcnt; x++) {
-				std::string s = ef.getDataString(0, x, y);
-				if (with_comma) {
-					text += ", " + s;
-				} else {
-					text += s;
-					with_comma = true;
-				}
-			}
-			text += "\n";
-		}
-		KOutputStream os = KOutputStream::fromFileName(filename + ".txt");
-		os.writeString(text);
-	}
+	std::string xml = ef.exportXmlString();
+	KOutputStream os = KOutputStream::fromFileName(filename + ".txt");
+	os.writeString(xml);
 }
 
 } // Test

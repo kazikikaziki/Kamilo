@@ -155,6 +155,12 @@ void K__ErrorW(const wchar_t *wfmt, ...) {
 	}
 }
 
+bool K__strtof(const std::string &s, float *val) {
+	return K__strtof(s.c_str(), val);
+}
+bool K__strtoi(const std::string &s, int *val) {
+	return K__strtoi(s.c_str(), val);
+}
 
 bool K__strtof(const char *s, float *val) {
 	if (s == nullptr) return false;
