@@ -10,7 +10,7 @@ class KWriter;
 
 class KInputStream {
 public:
-	static KInputStream fromFileName(const char *filename);
+	static KInputStream fromFileName(const std::string &filename);
 	static KInputStream fromMemory(const void *data, int size);
 	static KInputStream fromMemoryCopy(const void *data, int size);
 	static KInputStream fromReader(KReader *r);
@@ -61,7 +61,7 @@ private:
 
 class KOutputStream {
 public:
-	static KOutputStream fromFileName(const char *filename);
+	static KOutputStream fromFileName(const std::string &filename);
 	static KOutputStream fromMemory(std::string *dest);
 	static KOutputStream fromWriter(KWriter *w);
 
@@ -97,7 +97,7 @@ public:
 
 	/// ヌル終端文字列を書き込む。
 	/// 文字コードなどは一切考慮せず s で指定されたままのバイナリを書き込む
-	int writeString(const char *s);
+	int writeString(const std::string &s);
 
 	void close();
 	bool isOpen();

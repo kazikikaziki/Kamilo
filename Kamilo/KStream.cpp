@@ -76,7 +76,7 @@ public:
 	FILE *m_file;
 	std::string m_name;
 
-	CFileReadImpl(FILE *fp, const char *name) {
+	CFileReadImpl(FILE *fp, const std::string &name) {
 		m_file = fp;
 		m_name = name;
 	}
@@ -123,7 +123,7 @@ public:
 	FILE *m_file;
 	std::string m_name;
 
-	CFileWriteImpl(FILE *fp, const char *name) {
+	CFileWriteImpl(FILE *fp, const std::string &name) {
 		m_file = fp;
 		m_name = name;
 	}
@@ -261,9 +261,9 @@ public:
 
 
 #pragma region KInputStream
-KInputStream KInputStream::fromFileName(const char *filename) {
+KInputStream KInputStream::fromFileName(const std::string &filename) {
 	Impl *impl = nullptr;
-	FILE *fp = K__fopen_u8(filename, "rb");
+	FILE *fp = K__fopen_u8(filename.c_str(), "rb");
 	if (fp) {
 		impl = new CFileReadImpl(fp, filename);
 	}
@@ -373,9 +373,9 @@ std::string KInputStream::readBin(int readsize) {
 
 
 #pragma region KOutputStream
-KOutputStream KOutputStream::fromFileName(const char *filename) {
+KOutputStream KOutputStream::fromFileName(const std::string &filename) {
 	Impl *impl = nullptr;
-	FILE *fp = K__fopen_u8(filename, "wb");
+	FILE *fp = K__fopen_u8(filename.c_str(), "wb");
 	if (fp) {
 		impl = new CFileWriteImpl(fp, filename);
 	}
@@ -437,8 +437,12 @@ int KOutputStream::writeUint16(uint16_t value) {
 int KOutputStream::writeUint32(uint32_t value) {
 	return write(&value, sizeof(value));
 }
-int KOutputStream::writeString(const char *s) {
-	return write(s, strlen(s));
+int KOutputStream::writeString(const std::string &s) {
+	if (s.empty()) {
+		return 0;
+	} else {
+		return write(s.data(), s.size());
+	}
 }
 #pragma endregion // KOutputStream
 
