@@ -13,7 +13,7 @@ namespace Kamilo {
 
 
 class CRefChecker {
-	std::unordered_set<KRef*> mLockedObjects;
+	std::unordered_set<KRef*> m_LockedObjects;
 public:
 	CRefChecker() {
 	}
@@ -21,31 +21,31 @@ public:
 		check_leak();
 	}
 	void check_leak() {
-		if (mLockedObjects.empty()) return;
+		if (m_LockedObjects.empty()) return;
 
 		if (K__IsDebuggerPresent()) {
-			for (auto it=mLockedObjects.begin(); it!=mLockedObjects.end(); ++it) {
+			for (auto it=m_LockedObjects.begin(); it!=m_LockedObjects.end(); ++it) {
 				KRef *ref = *it;
 				// ログ出力中に参照カウンタが操作されないように注意
 				const char *s = ref->getReferenceDebugString();
 				K__Print("%s: %s", typeid(*ref).name(), s ? s : "");
 			}
 		}
-		K__Print("%d object(s) are still remain.", mLockedObjects.size());
+		K__Print("%d object(s) are still remain.", m_LockedObjects.size());
 		if (K__IsDebuggerPresent()) {
 			// ここに到達してブレークした場合、参照カウンタがまだ残っているオブジェクトがある。
-			// デバッガーで locked_objects_ の中身をチェックすること。
-			mLockedObjects; // <-- 中身をチェック
+			// デバッガーで m_LockedObjects の中身をチェックすること。
+			m_LockedObjects; // <-- 中身をチェック
 			K__Assert(0);
 		}
 	}
 	void add(KRef *ref) {
 		K__Assert(ref);
-		mLockedObjects.insert(ref);
+		m_LockedObjects.insert(ref);
 	}
 	void del(KRef *ref) {
 		K__Assert(ref);
-		mLockedObjects.erase(ref);
+		m_LockedObjects.erase(ref);
 	}
 };
 
@@ -57,8 +57,8 @@ static std::mutex g_RefMutex;
 
 #pragma region KRef
 KRef::KRef() {
-	mRefCnt = 1;
-	mDebubBreakRefCnt = -1;
+	m_RefCnt = 1;
+	m_DebubBreakRefCnt = -1;
 	if (K_REFCNT_DEBUG) {
 		// 参照カウンタの整合性をチェック
 		g_RefMutex.lock();
@@ -67,7 +67,7 @@ KRef::KRef() {
 	}
 }
 KRef::~KRef() {
-	K__Assert(mRefCnt == 0); // ここで引っかかった場合、 drop しないで直接 delete してしまっている
+	K__Assert(m_RefCnt == 0); // ここで引っかかった場合、 drop しないで直接 delete してしまっている
 	if (K_REFCNT_DEBUG) {
 		// 参照カウンタの整合性をチェック
 		g_RefMutex.lock();
@@ -77,29 +77,29 @@ KRef::~KRef() {
 }
 void KRef::grab() const {
 	g_RefMutex.lock();
-	mRefCnt++;
+	m_RefCnt++;
 	g_RefMutex.unlock();
 }
 void KRef::drop() const {
 	g_RefMutex.lock();
-	mRefCnt--;
+	m_RefCnt--;
 	g_RefMutex.unlock();
-	K__Assert(mRefCnt >= 0);
-	if (mRefCnt == mDebubBreakRefCnt) { // 参照カウンタが mDebubBreakRefCnt になったら中断する
+	K__Assert(m_RefCnt >= 0);
+	if (m_RefCnt == m_DebubBreakRefCnt) { // 参照カウンタが m_DebubBreakRefCnt になったら中断する
 		K__Break();
 	}
-	if (mRefCnt == 0) {
+	if (m_RefCnt == 0) {
 		delete this;
 	}
 }
 int KRef::getReferenceCount() const {
-	return mRefCnt;
+	return m_RefCnt;
 }
 const char * KRef::getReferenceDebugString() const {
 	return nullptr;
 }
 void KRef::setReferenceDebugBreak(int cond_refcnt) {
-	mDebubBreakRefCnt = cond_refcnt;
+	m_DebubBreakRefCnt = cond_refcnt;
 }
 #pragma endregion // KRef
 

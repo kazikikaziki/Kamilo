@@ -26,8 +26,8 @@ protected:
 	virtual ~KRef();
 
 private:
-	mutable int mRefCnt;
-	int mDebubBreakRefCnt;
+	mutable int m_RefCnt;
+	int m_DebubBreakRefCnt;
 };
 
 
