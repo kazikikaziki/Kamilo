@@ -1,18 +1,14 @@
-﻿#include <Windows.h>
+﻿#include "KImGui.h"
+
+#include <Windows.h>
 #include <Shlobj.h> // SHGetFolderPath
 #include <Shlwapi.h>
 #include <d3d9.h>
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h" // ImGui::GetCurrentWindow()
 #include "imgui/imgui_impl_dx9.h"
 #include "imgui/imgui_impl_win32.h"
-
-#include "KFile.h"
-#include "KImGui.h"
-#include "KDebug.h"
 #include "KInternal.h"
-#include "KLog.h"
 
 // imgui/ImGui_impl_win32.cpp
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -125,7 +121,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &file
 			KOutputStream output = KOutputStream::fromFileName(filename.u8());
 			output.write(png.data(), png.size());
 
-			KLog::printInfo("Export texture image %s", filename.u8());
+			K__Print("Export texture image %s", filename.u8());
 		}
 	}
 	if (KPathUtils::K_PathExists(filename.u8())) {
@@ -138,7 +134,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &file
 	}
 }
 void KImGui_StyleKK() {
-	K_assert(ImGui::GetCurrentContext());
+	K__Assert(ImGui::GetCurrentContext());
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Alpha = 1.0f; // このアルファ値は文字も含んだウィンドウ全体のアルファなので注意
 	style.WindowPadding = ImVec2(2, 2); // ImGuiStyleVar_WindowPadding
@@ -156,7 +152,7 @@ void KImGui_StyleKK() {
 }
 void KImGui_PushFont(int index) {
 	ImGuiIO &io = ImGui::GetIO();
-	K_assert(0 <= index && index < io.Fonts->Fonts.size());
+	K__Assert(0 <= index && index < io.Fonts->Fonts.size());
 	ImFont *font = io.Fonts->Fonts[index];
 	if (font) {
 		ImGui::PushFont(font);
@@ -1231,7 +1227,7 @@ void KImGuiCombo::begin() {
 }
 void KImGuiCombo::end() {
 	mUpdating--;
-	K_assert(mUpdating >= 0);
+	K__Assert(mUpdating >= 0);
 	if (mUpdating == 0) {
 		mPChars.clear();
 		for (int i=0; i<mItems.size(); i++) {
@@ -1240,7 +1236,7 @@ void KImGuiCombo::end() {
 	}
 }
 void KImGuiCombo::addItem(const char *s, int value) {
-	K_assert(mUpdating > 0);
+	K__Assert(mUpdating > 0);
 	mItems.push_back(Pair(s, value));
 }
 int KImGuiCombo::indexOfText(const char *s) const {
