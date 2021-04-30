@@ -36,7 +36,7 @@ public:
 	std::string getFileName() const;
 
 	/// .XLSX ファイルをロードする
-	bool loadFromFile(KInputStream &file, const char *xlsx_name);
+	bool loadFromStream(KInputStream &file, const char *xlsx_name);
 	bool loadFromFileName(const std::string &name);
 	bool loadFromMemory(const void *bin, size_t size, const std::string &name);
 
@@ -78,6 +78,7 @@ public:
 	
 	/// セル文字列を XML 形式でエクスポートする
 	std::string exportXmlString(bool with_header=true, bool with_comment=true);
+	std::string exportText();
 
 private:
 	std::shared_ptr<CCoreExcelReader> m_impl;

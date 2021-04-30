@@ -1982,7 +1982,7 @@ bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, c
 }
 bool KTable::loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
 	KExcelFile excel;
-	if (excel.loadFromFile(xmls, filename)) {
+	if (excel.loadFromStream(xmls, filename)) {
 		if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {
 			return true;
 		}

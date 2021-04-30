@@ -646,7 +646,7 @@ std::string KExcelFile::getFileName() const {
 	m_name = m_impl->getFileName();
 	return m_name;
 }
-bool KExcelFile::loadFromFile(KInputStream &file, const char *xlsx_name) {
+bool KExcelFile::loadFromStream(KInputStream &file, const char *xlsx_name) {
 	return m_impl->loadFromFile(file, xlsx_name);
 }
 bool KExcelFile::loadFromFileName(const std::string &name) {
@@ -771,6 +771,44 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 	s += "</excel>\n";
 	return s;
 }
+std::string KExcelFile::exportText() {
+	if (empty()) return "";
+	std::string s;
+	for (int iSheet=0; iSheet<getSheetCount(); iSheet++) {
+		int col=0, row=0, nCol=0, nRow=0;
+		std::string sheet_name = getSheetName(iSheet);
+		getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
+		s += "\n";
+		s += "============================================================================\n";
+		s += sheet_name + "\n";
+		s += "============================================================================\n";
+		int blank_lines = 0;
+		for (int r=0; r<nRow; r++) {
+			bool has_cell = false;
+			for (int c=0; c<nCol; c++) {
+				const char *str = getDataString(iSheet, c, r);
+				if (str && str[0]) {
+					if (blank_lines >= 1) {
+						s += "\n";
+						blank_lines = 0;
+					}
+					if (has_cell) s += ", ";
+					std::string ss = str;
+					_EscapeString(ss);
+					s += ss;
+					has_cell = true;
+				}
+			}
+			if (has_cell) {
+				s += "\n";
+			} else {
+				blank_lines++;
+			}
+		}
+	}
+	return s;
+}
+
 #pragma endregion // KExcelFile
 
 
