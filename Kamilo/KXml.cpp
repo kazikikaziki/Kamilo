@@ -65,81 +65,81 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 
 class CXNode: public KXmlElement {
 	typedef std::pair<std::string, std::string> PairStrStr;
-	std::string mTag;
-	std::string mText;
-	std::vector<PairStrStr> mAttrs;
-	std::vector<KXmlElement *> mNodes;
-	int mLine;
+	std::string m_Tag;
+	std::string m_Text;
+	std::vector<PairStrStr> m_Attrs;
+	std::vector<KXmlElement *> m_Nodes;
+	int m_SourceLine;
 public:
 	CXNode() {
-		mLine = 0;
+		m_SourceLine = 0;
 	}
 	virtual ~CXNode() {
-		for (auto it=mNodes.begin(); it!=mNodes.end(); ++it) {
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			(*it)->drop();
 		}
 	}
 	virtual const char * getTag() const override {
-		return mTag.c_str();
+		return m_Tag.c_str();
 	}
 	virtual void setTag(const char *tag) override {
 		if (!KStringUtils::isEmpty(tag)) {
-			mTag = tag;
+			m_Tag = tag;
 		}
 	}
 	virtual int getAttrCount() const override {
-		return (int)mAttrs.size();
+		return (int)m_Attrs.size();
 	}
 	virtual const char * getAttrName(int index) const override {
-		return mAttrs[index].first.c_str();
+		return m_Attrs[index].first.c_str();
 	}
 	virtual const char * getAttrValue(int index) const override {
-		return mAttrs[index].second.c_str();
+		return m_Attrs[index].second.c_str();
 	}
 	virtual void setAttr(const char *name, const char *value) override {
 		if (value == nullptr) { delAttr(name); return; }
 		int index = getAttrIndex(name);
 		if (index >= 0) {
-			mAttrs[index].second = value; // 既存の属性を変更
+			m_Attrs[index].second = value; // 既存の属性を変更
 		} else {
-			mAttrs.push_back(PairStrStr(name, value)); // 属性を追加
+			m_Attrs.push_back(PairStrStr(name, value)); // 属性を追加
 		}
 	}
 	virtual void delAttr(const char *name) override {
 		int index = getAttrIndex(name);
 		if (index >= 0) {
-			mAttrs.erase(mAttrs.begin() + index);
+			m_Attrs.erase(m_Attrs.begin() + index);
 		}
 	}
 	virtual const char * getText(const char *def) const override {
-		if (mText.empty()) {
+		if (m_Text.empty()) {
 			return def;
 		} else {
-			return mText.c_str();
+			return m_Text.c_str();
 		}
 	}
 	virtual void setText(const char *text) override {
-		mText = text ? text : "";
+		m_Text = text ? text : "";
 	}
 	virtual int getNodeCount() const override {
-		return (int)mNodes.size();
+		return (int)m_Nodes.size();
 	}
 	virtual const KXmlElement * getNode(int index) const override {
-		if (0 <= index && index < (int)mNodes.size()) {
-			return mNodes[index];
+		if (0 <= index && index < (int)m_Nodes.size()) {
+			return m_Nodes[index];
 		}
 		return nullptr;
 	}
 	virtual KXmlElement * getNode(int index) override {
-		if (0 <= index && index < (int)mNodes.size()) {
-			return mNodes[index];
+		if (0 <= index && index < (int)m_Nodes.size()) {
+			return m_Nodes[index];
 		}
 		return nullptr;
 	}
 	virtual KXmlElement * addNode(const char *tag, int pos) override {
 		if (tag && tag[0]) {
 			CXNode *newnode = new CXNode();
-			newnode->mTag = tag;
+			newnode->m_Tag = tag;
 			addNode(newnode, pos);
 			return newnode;
 		}
@@ -149,28 +149,28 @@ public:
 		if (newnode) {
 			newnode->grab();
 			if (pos >= 0) {
-				mNodes.insert(mNodes.begin() + pos, newnode);
+				m_Nodes.insert(m_Nodes.begin() + pos, newnode);
 			} else {
-				mNodes.push_back(newnode);
+				m_Nodes.push_back(newnode);
 			}
 		}
 	}
 	virtual void deleteNode(int index) override {
-		if (0 <= index && index < (int)mNodes.size()) {
-			mNodes[index]->drop();
-			mNodes.erase(mNodes.begin() + index);
+		if (0 <= index && index < (int)m_Nodes.size()) {
+			m_Nodes[index]->drop();
+			m_Nodes.erase(m_Nodes.begin() + index);
 		}
 	}
 	virtual int getChildIndex(const KXmlElement *child) const {
-		for (int i=0; i<(int)mNodes.size(); i++) {
-			if (mNodes[i] == child) {
+		for (int i=0; i<(int)m_Nodes.size(); i++) {
+			if (m_Nodes[i] == child) {
 				return i;
 			}
 		}
 		return -1;
 	}
 	virtual int getLineNumber() const override {
-		return mLine;
+		return m_SourceLine;
 	}
 	virtual bool write(KOutputStream &output, int indent) const override {
 		if (!output.isOpen()) return false;
@@ -178,13 +178,13 @@ public:
 		char s[1024] = {0};
 
 		// Tag
-		sprintf_s(s, sizeof(s), "%*s<%s", indent*2, "", mTag.c_str());
+		sprintf_s(s, sizeof(s), "%*s<%s", indent*2, "", m_Tag.c_str());
 		output.writeString(s);
 
 		// Attr
-		for (size_t i=0; i<mAttrs.size(); i++) {
-			const char *k = mAttrs[i].first.c_str();
-			const char *v = mAttrs[i].second.c_str();
+		for (size_t i=0; i<m_Attrs.size(); i++) {
+			const char *k = m_Attrs[i].first.c_str();
+			const char *v = m_Attrs[i].second.c_str();
 			if (k && k[0] && v) {
 				sprintf_s(s, sizeof(s), " %s=\"%s\"", k, v);
 				output.writeString(s);
@@ -192,26 +192,26 @@ public:
 		}
 
 		// Text
-		if (mText.size() > 0) {
+		if (m_Text.size() > 0) {
 			output.writeString("<![CDATA[");
-			output.writeString(mText.c_str());
+			output.writeString(m_Text.c_str());
 			output.writeString("]]>");
 		}
 
 		// Sub nodes
-		if (mNodes.empty()) {
+		if (m_Nodes.empty()) {
 			output.writeString("/>\n");
 		} else {
-			if (mText.size() > 0) {
+			if (m_Text.size() > 0) {
 				// テキスト属性と子ノードは両立しない。
 				K__Error(u8"Xml element cannot have both Text Element and Child Elements");
 
 			} else {
 				output.writeString(">\n");
-				for (size_t i=0; i<mNodes.size(); i++) {
-					mNodes[i]->write(output, indent+1);
+				for (size_t i=0; i<m_Nodes.size(); i++) {
+					m_Nodes[i]->write(output, indent+1);
 				}
-				sprintf_s(s, sizeof(s), "%*s</%s>\n", indent*2, "", mTag.c_str());
+				sprintf_s(s, sizeof(s), "%*s</%s>\n", indent*2, "", m_Tag.c_str());
 				output.writeString(s);
 			}
 		}
@@ -219,13 +219,13 @@ public:
 	}
 	virtual KXmlElement * clone() const override {
 		CXNode *result = new CXNode();
-		result->mTag = this->mTag;
-		result->mLine = this->mLine;
-		result->mAttrs = this->mAttrs;
-		result->mText = this->mText;
-		for (auto it=mNodes.begin(); it!=mNodes.end(); ++it) {
+		result->m_Tag = this->m_Tag;
+		result->m_SourceLine = this->m_SourceLine;
+		result->m_Attrs = this->m_Attrs;
+		result->m_Text = this->m_Text;
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			KXmlElement *elm = *it;
-			result->mNodes.push_back(elm->clone());
+			result->m_Nodes.push_back(elm->clone());
 		}
 		return result;
 	}
@@ -237,12 +237,12 @@ public:
 		const tinyxml2::XMLElement *tiElm = tiNode->ToElement();
 
 		// 位置情報
-		result->mLine = tiNode->GetLineNum();
+		result->m_SourceLine = tiNode->GetLineNum();
 
 		// タグ
 		if (tiElm) {
 			const char *tag = tiElm->Name();
-			result->mTag = tag ? tag : "";
+			result->m_Tag = tag ? tag : "";
 		}
 
 		// 属性
@@ -250,7 +250,7 @@ public:
 			for (const tinyxml2::XMLAttribute *attr=tiElm->FirstAttribute(); attr!=nullptr; attr=attr->Next()) {
 				const char *k = attr->Name();
 				const char *v = attr->Value();
-				result->mAttrs.push_back(PairStrStr(k, v));
+				result->m_Attrs.push_back(PairStrStr(k, v));
 			}
 		}
 
@@ -258,7 +258,7 @@ public:
 		if (tiElm) {
 			const char *text = tiElm->GetText();
 			if (text && text[0]) {
-				result->mText = text;
+				result->m_Text = text;
 			}
 		}
 
@@ -266,7 +266,7 @@ public:
 		for (const tinyxml2::XMLElement *sub=tiNode->FirstChildElement(); sub!=nullptr; sub=sub->NextSiblingElement()) {
 			CXNode *subnode = createFromTinyXml(sub);
 			if (subnode) {
-				result->mNodes.push_back(subnode);
+				result->m_Nodes.push_back(subnode);
 			}
 		}
 

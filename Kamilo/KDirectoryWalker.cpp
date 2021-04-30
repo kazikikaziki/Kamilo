@@ -1,8 +1,9 @@
 ﻿#include "KDirectoryWalker.h"
-#include "KInternal.h"
+
 #include <vector>
 #include <Windows.h>
 #include <Shlwapi.h>
+#include "KInternal.h"
 
 namespace Kamilo {
 

@@ -161,9 +161,9 @@ public:
 	}
 public:
 	CZipCrypt() {
-		keys_[0] = 0;
-		keys_[1] = 0;
-		keys_[2] = 0;
+		m_Keys[0] = 0;
+		m_Keys[1] = 0;
+		m_Keys[2] = 0;
 	}
 	void encodeInit(const char *password, uint8_t *crypt_header, uint8_t crc32_hi_8bit) {
 		K__Assert(password);
@@ -206,18 +206,18 @@ public:
 	}
 private:
 	void initKeys() {
-		keys_[0] = 0x12345678;
-		keys_[1] = 0x23456789;
-		keys_[2] = 0x34567890;
+		m_Keys[0] = 0x12345678;
+		m_Keys[1] = 0x23456789;
+		m_Keys[2] = 0x34567890;
 	}
 	void update(uint8_t val) {
-		keys_[0] = KCrc32::fromByte(val, keys_[0]);
-		keys_[1] += (keys_[0] & 0xFF);
-		keys_[1] = keys_[1] * 134775813 + 1;
-		keys_[2] = KCrc32::fromByte(keys_[1] >> 24, keys_[2]);
+		m_Keys[0] = KCrc32::fromByte(val, m_Keys[0]);
+		m_Keys[1] += (m_Keys[0] & 0xFF);
+		m_Keys[1] = m_Keys[1] * 134775813 + 1;
+		m_Keys[2] = KCrc32::fromByte(m_Keys[1] >> 24, m_Keys[2]);
 	}
 	uint8_t next() {
-		uint16_t tmp = (uint16_t)((keys_[2] & 0xFFFF) | 2);
+		uint16_t tmp = (uint16_t)((m_Keys[2] & 0xFFFF) | 2);
 		return ((tmp * (tmp ^ 1)) >> 8) & 0xFF;
 	}
 	uint8_t encode_byte(uint8_t val) {
@@ -230,7 +230,7 @@ private:
 		update(val);
 		return val;
 	}
-	uint32_t keys_[3];
+	uint32_t m_Keys[3];
 };
 
 struct SZipExtraBlock {
@@ -891,40 +891,40 @@ static bool Unzip__GetZipFileComment(KInputStream &input, std::string *comment_b
 
 
 class CZipWriterImpl {
-	std::vector<SZipEntryWritingParams> m_entries;
-	std::string m_password;
-	KOutputStream m_output;
-	int m_central_directory_header_offset;
-	int m_compress_level;
+	std::vector<SZipEntryWritingParams> m_Entries;
+	std::string m_Password;
+	KOutputStream m_Output;
+	int m_CentralDirectoryHeaderOffset;
+	int m_CompressLevel;
 public:
 	CZipWriterImpl() {
 		clear();
 	}
 	void clear() {
-		m_entries.clear();
-		m_password.clear();
-		m_output = KOutputStream();
-		m_central_directory_header_offset = 0;
-		m_compress_level = -1;
+		m_Entries.clear();
+		m_Password.clear();
+		m_Output = KOutputStream();
+		m_CentralDirectoryHeaderOffset = 0;
+		m_CompressLevel = -1;
 	}
 	bool isOpen() {
-		return m_output.isOpen();
+		return m_Output.isOpen();
 	}
 	void setOutput(KOutputStream &output) {
 		clear();
-		m_output = output;
+		m_Output = output;
 	}
 	void setCompressLevel(int level) {
 		if (level < -1) {
-			m_compress_level = -1;
+			m_CompressLevel = -1;
 		} else if (level > 9) {
-			m_compress_level = 9;
+			m_CompressLevel = 9;
 		} else {
-			m_compress_level = level;
+			m_CompressLevel = level;
 		}
 	}
 	void setPassword(const char *password) {
-		m_password = password;
+		m_Password = password;
 	}
 	// アーカイブにファイルを追加する。
 	// @param password 暗号化パスワード。暗号化しない場合は nullptr または "" を指定する
@@ -970,11 +970,11 @@ public:
 			params.mtime = 0;
 			params.atime = 0;
 		} 
-		params.password = m_password.c_str();
-		params.level = m_compress_level;
-		Zip__WriteEntry(m_output, params);
+		params.password = m_Password.c_str();
+		params.level = m_CompressLevel;
+		Zip__WriteEntry(m_Output, params);
 
-		m_entries.push_back(params);
+		m_Entries.push_back(params);
 		return true;
 	}
 	void finalize(const char *comment, int size) {
@@ -984,18 +984,18 @@ public:
 private:
 	// Central directory header を追加
 	void add_central_directories() {
-		m_central_directory_header_offset = m_output.tell(); // 中央ディレクトリの開始位置を記録しておく
-		for (size_t i=0; i<m_entries.size(); ++i) {
-			Zip__WriteCentralDirectoryHeader(m_output, m_entries[i]);
+		m_CentralDirectoryHeaderOffset = m_Output.tell(); // 中央ディレクトリの開始位置を記録しておく
+		for (size_t i=0; i<m_Entries.size(); ++i) {
+			Zip__WriteCentralDirectoryHeader(m_Output, m_Entries[i]);
 		}
 	}
 	// End of central directory record を追加
 	void add_end_of_central_directory_record(const char *comment, int commentsize) {
 		Zip__WriteEndOfCentralDirectoryHeaderAndComment(
-			m_output,
-			m_central_directory_header_offset, 
-			&m_entries[0], 
-			(int)m_entries.size(), 
+			m_Output,
+			m_CentralDirectoryHeaderOffset, 
+			&m_Entries[0], 
+			(int)m_Entries.size(), 
 			comment,
 			commentsize
 		);
@@ -1040,8 +1040,8 @@ void KZipper::finalize(const char *comment, int commentsize) {
 
 
 class CZipReaderImpl {
-	std::vector<SZipEntryBlock> m_entries;
-	KInputStream m_input;
+	std::vector<SZipEntryBlock> m_Entries;
+	KInputStream m_Input;
 public:
 	CZipReaderImpl() {
 		clear();
@@ -1049,28 +1049,28 @@ public:
 	~CZipReaderImpl() {
 	}
 	void clear() {
-		m_entries.clear();
-		m_input = KInputStream();
+		m_Entries.clear();
+		m_Input = KInputStream();
 	}
 	void setInput(KInputStream &input) {
 		clear();
-		m_input = input;
+		m_Input = input;
 		
 		// 中央ディレクトリヘッダまでシーク
-		Unzip__SeekToCentralDirectoryHeader(m_input);
+		Unzip__SeekToCentralDirectoryHeader(m_Input);
 
 		// 中央ディレクトリヘッダ及びコンテンツ情報を読み取る
-		while (Unzip__CheckFileUint32(m_input, ZIP_SIGN_PK0102)) {
+		while (Unzip__CheckFileUint32(m_Input, ZIP_SIGN_PK0102)) {
 			SZipEntryBlock entry;
-			Unzip__ReadCenteralDirectoryHeaderAndEntry(m_input, &entry);
-			m_entries.push_back(entry);
+			Unzip__ReadCenteralDirectoryHeaderAndEntry(m_Input, &entry);
+			m_Entries.push_back(entry);
 		}
 	}
 	bool isOpen() {
-		return m_input.isOpen();
+		return m_Input.isOpen();
 	}
 	int getEntryCount() const {
-		return (int)m_entries.size();
+		return (int)m_Entries.size();
 	}
 	int getEntryName(int file_index, std::string *bin) {
 		const SZipEntryBlock *entry = get_entry(file_index);
@@ -1084,7 +1084,7 @@ public:
 		const SZipEntryBlock *entry = get_entry(file_index);
 		int size = 0;
 		if (entry) {
-			size = Unzip__GetComment(m_input, entry, bin);
+			size = Unzip__GetComment(m_Input, entry, bin);
 		}
 		return size;
 	}
@@ -1097,7 +1097,7 @@ public:
 				if (out_sign) {
 					*out_sign = extra->sign;
 				}
-				size = Unzip__GetExtra(m_input, extra, out_bin);
+				size = Unzip__GetExtra(m_Input, extra, out_bin);
 			}
 		}
 		return size;
@@ -1138,17 +1138,17 @@ public:
 	bool getEntryData(int file_index, const char *password, std::string *bin) {
 		const SZipEntryBlock *entry = get_entry(file_index);
 		if (entry) {
-			return Unzip__UnzipEntry(m_input, entry, password, bin);
+			return Unzip__UnzipEntry(m_Input, entry, password, bin);
 		}
 		return false;
 	}
 	int getComment(std::string *bin) {
-		return Unzip__GetZipFileComment(m_input, bin);
+		return Unzip__GetZipFileComment(m_Input, bin);
 	}
 private:
 	const SZipEntryBlock * get_entry(int index) const {
-		if (0 <= index && index < (int)m_entries.size()) {
-			return &m_entries[index];
+		if (0 <= index && index < (int)m_Entries.size()) {
+			return &m_Entries[index];
 		}
 		return nullptr;
 	}

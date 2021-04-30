@@ -13,16 +13,6 @@
 #define INVALID_OPERATION    KLog::printWarning("INVALID_OPERATION at %s(%d)", __FUNCTION__, __LINE__)
 
 
-
-#ifdef _DEBUG
-//#	define VIDEO_LOG(...)   KLog::printDebug(__VA_ARGS__)
-#	define VIDEO_LOG(...)   KLog::printVerbose(__VA_ARGS__)
-#else
-#	define VIDEO_LOG(...)
-#endif
-
-
-
 namespace Kamilo {
 
 #pragma region internal
@@ -833,7 +823,7 @@ KTextureRes::KTextureRes() {
 }
 void KTextureRes::release() {
 	if (mTexId) {
-		VIDEO_LOG("Del texture: %s", mName.u8());
+		K__Verbose("Del texture: %s", mName.u8());
 		KVideo::deleteTexture(mTexId);
 		mTexId = nullptr;
 	}
@@ -2010,7 +2000,7 @@ public:
 		m_mutex.lock();
 		{
 			m_items[name] = sp;
-			VIDEO_LOG("ADD_SPRITE: %s", name.u8());
+			K__Verbose("ADD_SPRITE: %s", name.u8());
 		}
 		m_mutex.unlock();
 
@@ -2253,7 +2243,7 @@ public:
 				KShaderAuto &sh = it->second;
 				sh->release();
 				m_items.erase(it);
-				VIDEO_LOG("Del shader: %s", name.u8());
+				K__Verbose("Del shader: %s", name.u8());
 			}
 		}
 		m_mutex.unlock();
@@ -2265,7 +2255,7 @@ public:
 				KShaderAuto &sh = it->second;
 				if (sh->hasTag(tag)) {
 					sh->release();
-					VIDEO_LOG("Del shader: %s (by tag \"%s\")", it->first.u8(), tag.c_str());
+					K__Verbose("Del shader: %s (by tag \"%s\")", it->first.u8(), tag.c_str());
 					it = m_items.erase(it);
 				} else {
 					it++;

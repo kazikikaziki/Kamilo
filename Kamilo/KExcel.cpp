@@ -84,41 +84,41 @@ class CCoreExcelReader {
 		TP_LITERAL,
 		TP_OTHER,
 	};
-	std::string m_filename;
-	KXmlElement *m_workbook_doc;
-	std::vector<KXmlElement *> m_worksheets;
-	std::unordered_map<int, std::string> m_strings;
+	std::string m_FileName;
+	KXmlElement *m_WorkBookDoc;
+	std::vector<KXmlElement *> m_WorkSheets;
+	std::unordered_map<int, std::string> m_Strings;
 	typedef std::unordered_map<int, const KXmlElement*> Int_Elms;
 	typedef std::unordered_map<const KXmlElement*, Int_Elms> Sheet_RowElms;
-	mutable Sheet_RowElms m_row_elements;
+	mutable Sheet_RowElms m_RowElements;
 public:
 	CCoreExcelReader() {
-		m_workbook_doc = nullptr;
+		m_WorkBookDoc = nullptr;
 	}
 	virtual ~CCoreExcelReader() {
 		clear();
 	}
 	void clear() {
-		for (size_t i=0; i<m_worksheets.size(); i++) {
-			K_Drop(m_worksheets[i]);
+		for (size_t i=0; i<m_WorkSheets.size(); i++) {
+			K_Drop(m_WorkSheets[i]);
 		}
-		m_worksheets.clear();
-		m_strings.clear();
-		m_row_elements.clear();
-		K_Drop(m_workbook_doc);
-		m_filename.clear();
+		m_WorkSheets.clear();
+		m_Strings.clear();
+		m_RowElements.clear();
+		K_Drop(m_WorkBookDoc);
+		m_FileName.clear();
 	}
 	bool empty() const {
-		return m_worksheets.empty();
+		return m_WorkSheets.empty();
 	}
 	std::string getFileName() const {
-		return m_filename;
+		return m_FileName;
 	}
 	int getSheetCount() const {
-		return (int)m_worksheets.size();
+		return (int)m_WorkSheets.size();
 	}
 	std::string getSheetName(int sheetId) const {
-		const KXmlElement *root_elm = m_workbook_doc->getNode(0);
+		const KXmlElement *root_elm = m_WorkBookDoc->getNode(0);
 		K__Assert(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
@@ -145,7 +145,7 @@ public:
 		return "";
 	}
 	int getSheetByName(const char *name) const {
-		const KXmlElement *root_elm = m_workbook_doc->getNode(0);
+		const KXmlElement *root_elm = m_WorkBookDoc->getNode(0);
 		K__Assert(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
@@ -173,9 +173,9 @@ public:
 	}
 	bool getSheetDimension(int sheet, int *col, int *row, int *colcount, int *rowcount) const {
 		if (sheet < 0) return false;
-		if (sheet >= (int)m_worksheets.size()) return false;
+		if (sheet >= (int)m_WorkSheets.size()) return false;
 
-		const KXmlElement *xdoc = m_worksheets[sheet];
+		const KXmlElement *xdoc = m_WorkSheets[sheet];
 		K__Assert(xdoc);
 
 		const KXmlElement *xroot = xdoc->getNode(0);
@@ -269,9 +269,9 @@ public:
 	}
 	void scanCells(int sheet, KExcelScanCellsCallback *cb) const {
 		if (sheet < 0) return;
-		if (sheet >= (int)m_worksheets.size()) return;
+		if (sheet >= (int)m_WorkSheets.size()) return;
 
-		const KXmlElement *doc = m_worksheets[sheet];
+		const KXmlElement *doc = m_WorkSheets[sheet];
 		K__Assert(doc);
 
 		const KXmlElement *root_elm = doc->getNode(0);
@@ -283,7 +283,7 @@ public:
 		}
 	}
 	bool loadFromFile(KInputStream &file, const std::string &xlsx_name) {
-		m_row_elements.clear();
+		m_RowElements.clear();
 
 		if (!file.isOpen()) {
 			K__Error("E_INVALID_ARGUMENT");
@@ -317,7 +317,7 @@ public:
 				const KXmlElement *t_elm = si_elm->findNode("t");
 				if (t_elm) {
 					const char *s = t_elm->getText("");
-					m_strings[stringId] = s;
+					m_Strings[stringId] = s;
 					stringId++;
 					continue;
 				}
@@ -340,7 +340,7 @@ public:
 					}
 				}
 				if (!s.empty()) {
-					m_strings[stringId] = s;
+					m_Strings[stringId] = s;
 					stringId++;
 					continue;
 				}
@@ -353,7 +353,7 @@ public:
 		}
 
 		// ワークシート情報を取得
-		m_workbook_doc = _LoadXmlFromZip(zr, xlsx_name, "xl/workbook.xml");
+		m_WorkBookDoc = _LoadXmlFromZip(zr, xlsx_name, "xl/workbook.xml");
 
 		// ワークシートを取得
 		for (int i=1; ; i++) {
@@ -365,17 +365,17 @@ public:
 				K__Error("E_XLSX: Failed to load document: '%s' in xlsx file.", s);
 				break;
 			}
-			m_worksheets.push_back(sheet_doc);
+			m_WorkSheets.push_back(sheet_doc);
 		}
 
 		// 必要な情報がそろっていることを確認
-		if (m_workbook_doc == nullptr || m_worksheets.empty()) {
+		if (m_WorkBookDoc == nullptr || m_WorkSheets.empty()) {
 			K__Error("E_FAILED_TO_READ_EXCEL_ARCHIVE: %s", xlsx_name);
 			clear();
 			return false;
 		}
 
-		m_filename = xlsx_name;
+		m_FileName = xlsx_name;
 		return true;
 	}
 
@@ -392,8 +392,8 @@ private:
 			int sid = -1;
 			K__strtoi(val, &sid);
 			K__Assert(sid >= 0);
-			auto it = m_strings.find(sid);
-			if (it != m_strings.end()) {
+			auto it = m_Strings.find(sid);
+			if (it != m_Strings.end()) {
 				return it->second.c_str();
 			}
 			return "";
@@ -455,9 +455,9 @@ private:
 	}
 	const KXmlElement * get_sheet_xml(int sheet) const {
 		if (sheet < 0) return nullptr;
-		if (sheet >= (int)m_worksheets.size()) return nullptr;
+		if (sheet >= (int)m_WorkSheets.size()) return nullptr;
 
-		const KXmlElement *doc = m_worksheets[sheet];
+		const KXmlElement *doc = m_WorkSheets[sheet];
 		K__Assert(doc);
 
 		const KXmlElement *root_elm = doc->getNode(0);
@@ -469,10 +469,10 @@ private:
 		if (sheet_xml == nullptr) return nullptr;
 		if (row < 0) return nullptr;
 		// キャッシュからから探す
-		if (! m_row_elements.empty()) {
+		if (! m_RowElements.empty()) {
 			// シートを得る
-			Sheet_RowElms::const_iterator sheet_it = m_row_elements.find(sheet_xml);
-			if (sheet_it != m_row_elements.end()) {
+			Sheet_RowElms::const_iterator sheet_it = m_RowElements.find(sheet_xml);
+			if (sheet_it != m_RowElements.end()) {
 				// 行を得る
 				Int_Elms::const_iterator row_it = sheet_it->second.find(row);
 				if (row_it != sheet_it->second.end()) {
@@ -490,7 +490,7 @@ private:
 			int val = it->findAttrInt("r");
 			if (val >= 1) {
 				int r = val - 1;
-				m_row_elements[sheet_xml][r] = it;
+				m_RowElements[sheet_xml][r] = it;
 				if (r == row) {
 					ret = it;
 				}
@@ -636,29 +636,28 @@ bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
 
 
 KExcelFile::KExcelFile() {
-	m_impl = std::make_shared<CCoreExcelReader>();
+	m_Impl = std::make_shared<CCoreExcelReader>();
 }
 bool KExcelFile::empty() const {
-	return m_impl->empty();
+	return m_Impl->empty();
 }
 void KExcelFile::clear() {
-	m_impl->clear();
+	m_Impl->clear();
 }
 std::string KExcelFile::getFileName() const {
-	m_name = m_impl->getFileName();
-	return m_name;
+	return m_Impl->getFileName();
 }
 bool KExcelFile::loadFromStream(KInputStream &file, const char *xlsx_name) {
-	return m_impl->loadFromFile(file, xlsx_name);
+	return m_Impl->loadFromFile(file, xlsx_name);
 }
 bool KExcelFile::loadFromFileName(const std::string &name) {
 	bool ok = false;
 	KInputStream file = KInputStream::fromFileName(name);
 	if (file.isOpen()) {
-		ok = m_impl->loadFromFile(file, name);
+		ok = m_Impl->loadFromFile(file, name);
 	}
 	if (!ok) {
-		m_impl->clear();
+		m_Impl->clear();
 	}
 	return ok;
 }
@@ -666,33 +665,33 @@ bool KExcelFile::loadFromMemory(const void *bin, size_t size, const std::string 
 	bool ok = false;
 	KInputStream file = KInputStream::fromMemory(bin, size);
 	if (file.isOpen()) {
-		ok = m_impl->loadFromFile(file, name);
+		ok = m_Impl->loadFromFile(file, name);
 	}
 	if (!ok) {
-		m_impl->clear();
+		m_Impl->clear();
 	}
 	return ok;
 }
 int KExcelFile::getSheetCount() const {
-	return m_impl->getSheetCount();
+	return m_Impl->getSheetCount();
 }
 int KExcelFile::getSheetByName(const char *name) const {
-	return m_impl->getSheetByName(name);
+	return m_Impl->getSheetByName(name);
 }
 std::string KExcelFile::getSheetName(int sheet) const {
-	return m_impl->getSheetName(sheet);
+	return m_Impl->getSheetName(sheet);
 }
 bool KExcelFile::getSheetDimension(int sheet, int *col, int *row, int *colcount, int *rowcount) const {
-	return m_impl->getSheetDimension(sheet, col, row, colcount, rowcount);
+	return m_Impl->getSheetDimension(sheet, col, row, colcount, rowcount);
 }
 const char * KExcelFile::getDataString(int sheet, int col, int row) const {
-	return m_impl->getDataString(sheet, col, row);
+	return m_Impl->getDataString(sheet, col, row);
 }
 bool KExcelFile::getCellByText(int sheet, const char *s, int *col, int *row) const {
-	return m_impl->getCellByText(sheet, s, col, row);
+	return m_Impl->getCellByText(sheet, s, col, row);
 }
 void KExcelFile::scanCells(int sheet, KExcelScanCellsCallback *cb) const {
-	m_impl->scanCells(sheet, cb);
+	m_Impl->scanCells(sheet, cb);
 }
 std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 	class CB: public KExcelScanCellsCallback {

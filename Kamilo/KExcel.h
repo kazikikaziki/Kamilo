@@ -82,8 +82,7 @@ public:
 	std::string exportText();
 
 private:
-	std::shared_ptr<CCoreExcelReader> m_impl;
-	mutable std::string m_name;
+	std::shared_ptr<CCoreExcelReader> m_Impl;
 };
 
 
