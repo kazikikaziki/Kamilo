@@ -35,34 +35,34 @@ private:
 		item.hRsrc = FindResourceW(module, name, type);
 		K__WideToUtf8(item.name_u8, sizeof(item.name_u8), item.name_w);
 		K__Assert(item.hRsrc);
-		items_.push_back(item);
+		m_Items.push_back(item);
 	}
 
 private:
-	std::vector<ITEM> items_;
+	std::vector<ITEM> m_Items;
 
 public:
 	/// この実行ファイルに埋め込まれているリソースデータの一覧を得る
 	void update() {
-		items_.clear();
+		m_Items.clear();
 		EnumResourceTypesW(NULL, typeCallback, (LONG_PTR)this);
 	}
 
 	/// リソースデータの個数
 	int getCount() const {
-		return (int)items_.size();
+		return (int)m_Items.size();
 	}
 
 	/// リソース情報
 	const ITEM * getItem(int index) const {
-		return &items_[index];
+		return &m_Items[index];
 	}
 
 	/// リソースデータの先頭アドレスとサイズを取得する。
 	/// ここで取得できるアポインタはアプリケーション終了時まで常に有効である
 	const void * getData(int index, int *size) const {
-		if (0 <= index && index < (int)items_.size()) {
-			const ITEM &item = items_[index];
+		if (0 <= index && index < (int)m_Items.size()) {
+			const ITEM &item = m_Items[index];
 			HGLOBAL hGlobal = LoadResource(item.hModule, item.hRsrc);
 			if (hGlobal) {
 				if (size) *size = (int)SizeofResource(item.hModule, item.hRsrc);
@@ -74,11 +74,11 @@ public:
 
 public:
 	int getIndexOfName(const char *name) {
-		if (items_.empty()) {
+		if (m_Items.empty()) {
 			update();
 		}
-		for (size_t i=0; i<items_.size(); i++) {
-			if (K__PathCompare(items_[i].name_u8, name, true, true) == 0) {
+		for (size_t i=0; i<m_Items.size(); i++) {
+			if (K__PathCompare(m_Items[i].name_u8, name, true, true) == 0) {
 				return (int)i;
 			}
 		}

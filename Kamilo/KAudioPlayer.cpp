@@ -22,16 +22,16 @@ namespace Kamilo {
 #pragma region Internal Utils
 class CScopedLock {
 public:
-	std::recursive_mutex &m_mutex;
+	std::recursive_mutex &m_Mutex;
 
-	explicit CScopedLock(std::recursive_mutex &m): m_mutex(m) {
-		m_mutex.lock();
+	explicit CScopedLock(std::recursive_mutex &m): m_Mutex(m) {
+		m_Mutex.lock();
 	}
 	~CScopedLock() {
-		m_mutex.unlock();
+		m_Mutex.unlock();
 	}
 };
-#define K__SCOPED_LOCK  CScopedLock lock__(m_mutex) // m_mutex = std::recursive_mutex
+#define K__SCOPED_LOCK  CScopedLock lock__(m_Mutex) // m_Mutex = std::recursive_mutex
 
 #pragma endregion // Internal Utils
 
@@ -95,11 +95,11 @@ public:
 	void updateThreadProc();
 
 private:
-	std::unordered_map<KSOUNDID, KSoundPlayer::Buf> m_sounds;
-	std::unordered_map<KPath, KSoundPlayer::Buf> m_pool;
-	int m_newid;
-	std::recursive_mutex m_mutex; // m_sounds, m_pool の操作に対するロック用
-	bool m_isinit;
+	std::unordered_map<KSOUNDID, KSoundPlayer::Buf> m_Sounds;
+	std::unordered_map<KPath, KSoundPlayer::Buf> m_Pool;
+	int m_NewId;
+	std::recursive_mutex m_Mutex; // m_Sounds, m_Pool の操作に対するロック用
+	bool m_IsInit;
 
 	class CSoundThread: public KThread {
 	public:
@@ -111,40 +111,40 @@ private:
 			m_SoundImpl->updateThreadProc();
 		}
 	};
-	CSoundThread m_thread;
+	CSoundThread m_Thread;
 };
 
 #pragma region CSoundImpl
 CSoundImpl::CSoundImpl() {
-	m_newid = 0;
-	m_isinit = false;
-	m_thread.m_SoundImpl = this;
+	m_NewId = 0;
+	m_IsInit = false;
+	m_Thread.m_SoundImpl = this;
 }
 CSoundImpl::~CSoundImpl() {
-	m_thread.m_SoundImpl = nullptr;
+	m_Thread.m_SoundImpl = nullptr;
 	shutdown();
 }
 bool CSoundImpl::is_init() const {
-	return m_isinit;
+	return m_IsInit;
 }
 void CSoundImpl::init() {
 	// ストリーミング再生用のスレッドを開始する
-	m_thread.start();
+	m_Thread.start();
 }
 void CSoundImpl::shutdown() {
 	// ストリーミング再生用のスレッドを停止する
-	m_thread.stop();
+	m_Thread.stop();
 
 	// サウンドオブジェクトをすべて削除する
-	for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+	for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 		KSoundPlayer::remove(it->second);
 	}
-	for (auto it=m_pool.begin(); it!=m_pool.end(); ++it) {
+	for (auto it=m_Pool.begin(); it!=m_Pool.end(); ++it) {
 		KSoundPlayer::remove(it->second);
 	}
 	// K__SCOPED_LOCK もうスレッドからは抜けているはずなので、ロック不要
-	m_sounds.clear();
-	m_pool.clear();
+	m_Sounds.clear();
+	m_Pool.clear();
 }
 /// サウンドファイルをロードして playPooledSound() で再生可能な状態にする
 /// @param name 登録するサウンド名
@@ -159,7 +159,7 @@ void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
  		KSoundPlayer::Buf buf = KSoundPlayer::makeBuffer(oggStrm);
 		if (buf) {
 			K__SCOPED_LOCK;
-			m_pool[name] = buf;
+			m_Pool[name] = buf;
 			return;
 		}
 		K__Error("E_FAIL_PLAY_SOUND: %s", name.u8());
@@ -171,7 +171,7 @@ void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
 		KSoundPlayer::Buf buf = KSoundPlayer::makeBuffer(wavStrm);
 		if (buf) {
 			K__SCOPED_LOCK;
-			m_pool[name] = buf;
+			m_Pool[name] = buf;
 			return;
 		}
 		K__Error("E_FAIL_PLAY_SOUND: %s", name.u8());
@@ -186,8 +186,8 @@ void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
 /// @return ロード済みなら true
 bool CSoundImpl::isPooled(const KPath &name) {
 	K__SCOPED_LOCK;
-	auto it = m_pool.find(name);
-	if (it != m_pool.end()) {
+	auto it = m_Pool.find(name);
+	if (it != m_Pool.end()) {
 		return true;
 	}
 	return false;
@@ -196,7 +196,7 @@ bool CSoundImpl::isPooled(const KPath &name) {
 /// @param name サウンド名
 void CSoundImpl::deletePooledSound(const KPath &name) {
 	K__SCOPED_LOCK;
-	m_pool.erase(name);
+	m_Pool.erase(name);
 }
 /// ロード済みオーディオクリップを再生し、サウンドIDを返す。
 /// @note サウンドはあらかじめ poolSound() でロードしておくこと
@@ -206,8 +206,8 @@ void CSoundImpl::deletePooledSound(const KPath &name) {
 KSOUNDID CSoundImpl::playPooledSound(const KPath &name, float volume) {
 	K__SCOPED_LOCK;
 	K__Assert(!name.empty());
-	auto it = m_pool.find(name);
-	if (it == m_pool.end()) {
+	auto it = m_Pool.find(name);
+	if (it == m_Pool.end()) {
 		return nullptr;
 	}
 	KSoundPlayer::Buf se = KSoundPlayer::makeClone(it->second);
@@ -217,8 +217,8 @@ KSOUNDID CSoundImpl::playPooledSound(const KPath &name, float volume) {
 	KSoundPlayer::setVolume(se, volume);
 	KSoundPlayer::play(se);
 
-	KSOUNDID id = (KSOUNDID)(++m_newid);
-	m_sounds[id] = se;
+	KSOUNDID id = (KSOUNDID)(++m_NewId);
+	m_Sounds[id] = se;
 	return id;
 }
 /// オーディオクリップをストリーミング再生する
@@ -248,119 +248,119 @@ KSOUNDID CSoundImpl::playStreamingSound(const void *data, size_t size, float off
 	KSoundPlayer::setPosition(music, offsetSeconds);
 	KSoundPlayer::play(music);
 
-	KSOUNDID id = (KSOUNDID)(++m_newid);
-	m_sounds[id] = music;
+	KSOUNDID id = (KSOUNDID)(++m_NewId);
+	m_Sounds[id] = music;
 	return id;
 }
 void CSoundImpl::pause(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::stop(it->second);
 	}
 }
 void CSoundImpl::resume(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::play(it->second);
 	}
 }
 void CSoundImpl::deleteHandle(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::remove(it->second);
-		m_sounds.erase(it);
+		m_Sounds.erase(it);
 	}
 }
 float CSoundImpl::getPositionSeconds(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_POSITION_SECONDS);
 	}
 	return 0.0f;
 }
 float CSoundImpl::getLengthSeconds(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_LENGTH_SECONDS);
 	}
 	return 0.0f;
 }
 void CSoundImpl::setPositionSeconds(KSOUNDID id, float seconds) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::setPosition(it->second, seconds);
 	}
 }
 bool CSoundImpl::isLooping(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_IS_LOOPING) != 0.0f;
 	}
 	return false;
 }
 bool CSoundImpl::isPlaying(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_IS_PLAYING) != 0.0f;
 	}
 	return false;
 }
 void CSoundImpl::setLooping(KSOUNDID id, bool value) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::setStreamingLoop(it->second, value);
 	}
 }
 void CSoundImpl::setPan(KSOUNDID id, float value) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::setPan(it->second, value);
 	}
 }
 float CSoundImpl::getPan(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_PAN);
 	}
 	return 0.0f;
 }
 void CSoundImpl::setVolume(KSOUNDID id, float value) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::setVolume(it->second, value);
 	}
 }
 float CSoundImpl::getVolume(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_VOLUME);
 	}
 	return 0.0f;
 }
 void CSoundImpl::setPitch(KSOUNDID id, float value) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		KSoundPlayer::setPitch(it->second, value);
 	}
 }
 float CSoundImpl::getPitch(KSOUNDID id) {
 	K__SCOPED_LOCK;
-	auto it = m_sounds.find(id);
-	if (it != m_sounds.end()) {
+	auto it = m_Sounds.find(id);
+	if (it != m_Sounds.end()) {
 		return KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_PITCH);
 	}
 	return 1.0f;
@@ -373,7 +373,7 @@ void CSoundImpl::command(const char *cmd, int *args) {
 }
 void CSoundImpl::updateStreaming() {
 	K__SCOPED_LOCK;
-	for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+	for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 		if (KSoundPlayer::getParameterf(it->second, KSoundPlayer::INFO_IS_STREAMING)) {
 			KSoundPlayer::updateStreaming(it->second);
 		}
@@ -384,7 +384,7 @@ void CSoundImpl::updateThreadProc() {
 	// 少なくとも K__DS_STREAMING_BUFFSER_SEC 秒の半分未満の時間間隔で更新すること
 	int interval_msec = (int)(K__DS_STREAMING_BUFFSER_SEC * 1000) / 4;
 
-	while (!m_thread.shouldExit()) {
+	while (!m_Thread.shouldExit()) {
 		updateStreaming();
 
 		// 適当な時間待つだけ。スリープの精度が低くてもよい
@@ -453,38 +453,38 @@ public:
 		bool auto_stop;
 		bool finished;
 	};
-	std::unordered_map<KSOUNDID, SSndItem> m_sounds;
-	std::unordered_set<KSOUNDID> m_post_destroy_sounds;
-	std::vector<SFade> m_fades;
-	std::vector<SSndGroup> m_groups;
-	CSoundImpl m_snd;
-	int m_solo_group; // KAudioFlag_SOLO が設定されてているグループ番号。未設定ならば -1
-	float m_master_volume;
-	bool m_master_mute;
-	KStorage m_storage;
+	std::unordered_map<KSOUNDID, SSndItem> m_Sounds;
+	std::unordered_set<KSOUNDID> m_PostDestroySounds;
+	std::vector<SFade> m_Fades;
+	std::vector<SSndGroup> m_Groups;
+	CSoundImpl m_SndImpl;
+	int m_SoloGroup; // KAudioFlag_SOLO が設定されてているグループ番号。未設定ならば -1
+	float m_MasterVolume;
+	bool m_MasterMute;
+	KStorage m_Storage;
 
 	CAudioPlayer() {
-		m_master_volume = 1.0f;
-		m_master_mute = false;
-		m_solo_group = -1;
+		m_MasterVolume = 1.0f;
+		m_MasterMute = false;
+		m_SoloGroup = -1;
 	
 		SSndGroup def_group;
 		def_group.name = "Default";
-		m_groups.push_back(def_group);
+		m_Groups.push_back(def_group);
 
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this); // KInspectorCallback
 	}
 	virtual void on_manager_start() override {
-		m_snd.init();
+		m_SndImpl.init();
 	}
 	virtual void on_manager_end() override {
 		clearAllSounds();
-		m_snd.shutdown();
+		m_SndImpl.shutdown();
 	}
 	virtual void on_manager_frame() override {
 		// サウンド処理
-		for (auto it=m_fades.begin(); it!=m_fades.end(); ++it) {
+		for (auto it=m_Fades.begin(); it!=m_Fades.end(); ++it) {
 			SFade *fade = &(*it);
 			if (!fade->finished) {
 				if (fade->time < fade->duration) {
@@ -493,7 +493,7 @@ public:
 
 					// 音量更新
 					if (fade->sound_id) {
-						m_snd.setVolume(fade->sound_id, v);
+						m_SndImpl.setVolume(fade->sound_id, v);
 
 					} else if (fade->group_id >= 0) {
 						set_group_volume(fade->group_id, v);
@@ -503,7 +503,7 @@ public:
 				} else {
 					// フェード終了。最終音量に設定する
 					if (fade->sound_id) {
-						m_snd.setVolume(fade->sound_id, fade->volume_end);
+						m_SndImpl.setVolume(fade->sound_id, fade->volume_end);
 					} else {
 						set_group_volume(fade->group_id, fade->volume_end);
 					}
@@ -515,10 +515,10 @@ public:
 				}
 			}
 		}
-		if (!m_fades.empty()) {
-			for (auto it=m_fades.begin(); it!=m_fades.end();/* ++it*/) {
+		if (!m_Fades.empty()) {
+			for (auto it=m_Fades.begin(); it!=m_Fades.end();/* ++it*/) {
 				if (it->finished) {
-					it = m_fades.erase(it);
+					it = m_Fades.erase(it);
 				} else {
 					++it;
 				}
@@ -526,39 +526,39 @@ public:
 		}
 
 		// 再生終了しているサウンドを削除する
-		for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+		for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 			KSOUNDID id = it->first;
 			const SSndItem &snd = it->second;
 			if (snd.destroy_on_stop) {
-				if (! m_snd.isPlaying(id)) {
-					m_post_destroy_sounds.insert(id);
+				if (! m_SndImpl.isPlaying(id)) {
+					m_PostDestroySounds.insert(id);
 				}
 			}
 		}
 
 		// 無効化されたサウンドを削除
-		if (! m_post_destroy_sounds.empty()) {
-			for (auto it=m_post_destroy_sounds.begin(); it!=m_post_destroy_sounds.end(); ++it) {
+		if (! m_PostDestroySounds.empty()) {
+			for (auto it=m_PostDestroySounds.begin(); it!=m_PostDestroySounds.end(); ++it) {
 				KSOUNDID id = *it;
-				m_snd.deleteHandle(id);
-				m_sounds.erase(id);
+				m_SndImpl.deleteHandle(id);
+				m_Sounds.erase(id);
 			}
-			m_post_destroy_sounds.clear();
+			m_PostDestroySounds.clear();
 		}
 	}
 	virtual void onInspectorGui() override { // KInspectorCallback
 		if (ImGui::TreeNodeEx("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
 			if (ImGui::TreeNodeEx(KImGui::KImGui_ID(-1), ImGuiTreeNodeFlags_Leaf, "Master")) {
-				if (ImGui::SliderFloat("Volume", &m_master_volume, 0.0f, 1.0f)) {
+				if (ImGui::SliderFloat("Volume", &m_MasterVolume, 0.0f, 1.0f)) {
 					updateSoundVolumes(-1);
 				}
-				if (ImGui::Checkbox("Mute", &m_master_mute)) {
+				if (ImGui::Checkbox("Mute", &m_MasterMute)) {
 					updateSoundVolumes(-1);
 				}
 				ImGui::TreePop();
 			}
-			for (size_t i=0; i<m_groups.size(); i++) {
-				SSndGroup group = m_groups[i];
+			for (size_t i=0; i<m_Groups.size(); i++) {
+				SSndGroup group = m_Groups[i];
 				ImGui::Separator();
 				if (ImGui::TreeNodeEx(KImGui::KImGui_ID(i), ImGuiTreeNodeFlags_Leaf, "%s", group.name.u8())) {
 					if (ImGui::SliderFloat("Master Vol.", &group.master_volume, 0.0f, 1.0f)) {
@@ -580,11 +580,11 @@ public:
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNode("Sounds")) {
-			ImGui::Text("Sound count: %d", (int)m_sounds.size());
-			for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+			ImGui::Text("Sound count: %d", (int)m_Sounds.size());
+			for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 				const KSOUNDID sid = it->first;
-				float pos_sec = m_snd.getPositionSeconds(sid);
-				float len_sec = m_snd.getLengthSeconds(sid);
+				float pos_sec = m_SndImpl.getPositionSeconds(sid);
+				float len_sec = m_SndImpl.getLengthSeconds(sid);
 				
 				ImGui::Separator();
 				ImGui::Text("Name: %s", it->second.name.u8());
@@ -592,23 +592,23 @@ public:
 
 				ImGui::PushID(sid);
 				if (ImGui::SliderFloat("Seek", &pos_sec, 0, len_sec)) {
-					m_snd.setPositionSeconds(sid, pos_sec);
+					m_SndImpl.setPositionSeconds(sid, pos_sec);
 				}
-				float p = m_snd.getPitch(sid);
+				float p = m_SndImpl.getPitch(sid);
 				if (ImGui::SliderFloat("Pitch", &p, 0.1f, 4.0f)) {
-					m_snd.setPitch(sid, p);
+					m_SndImpl.setPitch(sid, p);
 				}
-				float vol = m_snd.getVolume(sid);
+				float vol = m_SndImpl.getVolume(sid);
 				if (ImGui::SliderFloat("Volume", &vol, 0.0f, 1.0f)) {
-					m_snd.setVolume(sid, vol);
+					m_SndImpl.setVolume(sid, vol);
 				}
-				float pan = m_snd.getPan(sid);
+				float pan = m_SndImpl.getPan(sid);
 				if (ImGui::SliderFloat("Pan", &pan, -1.0f, 1.0f)) {
-					m_snd.setPan(sid, pan);
+					m_SndImpl.setPan(sid, pan);
 				}
-				bool L = m_snd.isLooping(sid);
+				bool L = m_SndImpl.isLooping(sid);
 				if (ImGui::Checkbox("Loop", &L)) {
-					m_snd.setLooping(sid, L);
+					m_SndImpl.setLooping(sid, L);
 				}
 				ImGui::PopID();
 			}
@@ -617,58 +617,58 @@ public:
 	}
 	// 現在のサウンドグループ数を返す
 	int getGroupCount() {
-		return (int)m_groups.size();
+		return (int)m_Groups.size();
 	}
 	void setGroupCount(int count) {
 		if (count > 0) {
-			m_groups.resize(count);
+			m_Groups.resize(count);
 		} else {
-			m_groups.clear();
+			m_Groups.clear();
 		}
 	}
 	float getGroupMasterVolume(int group_id) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			return m_groups[group_id].master_volume;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			return m_Groups[group_id].master_volume;
 		}
 		return 0.0f;
 	}
 	float getGroupVolume(int group_id) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			return m_groups[group_id].volume;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			return m_Groups[group_id].volume;
 		}
 		return 0.0f;
 	}
 	void setGroupMasterVolume(int group_id, float volume) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			m_groups[group_id].master_volume = volume;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			m_Groups[group_id].master_volume = volume;
 			updateSoundVolumes(group_id);
 		}
 	}
 	void stopFadeAll() {
-		for (auto it=m_fades.begin(); it!=m_fades.end(); ++it) {
+		for (auto it=m_Fades.begin(); it!=m_Fades.end(); ++it) {
 			it->finished = true;
 		}
 	}
 	void stopFade(KSOUNDID id) {
-		for (auto it=m_fades.begin(); it!=m_fades.end(); ++it) {
+		for (auto it=m_Fades.begin(); it!=m_Fades.end(); ++it) {
 			if (it->sound_id == id) {
 				it->finished = true;
 			}
 		}
 	}
 	void stopFadeByGroup(int group_id) {
-		for (auto it=m_fades.begin(); it!=m_fades.end(); ++it) {
+		for (auto it=m_Fades.begin(); it!=m_Fades.end(); ++it) {
 			if (it->group_id == group_id) {
 				it->finished = true;
 			}
 		}
 	}
 	void set_group_volume(int group_id, float volume) {
-		m_groups[group_id].volume = volume;
+		m_Groups[group_id].volume = volume;
 		updateSoundVolumes(group_id);
 	}
 	void setGroupVolume(int group_id, float volume, int time) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
 			// 進行中のフェードを停止する
 			stopFadeByGroup(group_id);
 
@@ -682,7 +682,7 @@ public:
 				fade.volume_end = volume;
 				fade.auto_stop = false;
 				fade.finished = false;
-				m_fades.push_back(fade);
+				m_Fades.push_back(fade);
 
 			} else {
 				set_group_volume(group_id, volume);
@@ -690,54 +690,54 @@ public:
 		}
 	}
 	KAudioFlags getGroupFlags(int group_id) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			return m_groups[group_id].flags;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			return m_Groups[group_id].flags;
 		}
 		return 0;
 	}
 	void setGroupFlags(int group_id, KAudioFlags flags) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
 			// 排他的フラグが設定されている場合は、他のグループの該当フラグを解除する
 			if (flags & KAudioFlag_SOLO) {
-				for (auto it=m_groups.begin(); it!=m_groups.end(); ++it) {
+				for (auto it=m_Groups.begin(); it!=m_Groups.end(); ++it) {
 					it->flags &= ~KAudioFlag_SOLO;
 				}
 			}
-			m_groups[group_id].flags = flags;
+			m_Groups[group_id].flags = flags;
 			updateSoundVolumes(group_id);
 		}
 	}
 	float getActualGroupVolume(int group_id) {
 		// マスターボリュームがミュート状態の時は無条件でミュート
-		if (m_master_mute) return 0.0f;
+		if (m_MasterMute) return 0.0f;
 
 		// SOLO属性がある場合、SOLO以外の音は全てミュート
-		if (m_solo_group >= 0 && group_id != m_solo_group) return 0.0f;
+		if (m_SoloGroup >= 0 && group_id != m_SoloGroup) return 0.0f;
 
 		// グループタインでミュートが設定されていればミュート
-		const SSndGroup &group = m_groups[group_id];
+		const SSndGroup &group = m_Groups[group_id];
 		if (group.flags & KAudioFlag_MUTE) return 0.0f;
 
 		// 音量 = [マスターボリューム] * [グループ単位でのマスターボリューム(OptoinなどでBGM, SEごとに設定された音量] * [一時的なグループボリューム（フェードや演出のために一時的に音量を下げるなど）]
-		return m_master_volume * group.master_volume * group.volume;
+		return m_MasterVolume * group.master_volume * group.volume;
 	}
 	const KPath & getGroupName(int group_id) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			return m_groups[group_id].name;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			return m_Groups[group_id].name;
 		}
 		return KPath::Empty;
 	}
 	void setGroupName(int group_id, const KPath &name) {
-		if (0 <= group_id && group_id < (int)m_groups.size()) {
-			m_groups[group_id].name = name;
+		if (0 <= group_id && group_id < (int)m_Groups.size()) {
+			m_Groups[group_id].name = name;
 		}
 	}
 	int getNumberOfPlaying() const {
-		return (int)m_sounds.size();
+		return (int)m_Sounds.size();
 	}
 	int getNumberOfPlayingInGroup(int group_id) const {
 		int num = 0;
-		for (auto it=m_sounds.cbegin(); it!=m_sounds.cend(); ++it) {
+		for (auto it=m_Sounds.cbegin(); it!=m_Sounds.cend(); ++it) {
 			if (it->second.group_id == group_id) {
 				num++;
 			}
@@ -745,27 +745,27 @@ public:
 		return num;
 	}
 	void stopAll(int fade) {
-		for (auto it=m_sounds.cbegin(); it!=m_sounds.cend(); ++it) {
+		for (auto it=m_Sounds.cbegin(); it!=m_Sounds.cend(); ++it) {
 			stop(it->first, fade);
 		}
 	}
 	void stopByGroup(int group_id, int fade) {
-		for (auto it=m_sounds.cbegin(); it!=m_sounds.cend(); ++it) {
+		for (auto it=m_Sounds.cbegin(); it!=m_Sounds.cend(); ++it) {
 			if (it->second.group_id == group_id) {
 				stop(it->first, fade);
 			}
 		}
 	}
 	KSOUNDID playStreaming(const KPath &name, bool looping, int group_id) {
-		if (m_master_mute) return 0;
+		if (m_MasterMute) return 0;
 
-		std::string bin = m_storage.loadBinary(name.u8());
+		std::string bin = m_Storage.loadBinary(name.u8());
 		if (bin.empty()) {
 			K__Error("Failed to open asset file: %s", name.u8());
 			return 0;
 		}
 
-		KSOUNDID snd_id = m_snd.playStreamingSound(bin.data(), bin.size(), 0.0f, looping);
+		KSOUNDID snd_id = m_SndImpl.playStreamingSound(bin.data(), bin.size(), 0.0f, looping);
 		if (snd_id == 0) {
 			K__Error("playStreaming: No sound named: %s", name.u8());
 			return 0;
@@ -777,22 +777,22 @@ public:
 		snd.vol = 1.0f;
 		snd.group_id = group_id;
 		snd.destroy_on_stop = false;
-		m_snd.setVolume(snd_id, group_vol);
-		m_sounds[snd_id] = snd;
+		m_SndImpl.setVolume(snd_id, group_vol);
+		m_Sounds[snd_id] = snd;
 		return snd_id;
 	}
 	KSOUNDID playOneShot(const KPath &name, int group_id) {
-		if (m_master_mute) return 0;
-		if (! m_snd.isPooled(name)) {
-			std::string bin = m_storage.loadBinary(name.u8());
+		if (m_MasterMute) return 0;
+		if (! m_SndImpl.isPooled(name)) {
+			std::string bin = m_Storage.loadBinary(name.u8());
 			if (bin.empty()) {
 				K__Error("Failed to open file: %s", name.u8());
 				return 0;
 			}
-			m_snd.poolSound(name, bin.data(), bin.size());
+			m_SndImpl.poolSound(name, bin.data(), bin.size());
 		}
 		float group_vol = getActualGroupVolume(group_id);
-		KSOUNDID snd_id = m_snd.playPooledSound(name, group_vol);
+		KSOUNDID snd_id = m_SndImpl.playPooledSound(name, group_vol);
 		if (snd_id == 0) {
 			K__Error("playOneShot: No sound named: %s", name.u8());
 			return 0;
@@ -803,48 +803,48 @@ public:
 		snd.vol = 1.0f;
 		snd.group_id = group_id;
 		snd.destroy_on_stop = true; // 停止したら自動削除
-		m_snd.setVolume(snd_id, group_vol);
-		m_sounds[snd_id] = snd;
+		m_SndImpl.setVolume(snd_id, group_vol);
+		m_Sounds[snd_id] = snd;
 		return snd_id;
 	}
 	void postDeleteHandle(KSOUNDID id) {
-		m_post_destroy_sounds.insert(id);
+		m_PostDestroySounds.insert(id);
 	}
 	bool isValidSound(KSOUNDID id) {
-		return m_sounds.find(id) != m_sounds.end();
+		return m_Sounds.find(id) != m_Sounds.end();
 	}
 	void clearAllSounds() {
-		for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+		for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 			KSOUNDID id = it->first;
-			m_snd.deleteHandle(id);
+			m_SndImpl.deleteHandle(id);
 		}
-		m_sounds.clear();
-		m_post_destroy_sounds.clear();
+		m_Sounds.clear();
+		m_PostDestroySounds.clear();
 	}
 	void seekSeconds(KSOUNDID id, float time) {
-		return m_snd.setPositionSeconds(id, time);
+		return m_SndImpl.setPositionSeconds(id, time);
 	}
 	float getPositionInSeconds(KSOUNDID id) {
-		return m_snd.getPositionSeconds(id);
+		return m_SndImpl.getPositionSeconds(id);
 	}
 	float getLengthInSeconds(KSOUNDID id) {
-		return m_snd.getLengthSeconds(id);
+		return m_SndImpl.getLengthSeconds(id);
 	}
 	void setLooping(KSOUNDID id, bool value) {
-		m_snd.setLooping(id, value);
+		m_SndImpl.setLooping(id, value);
 	}
 	void setVolume(KSOUNDID id, float value) {
-		auto it = m_sounds.find(id);
-		if (it != m_sounds.end()) {
+		auto it = m_Sounds.find(id);
+		if (it != m_Sounds.end()) {
 			const KSOUNDID s = it->first;
 			SSndItem &snd = it->second;
 			snd.vol = value;
 			float actual_volume = getActualGroupVolume(snd.group_id) * snd.vol;
-			m_snd.setVolume(s, actual_volume);
+			m_SndImpl.setVolume(s, actual_volume);
 		}
 	}
 	void setPitch(KSOUNDID id, float value) {
-		m_snd.setPitch(id, value);
+		m_SndImpl.setPitch(id, value);
 	}
 	void stop(KSOUNDID id, int time) {
 		if (time > 0) {
@@ -853,49 +853,49 @@ public:
 			fade.time = 0;
 			fade.sound_id = id;
 			fade.group_id = -1;
-			fade.volume_start = m_snd.getVolume(id);
+			fade.volume_start = m_SndImpl.getVolume(id);
 			fade.volume_end = 0.0f;
 			fade.auto_stop = true;
 			fade.finished = false;
-			m_fades.push_back(fade);
+			m_Fades.push_back(fade);
 		} else {
-			m_snd.pause(id);
+			m_SndImpl.pause(id);
 			postDeleteHandle(id);
 		}
 	}
 	bool isPlaying(KSOUNDID id) {
-		return m_snd.isPlaying(id);
+		return m_SndImpl.isPlaying(id);
 	}
 	void updateSoundVolumes(int group_id) {
-		for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+		for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 			const KSOUNDID id = it->first;
 			const SSndItem &snd = it->second;
 			if (group_id < 0 || snd.group_id == group_id) {
 				float vol = getActualGroupVolume(snd.group_id) * snd.vol;
-				m_snd.setVolume(id, vol);
+				m_SndImpl.setVolume(id, vol);
 			}
 		}
 	}
 	void groupCommand(int group_id, const char *cmd) {
-		for (auto it=m_sounds.begin(); it!=m_sounds.end(); ++it) {
+		for (auto it=m_Sounds.begin(); it!=m_Sounds.end(); ++it) {
 			const KSOUNDID id = it->first;
 			const SSndItem &snd = it->second;
 			if (group_id < 0 || snd.group_id == group_id) {
-				m_snd.command(cmd, (int*)&id);
+				m_SndImpl.command(cmd, (int*)&id);
 			}
 		}
 	}
 	void setMuted(bool value) {
-		m_master_mute = value;
+		m_MasterMute = value;
 	}
 	bool isMuted() const {
-		return m_master_mute;
+		return m_MasterMute;
 	}
 	float getMasterVolume() {
-		return m_master_volume;
+		return m_MasterVolume;
 	}
 	void setMasterVolume(float volume) {
-		m_master_volume = volume;
+		m_MasterVolume = volume;
 		updateSoundVolumes(-1);
 	}
 }; // CAudioPlayer
@@ -911,7 +911,7 @@ void KAudioPlayer::install() {
 }
 void KAudioPlayer::install(KStorage &storage) {
 	g_AudioPlayer = new CAudioPlayer();
-	g_AudioPlayer->m_storage = storage;
+	g_AudioPlayer->m_Storage = storage;
 }
 void KAudioPlayer::uninstall() {
 	if (g_AudioPlayer)  {

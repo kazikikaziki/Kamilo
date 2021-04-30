@@ -38,20 +38,20 @@ public:
 	KRefSet() {
 	}
 	bool empty() const {
-		return mItems.empty();
+		return m_Items.empty();
 	}
 	size_t size() const {
-		return mItems.size();
+		return m_Items.size();
 	}
 	void clear() {
-		for (auto it=mItems.begin(); it!=mItems.end(); ++it) {
+		for (auto it=m_Items.begin(); it!=m_Items.end(); ++it) {
 			_KRef *ref = *it;
 			if (ref) ref->drop();
 		}
-		mItems.clear();
+		m_Items.clear();
 	}
 	void insert(_KRef *ref) {
-		auto pair = mItems.insert(ref);
+		auto pair = m_Items.insert(ref);
 		if (pair.second) {
 			ref->grab(); // item added
 		} else {
@@ -59,31 +59,31 @@ public:
 		}
 	}
 	bool contains(_KRef *ref) {
-		auto it = mItems.find(ref);
-		return it != mItems.end();
+		auto it = m_Items.find(ref);
+		return it != m_Items.end();
 	}
 	void erase(_KRef *ref) {
-		auto it = mItems.find(ref);
-		if (it != mItems.end()) {
+		auto it = m_Items.find(ref);
+		if (it != m_Items.end()) {
 			if (ref) ref->drop();
-			mItems.erase(it);
+			m_Items.erase(it);
 		}
 	}
 #if 0
 	std::unordered_set<_KRef *>::iterator begin() {
-		return mItems.begin();
+		return m_Items.begin();
 	}
 	std::unordered_set<_KRef *>::iterator end() {
-		return mItems.end();
+		return m_Items.end();
 	}
 #else
 	std::unordered_set<_KRef *> items() {
-		return mItems;
+		return m_Items;
 	}
 #endif
 
 private:
-	std::unordered_set<_KRef *> mItems;
+	std::unordered_set<_KRef *> m_Items;
 };
 
 template <class _KRef> class KRefArray {
@@ -91,131 +91,131 @@ public:
 	KRefArray() {
 	}
 	bool empty() const {
-		return mItems.empty();
+		return m_Items.empty();
 	}
 	size_t size() const {
-		return mItems.size();
+		return m_Items.size();
 	}
 	void clear() {
-		for (auto it=mItems.begin(); it!=mItems.end(); ++it) {
+		for (auto it=m_Items.begin(); it!=m_Items.end(); ++it) {
 			_KRef *ref = *it;
 			if (ref) ref->drop();
 		}
-		mItems.clear();
+		m_Items.clear();
 	}
 	void push_back(_KRef *ref) {
 		if (ref) ref->grab();
-		mItems.push_back(ref);
+		m_Items.push_back(ref);
 	}
 	bool contains(_KRef *ref) {
-		auto it = mItems.find(ref);
-		return it != mItems.end();
+		auto it = m_Items.find(ref);
+		return it != m_Items.end();
 	}
 	void erase(_KRef *ref) {
-		auto it = mItems.find(ref);
-		if (it != mItems.end()) {
+		auto it = m_Items.find(ref);
+		if (it != m_Items.end()) {
 			if (ref) ref->drop();
-			mItems.erase(it);
+			m_Items.erase(it);
 		}
 	}
 	_KRef * operator[] (int index) const {
-		return mItems[index];
+		return m_Items[index];
 	}
 #if 0
 	std::vector<_KRef *>::iterator begin() {
-		return mItems.begin();
+		return m_Items.begin();
 	}
 	std::vector<_KRef *>::iterator end() {
-		return mItems.end();
+		return m_Items.end();
 	}
 #endif
 	std::vector<_KRef *> items() {
-		return mItems;
+		return m_Items;
 	}
 
 private:
-	std::vector<_KRef *> mItems;
+	std::vector<_KRef *> m_Items;
 };
 
 template <class _KRef> class KAutoRef {
 public:
 	KAutoRef() {
-		mRef = nullptr;
+		m_Ref = nullptr;
 	}
 	KAutoRef(const _KRef *ref) {
-		mRef = const_cast<_KRef*>(ref);
-		K_Grab(mRef);
+		m_Ref = const_cast<_KRef*>(ref);
+		K_Grab(m_Ref);
 	}
 	KAutoRef(const KAutoRef<_KRef> &autoref) {
-		mRef = const_cast<_KRef*>(autoref.mRef);
-		K_Grab(mRef);
+		m_Ref = const_cast<_KRef*>(autoref.m_Ref);
+		K_Grab(m_Ref);
 	}
 	~KAutoRef() {
-		K_Drop(mRef);
+		K_Drop(m_Ref);
 	}
 	void make() {
-		K_Drop(mRef);
-		mRef = new _KRef();
+		K_Drop(m_Ref);
+		m_Ref = new _KRef();
 	}
 	_KRef * get() const {
-		return mRef;
+		return m_Ref;
 	}
 	void set(const _KRef *ref) {
-		K_Drop(mRef);
-		mRef = const_cast<_KRef*>(ref);
-		K_Grab(mRef);
+		K_Drop(m_Ref);
+		m_Ref = const_cast<_KRef*>(ref);
+		K_Grab(m_Ref);
 	}
 	KAutoRef<_KRef> operator = (_KRef *ref) {
 		set(ref);
 		return *this;
 	}
 	KAutoRef<_KRef> operator = (const KAutoRef<_KRef> &autoref) {
-		set(autoref.mRef);
+		set(autoref.m_Ref);
 		return *this;
 	}
 #if 1
 	operator _KRef * () const {
-		return mRef;
+		return m_Ref;
 	}
 	_KRef * operator()() const {
-		return mRef;
+		return m_Ref;
 	}
 #endif
 	bool operator == (const _KRef *ref) const {
-		return mRef == ref;
+		return m_Ref == ref;
 	}
 	bool operator == (const KAutoRef<_KRef> &autoref) const {
-		return mRef == autoref.mRef;
+		return m_Ref == autoref.m_Ref;
 	}
 	bool operator != (const _KRef *ref) const {
-		return mRef != ref;
+		return m_Ref != ref;
 	}
 	bool operator != (const KAutoRef<_KRef> &autoref) const {
-		return mRef != autoref.mRef;
+		return m_Ref != autoref.m_Ref;
 	}
 	bool operator < (const _KRef *ref) const {
-		return mRef < ref;
+		return m_Ref < ref;
 	}
 	bool operator < (const KAutoRef<_KRef> &autoref) const {
-		return mRef < autoref.mRef;
+		return m_Ref < autoref.m_Ref;
 	}
 	_KRef * operator->() const {
-		if (mRef) {
-			return mRef;
+		if (m_Ref) {
+			return m_Ref;
 		} else {
 			__debugbreak();
-			mRef = new _KRef();
-			return mRef;
+			m_Ref = new _KRef();
+			return m_Ref;
 		}
 	}
 	bool isValid() const {
-		return mRef != nullptr;
+		return m_Ref != nullptr;
 	}
 	bool isNull() const {
-		return mRef == nullptr;
+		return m_Ref == nullptr;
 	}
 private:
-	mutable _KRef *mRef;
+	mutable _KRef *m_Ref;
 };
 
 

@@ -179,7 +179,7 @@ private:
 			return a.time < b.time;
 		}
 	};
-	std::vector<TimeKey> m_keys;
+	std::vector<TimeKey> m_Keys;
 };
 
 } // namespace

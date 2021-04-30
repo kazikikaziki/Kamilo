@@ -39,7 +39,7 @@ private:
 		TP_NOD,
 		TP_COL,
 	};
-	Type mType;
+	Type m_Type;
 	union {
 		float f;
 		int   i;
@@ -47,7 +47,7 @@ private:
 		const char *s;
 		KNode *n;
 		float f4[4];
-	} mValue;
+	} m_Value;
 };
 
 } // namespace

@@ -298,64 +298,64 @@ KEasing::KEasing() {
 	clear();
 }
 void KEasing::clear() {
-	m_keys.clear();
+	m_Keys.clear();
 }
 KEasing & KEasing::addKey(int time, float value, Expr expr) {
 	// 指定時刻にすでにキーがあるなら消す
 	{
 		int i = getIndexByTime(time);
 		if (i >= 0) {
-			m_keys.erase(m_keys.begin() + i);
+			m_Keys.erase(m_Keys.begin() + i);
 		}
 	}
 	// キーを追加
-	m_keys.push_back(TimeKey(time, value, expr));
+	m_Keys.push_back(TimeKey(time, value, expr));
 
 	// 時間順でソート
-	std::sort(m_keys.begin(), m_keys.end(), SortByTime());
+	std::sort(m_Keys.begin(), m_Keys.end(), SortByTime());
 	return *this;
 }
 int KEasing::getDuration() const {
-	return m_keys.size() ? m_keys.back().time : 0;
+	return m_Keys.size() ? m_Keys.back().time : 0;
 }
 int KEasing::getKeyCount() const {
-	return (int)m_keys.size();
+	return (int)m_Keys.size();
 }
 void KEasing::setKey(int index, int *time, float *value, Expr *expr) {
-	if (0 <= index && index < (int)m_keys.size()) {
-		if (time)  m_keys[index].time  = *time;
-		if (value) m_keys[index].value = *value;
-		if (expr)  m_keys[index].expr  = *expr;
-		std::sort(m_keys.begin(), m_keys.end(), SortByTime());
+	if (0 <= index && index < (int)m_Keys.size()) {
+		if (time)  m_Keys[index].time  = *time;
+		if (value) m_Keys[index].value = *value;
+		if (expr)  m_Keys[index].expr  = *expr;
+		std::sort(m_Keys.begin(), m_Keys.end(), SortByTime());
 	}
 }
 bool KEasing::getKey(int index, int *time, float *value, Expr *expr) const {
-	if (0 <= index && index < (int)m_keys.size()) {
-		if (time ) *time  = m_keys[index].time;
-		if (value) *value = m_keys[index].value;
-		if (expr ) *expr  = m_keys[index].expr;
+	if (0 <= index && index < (int)m_Keys.size()) {
+		if (time ) *time  = m_Keys[index].time;
+		if (value) *value = m_Keys[index].value;
+		if (expr ) *expr  = m_Keys[index].expr;
 		return true;
 	}
 	return false;
 }
 float KEasing::getValue(int time) const {
-	if (m_keys.size() == 0) {
+	if (m_Keys.size() == 0) {
 		return 0.0f;
 	}
-	if (time < m_keys.front().time) {
-		return m_keys.front().value;
+	if (time < m_Keys.front().time) {
+		return m_Keys.front().value;
 	}
-	if (time >= m_keys.back().time) {
-		return m_keys.back().value;
+	if (time >= m_Keys.back().time) {
+		return m_Keys.back().value;
 	}
 	int i0 = 0;
-	for (size_t i=0; i<m_keys.size(); i++) {
-		const TimeKey &key1 = m_keys[i];
+	for (size_t i=0; i<m_Keys.size(); i++) {
+		const TimeKey &key1 = m_Keys[i];
 		if (key1.time <= time) {
 			i0 = i;
 		}
 		if (time < key1.time) {
-			const TimeKey &key0 = m_keys[i0];
+			const TimeKey &key0 = m_Keys[i0];
 			int dur = key1.time - key0.time;
 			K__Assert(dur > 0);
 			float t = (float)(time - key0.time) / dur;
@@ -367,8 +367,8 @@ float KEasing::getValue(int time) const {
 }
 int KEasing::getIndexByTime(int time) const {
 	if (time < 0) return -1;
-	for (size_t i=0; i<m_keys.size(); i++) {
-		if (m_keys[i].time == time) {
+	for (size_t i=0; i<m_Keys.size(); i++) {
+		if (m_Keys[i].time == time) {
 			return i;
 		}
 	}

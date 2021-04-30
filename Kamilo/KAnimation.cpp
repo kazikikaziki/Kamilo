@@ -1,6 +1,5 @@
 ﻿#include "KAnimation.h"
 #include "KSpriteDrawable.h"
-#include "KDebug.h"
 #include "KInternal.h"
 #include "KSig.h"
 
@@ -60,142 +59,142 @@ public:
 	typedef int Flags;
 
 	CPlayback() {
-		mCB = nullptr;
-		mClip = nullptr;
-		mFlags = 0;
-		mFrame = 0.0f;
-		mIsPlaying = false;
-		mSleepTime = 0;
-		mTarget = nullptr;
-		mPostNextClip = "";
-		mPostNextPage = 0;
+		m_CB = nullptr;
+		m_Clip = nullptr;
+		m_Flags = 0;
+		m_Frame = 0.0f;
+		m_IsPlaying = false;
+		m_SleepTime = 0;
+		m_Target = nullptr;
+		m_PostNextClip = "";
+		m_PostNextPage = 0;
 	}
-	KClipRes *mClip;
-	bool mIsPlaying; // 再生中かどうか
-	float mFrame;
-	int mSleepTime; // 指定された時間だけ再生を停止する。-1 で無期限停止
-	KClipRes::Flags mFlags;
-	KPlaybackCallback *mCB;
-	KNode *mTarget;
-	KPath mPostNextClip;
-	int mPostNextPage;
+	KClipRes *m_Clip;
+	bool m_IsPlaying; // 再生中かどうか
+	float m_Frame;
+	int m_SleepTime; // 指定された時間だけ再生を停止する。-1 で無期限停止
+	KClipRes::Flags m_Flags;
+	KPlaybackCallback *m_CB;
+	KNode *m_Target;
+	KPath m_PostNextClip;
+	int m_PostNextPage;
 
 
 	void clearClip() {
-		if (mClip) {
-			mClip->drop();
-			mClip = nullptr;
+		if (m_Clip) {
+			m_Clip->drop();
+			m_Clip = nullptr;
 		}
-		mFlags = 0;
-		mFrame = 0.0f;
-		mIsPlaying = false;
-		mSleepTime = 0;
-		mPostNextClip = "";
-		mPostNextPage = 0;
-		// mCB は初期化しない
+		m_Flags = 0;
+		m_Frame = 0.0f;
+		m_IsPlaying = false;
+		m_SleepTime = 0;
+		m_PostNextClip = "";
+		m_PostNextPage = 0;
+		// m_CB は初期化しない
 	}
 
 	bool getFlag(KClipRes::Flag f) const {
-		return (mFlags & f) != 0;
+		return (m_Flags & f) != 0;
 	}
 
 	void setFlag(KClipRes::Flag f, bool value) {
 		if (value) {
-			mFlags |= f;
+			m_Flags |= f;
 		} else {
-			mFlags &= ~f;
+			m_Flags &= ~f;
 		}
 	}
 
 	void callRepeat() {
-		if (mCB) {
+		if (m_CB) {
 			KPlaybackSignalArgs args;
-			args.node = mTarget;
-			mCB->on_playback_repeat(&args);
+			args.node = m_Target;
+			m_CB->on_playback_repeat(&args);
 		}
 	}
 
 	void callTick(int page) {
-		if (mCB) {
+		if (m_CB) {
 			KPlaybackSignalArgs args;
-			args.node = mTarget;
+			args.node = m_Target;
 			args.page = page;
-			mCB->on_playback_tick(&args);
+			m_CB->on_playback_tick(&args);
 		}
 	}
 
 	void callEnterClip(int page) {
-		if (mCB) {
+		if (m_CB) {
 			KPlaybackSignalArgs args;
-			args.node = mTarget;
-			args.clip = mClip;
+			args.node = m_Target;
+			args.clip = m_Clip;
 			args.page = page;
-			mCB->on_playback_enter_page(&args);
+			m_CB->on_playback_enter_page(&args);
 		}
 	}
 	void callEnterPage(int new_page) {
-		if (mCB) {
+		if (m_CB) {
 			KPlaybackSignalArgs args;
-			args.node = mTarget;
-			args.clip = mClip;
+			args.node = m_Target;
+			args.clip = m_Clip;
 			args.page = new_page;
-			mCB->on_playback_enter_page(&args);
+			m_CB->on_playback_enter_page(&args);
 		}
 	}
 	void callExitPage(int old_page) {
-		if (mCB) {
-			if (mClip) {
+		if (m_CB) {
+			if (m_Clip) {
 				KPlaybackSignalArgs args;
-				args.node = mTarget;
-				args.clip = mClip;
+				args.node = m_Target;
+				args.clip = m_Clip;
 				args.page = old_page;
-				mCB->on_playback_exit_page(&args);
+				m_CB->on_playback_exit_page(&args);
 			}
 		}
 	}
 	void callExitClip() {
-		if (mCB) {
+		if (m_CB) {
 			KPlaybackSignalArgs args;
-			args.node = mTarget;
-			mCB->on_playback_exit_clip(&args);
+			args.node = m_Target;
+			m_CB->on_playback_exit_clip(&args);
 		}
 	}
 
 	// playback の内容を初期化する
 	// keep_clip: clip を drop & 削除せずに残しておく（アニメが終わったことを通知するだけで、クリップを外さない）
 	void playbackClear(bool keep_clip) {
-		if (mClip) {
+		if (m_Clip) {
 
 			// スプライトページの終了を通知
-			callExitPage(mClip->getPageByFrame(mFrame, nullptr));
+			callExitPage(m_Clip->getPageByFrame(m_Frame, nullptr));
 
 			// アニメクリップの解除を通知
 			callExitClip();
 
 			// アニメクリップを解除
 			if (!keep_clip) {
-				mClip->drop();
-				mClip = nullptr;
+				m_Clip->drop();
+				m_Clip = nullptr;
 			}
-			mIsPlaying = false;
+			m_IsPlaying = false;
 		}
 	}
 	// 現在の再生位置にあるコマンドをシグナル送信する
 	// e: playback のコールバックに渡すパラメータ
 	void playbackSignal() const {
-		if (mClip && mTarget) {
-			const KClipRes::SPRITE_KEY *key = mClip->getKeyByFrame(mFrame);
+		if (m_Clip && m_Target) {
+			const KClipRes::SPRITE_KEY *key = m_Clip->getKeyByFrame(m_Frame);
 			if (key) {
 				// コマンドを通知する
 				const KNamedValues &nv = key->user_parameters;
 				for (int i=0; i<nv.size(); i++) {
 					KSig sig(K_SIG_ANIMATION_COMMAND);
-					sig.setNode("target", mTarget);
+					sig.setNode("target", m_Target);
 					sig.setString("cmd", nv.getName(i));
 					sig.setString("val", nv.getString(i));
-					sig.setString("clipname", mClip ? mClip->getName() : "");
-					sig.setPointer("clipptr", mClip);
-					mTarget->getRoot()->broadcastSignalToChildren(sig);
+					sig.setString("clipname", m_Clip ? m_Clip->getName() : "");
+					sig.setPointer("clipptr", m_Clip);
+					m_Target->getRoot()->broadcastSignalToChildren(sig);
 				}
 			}
 		}
@@ -219,35 +218,35 @@ public:
 
 		// エンティティの自動削除
 		if (kill) {
-			mTarget->markAsRemove();
+			m_Target->markAsRemove();
 		}
 		return false;
 	}
 
 	bool playbackSeekSprite(float new_frame, Flags flags) {
-		K_assert(mClip);
+		K_assert(m_Clip);
 
 		// アニメ全体の長さ
-		int total_length = mClip->getLength();
+		int total_length = m_Clip->getLength();
 
 		// シーク前のページ
-		int old_page = mClip->getPageByFrame(mFrame, nullptr);
+		int old_page = m_Clip->getPageByFrame(m_Frame, nullptr);
 
 		// シーク後のページ
 		int new_page = -1;
 		if (new_frame < total_length) {
-			new_page = mClip->getPageByFrame(new_frame, nullptr);
+			new_page = m_Clip->getPageByFrame(new_frame, nullptr);
 		}
 
 		// ページ切り替えの有無
 		if (old_page == new_page) {
 			// シーク前とシーク後でページが変化していない
-			mIsPlaying = true;
-			mFrame = new_frame;
+			m_IsPlaying = true;
+			m_Frame = new_frame;
 
 			// アニメ対象の状態を更新
-			if (mClip) {
-				clipAnimate(mTarget, mClip, mFrame);
+			if (m_Clip) {
+				clipAnimate(m_Target, m_Clip, m_Frame);
 			}
 			callTick(new_page);
 			return true;
@@ -260,10 +259,10 @@ public:
 
 		// アニメクリップで定義されたページジャンプに従って、シーク先ページを再設定する
 		if (flags & PLAYBACKFLAG__CAN_PREDEF_SEEK) {
-			const KClipRes::SPRITE_KEY *key = mClip->getKey(old_page);
+			const KClipRes::SPRITE_KEY *key = m_Clip->getKey(old_page);
 			KPath jump_clip;
 			int jump_page = -1;
-			if (mClip->getNextPage(old_page, key->next_mark, &jump_clip, &jump_page)) {
+			if (m_Clip->getNextPage(old_page, key->next_mark, &jump_clip, &jump_page)) {
 
 				if (jump_clip.empty()) {
 					// 同じクリップ内でジャンプする
@@ -271,8 +270,8 @@ public:
 				} else {
 					// 異なるクリップにジャンプする。現在のクリップをいったん終了させる
 					new_page = -1;
-					mPostNextClip = jump_clip;
-					mPostNextPage = jump_page;
+					m_PostNextClip = jump_clip;
+					m_PostNextPage = jump_page;
 				}
 			}
 		}
@@ -281,13 +280,13 @@ public:
 		// なお、結果として old_page == new_page になった場合（同ページ内ループ）でも
 		// 必ずページ切り替えイベントを生させる
 		if (new_page >= 0) {
-			mIsPlaying = true;
+			m_IsPlaying = true;
 
 			// 古いページから離れることを通知
 			callExitPage(old_page);
 
 			// 新しいフレーム位置を設定
-			mFrame = (float)mClip->getKeyTime(new_page);
+			m_Frame = (float)m_Clip->getKeyTime(new_page);
 
 			// ページ切り替え時のシグナル送信
 			if (old_page != new_page) {
@@ -295,8 +294,8 @@ public:
 			}
 
 			// アニメ対象の状態を更新
-			if (mClip) {
-				clipAnimate(mTarget, mClip, mFrame);
+			if (m_Clip) {
+				clipAnimate(m_Target, m_Clip, m_Frame);
 			}
 
 			// 新しいページに入ったことを通知
@@ -317,15 +316,15 @@ public:
 	}
 
 	bool playback_seek_non_sprite(float new_frame, Flags flags) {
-		const int total_length = mClip->getLength(); // アニメ全体の長さ
+		const int total_length = m_Clip->getLength(); // アニメ全体の長さ
 
 		if (new_frame<total_length) {
 			// まだ終端に達していない or 無限長さ
-			mIsPlaying = true;
-			mFrame = new_frame;
+			m_IsPlaying = true;
+			m_Frame = new_frame;
 			// アニメ対象の状態を更新
-			if (mClip) {
-				clipAnimate(mTarget, mClip, mFrame);
+			if (m_Clip) {
+				clipAnimate(m_Target, m_Clip, m_Frame);
 			}
 			return true;
 		}
@@ -333,13 +332,13 @@ public:
 		// ループまたは終了処理する
 		if (getFlag(KClipRes::FLAG_LOOP)) {
 			// 先頭に戻る
-			mIsPlaying = true;
-			mFrame = 0;
+			m_IsPlaying = true;
+			m_Frame = 0;
 			// リピート通知
 			callRepeat();
 			// アニメ対象の状態を更新
-			if (mClip) {
-				clipAnimate(mTarget, mClip, mFrame);
+			if (m_Clip) {
+				clipAnimate(m_Target, m_Clip, m_Frame);
 			}
 			return true;
 		}
@@ -461,7 +460,7 @@ KAnimation::~KAnimation() {
 }
 void KAnimation::_setNode(KNode *node) {
 	m_Node = node;
-	m_MainPlayback->mTarget = node;
+	m_MainPlayback->m_Target = node;
 }
 KNode * KAnimation::getNode() {
 	return m_Node;
@@ -474,23 +473,23 @@ const KClipRes * KAnimation::getMainClip() const {
 	return KBank::getAnimationBank()->getClipResource(name.u8());
 }
 KPath KAnimation::getMainClipName() const {
-	if (m_MainPlayback->mClip == nullptr) return KPath::Empty;
-	return m_MainPlayback->mClip->getName();
+	if (m_MainPlayback->m_Clip == nullptr) return KPath::Empty;
+	return m_MainPlayback->m_Clip->getName();
 }
 /// アニメを指定フレームの間だけ停止する。
 /// @param duration 停止フレーム数。負の値を指定すると無期限に停止する
 void KAnimation::setMainClipSleep(int duration) {
-	m_MainPlayback->mSleepTime = duration;
+	m_MainPlayback->m_SleepTime = duration;
 }
 bool KAnimation::isMainClipSleep() const {
-	return m_MainPlayback->mSleepTime != 0;
+	return m_MainPlayback->m_SleepTime != 0;
 }
 void KAnimation::seekMainClipBegin() {
 	seekMainclip(0, -1, 0);
 }
 void KAnimation::seekMainClipEnd() {
-	if (m_MainPlayback->mClip) {
-		int len = m_MainPlayback->mClip->getLength();
+	if (m_MainPlayback->m_Clip) {
+		int len = m_MainPlayback->m_Clip->getLength();
 		if (m_MainPlayback->playbackSeek((float)len, CPlayback::PLAYBACKFLAG__CAN_PREDEF_SEEK)) {
 		//	this->node_update_commands();
 		}
@@ -510,38 +509,38 @@ bool KAnimation::seekMainClipToMark(int mark) {
 /// 指定したマーカーがついているページを返す
 /// マーカーが存在しなければ -1 を返す
 int KAnimation::findPageByMark(int mark) const {
-	if (m_MainPlayback->mClip == nullptr) {
+	if (m_MainPlayback->m_Clip == nullptr) {
 		return -1;
 	}
-	if (m_MainPlayback->mClip == nullptr) {
+	if (m_MainPlayback->m_Clip == nullptr) {
 		return -1;
 	}
-	return m_MainPlayback->mClip->findPageByMark(mark);
+	return m_MainPlayback->m_Clip->findPageByMark(mark);
 }
 /// アニメクリップを再生中の場合、そのページ番号を返す。
 /// 失敗した場合は -1 を返す
 /// out_pageframe ページ先頭からの経過フレーム数を返す
 int KAnimation::getMainClipPage(int *out_pageframe) const {
-	const KClipRes *clip = m_MainPlayback->mClip;
+	const KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip == nullptr) return -1;
 
-	float frame = m_MainPlayback->mFrame;
+	float frame = m_MainPlayback->m_Frame;
 	if (frame < 0) return -1;
 
 	int page = clip->getPageByFrame(frame, out_pageframe);
 	return page;
 }
 bool KAnimation::isMainClipPlaying(const char *name_or_alias, KPath *post_next_clip, int *post_next_page) const {
-	if (m_MainPlayback->mIsPlaying) {
+	if (m_MainPlayback->m_IsPlaying) {
 		// メインアニメ再生中
 		if (KStringUtils::isEmpty(name_or_alias)) {
 			return true;
 		}
 
-		const KPath &playing_clip_name = m_MainPlayback->mClip->getName();
+		const KPath &playing_clip_name = m_MainPlayback->m_Clip->getName();
 
 		// 名前が指定されている場合は、再生中のクリップ名も確認する
-		K_assert(m_MainPlayback->mClip);
+		K_assert(m_MainPlayback->m_Clip);
 		auto it = m_AliasMap.find(name_or_alias);
 		if (it != m_AliasMap.end()) {
 			// name_or_alias はエイリアス名で指定されている
@@ -558,8 +557,8 @@ bool KAnimation::isMainClipPlaying(const char *name_or_alias, KPath *post_next_c
 			}
 		}
 	} else {
-		if (post_next_clip) *post_next_clip = m_MainPlayback->mPostNextClip;
-		if (post_next_page) *post_next_page = m_MainPlayback->mPostNextPage;
+		if (post_next_clip) *post_next_clip = m_MainPlayback->m_PostNextClip;
+		if (post_next_page) *post_next_page = m_MainPlayback->m_PostNextPage;
 	}
 	return false;
 }
@@ -589,7 +588,7 @@ bool KAnimation::setMainClipAlias(const char *alias, bool keep) {
 bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 	// 同じアニメが既に再生中の場合は何もしない
 	if (keep && clip) {
-		if (m_MainPlayback->mClip == clip) {
+		if (m_MainPlayback->m_Clip == clip) {
 			return false;
 		}
 	}
@@ -611,9 +610,9 @@ bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 		// アニメ適用
 		m_AutoResetClipSpeed = false;
 		m_MainPlayback->clearClip();
-		m_MainPlayback->mClip = clip;
-		m_MainPlayback->mClip->grab();
-		m_MainPlayback->mIsPlaying = true;
+		m_MainPlayback->m_Clip = clip;
+		m_MainPlayback->m_Clip->grab();
+		m_MainPlayback->m_IsPlaying = true;
 
 		// アニメで設定されている再生フラグをコピー
 		m_MainPlayback->setFlag(KClipRes::FLAG_LOOP, clip->getFlag(KClipRes::FLAG_LOOP));
@@ -622,18 +621,18 @@ bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 		// コマンド更新
 	//	this->node_update_commands();
 
-		if (m_MainPlayback->mCB) {
+		if (m_MainPlayback->m_CB) {
 			KPlaybackSignalArgs args;
 			args.node = getNode();
-			m_MainPlayback->mCB->on_playback_enter_clip(&args);
+			m_MainPlayback->m_CB->on_playback_enter_clip(&args);
 		}
 
-		if (m_MainPlayback->mClip) {
+		if (m_MainPlayback->m_Clip) {
 			// 開始イベントを呼ぶ
-			CPlayback::clipStart(getNode(), m_MainPlayback->mClip);
+			CPlayback::clipStart(getNode(), m_MainPlayback->m_Clip);
 
 			// アニメ更新関数を通しておく
-			CPlayback::clipAnimate(getNode(), m_MainPlayback->mClip, m_MainPlayback->mFrame);
+			CPlayback::clipAnimate(getNode(), m_MainPlayback->m_Clip, m_MainPlayback->m_Frame);
 		}
 		// 新しいクリップが設定されたことを通知
 		if (1) {
@@ -644,8 +643,8 @@ bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 		}
 
 		// ページ開始
-		if (m_MainPlayback->mClip) {
-			int page = m_MainPlayback->mClip->getPageByFrame(m_MainPlayback->mFrame, nullptr);
+		if (m_MainPlayback->m_Clip) {
+			int page = m_MainPlayback->m_Clip->getPageByFrame(m_MainPlayback->m_Frame, nullptr);
 			m_MainPlayback->callEnterClip(page);
 		}
 
@@ -655,16 +654,16 @@ bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
 	return true;
 }
 void KAnimation::setMainClipCallback(KPlaybackCallback *cb) {
-	m_MainPlayback->mCB = cb;
+	m_MainPlayback->m_CB = cb;
 }
 void KAnimation::tickTracks() {
-	if (m_MainPlayback->mClip) {
-		if (m_MainPlayback->mSleepTime > 0) {
-			m_MainPlayback->mSleepTime--;
+	if (m_MainPlayback->m_Clip) {
+		if (m_MainPlayback->m_SleepTime > 0) {
+			m_MainPlayback->m_SleepTime--;
 
-		} else if (m_MainPlayback->mSleepTime == 0) {
+		} else if (m_MainPlayback->m_SleepTime == 0) {
 
-			float newframe = m_MainPlayback->mFrame + m_ClipSpeed;
+			float newframe = m_MainPlayback->m_Frame + m_ClipSpeed;
 			if (m_MainPlayback->playbackSeek(newframe, CPlayback::PLAYBACKFLAG__CAN_PREDEF_SEEK)) {
 			//	this->node_update_commands();
 			}
@@ -718,9 +717,9 @@ void KAnimation::setCurrentParameter(const char *key, const char *value) {
 	if (nv) nv->setString(key, value);
 }
 const KXmlElement * KAnimation::getCurrentDataXml() const {
-	const KClipRes *clip = m_MainPlayback->mClip;
+	const KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip) {
-		const KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->mFrame);
+		const KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->m_Frame);
 		if (key) {
 			return key->xml_data;
 		}
@@ -728,9 +727,9 @@ const KXmlElement * KAnimation::getCurrentDataXml() const {
 	return nullptr;
 }
 KXmlElement * KAnimation::getCurrentDataXmlEdit() {
-	KClipRes *clip = m_MainPlayback->mClip;
+	KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip) {
-		KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->mFrame);
+		KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->m_Frame);
 		if (key) {
 			return key->xml_data;
 		}
@@ -738,9 +737,9 @@ KXmlElement * KAnimation::getCurrentDataXmlEdit() {
 	return nullptr;
 }
 const KNamedValues * KAnimation::getCurrentUserParameters() const {
-	const KClipRes *clip = m_MainPlayback->mClip;
+	const KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip) {
-		const KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->mFrame);
+		const KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->m_Frame);
 		if (key) {
 			return &key->user_parameters;
 		}
@@ -748,9 +747,9 @@ const KNamedValues * KAnimation::getCurrentUserParameters() const {
 	return nullptr;
 }
 KNamedValues * KAnimation::getCurrentUserParametersEdit() {
-	KClipRes *clip = m_MainPlayback->mClip;
+	KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip) {
-		KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->mFrame);
+		KClipRes::SPRITE_KEY *key = clip->getKeyByFrame(m_MainPlayback->m_Frame);
 		if (key) {
 			return &key->user_parameters;
 		}
@@ -759,17 +758,17 @@ KNamedValues * KAnimation::getCurrentUserParametersEdit() {
 }
 bool KAnimation::updateClipGui() {
 #ifndef NO_IMGUI
-	const KClipRes *clip = m_MainPlayback->mClip;
+	const KClipRes *clip = m_MainPlayback->m_Clip;
 	if (clip == nullptr) {
 		ImGui::Text("(NO CLIP)");
 		return false;
 	}
 	bool changed = false;
-	if (m_MainPlayback->mSleepTime == 0) {
-		ImGui::Text("Frame %.1f/%d", m_MainPlayback->mFrame, clip->getLength());
+	if (m_MainPlayback->m_SleepTime == 0) {
+		ImGui::Text("Frame %.1f/%d", m_MainPlayback->m_Frame, clip->getLength());
 	} else {
 		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
-		ImGui::Text("Frame %.1f/%d (Sleep)", m_MainPlayback->mFrame, clip->getLength());
+		ImGui::Text("Frame %.1f/%d (Sleep)", m_MainPlayback->m_Frame, clip->getLength());
 		KImGui::KImGui_PopTextColor();
 	}
 	{
@@ -794,9 +793,9 @@ bool KAnimation::updateClipGui() {
 			m_ClipSpeed = spd;
 		}
 	}
-	if (m_MainPlayback->mClip) {
-		if (ImGui::TreeNodeEx("%s", ImGuiTreeNodeFlags_DefaultOpen, typeid(*m_MainPlayback->mClip).name())) {
-			m_MainPlayback->mClip->on_track_gui_state(m_MainPlayback->mFrame);
+	if (m_MainPlayback->m_Clip) {
+		if (ImGui::TreeNodeEx("%s", ImGuiTreeNodeFlags_DefaultOpen, typeid(*m_MainPlayback->m_Clip).name())) {
+			m_MainPlayback->m_Clip->on_track_gui_state(m_MainPlayback->m_Frame);
 			ImGui::TreePop();
 		}
 	}
@@ -806,12 +805,12 @@ bool KAnimation::updateClipGui() {
 #endif // NO_IMGUI
 }
 void KAnimation::updateInspector() {
-	if (m_MainPlayback->mSleepTime == 0) {
+	if (m_MainPlayback->m_SleepTime == 0) {
 		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
 		ImGui::Text("Sleep: Off");
-	} else if (m_MainPlayback->mSleepTime > 0) {
+	} else if (m_MainPlayback->m_SleepTime > 0) {
 		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
-		ImGui::Text("Sleep: On (%d)", m_MainPlayback->mSleepTime);
+		ImGui::Text("Sleep: On (%d)", m_MainPlayback->m_SleepTime);
 	} else {
 		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
 		ImGui::Text("Sleep: On (INF)");
@@ -819,7 +818,7 @@ void KAnimation::updateInspector() {
 	KImGui::KImGui_PopTextColor();
 
 	{
-		KPath name = m_MainPlayback->mClip ? m_MainPlayback->mClip->getName() : KPath::Empty;
+		KPath name = m_MainPlayback->m_Clip ? m_MainPlayback->m_Clip->getName() : KPath::Empty;
 		if (ImGui::TreeNode("Clip: %s", name.u8())) {
 			updateClipGui();
 			ImGui::TreePop();
@@ -845,19 +844,19 @@ void KAnimation::updateInspector() {
 	}
 }
 bool KAnimation::seekMainclip(float frame, int key, int mark) {
-	if (m_MainPlayback->mClip == nullptr) {
+	if (m_MainPlayback->m_Clip == nullptr) {
 		return false;
 	}
 
 	// マークが指定されているならキーに変換する
 	if (mark > 0) { // mark == 0 は「マーク無し」を意味するので、探さない
-		key = m_MainPlayback->mClip->findPageByMark(mark);
+		key = m_MainPlayback->m_Clip->findPageByMark(mark);
 		if (key < 0) return false; // マークが見つからない
 	}
 
 	// キーが指定されているならフレームに変換する
 	if (key >= 0) {
-		frame = (float)m_MainPlayback->mClip->getKeyTime(key);
+		frame = (float)m_MainPlayback->m_Clip->getKeyTime(key);
 	}
 
 	if (frame >= 0) {
