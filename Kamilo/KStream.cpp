@@ -3,195 +3,194 @@
 namespace Kamilo {
 
 
-
-#pragma region File Impl
 class CFileReadImpl: public KInputStream::Impl {
 public:
-	FILE *m_file;
-	std::string m_name;
+	FILE *m_File;
+	std::string m_Name;
 
 	CFileReadImpl(FILE *fp, const std::string &name) {
-		m_file = fp;
-		m_name = name;
+		m_File = fp;
+		m_Name = name;
 	}
 	virtual ~CFileReadImpl() {
-		if (m_file) {
-			fclose(m_file);
+		if (m_File) {
+			fclose(m_File);
 		}
 	}
 	virtual int tell() override {
-		return ftell(m_file);
+		return ftell(m_File);
 	}
 	virtual int read(void *data, int size) override {
 		if (data) {
-			return fread(data, 1, size, m_file);
+			return fread(data, 1, size, m_File);
 		} else {
-			return fseek(m_file, size, SEEK_CUR);
+			return fseek(m_File, size, SEEK_CUR);
 		}
 	}
 	virtual void seek(int pos) override {
-		fseek(m_file, pos, SEEK_SET);
+		fseek(m_File, pos, SEEK_SET);
 	}
 	virtual int size() {
-		int i=ftell(m_file);
-		fseek(m_file, 0, SEEK_END);
-		int n=ftell(m_file);
-		fseek(m_file, i, SEEK_SET);
+		int i=ftell(m_File);
+		fseek(m_File, 0, SEEK_END);
+		int n=ftell(m_File);
+		fseek(m_File, i, SEEK_SET);
 		return n; 
 	}
 	virtual bool eof() override {
-		return feof(m_file) != 0;
+		return feof(m_File) != 0;
 	}
 	virtual void close() override {
-		if (m_file) {
-			fclose(m_file);
-			m_file = nullptr;
+		if (m_File) {
+			fclose(m_File);
+			m_File = nullptr;
 		}
 	}
 	virtual bool isOpen() override {
-		return m_file != nullptr;
+		return m_File != nullptr;
 	}
 };
+
+
 class CFileWriteImpl: public KOutputStream::Impl {
 public:
-	FILE *m_file;
-	std::string m_name;
+	FILE *m_File;
+	std::string m_Name;
 
 	CFileWriteImpl(FILE *fp, const std::string &name) {
-		m_file = fp;
-		m_name = name;
+		m_File = fp;
+		m_Name = name;
 	}
 	virtual ~CFileWriteImpl() {
-		if (m_file) {
-			fclose(m_file);
+		if (m_File) {
+			fclose(m_File);
 		}
 	}
 	virtual int tell() override {
-		return ftell(m_file);
+		return ftell(m_File);
 	}
 	virtual int write(const void *data, int size) override {
-		return fwrite(data, 1, size, m_file);
+		return fwrite(data, 1, size, m_File);
 	}
 	virtual void seek(int pos) override {
-		fseek(m_file, pos, SEEK_SET);
+		fseek(m_File, pos, SEEK_SET);
 	}
 	virtual void close() override {
-		if (m_file) {
-			fclose(m_file);
-			m_file = nullptr;
+		if (m_File) {
+			fclose(m_File);
+			m_File = nullptr;
 		}
 	}
 	virtual bool isOpen() override {
-		return m_file != nullptr;
+		return m_File != nullptr;
 	}
 };
-#pragma endregion // File Impl
 
 
-#pragma region Memory Impl
 class CMemoryReadImpl: public KInputStream::Impl {
-	void *m_ptr;
-	int m_size;
-	int m_pos;
-	bool m_copy;
+	void *m_Ptr;
+	int m_Size;
+	int m_Pos;
+	bool m_IsCopy;
 public:
 	CMemoryReadImpl(const void *p, int size, bool copy) {
 		if (copy) {
-			m_ptr = malloc(size);
-			memcpy(m_ptr, p, size);
-			m_copy = true;
+			m_Ptr = malloc(size);
+			memcpy(m_Ptr, p, size);
+			m_IsCopy = true;
 		} else {
-			m_ptr = const_cast<void*>(p);
-			m_copy = false;
+			m_Ptr = const_cast<void*>(p);
+			m_IsCopy = false;
 		}
-		m_size = size;
-		m_pos = 0;
+		m_Size = size;
+		m_Pos = 0;
 	}
 	virtual ~CMemoryReadImpl() {
-		if (m_copy && m_ptr) {
-			free(m_ptr);
+		if (m_IsCopy && m_Ptr) {
+			free(m_Ptr);
 		}
 	}
 	virtual int tell() override {
-		return m_pos;
+		return m_Pos;
 	}
 	virtual int read(void *data, int size) override {
-		if (m_ptr == nullptr) return 0;
+		if (m_Ptr == nullptr) return 0;
 		int n = 0;
-		if (m_pos + size <= m_size) {
+		if (m_Pos + size <= m_Size) {
 			n = size;
-		} else if (m_pos < m_size) {
-			n = m_size - m_pos;
+		} else if (m_Pos < m_Size) {
+			n = m_Size - m_Pos;
 		}
 		if (n > 0) {
-			if (data) memcpy(data, (uint8_t*)m_ptr + m_pos, n); // data=nullptr だと単なるシークになる
-			m_pos += n;
+			if (data) memcpy(data, (uint8_t*)m_Ptr + m_Pos, n); // data=nullptr だと単なるシークになる
+			m_Pos += n;
 			return n;
 		}
 		return 0;
 	}
 	virtual void seek(int pos) override {
 		if (pos < 0) {
-			m_pos = 0;
-		} else if (pos < m_size) {
-			m_pos = pos;
+			m_Pos = 0;
+		} else if (pos < m_Size) {
+			m_Pos = pos;
 		} else {
-			m_pos = m_size;
+			m_Pos = m_Size;
 		}
 	}
 	virtual int size() override {
-		return m_size;
+		return m_Size;
 	}
 	virtual bool eof() override {
-		return m_pos >= m_size;
+		return m_Pos >= m_Size;
 	}
 	virtual void close() override {
-		m_ptr = nullptr;
-		m_size = 0;
-		m_pos = 0;
-		m_copy = false;
+		m_Ptr = nullptr;
+		m_Size = 0;
+		m_Pos = 0;
+		m_IsCopy = false;
 	}
 	virtual bool isOpen() override {
-		return m_ptr != nullptr;
+		return m_Ptr != nullptr;
 	}
 };
+
+
 class CMemoryWriteImpl: public KOutputStream::Impl {
-	std::string *m_buf;
-	int m_pos;
+	std::string *m_Buf;
+	int m_Pos;
 public:
 	explicit CMemoryWriteImpl(std::string *dest) {
-		m_buf = dest;
-		m_pos = 0;
+		m_Buf = dest;
+		m_Pos = 0;
 	}
 	virtual int tell() override {
-		return m_pos;
+		return m_Pos;
 	}
 	virtual int write(const void *data, int size) {
-		if (m_buf == nullptr) return 0;
-		m_buf->resize(m_pos + size);
-		memcpy((char*)m_buf->data() + m_pos, data, size);
-		m_pos += size;
+		if (m_Buf == nullptr) return 0;
+		m_Buf->resize(m_Pos + size);
+		memcpy((char*)m_Buf->data() + m_Pos, data, size);
+		m_Pos += size;
 		return size;
 	}
 	virtual void seek(int pos) override {
-		if (m_buf == nullptr) return;
+		if (m_Buf == nullptr) return;
 		if (pos < 0) {
-			m_pos = 0;
-		} else if (pos < (int)m_buf->size()) {
-			m_pos = pos;
+			m_Pos = 0;
+		} else if (pos < (int)m_Buf->size()) {
+			m_Pos = pos;
 		} else {
-			m_pos = m_buf->size();
+			m_Pos = m_Buf->size();
 		}
 	}
 	virtual void close() override {
-		m_buf = nullptr;
-		m_pos = 0;
+		m_Buf = nullptr;
+		m_Pos = 0;
 	}
 	virtual bool isOpen() override {
-		return m_buf != nullptr;
+		return m_Buf != nullptr;
 	}
 };
-#pragma endregion // Memory Impl
 
 
 #pragma region KInputStream
