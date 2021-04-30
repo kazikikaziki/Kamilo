@@ -1,72 +1,6 @@
 ﻿#include "KStream.h"
 #include "KInternal.h"
-#include "KFile.h"
 namespace Kamilo {
-
-
-class CReaderStrm: public KInputStream::Impl {
-public:
-	KReader *m_Reader;
-	CReaderStrm(KReader *r) {
-		m_Reader = r;
-		K_Grab(m_Reader);
-	}
-	virtual ~CReaderStrm() {
-		K_Drop(m_Reader);
-	}
-	virtual int read(void *buf, int size) {
-		return m_Reader->read(buf, size);
-	}
-	virtual int tell() {
-		return m_Reader->tell();
-	}
-	virtual int size() {
-		return m_Reader->size();
-	}
-	virtual void seek(int pos) {
-		return m_Reader->seek(pos);
-	}
-	virtual bool eof() {
-		return tell() >= size();
-	}
-	virtual void close() {
-		K_Drop(m_Reader);
-	}
-	virtual bool isOpen() {
-		return m_Reader != nullptr;
-	}
-};
-
-class CWriterStrm: public KOutputStream::Impl {
-public:
-	KWriter *m_Writer;
-	CWriterStrm(KWriter *w) {
-		m_Writer = w;
-		K_Grab(m_Writer);
-	}
-	virtual ~CWriterStrm() {
-		K_Drop(m_Writer);
-	}
-	virtual int tell() {
-		return m_Writer->tell();
-	}
-	virtual int write(const void *data, int size) {
-		return m_Writer->write(data, size);
-	}
-	virtual void seek(int pos) {
-		assert(0);
-	}
-	virtual void close() {
-		K_Drop(m_Writer);
-	}
-	virtual bool isOpen() {
-		return m_Writer != nullptr;
-	}
-};
-
-
-
-
 
 
 
@@ -283,13 +217,6 @@ KInputStream KInputStream::fromMemoryCopy(const void *data, int size) {
 	}
 	return KInputStream(impl);
 }
-KInputStream KInputStream::fromReader(KReader *r) {
-	Impl *impl = nullptr;
-	if (r) {
-		impl = new CReaderStrm(r);
-	}
-	return KInputStream(impl);
-}
 
 KInputStream::KInputStream() {
 	m_Impl = nullptr;
@@ -383,10 +310,6 @@ KOutputStream KOutputStream::fromFileName(const std::string &filename) {
 }
 KOutputStream KOutputStream::fromMemory(std::string *dest) {
 	Impl *impl = new CMemoryWriteImpl(dest); // No copy
-	return KOutputStream(impl);
-}
-KOutputStream KOutputStream::fromWriter(KWriter *w) {
-	Impl *impl = new CWriterStrm(w);
 	return KOutputStream(impl);
 }
 

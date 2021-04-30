@@ -3,6 +3,7 @@
 #include <time.h>
 #include <inttypes.h>
 #include <vector>
+#include "KStream.h"
 #include "KInternal.h"
 #include "KCrc32.h"
 #include "KZlib.h"

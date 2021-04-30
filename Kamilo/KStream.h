@@ -5,15 +5,11 @@
 
 namespace Kamilo {
 
-class KReader;
-class KWriter;
-
 class KInputStream {
 public:
 	static KInputStream fromFileName(const std::string &filename);
 	static KInputStream fromMemory(const void *data, int size);
 	static KInputStream fromMemoryCopy(const void *data, int size);
-	static KInputStream fromReader(KReader *r);
 
 	class Impl {
 	public:
@@ -63,7 +59,6 @@ class KOutputStream {
 public:
 	static KOutputStream fromFileName(const std::string &filename);
 	static KOutputStream fromMemory(std::string *dest);
-	static KOutputStream fromWriter(KWriter *w);
 
 	class Impl {
 	public:

@@ -4,7 +4,6 @@
 #include "KStream.h"
 #include "KInternal.h"
 #include "KZip.h"
-#include "KLog.h"
 #include "KXml.h"
 
 
@@ -49,27 +48,27 @@ static int _FindZipEntry(KUnzipper &zr, const std::string &name) {
 }
 static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const std::string &zip_name, const std::string &entry_name) {
 	if (!zr.isOpen()) {
-		KLog::printError("E_INVALID_ARGUMENT");
+		K__Error("E_INVALID_ARGUMENT");
 		return nullptr;
 	}
 
 	// XLSX の XML は常に UTF-8 で書いてある。それを信用する
 	int fileid = _FindZipEntry(zr, entry_name);
 	if (fileid < 0) {
-		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
+		K__Error("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 		return nullptr;
 	}
 
 	std::string xml_u8;
 	if (!zr.getEntryData(fileid, "", &xml_u8)) {
-		KLog::printError("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
+		K__Error("E_FILE: Failed to open file '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 		return nullptr;
 	}
 
 	std::string doc_name = K__PathJoin(zip_name, entry_name);
 	KXmlElement *xdoc = KXmlElement::createFromString(xml_u8, doc_name);
 	if (xdoc == nullptr) {
-		KLog::printError("E_XML: Failed to read xml document: '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
+		K__Error("E_XML: Failed to read xml document: '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
 	}
 	return xdoc;
 }
@@ -287,7 +286,7 @@ public:
 		m_row_elements.clear();
 
 		if (!file.isOpen()) {
-			KLog::printError("E_INVALID_ARGUMENT");
+			K__Error("E_INVALID_ARGUMENT");
 			return false;
 		}
 
@@ -363,7 +362,7 @@ public:
 			if (_FindZipEntry(zr, s) < 0) break;
 			KXmlElement *sheet_doc = _LoadXmlFromZip(zr, xlsx_name, s);
 			if (sheet_doc == nullptr) {
-				KLog::printError("E_XLSX: Failed to load document: '%s' in xlsx file.", s);
+				K__Error("E_XLSX: Failed to load document: '%s' in xlsx file.", s);
 				break;
 			}
 			m_worksheets.push_back(sheet_doc);
@@ -371,7 +370,7 @@ public:
 
 		// 必要な情報がそろっていることを確認
 		if (m_workbook_doc == nullptr || m_worksheets.empty()) {
-			KLog::printError("E_FAILED_TO_READ_EXCEL_ARCHIVE: %s", xlsx_name);
+			K__Error("E_FAILED_TO_READ_EXCEL_ARCHIVE: %s", xlsx_name);
 			clear();
 			return false;
 		}

@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include "KRef.h"
-#include "KStream.h"
 
 namespace Kamilo {
+
+class KInputStream;
+class KOutputStream;
 
 /// 簡単な XML パーサ
 /// ※バックエンドとして TinyXml を必要とする
@@ -48,126 +50,22 @@ public:
 
 	virtual int getLineNumber() const = 0;
 	virtual bool write(KOutputStream &output, int indent=0) const = 0;
-
-	virtual bool writeDoc(KOutputStream &output) const {
-		if (!output.isOpen()) return false;
-		output.writeString("<?xml version=\"1.0\" encoding=\"utf8\" ?>\n");
-		int num = getNodeCount();
-		for (int i=0; i<num; i++) { // ルートではなくその子を書き出す
-			if (!getNode(i)->write(output, 0)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	virtual KXmlElement * clone() const = 0;
 
 	#pragma region Helper
-	virtual bool hasTag(const char *tag) const {
-		const char *mytag = getTag();
-		return mytag && tag && strcmp(mytag, tag)==0;
-	}
-	virtual const char * findAttr(const char *name, const char *def=nullptr) const {
-		int i = getAttrIndex(name);
-		return i>=0 ? getAttrValue(i) : def;
-	}
-	virtual float findAttrFloat(const char *name, float def=0.0f) const {
-		const char *s = findAttr(name);
-		if (s == nullptr) return def;
-		char *err = 0;
-		float result = strtof(s, &err);
-		if (err==s || err[0]) return def;
-		return result;
-	}
-	virtual int findAttrInt(const char *name, int def=0) const {
-		const char *s = findAttr(name);
-		if (s == nullptr) return def;
-		char *err = 0;
-		int result = strtol(s, &err, 0);
-		if (err==s || *err) return def;
-		return result;
-	}
-	virtual int getAttrIndex(const char *name, int start=0) const {
-		if (name && name[0]) {
-			for (int i=start; i<getAttrCount(); i++) {
-				if (strcmp(getAttrName(i), name) == 0) {
-					return i;
-				}
-			}
-		}
-		return -1;
-	}
-	virtual void setAttrInt(const char *name, int value) {
-		char s[32] = {0};
-		sprintf_s(s, sizeof(s), "%d", value);
-		setAttr(name, s);
-	}
-	virtual void setAttrFloat(const char *name, float value) {
-		char s[32] = {0};
-		sprintf_s(s, sizeof(s), "%g", value);
-		setAttr(name, s);
-	}
-	virtual bool deleteNode(KXmlElement *node, bool in_tree) {
-		if (node == nullptr) return false;
-		int n = getNodeCount();
-
-		// 子ノードから探す
-		for (int i=0; i<n; i++) {
-			KXmlElement *nd = getNode(i);
-			if (nd == node) {
-				deleteNode(i);
-				return true;
-			}
-		}
-
-		// 子ツリーから探す
-		if (in_tree) {
-			for (int i=0; i<n; i++) {
-				KXmlElement *nd = getNode(i);
-				if (nd->deleteNode(node, true)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	virtual int getNodeIndex(const char *tag, int start=0) const {
-		int n = getNodeCount();
-		for (int i=start; i<n; i++) {
-			const KXmlElement *elm = getNode(i);
-			if (elm->hasTag(tag)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	virtual const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const {
-		return _findnode_const(tag, start);
-	}
-	virtual KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) {
-		const KXmlElement *elm = _findnode_const(tag, start);
-		return const_cast<KXmlElement*>(elm);
-	}
-	const KXmlElement * _findnode_const(const char *tag, const KXmlElement *start=nullptr) const {
-		int index = 0;
-		int n = getNodeCount();
-		if (start) {
-			for (int i=0; i<n; i++) {
-				if (getNode(i) == start) {
-					index = i+1;
-					break;
-				}
-			}
-		}
-		for (int i=index; i<n; i++) {
-			const KXmlElement *elm = getNode(i);
-			if (elm->hasTag(tag)) {
-				return elm;
-			}
-		}
-		return nullptr;
-	}
+	virtual bool writeDoc(KOutputStream &output) const;
+	virtual bool hasTag(const char *tag) const;
+	virtual const char * findAttr(const char *name, const char *def=nullptr) const;
+	virtual float findAttrFloat(const char *name, float def=0.0f) const;
+	virtual int findAttrInt(const char *name, int def=0) const;
+	virtual int getAttrIndex(const char *name, int start=0) const;
+	virtual void setAttrInt(const char *name, int value);
+	virtual void setAttrFloat(const char *name, float value);
+	virtual bool deleteNode(KXmlElement *node, bool in_tree);
+	virtual int getNodeIndex(const char *tag, int start=0) const;
+	virtual const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const;
+	virtual KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr);
+	const KXmlElement * _findnode_const(const char *tag, const KXmlElement *start=nullptr) const;
 	#pragma endregion
 };
 

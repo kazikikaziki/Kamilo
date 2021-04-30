@@ -1,8 +1,12 @@
 ﻿#pragma once
-#include "KStream.h"
+#include <inttypes.h>
+#include <string>
+#include <memory>
 
 namespace Kamilo {
 
+class KInputStream;
+class KOutputStream;
 class CZipWriterImpl; // internal
 class CZipReaderImpl; // internal
 

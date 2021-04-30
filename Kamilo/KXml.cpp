@@ -1,7 +1,7 @@
 ﻿#include "KXml.h"
 #include "KString.h"
 #include "KInternal.h"
-#include "KFile.h"
+#include "KStream.h"
 
 // Use tinyxml2.h
 #define K_USE_TINYXML 1
@@ -46,7 +46,7 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 		char s[1024];
 		sprintf_s(s, sizeof(s),
 			"E_XML: An error occurred while parsing XML document %s(%d): \n%s\n%s\n",
-			debug_name, tinyxml2_doc->ErrorLineNum(), err_name, err_msg
+			debug_name.c_str(), tinyxml2_doc->ErrorLineNum(), err_name, err_msg
 		);
 		*errmsg = s;
 		return false;
@@ -56,7 +56,7 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 		char s[1024];
 		sprintf_s(s, sizeof(s),
 			"E_XML: An error occurred while parsing XML document %s: \n%s\n%s\n",
-			debug_name, err_name, err_msg
+			debug_name.c_str(), err_name, err_msg
 		);
 		*errmsg = s;
 		return false;
@@ -307,6 +307,128 @@ KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const 
 	K__Error("Failed to read xml: %s: %s", filename, tiErrMsg.c_str());
 	return nullptr;
 }
+
+bool KXmlElement::writeDoc(KOutputStream &output) const {
+	if (!output.isOpen()) return false;
+	output.writeString("<?xml version=\"1.0\" encoding=\"utf8\" ?>\n");
+	int num = getNodeCount();
+	for (int i=0; i<num; i++) { // ルートではなくその子を書き出す
+		if (!getNode(i)->write(output, 0)) {
+			return false;
+		}
+	}
+	return true;
+}
+bool KXmlElement::hasTag(const char *tag) const {
+	const char *mytag = getTag();
+	return mytag && tag && strcmp(mytag, tag)==0;
+}
+const char * KXmlElement::findAttr(const char *name, const char *def) const {
+	int i = getAttrIndex(name);
+	return i>=0 ? getAttrValue(i) : def;
+}
+float KXmlElement::findAttrFloat(const char *name, float def) const {
+	const char *s = findAttr(name);
+	if (s == nullptr) return def;
+	char *err = 0;
+	float result = strtof(s, &err);
+	if (err==s || err[0]) return def;
+	return result;
+}
+int KXmlElement::findAttrInt(const char *name, int def) const {
+	const char *s = findAttr(name);
+	if (s == nullptr) return def;
+	char *err = 0;
+	int result = strtol(s, &err, 0);
+	if (err==s || *err) return def;
+	return result;
+}
+int KXmlElement::getAttrIndex(const char *name, int start) const {
+	if (name && name[0]) {
+		for (int i=start; i<getAttrCount(); i++) {
+			if (strcmp(getAttrName(i), name) == 0) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+void KXmlElement::setAttrInt(const char *name, int value) {
+	char s[32] = {0};
+	sprintf_s(s, sizeof(s), "%d", value);
+	setAttr(name, s);
+}
+void KXmlElement::setAttrFloat(const char *name, float value) {
+	char s[32] = {0};
+	sprintf_s(s, sizeof(s), "%g", value);
+	setAttr(name, s);
+}
+bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
+	if (node == nullptr) return false;
+	int n = getNodeCount();
+
+	// 子ノードから探す
+	for (int i=0; i<n; i++) {
+		KXmlElement *nd = getNode(i);
+		if (nd == node) {
+			deleteNode(i);
+			return true;
+		}
+	}
+
+	// 子ツリーから探す
+	if (in_tree) {
+		for (int i=0; i<n; i++) {
+			KXmlElement *nd = getNode(i);
+			if (nd->deleteNode(node, true)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+int KXmlElement::getNodeIndex(const char *tag, int start) const {
+	int n = getNodeCount();
+	for (int i=start; i<n; i++) {
+		const KXmlElement *elm = getNode(i);
+		if (elm->hasTag(tag)) {
+			return i;
+		}
+	}
+	return -1;
+}
+const KXmlElement * KXmlElement::findNode(const char *tag, const KXmlElement *start) const {
+	return _findnode_const(tag, start);
+}
+KXmlElement * KXmlElement::findNode(const char *tag, const KXmlElement *start) {
+	const KXmlElement *elm = _findnode_const(tag, start);
+	return const_cast<KXmlElement*>(elm);
+}
+const KXmlElement * KXmlElement::_findnode_const(const char *tag, const KXmlElement *start) const {
+	int index = 0;
+	int n = getNodeCount();
+	if (start) {
+		for (int i=0; i<n; i++) {
+			if (getNode(i) == start) {
+				index = i+1;
+				break;
+			}
+		}
+	}
+	for (int i=index; i<n; i++) {
+		const KXmlElement *elm = getNode(i);
+		if (elm->hasTag(tag)) {
+			return elm;
+		}
+	}
+	return nullptr;
+}
+#pragma endregion
+
+
+
+
+
 
 namespace Test {
 void Test_xml() {
