@@ -1,11 +1,11 @@
 ﻿#pragma once
+#include <memory>
 #include <string>
-#include "KFile.h"
-#include "KStream.h"
+#include "KRef.h"
 
 namespace Kamilo {
-	
-class KReader;
+
+class KInputStream;
 class CFileLoaderImpl; // internal
 
 class KArchive: public virtual KRef {
@@ -67,7 +67,6 @@ public:
 
 	/// 指定した名前のファイルがあれば KReader を返す
 	/// should_exists が true の場合、ファイルが見つからなければエラーログを出す
-	KReader * createReader(const char *filename, bool should_exists=true);
 	KInputStream getInputStream(const char *filename, bool should_exists=true);
 	
 	/// 指定されたファイルが存在すれば、その内容をすべてバイナリモードで読み取る

@@ -27,6 +27,7 @@
 #pragma endregion // IMGUI
 
 #include "KInternal.h"
+#include "KFile.h"
 #include "KExcel.h"
 #include "KStorage.h"
 #include "KRes.h"
