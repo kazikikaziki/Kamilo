@@ -1341,8 +1341,8 @@ public:
 	/// データ列とデータ行を指定し、それが定義されている列と行を得る
 	bool getDataSource(int col, int row, int *col_in_file, int *row_in_file) const;
 
-	int findRowByIntData(int col, int value);
-	int findRowByStringData(int col, const char *value);
+	int findRowByIntData(int col, int value) const;
+	int findRowByStringData(int col, const char *value) const;
 
 private:
 	class Impl;

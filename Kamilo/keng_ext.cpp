@@ -2062,7 +2062,7 @@ bool KTable::getDataSource(int col, int row, int *col_in_file, int *row_in_file)
 	}
 	return false;
 }
-int KTable::findRowByIntData(int col, int value) {
+int KTable::findRowByIntData(int col, int value) const {
 	int numcols = getDataColCount();
 	int numrows = getDataRowCount();
 	if (col < 0 || numcols <= col) return -1;
@@ -2074,7 +2074,7 @@ int KTable::findRowByIntData(int col, int value) {
 	}
 	return -1;
 }
-int KTable::findRowByStringData(int col, const char *value) {
+int KTable::findRowByStringData(int col, const char *value) const {
 	int numcols = getDataColCount();
 	int numrows = getDataRowCount();
 	if (col < 0 || numcols <= col) return -1;
