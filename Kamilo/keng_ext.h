@@ -1276,14 +1276,14 @@ public:
 	/// この状態で loadFromExcelFile(excel, sheetname, "@BEGIN", "@END") を呼び出すと、A1 から C7 の範囲を KTable に読み込むことになる
 	/// このようにして取得した KTable は以下のような値を返す
 	/// @code
-	///     KTable::getDataColIndexByName("KEY") ==> 0
-	///     KTable::getDataColIndexByName("VAL") ==> 1
-	///     KTable::getDataString(0, 0) ==> "one"
-	///     KTable::getDataString(1, 0) ==> "100"
-	///     KTable::getDataString(0, 2) ==> "three"
-	///     KTable::getDataString(1, 2) ==> "300"
-	///     KTable::getRowMarker(0) ==> nullptr
-	///     KTable::getRowMarker(1) ==> "//"
+	///     table.getDataColIndexByName("KEY") ==> 0
+	///     table.getDataColIndexByName("VAL") ==> 1
+	///     table.getDataString(0, 0) ==> "one"
+	///     table.getDataString(1, 0) ==> "100"
+	///     table.getDataString(0, 2) ==> "three"
+	///     table.getDataString(1, 2) ==> "300"
+	///     table.getRowMarker(0) ==> nullptr  <---- セルA3の内容
+	///     table.getRowMarker(1) ==> "//"     <---- セルA4の内容
 	/// @endcode
 	bool loadFromExcelFile(const KExcelFile &file, const char *sheet_name, const char *top_cell_text, const char *bottom_cell_text);
 
