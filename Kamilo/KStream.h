@@ -101,4 +101,8 @@ private:
 	std::shared_ptr<Impl> m_Impl;
 };
 
+namespace Test {
+void Test_stream();
+}
+
 } // namespace

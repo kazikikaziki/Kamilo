@@ -1,12 +1,12 @@
 ﻿#include "KFile.h"
 //
-#include "KCrc32.h"
-#include "KDirectoryWalker.h"
 #include <vector>
 #include <unordered_set>
 #include <mutex>
 #include <Windows.h>
 #include <Shlwapi.h>
+#include "KCrc32.h"
+#include "KDirectoryWalker.h"
 #include "KInternal.h"
 #include "KString.h"
 
@@ -21,8 +21,6 @@
 namespace Kamilo {
 
 
-
-#pragma region File Operation
 namespace kns_fileop {
 static bool K_file__confirm(const wchar_t *op, const wchar_t *path1, const wchar_t *path2) {
 	if (K_FILE_SAFE) {
@@ -295,245 +293,6 @@ bool K_FileRemoveFilesInDirTree(const char *dir_u8) {
 	K__Utf8ToWidePath(wdir, MAX_PATH, dir_u8);
 	return kns_fileop::K_file__RemoveNonDirFilesInDirectoryW(wdir, true);
 }
-#pragma endregion // File Operation
-
-
-
-
-
-#pragma region KReader
-namespace kns_reader {
-class CFileStrmR: public KReader {
-public:
-	FILE *m_file;
-	std::string m_name;
-
-	CFileStrmR(FILE *fp, const char *name) {
-		m_file = fp;
-		m_name = name;
-	}
-	virtual ~CFileStrmR() {
-		fclose(m_file);
-	}
-	virtual int tell() override {
-		return ftell(m_file);
-	}
-	virtual int read(void *data, int size) {
-		if (data) {
-			return fread(data, 1, size, m_file);
-		} else {
-			return fseek(m_file, size, SEEK_CUR);
-		}
-	}
-	virtual void seek(int pos) {
-		fseek(m_file, pos, SEEK_SET);
-	}
-	virtual int size() {
-		int i=ftell(m_file);
-		fseek(m_file, 0, SEEK_END);
-		int n=ftell(m_file);
-		fseek(m_file, i, SEEK_SET);
-		return n; 
-	}
-};
-class CMemStrmR: public KReader {
-	void *m_ptr;
-	int m_size;
-	int m_pos;
-	bool m_copy;
-public:
-	CMemStrmR(const void *p, int size, bool copy) {
-		if (copy) {
-			m_ptr = malloc(size);
-			memcpy(m_ptr, p, size);
-			m_copy = true;
-		} else {
-			m_ptr = const_cast<void*>(p);
-			m_copy = false;
-		}
-		m_size = size;
-		m_pos = 0;
-	}
-	virtual ~CMemStrmR() {
-		if (m_copy && m_ptr) {
-			free(m_ptr);
-		}
-	}
-	virtual int tell() override {
-		return m_pos;
-	}
-	virtual int read(void *data, int size) {
-		int n = 0;
-		if (m_pos + size <= m_size) {
-			n = size;
-		} else if (m_pos < m_size) {
-			n = m_size - m_pos;
-		}
-		if (n > 0) {
-			if (data) memcpy(data, (uint8_t*)m_ptr + m_pos, n); // data=nullptr だと単なるシークになる
-			m_pos += n;
-			return n;
-		}
-		return 0;
-	}
-	virtual void seek(int pos) {
-		if (pos < 0) {
-			m_pos = 0;
-		} else if (pos < m_size) {
-			m_pos = pos;
-		} else {
-			m_pos = m_size;
-		}
-	}
-	virtual int size() {
-		return m_size;
-	}
-};
-} // naemsapce kns_reader
-KReader * KReader::createFromFileName(const char *filename) {
-	FILE *fp = K__fopen_u8(filename, "rb");
-	if (fp) {
-		return new kns_reader::CFileStrmR(fp, filename);
-	}
-	return nullptr;
-}
-KReader * KReader::createFromMemory(const void *data, int size) {
-	return new kns_reader::CMemStrmR(data, size, false); // No copy
-}
-KReader * KReader::createFromMemoryCopy(const void *data, int size) {
-	return new kns_reader::CMemStrmR(data, size, true); // Copy
-}
-
-class CStreamReader: public KReader {
-public:
-	KInputStream m_Strm;
-
-	CStreamReader(KInputStream &strm) {
-		m_Strm = strm;
-	}
-	virtual int tell() {
-		return m_Strm.tell();
-	}
-	virtual int read(void *data, int size) {
-		return m_Strm.read(data, size);
-	}
-	virtual void seek(int pos) {
-		m_Strm.seek(pos);
-	}
-	virtual int size() {
-		return m_Strm.size();
-	}
-};
-KReader * KReader::createFromStream(KInputStream &input) {
-	return new CStreamReader(input);
-}
-
-
-
-
-std::string KReader::readBinFromFileName(const char *filename) {
-	std::string bin;
-	KReader *r = createFromFileName(filename);
-	if (r) {
-		bin = r->read_bin();
-		r->drop();
-	}
-	return bin;
-}
-#pragma endregion // KReader
-
-namespace Test {
-void Test_reader() {
-	const char *text = "hello, world.";
-	KReader *r = KReader::createFromMemory(text, strlen(text));
-	char s[32] = {0};
-	
-	K__Assert(r->read(s, 5) == 5);
-	K__Assert(strncmp(s, "hello", 5) == 0);
-	K__Assert(r->tell() == 5);
-	
-	K__Assert(r->read(s, 7) == 7);
-	K__Assert(strncmp(s, ", world", 7) == 0);
-	K__Assert(r->tell() == 12);
-
-	K__Assert(r->read(s, 4) == 1);
-	K__Assert(strncmp(s, ".", 1) == 0);
-	K__Assert(r->tell() == 13);
-
-	r->drop();
-}
-void Test_writer() {
-	std::string s;
-	KOutputStream w = KOutputStream::fromMemory(&s);
-	K__Assert(w.write("abc", 3) == 3);
-	K__Assert(w.write(" ",   1) == 1);
-	K__Assert(w.write("def", 3) == 3);
-	K__Assert(s.compare("abc def") == 0);
-}
-} // Test
-
-#pragma region KWriter
-class CFileStrmW: public KWriter {
-public:
-	FILE *m_file;
-	std::string m_name;
-
-	CFileStrmW(FILE *fp, const char *name) {
-		m_file = fp;
-		m_name = name;
-	}
-	virtual ~CFileStrmW() {
-		fclose(m_file);
-	}
-	virtual int tell() override {
-		return ftell(m_file);
-	}
-	virtual int write(const void *data, int size) {
-		return fwrite(data, 1, size, m_file);
-	}
-	virtual void seek(int pos) {
-		fseek(m_file, pos, SEEK_SET);
-	}
-};
-class CMemStrmW: public KWriter {
-	std::string *m_buf;
-	int m_pos;
-public:
-	CMemStrmW(std::string *dest) {
-		m_buf = dest;
-		m_pos = 0;
-	}
-	virtual int tell() override {
-		return m_pos;
-	}
-	virtual int write(const void *data, int size) {
-		m_buf->resize(m_pos + size);
-		memcpy((char*)m_buf->data() + m_pos, data, size);
-		m_pos += size;
-		return size;
-	}
-	virtual void seek(int pos) {
-		if (pos < 0) {
-			m_pos = 0;
-		} else if (pos < (int)m_buf->size()) {
-			m_pos = pos;
-		} else {
-			m_pos = m_buf->size();
-		}
-	}
-};
-KWriter * KWriter::createFromFileName(const char *filename_u8) {
-	FILE *fp = K__fopen_u8(filename_u8, "wb");
-	if (fp) {
-		return new CFileStrmW(fp, filename_u8);
-	}
-	return nullptr;
-}
-KWriter * KWriter::createFromMemory(std::string *dest) {
-	K__Assert(dest);
-	return new CMemStrmW(dest);
-}
-#pragma endregion // KWriter
 
 
 

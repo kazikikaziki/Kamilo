@@ -1,10 +1,11 @@
 ﻿#pragma once
 #include <memory>
 #include "KString.h"
-#include "KFile.h"
 
 namespace Kamilo {
 
+class KInputStream;
+class KOutputStream;
 class CPacWriterImpl; // internal
 class CPacReaderImpl; // internal
 

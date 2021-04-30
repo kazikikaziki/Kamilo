@@ -2,6 +2,7 @@
 //
 #include <mutex>
 #include "KInternal.h"
+#include "KStream.h"
 #include "KZlib.h"
 
 namespace Kamilo {
@@ -13,13 +14,13 @@ const int PAC_MAX_LABEL_LEN  = 128; // 128以外にすると昔の pac データ
 
 #pragma region KPacFileWriter
 class CPacWriterImpl {
-	KOutputStream output_;
+	KOutputStream m_Output;
 public:
 	CPacWriterImpl() {
 	}
 	bool open(KOutputStream &output) {
-		output_ = output;
-		return output_.isOpen();
+		m_Output = output;
+		return m_Output.isOpen();
 	}
 	virtual bool addEntryFromFileName(const KPath &entry_name, const KPath &filename) {
 		KInputStream file = KInputStream::fromFileName(filename.u8());
@@ -49,24 +50,24 @@ public:
 			for (uint8_t i=0; i<PAC_MAX_LABEL_LEN; i++) {
 				label[i] = label[i] ^ i;
 			}
-			output_.write(label, PAC_MAX_LABEL_LEN);
+			m_Output.write(label, PAC_MAX_LABEL_LEN);
 		}
 		if (data == nullptr || size <= 0) {
 			// nullptrデータ
 			// Data size in file
-			output_.writeUint32(0); // Hash
-			output_.writeUint32(0); // 元データサイズ
-			output_.writeUint32(0); // pacファイル内でのデータサイズ
-			output_.writeUint32(0); // Flags
+			m_Output.writeUint32(0); // Hash
+			m_Output.writeUint32(0); // 元データサイズ
+			m_Output.writeUint32(0); // pacファイル内でのデータサイズ
+			m_Output.writeUint32(0); // Flags
 
 		} else {
 			// 圧縮データ
 			std::string zbuf = KZlib::compress_zlib(data, size, PAC_COMPRESS_LEVEL);
-			output_.writeUint32(0); // Hash
-			output_.writeUint32(size); // 元データサイズ
-			output_.writeUint32(zbuf.size()); // pacファイル内でのデータサイズ
-			output_.writeUint32(0); // Flags
-			output_.write(zbuf.data(), zbuf.size());
+			m_Output.writeUint32(0); // Hash
+			m_Output.writeUint32(size); // 元データサイズ
+			m_Output.writeUint32(zbuf.size()); // pacファイル内でのデータサイズ
+			m_Output.writeUint32(0); // Flags
+			m_Output.write(zbuf.data(), zbuf.size());
 		}
 		return true;
 	}
@@ -111,113 +112,113 @@ bool KPacFileWriter::addEntryFromMemory(const KPath &entry_name, const void *dat
 
 #pragma region KPacFileReader
 class CPacReaderImpl {
-	std::mutex mutex_;
-	KInputStream file_;
+	std::mutex m_Mutex;
+	KInputStream m_Input;
 public:
 	CPacReaderImpl() {
 	}
 	~CPacReaderImpl() {
-		mutex_.lock();
-		file_ = KInputStream(); // スレッドセーフでデストラクタが実行されるように、あえて空オブジェクトを代入しておく
-		mutex_.unlock();
+		m_Mutex.lock();
+		m_Input = KInputStream(); // スレッドセーフでデストラクタが実行されるように、あえて空オブジェクトを代入しておく
+		m_Mutex.unlock();
 	}
 	int getCount() {
 		int ret = 0;
-		mutex_.lock();
+		m_Mutex.lock();
 		{
 			ret = getCount_unsafe();
 		}
-		mutex_.unlock();
+		m_Mutex.unlock();
 		return ret;
 	}
 	int getIndexByName(const KPath &entry_name, bool ignore_case, bool ignore_path) {
 		int ret = 0;
-		mutex_.lock();
+		m_Mutex.lock();
 		{
 			ret = getIndexByName_unsafe(entry_name, ignore_case, ignore_path);
 		}
-		mutex_.unlock();
+		m_Mutex.unlock();
 		return ret;
 	}
 	KPath getName(int index) {
 		KPath ret;
-		mutex_.lock();
+		m_Mutex.lock();
 		{
 			ret = getName_unsafe(index);
 		}
-		mutex_.unlock();
+		m_Mutex.unlock();
 		return ret;
 	}
 	std::string getData(int index) {
 		std::string ret;
-		mutex_.lock();
+		m_Mutex.lock();
 		{
 			ret = getData_unsafe(index);
 		}
-		mutex_.unlock();
+		m_Mutex.unlock();
 		return ret;
 	}
 	bool open(KInputStream &input) {
-		mutex_.lock();
-		file_ = input;
-		mutex_.unlock();
-		return file_.isOpen();
+		m_Mutex.lock();
+		m_Input = input;
+		m_Mutex.unlock();
+		return m_Input.isOpen();
 	}
 	void seekFirst_unsafe() {
-		file_.seek(0);
+		m_Input.seek(0);
 	}
 	bool seekNext_unsafe(KPath *name) {
-		if (file_.tell() >= file_.size()) {
+		if (m_Input.tell() >= m_Input.size()) {
 			return false;
 		}
 		uint32_t len = 0;
-		file_.read(nullptr, PAC_MAX_LABEL_LEN); // Name
-		file_.read(nullptr, 4); // Hash
-		file_.read(nullptr, 4); // Data size
-		file_.read(&len, 4); // Data size in pac file
-		file_.read(nullptr, 4); // Flags
-		file_.read(nullptr, len); // Data
+		m_Input.read(nullptr, PAC_MAX_LABEL_LEN); // Name
+		m_Input.read(nullptr, 4); // Hash
+		m_Input.read(nullptr, 4); // Data size
+		m_Input.read(&len, 4); // Data size in pac file
+		m_Input.read(nullptr, 4); // Flags
+		m_Input.read(nullptr, len); // Data
 		return true;
 	}
 	bool readFile_unsafe(KPath *name, std::string *data) {
-		if (file_.tell() >= file_.size()) {
+		if (m_Input.tell() >= m_Input.size()) {
 			return false;
 		}
 		if (name) {
 			char s[PAC_MAX_LABEL_LEN];
-			file_.read(s, PAC_MAX_LABEL_LEN);
+			m_Input.read(s, PAC_MAX_LABEL_LEN);
 			for (uint8_t i=0; i<PAC_MAX_LABEL_LEN; i++) {
 				s[i] = s[i] ^ i;
 			}
 			*name = KPath::fromUtf8(s);
 		} else {
-			file_.read(nullptr, PAC_MAX_LABEL_LEN);
+			m_Input.read(nullptr, PAC_MAX_LABEL_LEN);
 		}
 
 		// Hash (NOT USE)
-		uint32_t hash = file_.readUint32();
+		uint32_t hash = m_Input.readUint32();
 
 		// Data size (NOT USE)
-		uint32_t datasize_orig = file_.readUint32();
+		uint32_t datasize_orig = m_Input.readUint32();
 		if (datasize_orig >= 1024 * 1024 * 100) { // 100MBはこえないだろう
 			K__Error("too big datasize_orig size");
 			return false;
 		}
 
 		// Data size in pac file
-		uint32_t datasize_inpac = file_.readUint32();
+		uint32_t datasize_inpac = m_Input.readUint32();
 		if (datasize_inpac >= 1024 * 1024 * 100) { // 100MBはこえないだろう
 			K__Error("too big datasize_inpac size");
 			return false;
 		}
 
 		// Flags (NOT USE)
-		uint32_t flags = file_.readUint32();
+		uint32_t flags = m_Input.readUint32();
 
 		// Read data
 		if (data) {
 			if (datasize_orig > 0) {
-				std::string zdata = file_.readBin(datasize_inpac);
+				std::string zdata = m_Input.readBin(datasize_inpac);
 				*data = KZlib::uncompress_zlib(zdata, datasize_orig);
 				if (data->size() != datasize_orig) {
 					K__Error("E_PAC_DATA_SIZE_NOT_MATCHED");
@@ -228,7 +229,7 @@ public:
 				*data = std::string();
 			}
 		} else {
-			file_.read(nullptr, datasize_inpac);
+			m_Input.read(nullptr, datasize_inpac);
 		}
 		return true;
 	}
