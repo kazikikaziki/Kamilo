@@ -36,6 +36,18 @@ void _OutputW(const std::wstring &ws) {
 	OutputDebugStringW(ws.c_str());
 }
 
+static void K__WPrintLn(const wchar_t *ws) {
+#if 1
+	// windows では wprintf があまり信用できないので普通の printf を使う
+	std::string mb = K__WideToAnsiStd(ws, "");
+	printf("%s\n", mb.c_str());
+#else
+	wprintf(L"%s\n", ws);
+#endif
+
+	OutputDebugStringW(ws);
+	OutputDebugStringW(L"\n");
+}
 
 void K__RawPrintf(const char *fmt_u8, ...) {
 	// 無限再帰防止のため、いかなるライブラリ関数も呼んではいけない (K_assert 含む)
@@ -59,9 +71,7 @@ void K__DebugPrint(const char *fmt_u8, ...) {
 		g_DebugPrintHook(u8);
 	} else {
 		std::wstring ws = K__Utf8ToWideStd(u8);
-		wprintf(L"%s\n", ws.c_str());
-		OutputDebugStringW(ws.c_str());
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws.c_str());
 	}
 }
 void K__Print(const char *fmt_u8, ...) {
@@ -74,9 +84,7 @@ void K__Print(const char *fmt_u8, ...) {
 		g_PrintHook(u8);
 	} else {
 		std::wstring ws = K__Utf8ToWideStd(u8);
-		wprintf(L"%s\n", ws.c_str());
-		OutputDebugStringW(ws.c_str());
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws.c_str());
 	}
 }
 void K__PrintW(const wchar_t *wfmt, ...) {
@@ -89,9 +97,7 @@ void K__PrintW(const wchar_t *wfmt, ...) {
 		std::string u8 = K__WideToUtf8Std(ws);
 		g_PrintHook(u8.c_str());
 	} else {
-		wprintf(L"%s\n", ws);
-		OutputDebugStringW(ws);
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws);
 	}
 }
 void K__Warning(const char *fmt_u8, ...) {
@@ -104,9 +110,7 @@ void K__Warning(const char *fmt_u8, ...) {
 		g_WarningHook(u8);
 	} else {
 		std::wstring ws = K__Utf8ToWideStd(u8);
-		wprintf(L"%s\n", ws.c_str());
-		OutputDebugStringW(ws.c_str());
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws.c_str());
 	}
 }
 void K__WarningW(const wchar_t *wfmt, ...) {
@@ -119,9 +123,7 @@ void K__WarningW(const wchar_t *wfmt, ...) {
 		std::string u8 = K__WideToUtf8Std(ws);
 		g_WarningHook(u8.c_str());
 	} else {
-		wprintf(L"%s\n", ws);
-		OutputDebugStringW(ws);
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws);
 	}
 }
 void K__Error(const char *fmt_u8, ...) {
@@ -134,9 +136,7 @@ void K__Error(const char *fmt_u8, ...) {
 		g_ErrorHook(u8);
 	} else {
 		std::wstring ws = K__Utf8ToWideStd(u8);
-		wprintf(L"%s\n", ws.c_str());
-		OutputDebugStringW(ws.c_str());
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws.c_str());
 	}
 }
 void K__ErrorW(const wchar_t *wfmt, ...) {
@@ -149,9 +149,7 @@ void K__ErrorW(const wchar_t *wfmt, ...) {
 		std::string u8 = K__WideToUtf8Std(ws);
 		g_ErrorHook(u8.c_str());
 	} else {
-		wprintf(L"%s\n", ws);
-		OutputDebugStringW(ws);
-		OutputDebugStringW(L"\n");
+		K__WPrintLn(ws);
 	}
 }
 
@@ -406,21 +404,27 @@ FILE * K__fopen_u8(const char *path_u8, const char *mode_u8) {
 	MultiByteToWideChar(CP_UTF8, 0, path_u8, -1, wpath, MAX_PATH);
 	MultiByteToWideChar(CP_UTF8, 0, mode_u8, -1, wmode, MAX_PATH);
 	FILE *file = nullptr;
-	errno_t err = _wfopen_s(&file, wpath, wmode);
-	// errno constants
-	// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
-	if (err == 0) {
-		return file;
+	if (1) {
+		// _wfopen で開く
+		// 読み取りモードで開く場合は、他のアプリが対象ファイルを開いていても成功する
+		file = _wfopen(wpath, wmode);
+		if (file == nullptr) {
+			K__OutputDebugString("*** Failed to open file \"", path_u8, "\"");
+		}
+	} else {
+		errno_t err = _wfopen_s(&file, wpath, wmode);
+		// errno constants
+		// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
+		if (err == ENOENT) {
+			// 指定された名前のファイルが存在しない
+			K__OutputDebugString("*** No file named \"", path_u8, "\"");
+		}
+		if (err == EACCES) {
+			// 指定されたモードでアクセスできない (_wfopen だと成功するかも）
+			K__OutputDebugString("*** Permission denied \"", path_u8, "\"");
+		}
 	}
-	if (err == ENOENT) {
-		// 指定された名前のファイルが存在しない
-		K__OutputDebugString("No file named \"", path_u8, "\"");
-	}
-	if (err == EACCES) {
-		// 指定されたモードでアクセスできない
-		K__OutputDebugString("Permission denied \"", path_u8, "\"");
-	}
-	return nullptr;
+	return file;
 }
 std::string K__GetExecDirU8() {
 	wchar_t wpath[MAX_PATH] = {0};
