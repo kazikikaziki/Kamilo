@@ -153,6 +153,24 @@ void K__ErrorW(const wchar_t *wfmt, ...) {
 	}
 }
 
+void K__Verbose(const char *fmt_u8, ...) {
+#ifdef KAMILO_VERBOSE
+	char u8[K_SPRINTF_BUFSIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_WarningHook) {
+		g_WarningHook(u8);
+	} else {
+		std::wstring ws = K__Utf8ToWideStd(u8);
+		K__WPrintLn(ws.c_str());
+	}
+#endif
+}
+
+
+
 bool K__strtof(const std::string &s, float *val) {
 	return K__strtof(s.c_str(), val);
 }

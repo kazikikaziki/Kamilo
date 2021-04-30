@@ -58,6 +58,7 @@
 #include "KString.h"
 #include "KSpriteDrawable.h"
 #include "KSystem.h"
+#include "KTable.h"
 #include "KTextNode.h"
 #include "KThread.h"
 #include "KUserData.h"

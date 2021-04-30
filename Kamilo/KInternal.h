@@ -49,6 +49,9 @@ void K__ErrorW(const wchar_t *wfmt, ...);
 void K__Warning(const char *fmt_u8, ...);
 void K__WarningW(const wchar_t *wfmt, ...);
 
+// KAMILO_VERBOSE が定義されているときのみ動作する
+void K__Verbose(const char *fmt_u8, ...);
+
 void K__SetDebugPrintHook(void (*hook)(const char *u8));
 void K__SetPrintHook(void (*hook)(const char *u8));
 void K__SetWarningHook(void (*hook)(const char *u8));
