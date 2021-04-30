@@ -642,6 +642,9 @@ KExcelFile::KExcelFile() {
 bool KExcelFile::empty() const {
 	return m_impl->empty();
 }
+void KExcelFile::clear() {
+	m_impl->clear();
+}
 std::string KExcelFile::getFileName() const {
 	m_name = m_impl->getFileName();
 	return m_name;

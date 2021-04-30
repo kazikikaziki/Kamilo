@@ -31,6 +31,7 @@ public:
 	KExcelFile();
 
 	bool empty() const;
+	void clear();
 
 	/// 元のファイル名を返す
 	std::string getFileName() const;

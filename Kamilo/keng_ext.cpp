@@ -1741,7 +1741,7 @@ public:
 		return !file.empty();
 	}
 	void clear() {
-		m_excel = KExcelFile();
+		m_excel.clear();
 		m_sheet = -1;
 		m_leftcol = 0;
 		m_toprow = 0;
@@ -1965,10 +1965,12 @@ KTable::KTable() {
 	m_impl = nullptr;
 }
 bool KTable::empty() const {
-	return m_impl->empty();
+	return m_impl == nullptr || m_impl->empty();
 }
 void KTable::clear() {
-	m_impl->clear();
+	if (m_impl) {
+		m_impl->clear();
+	}
 }
 bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
 	auto impl = std::make_shared<Impl>();
