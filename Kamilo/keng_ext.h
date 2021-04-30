@@ -1238,6 +1238,7 @@ class KTable {
 public:
 	KTable();
 	bool empty() const;
+	void clear();
 
 	/// Excel シートからテーブルオブジェクトを作成する
 	/// 
@@ -1287,12 +1288,12 @@ public:
 	bool loadFromExcelFile(const KExcelFile &file, const char *sheet_name, const char *top_cell_text, const char *bottom_cell_text);
 
 	/// テーブルを作成する。詳細は loadFromExcelFile を参照
-	/// @param xmls .xlsx ファイルオブジェクト
+	/// @param xlsx .xlsx ファイルオブジェクト
 	/// @param filename ファイル名（エラーメッセージの表示などで使用）
 	/// @param sheetname シート名
 	/// @param top_cell_text テーブル範囲の左上にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左上とする
 	/// @param btm_cell_text テーブル範囲の左下（右下ではない）にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左下とする
-	bool loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
+	bool loadFromStream(KInputStream &xlsx, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
 
 	/// テーブルを作成する。詳細は loadFromExcelFile を参照
 	/// @param xlsx_bin  .xlsx ファイルのバイナリデータ
@@ -1339,6 +1340,10 @@ public:
 
 	/// データ列とデータ行を指定し、それが定義されている列と行を得る
 	bool getDataSource(int col, int row, int *col_in_file, int *row_in_file) const;
+
+	int findRowByIntData(int col, int value);
+	int findRowByStringData(int col, const char *value);
+
 private:
 	class Impl;
 	std::shared_ptr<Impl> m_impl;

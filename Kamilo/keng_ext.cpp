@@ -1731,7 +1731,7 @@ public:
 		m_bottomrow = 0;
 	}
 	~Impl() {
-		_unload();
+		clear();
 	}
 	bool empty() const {
 		return m_excel.empty();
@@ -1740,8 +1740,8 @@ public:
 		m_excel = file;
 		return !file.empty();
 	}
-	void _unload() {
-		m_excel = KExcelFile(); // claer
+	void clear() {
+		m_excel = KExcelFile();
 		m_sheet = -1;
 		m_leftcol = 0;
 		m_toprow = 0;
@@ -1967,6 +1967,9 @@ KTable::KTable() {
 bool KTable::empty() const {
 	return m_impl->empty();
 }
+void KTable::clear() {
+	m_impl->clear();
+}
 bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
 	auto impl = std::make_shared<Impl>();
 	if (impl->_loadFromExcelFile(excel)) {
@@ -1980,9 +1983,9 @@ bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, c
 	m_impl = nullptr;
 	return false;
 }
-bool KTable::loadFromFile(KInputStream &xmls, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
+bool KTable::loadFromStream(KInputStream &xlsx, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
 	KExcelFile excel;
-	if (excel.loadFromStream(xmls, filename)) {
+	if (excel.loadFromStream(xlsx, filename)) {
 		if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {
 			return true;
 		}
@@ -2007,7 +2010,7 @@ int KTable::getDataColIndexByName(const char *column_name) const {
 	if (m_impl) {
 		return m_impl->getDataColIndexByName(column_name);
 	}
-	return 0;
+	return -1;
 }
 KPath KTable::getColumnName(int col) const {
 	if (m_impl) {
@@ -2057,6 +2060,31 @@ bool KTable::getDataSource(int col, int row, int *col_in_file, int *row_in_file)
 	}
 	return false;
 }
+int KTable::findRowByIntData(int col, int value) {
+	int numcols = getDataColCount();
+	int numrows = getDataRowCount();
+	if (col < 0 || numcols <= col) return -1;
+	for (int i=0; i<numrows; i++) {
+		int n = getDataInt(col, i);
+		if (n == value) {
+			return i;
+		}
+	}
+	return -1;
+}
+int KTable::findRowByStringData(int col, const char *value) {
+	int numcols = getDataColCount();
+	int numrows = getDataRowCount();
+	if (col < 0 || numcols <= col) return -1;
+	for (int i=0; i<numrows; i++) {
+		const char *s = getDataString(col, i);
+		if (s && strcmp(s, value) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 #pragma endregion // KTable
 
 
