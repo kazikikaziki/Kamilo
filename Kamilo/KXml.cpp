@@ -1,5 +1,4 @@
 ﻿#include "KXml.h"
-#include "KString.h"
 #include "KInternal.h"
 #include "KStream.h"
 
@@ -21,7 +20,7 @@ namespace Kamilo {
 #pragma region KXmlElement
 static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug_name, tinyxml2::XMLDocument *tinyxml2_doc, std::string *errmsg) {
 	if (xlmtext_u8.empty()) {
-		*errmsg = KStringUtils::K_sprintf(u8"E_XML: Xml document has no text: %s", debug_name.c_str());
+		*errmsg = K__sprintf_std(u8"E_XML: Xml document has no text: %s", debug_name.c_str());
 		return false;
 	}
 
@@ -83,7 +82,7 @@ public:
 		return m_Tag.c_str();
 	}
 	virtual void setTag(const char *tag) override {
-		if (!KStringUtils::isEmpty(tag)) {
+		if (tag && tag[0]) {
 			m_Tag = tag;
 		}
 	}

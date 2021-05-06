@@ -1,4 +1,7 @@
 ﻿#include "KTable.h"
+
+#include <string>
+#include <vector>
 #include "KExcel.h"
 #include "KInternal.h"
 
@@ -6,7 +9,7 @@ namespace Kamilo {
 
 class KTable::Impl {
 	KExcelFile m_excel;
-	KPathList m_colnames; // 列の名前
+	std::vector<std::string> m_colnames; // 列の名前
 	int m_sheet;   // 選択中のテーブルを含んでいるシートのインデックス
 	int m_leftcol;   // テーブルの左端の列インデックス
 	int m_toprow;    // テーブルの開始マークのある行インデックス
@@ -94,7 +97,7 @@ public:
 			K__Verbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text, s.c_str());
 		}
 		// 開始セルの右隣からは、カラム名の定義が続く
-		KPathList cols;
+		std::vector<std::string> cols;
 		{
 			int c = col0 + 1;
 			while (1) {
@@ -120,21 +123,21 @@ public:
 		m_leftcol   = col0;
 		return true;
 	}
-	KPath getColumnName(int col) const {
+	std::string getColumnName(int col) const {
 		if (m_excel.empty()) {
 			K__Error("E_EXCEL: No table loaded");
-			return KPath::Empty;
+			return "";
 		}
 		if (m_sheet < 0) {
 			K__Error("E_EXCEL: No table selected");
-			return KPath::Empty;
+			return "";
 		}
 		if (col < 0 || (int)m_colnames.size() <= col) {
-			return KPath::Empty;
+			return "";
 		}
 		return m_colnames[col];
 	}
-	int getDataColIndexByName(const KPath &column_name) const {
+	int getDataColIndexByName(const std::string &column_name) const {
 		if (m_excel.empty()) {
 			K__Error("E_EXCEL: No table loaded");
 			return -1;
@@ -220,24 +223,26 @@ public:
 		const char *s = getDataString(data_col, data_row);
 		// 実数形式で記述されている値を整数として取り出す可能性
 		float f = 0.0f;
-		if (KStringUtils::toFloatTry(s, &f)) {
+		if (K__strtof(s, &f)) {
 			return (int)f;
 		}
 		// 8桁の16進数を取り出す可能性。この場合は符号なしで取り出しておかないといけない
 		unsigned int u = 0;
-		if (KStringUtils::toUintTry(s, &u)) {
+		if (K__strtoui32(s, &u)) {
 			return (int)u;
 		}
 		// 普通の整数として取り出す
 		int i = 0;
-		if (KStringUtils::toIntTry(s, &i)) {
+		if (K__strtoi(s, &i)) {
 			return i;
 		}
 		return def;
 	}
 	float getDataFloat(int data_col, int data_row, float def) const {
 		const char *s = getDataString(data_col, data_row);
-		return KStringUtils::toFloat(s, def);
+		float ret = def;
+		K__strtof(s, &ret);
+		return ret;
 	}
 	bool getDataSource(int data_col, int data_row, int *col_in_file, int *row_in_file) const {
 		if (data_col < 0) return false;
@@ -303,11 +308,11 @@ int KTable::getDataColIndexByName(const char *column_name) const {
 	}
 	return -1;
 }
-KPath KTable::getColumnName(int col) const {
+std::string KTable::getColumnName(int col) const {
 	if (m_impl) {
 		return m_impl->getColumnName(col);
 	}
-	return KPath::Empty;
+	return "";
 }
 int KTable::getDataColCount() const {
 	if (m_impl) {

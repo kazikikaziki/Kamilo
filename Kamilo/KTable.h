@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <memory>
-#include "KString.h"
+#include <string>
 
 namespace Kamilo {
 
@@ -83,7 +83,7 @@ public:
 	int getDataColIndexByName(const char *column_name) const;
 
 	/// 指定された列に対応するカラム名を返す
-	KPath getColumnName(int col) const;
+	std::string getColumnName(int col) const;
 	
 	/// データ列数
 	int getDataColCount() const;
