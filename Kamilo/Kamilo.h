@@ -42,6 +42,7 @@
 #include "KMath.h"
 #include "KMatrix.h"
 #include "KMeshDrawable.h"
+#include "KNamedValues.h"
 #include "KNode.h"
 #include "KPac.h"
 #include "KQuat.h"

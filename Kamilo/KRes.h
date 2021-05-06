@@ -7,6 +7,8 @@
 #include "KFont.h"
 #include "KImagePack.h"
 #include "KEdgeFile.h"
+#include "KNamedValues.h"
+
 
 namespace Kamilo {
 

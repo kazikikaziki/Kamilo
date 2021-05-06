@@ -3,6 +3,7 @@
 #include "KInspector.h"
 #include "KInternal.h"
 #include "KZlib.h"
+#include "KNamedValues.h"
 #include "keng_game.h"
 
 namespace Kamilo {

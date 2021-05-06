@@ -10,6 +10,7 @@
 #include "KAction.h"
 #include "KThread.h"
 #include "KSound.h"
+#include "KNamedValues.h"
 
 #define SCENE_TEST 0
 
@@ -20,7 +21,7 @@ namespace Kamilo {
 
 
 
-
+class KNamedValues;
 
 
 

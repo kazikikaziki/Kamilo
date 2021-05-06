@@ -2,6 +2,7 @@
 #include "KSpriteDrawable.h"
 #include "KInternal.h"
 #include "KSig.h"
+#include "KNamedValues.h"
 
 namespace Kamilo {
 
