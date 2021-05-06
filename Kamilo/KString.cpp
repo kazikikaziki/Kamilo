@@ -2709,22 +2709,22 @@ void Test_pathstring() {
 
 #pragma region KToken funcs
 #define BLANK_CHARS "\n\r\t "
-static int kktok_isblank(int c) {
+static int KTok_isblank(int c) {
 	return isascii(c) && isblank(c);
 }
 
 // s で最初に現れる非空白文字に移動する
-static char * kktok_skip_blank(char *s) {
+static char * KTok_skip_blank(char *s) {
 	return s + strspn(s, BLANK_CHARS);
 }
-static const char * kktok_skip_blank(const char *s) {
+static const char * KTok_skip_blank(const char *s) {
 	return s + strspn(s, BLANK_CHARS);
 }
 
 // 範囲 [s..e] の文字列の末尾にある空白文字を '\0' で上書きする。
 // 新しい末尾位置（ヌル文字）ポインタを返す
-static char * kktok_trim_rihgt_blanks(char *s, char *e) {
-	while (s < e && kktok_isblank(e[-1])) {
+static char * KTok_trim_rihgt_blanks(char *s, char *e) {
+	while (s < e && KTok_isblank(e[-1])) {
 		e[-1] = '\0';
 		e--;
 	}
@@ -2732,7 +2732,7 @@ static char * kktok_trim_rihgt_blanks(char *s, char *e) {
 }
 
 // "\r\n" ===> "\n"
-static void kktok_convert_newlines(std::string &out, const char *s) {
+static void KTok_convert_newlines(std::string &out, const char *s) {
 	out.reserve(strlen(s)); // 少なくとも元の文字列よりかは短くなるので strlen(s) だけ確保しておけばよい
 	for (const char *c=s; *c; /*none*/) {
 		if (c[0] == '\r' && c[1] == '\n') {
@@ -2806,7 +2806,7 @@ size_t KToken::splitLines(const char *text, bool with_empty_line) {
 
 	// 処理を簡単かつ確実にするため、１文字で改行を表すようにしておく
 	std::string cpy;
-	kktok_convert_newlines(cpy, text);
+	KTok_convert_newlines(cpy, text);
 
 	// 空白行を認識させるなら、連続する改行文字を結合してはいけない
 	bool condense_delims = !with_empty_line;
