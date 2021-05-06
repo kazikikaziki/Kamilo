@@ -3148,7 +3148,7 @@ public:
 	void addParams(int page, const KNamedValues *params) {
 		if (params && params->size() > 0) {
 			KClipRes::SPRITE_KEY *key = getkey(page);
-			key->user_parameters.append(params);
+			key->user_parameters.append(*params);
 		}
 	}
 	void addData(int page, const KXmlElement *xml) {
@@ -4324,13 +4324,13 @@ public:
 		int pagedur = xClip->findAttrInt("pagedur", 8);
 
 		KXmlElement *xEditInfo = nullptr;
-		KNamedValues *defaultUserParams = KNamedValues::create();
+		KNamedValues defaultUserParams;
 		for (int i=0; i<xClip->getNodeCount(); i++) {
 			KXmlElement *xElm = xClip->getNode(i);
 			if (xElm->hasTag("Parameters")) {
 				// <Clip> 直下に <Parameters> がある
 				// 全ページに対するデフォルトパラメータとして取得しておく
-				defaultUserParams->loadFromXml(xElm, true);
+				defaultUserParams.loadFromXml(xElm, true);
 			}
 			if (xElm->hasTag("EditInfo")) {
 				K_Drop(xEditInfo);
@@ -4361,19 +4361,16 @@ public:
 					page_duration = xPage->findAttrInt("delay");
 				}
 
-				KNamedValues *user_params = KNamedValues::create();
-				user_params->append(defaultUserParams);
-
+				KNamedValues user_params = defaultUserParams.clone();
 				int layerindex = 0;
 				for (int j=0; j<xPage->getNodeCount(); j++) {
 					KXmlElement * xElm = xPage->getNode(j);
 					if (xElm->hasTag("Parameters")) {
 						// <Parameters> ノードが指定されている
 						// ページ固有の追加パラメータを読む
-						KNamedValues *params = KNamedValues::create();
-						params->loadFromXml(xElm, true);
-						user_params->append(params); // デフォルト設定を固有設定で上書きする
-						KNamedValues_del(params);
+						KNamedValues params;
+						params.loadFromXml(xElm, true);
+						user_params.append(params); // デフォルト設定を固有設定で上書きする
 					}
 					if (xElm->hasTag("Data")) {
 						// <Data> ノードが指定されている。丸ごと取り込む
@@ -4435,10 +4432,9 @@ public:
 					builder.setLabel(pageindex, 0, xPage->findAttr("label"));
 					builder.setCommand(pageindex, 0, xPage->findAttr("command"));
 				}
-				builder.addParams(pageindex, user_params);
+				builder.addParams(pageindex, &user_params);
 				builder.setDuration(pageindex, page_duration);
 				pageindex++;
-				KNamedValues_del(user_params);
 			}
 		}
 
@@ -4454,8 +4450,6 @@ public:
 				*out_clip = KBank::getAnimationBank()->find_clip(clipName.u8());
 			}
 		}
-
-		KNamedValues_del(defaultUserParams);
 		return false;
 	}
 };
@@ -4671,16 +4665,15 @@ public:
 		builder.setKillSelf(xEdgeAnimation->findAttrInt("autoKill") != 0);
 
 		KXmlElement *xEditInfo = nullptr;
-		KNamedValues *defaultUserParams = KNamedValues::create();
+		KNamedValues defaultUserParams;
 		for (int i=0; i<xEdgeAnimation->getNodeCount(); i++) {
 			KXmlElement *xElm = xEdgeAnimation->getNode(i);
 			if (xElm->hasTag("Parameters")) {
 				// <EdgeAnimation> 直下に <Parameters> がある
 				// 全ページに対するデフォルトパラメータとして取得しておく
-				KNamedValues *params = KNamedValues::create();
-				params->loadFromXml(xElm, true);
-				defaultUserParams->append(params);
-				KNamedValues_del(params);
+				KNamedValues params;
+				params.loadFromXml(xElm, true);
+				defaultUserParams.append(params);
 			}
 			if (xElm->hasTag("EditInfo")) {
 				// <EdgeAnimation> 直下に <EditInfo> がある
@@ -4745,15 +4738,13 @@ public:
 
 				// ページ固有の追加パラメータがあるならそれを読む
 				// <Parameters>
-				KNamedValues *user_params = KNamedValues::create();
-				user_params->append(defaultUserParams);
+				KNamedValues user_params = defaultUserParams.clone();
 				for (int j=0; j<xPage->getNodeCount(); j++) {
 					KXmlElement *xElm = xPage->getNode(j);
 					if (xElm->hasTag("Parameters")) {
-						KNamedValues *params = KNamedValues::create();
-						params->loadFromXml(xElm, true);
-						user_params->append(params); // デフォルト設定を固有設定で上書きする
-						KNamedValues_del(params);
+						KNamedValues params;
+						params.loadFromXml(xElm, true);
+						user_params.append(params); // デフォルト設定を固有設定で上書きする
 					}
 					if (xElm->hasTag("Data")) {
 						// <Data> ノードが指定されている。丸ごと取り込む
@@ -4869,12 +4860,11 @@ public:
 						}
 					}
 				}
-				builder.addParams(clip_page_index, user_params);
+				builder.addParams(clip_page_index, &user_params);
 				builder.setDuration(clip_page_index, page_duration);
 				auto_page_index = edgePageIndex + 1;
 				clip_page_index++;
 				last_page_dur = page_duration;
-				KNamedValues_del(user_params);
 			}
 		}
 		if (KBank::getAnimationBank()) {
@@ -4891,8 +4881,6 @@ public:
 				*out_clip = KBank::getAnimationBank()->find_clip(clipName.u8());
 			}
 		}
-
-		KNamedValues_del(defaultUserParams);
 		return true;
 	}
 

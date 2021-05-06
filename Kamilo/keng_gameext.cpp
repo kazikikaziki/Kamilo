@@ -34,7 +34,9 @@ KNamedValues * KScene::getParamsEditable() {
 void KScene::setParams(const KNamedValues *new_params) {
 	KNamedValues old_params = m_params;
 	m_params.clear();
-	m_params.append(new_params);
+	if (new_params) {
+		m_params.append(*new_params);
+	}
 	onSetParams(&m_params, new_params, &old_params);
 }
 
@@ -197,7 +199,9 @@ public:
 		m_next_scene.scene = scene;
 		m_next_scene.id = id;
 		m_next_scene.params.clear();
-		m_next_scene.params.append(params);
+		if (params) {
+			m_next_scene.params.append(*params);
+		}
 	}
 	void restart() {
 		KLog::printInfo("Restart!");

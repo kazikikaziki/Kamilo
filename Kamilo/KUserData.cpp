@@ -174,13 +174,10 @@ public:
 			return true;
 		}
 	}
-	bool loadFromNamedValues(const KNamedValues *nv) {
-		if (nv) {
-			m_Values.clear();
-			m_Values.append(nv);
-			return true;
-		}
-		return false;
+	bool loadFromNamedValues(const KNamedValues &nv) {
+		m_Values.clear();
+		m_Values.append(nv);
+		return true;
 	}
 	bool peekFile(const std::string &filename, const std::string &password, KNamedValues *nv) const {
 		bool ret = false;
