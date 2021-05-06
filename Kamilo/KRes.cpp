@@ -3776,8 +3776,11 @@ public:
 	FILE *fp_;
 	
 	CAutoFile(const char *name) {
-		fp_ = fopen(name, "w");
-		write("\"FILE\", \"TYPE\", \"PAGE\", \"LAYER\", \"W\", \"H\", \"SIZE(BYTES)\"\n");
+		fp_ = nullptr;
+		if (EXPORT_CONTENTS_DEBUG_DATA) {
+			fp_ = fopen(name, "w");
+			write("\"FILE\", \"TYPE\", \"PAGE\", \"LAYER\", \"W\", \"H\", \"SIZE(BYTES)\"\n");
+		}
 	}
 	~CAutoFile() {
 		if (fp_) {
