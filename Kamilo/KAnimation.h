@@ -4,10 +4,13 @@
 /// http://opensource.org/licenses/mit-license.php
 
 #pragma once
-#include "KNode.h"
+#include <unordered_map>
+#include "KString.h"
+#include "KRef.h"
 
 namespace Kamilo {
 
+class KNode;
 class KClipRes;
 class KNamedValues;
 class KXmlElement;
