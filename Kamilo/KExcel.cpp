@@ -713,7 +713,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 				}
 				if (last_row_ < 0 || last_row_ + 1 < row) {
 					// 行番号が飛んでいる場合のみ列番号を付加する
-					dest_ += K__sprintf_std("\t<row r='%d'>", row);
+					dest_ += K::str_sprintf("\t<row r='%d'>", row);
 				} else {
 					// インクリメントで済む場合は行番号を省略
 					dest_ += "\t<row>";
@@ -723,13 +723,13 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 			}
 			if (last_col_ < 0 || last_col_ + 1 < col) {
 				// 列番号が飛んでいる場合のみ列番号を付加する
-				dest_ += K__sprintf_std("<c i='%d'>", col);
+				dest_ += K::str_sprintf("<c i='%d'>", col);
 			} else {
 				// インクリメントで済む場合は列番号を省略
 				dest_ += "<c>";
 			}
 			if (_ShouldEscapeString(s)) { // xml禁止文字が含まれているなら CDATA 使う
-				dest_ += K__sprintf_std("<![CDATA[%s]]>", s);
+				dest_ += K::str_sprintf("<![CDATA[%s]]>", s);
 			} else {
 				dest_ += s;
 			}
@@ -748,12 +748,12 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		s += u8"<!-- <row> タグは各シートの「行」に対応する。 <row> の r 属性には 0 起算での行番号が入る。ただし直前の <row> の次の行だった場合 r 属性は省略される -->\n";
 		s += u8"<!-- <c> タグは、それぞれの行 <row> 内にある「セル」に対応する。 i 属性には 0 起算での列番号が入る。ただし、直前の <c> の次の列だった場合 i 属性は省略される -->\n";
 	}
-	s += K__sprintf_std("<excel numsheets='%d'>\n", getSheetCount());
+	s += K::str_sprintf("<excel numsheets='%d'>\n", getSheetCount());
 	for (int iSheet=0; iSheet<getSheetCount(); iSheet++) {
 		int col=0, row=0, nCol=0, nRow=0;
 		std::string sheet_name = getSheetName(iSheet);
 		getSheetDimension(iSheet, &col, &row, &nCol, &nRow);
-		s += K__sprintf_std("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.c_str(), col, row, nCol, nRow);
+		s += K::str_sprintf("<sheet name='%s' left='%d' top='%d' cols='%d' rows='%d'>\n", sheet_name.c_str(), col, row, nCol, nRow);
 		{
 			CB cb(s);
 			scanCells(iSheet, &cb);
@@ -765,7 +765,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		}
 		s += "</sheet>";
 		if (with_comment) {
-			s += K__sprintf_std("<!-- %s -->", sheet_name.c_str());
+			s += K::str_sprintf("<!-- %s -->", sheet_name.c_str());
 		}
 		s += "\n\n";
 	}

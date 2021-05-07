@@ -174,119 +174,11 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-/// strptime の代替関数
-/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man3/strptime.3.html
-/// Visual Studio では strptime が定義されていないので、代わりにこれを使う。
-/// @code
-///		K_strptime_l("2020-12-17 10:12:01", "%Y-%m-%d %H:%M:%S", &tm, "");
-/// @endcode
-char * K__strptime_l(const char *str, const char *fmt, struct tm *out_tm, const char *_locale) {
-	K__Assert(str);
-	K__Assert(fmt);
-	K__Assert(out_tm);
-	K__Assert(_locale);
-#ifdef _WIN32
-	{
-		// strptime は Visual Studio では使えないので代替関数を用意する
-		// https://code.i-harness.com/ja/q/4e939
-		std::istringstream input(str);
-		input.imbue(std::locale(_locale));
-		input >> std::get_time(out_tm, fmt);
-		if (input.fail()) return nullptr;
-		return (char*)(str + (int)input.tellg()); // 戻り値は解析済み文字列の次の文字
-	}
-#else
-	{
-		return strptime(str, fmt, out_tm);
-	}
-#endif
-}
 
-int K__stricmp(const char *s, const char *t) {
-#ifdef _WIN32
-	return _stricmp(s, t);
-#else
-	return strcasecmp(s, t);
-#endif
-}
 
-/// 半角英数かどうか
-bool K__iswhalf(wchar_t wc) {
-	WORD t = 0;
-	GetStringTypeW(CT_CTYPE3, &wc, 1, &t);
-	return (t & C3_HALFWIDTH) != 0;
-}
 
-/// iswprint の代替関数
-/// 印字可能文字（空白やタブ等も含む）を判別する
-/// 標準関数の iswprint と同じだが、ロケールを設定していなくてもよい
-///  (iswprint はロケールを設定しないと正しく動作しない場合がある）
-bool K__iswprint(wchar_t wc) { // 印字文字（空白を含む）
-	// 文字 YES
-	// 空白 YES
-	// タブ YES
-	// 改行 NO
-	WORD t = 0;
-	GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
-	return (t & C1_DEFINED) && !(t & C1_CNTRL);
-}
 
-/// iswgraph の代替関数
-/// 印字可能文字（空白やタブ等を含まない）を判別する
-/// 標準関数の iswgraph と同じだが、ロケールを設定していなくてもよい
-///  (iswgraph はロケールを設定しないと正しく動作しない場合がある）
-bool K__iswgraph(wchar_t wc) {
-	// 文字 YES
-	// 空白 NO
-	// タブ NO
-	// 改行 NO
-	WORD t = 0;
-	GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
-	return (t & C1_DEFINED) && !(t & C1_CNTRL) && !(t & C1_SPACE);
-}
 
-/// iswblank の代替関数
-/// ブランク文字（空白やタブ等。改行文字などは含まない）を判別する
-/// 標準関数の iswgraph と同じだが、ロケールを設定していなくてもよい
-///  (iswgraph はロケールを設定しないと正しく動作しない場合がある）
-bool K__iswblank(wchar_t wc) {
-	// 文字 NO
-	// 空白 YES
-	// タブ YES
-	// 改行 NO
-	WORD t = 0;
-	GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
-	return (t & C1_DEFINED) && (t & C1_BLANK);
-}
-
-std::string K__vsprintf_std(const char *fmt, va_list args) {
-	// 長さ取得
-	int len = 0;
-	{
-		// vsnprintfを args に対して複数回呼び出すときには注意が必要。
-		// args はストリームのように動作するため、args の位置をリセットしなければならない
-		// args に対しては va_start することができないので、毎回コピーを取り、それを使うようにする
-		va_list ap;
-		va_copy(ap, args);
-		len = vsnprintf(nullptr, 0, fmt, ap);
-		va_end(ap);
-	}
-	if (len > 0) {
-		std::string s(len+1, 0); // vsprintf はヌル文字も書き込むため、len+1 確保しないといけない
-		int n = vsnprintf(&s[0], s.size(), fmt, args);
-		s.resize(n);
-		return s;
-	} else {
-		return "";
-	}
-}
-std::string K__sprintf_std(const char *fmt, ...) {
-	va_list args;
-	va_start(args, fmt);
-	std::string result = K__vsprintf_std(fmt, args);
-	va_end(args);
-	return result;
-}
 
 
 
@@ -717,12 +609,12 @@ int K::pathCompare(const std::string &path1, const std::string &path2, bool igno
 		const char *s2 = strrchr(path2.c_str(), K__PATH_SLASH);
 		if (s1) { s1++; /* K__PATH_SLASH の次の文字へ */ } else { s1 = path1.c_str(); }
 		if (s2) { s2++; /* K__PATH_SLASH の次の文字へ */ } else { s2 = path2.c_str(); }
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+		return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
 	
 	} else {
 		const char *s1 = path1.c_str();
 		const char *s2 = path2.c_str();
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+		return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
 	}
 }
 std::string K::pathGetFull(const std::string &s) {
@@ -834,6 +726,119 @@ bool K::strToUInt64(const char *s, uint64_t *val) {
 	if (val) *val = result;
 	return true;
 }
+
+/// strptime の代替関数
+/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man3/strptime.3.html
+/// Visual Studio では strptime が定義されていないので、代わりにこれを使う。
+/// @code
+///		K_strptime_l("2020-12-17 10:12:01", "%Y-%m-%d %H:%M:%S", &tm, "");
+/// @endcode
+char * K::str_strptime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale) {
+	K__Assert(str);
+	K__Assert(fmt);
+	K__Assert(out_tm);
+	K__Assert(_locale);
+	#ifdef _WIN32
+	{
+		// strptime は Visual Studio では使えないので代替関数を用意する
+		// https://code.i-harness.com/ja/q/4e939
+		std::istringstream input(str);
+		input.imbue(std::locale(_locale));
+		input >> std::get_time(out_tm, fmt);
+		if (input.fail()) return nullptr;
+		return (char*)(str + (int)input.tellg()); // 戻り値は解析済み文字列の次の文字
+	}
+	#else
+	{
+		return strptime(str, fmt, out_tm);
+	}
+	#endif
+}
+int K::str_stricmp(const char *s, const char *t) {
+	#ifdef _WIN32
+	return _stricmp(s, t);
+	#else
+	return strcasecmp(s, t);
+	#endif
+}
+std::string K::str_vsprintf(const char *fmt, va_list args) {
+	// 長さ取得
+	int len = 0;
+	{
+		// vsnprintfを args に対して複数回呼び出すときには注意が必要。
+		// args はストリームのように動作するため、args の位置をリセットしなければならない
+		// args に対しては va_start することができないので、毎回コピーを取り、それを使うようにする
+		va_list ap;
+		va_copy(ap, args);
+		len = ::vsnprintf(nullptr, 0, fmt, ap);
+		va_end(ap);
+	}
+	if (len > 0) {
+		std::string s(len+1, 0); // vsprintf はヌル文字も書き込むため、len+1 確保しないといけない
+		int n = ::vsnprintf(&s[0], s.size(), fmt, args);
+		s.resize(n);
+		return s;
+	} else {
+		return "";
+	}
+}
+std::string K::str_sprintf(const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	std::string result = str_vsprintf(fmt, args);
+	va_end(args);
+	return result;
+}
+
+/// iswprint の代替関数
+/// 印字可能文字（空白やタブ等も含む）を判別する
+/// 標準関数の iswprint と同じだが、ロケールを設定していなくてもよい
+///  (iswprint はロケールを設定しないと正しく動作しない場合がある）
+bool K::str_iswprint(wchar_t wc) { // 印字文字（空白を含む）
+	// 文字 YES
+	// 空白 YES
+	// タブ YES
+	// 改行 NO
+	WORD t = 0;
+	::GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
+	return (t & C1_DEFINED) && !(t & C1_CNTRL);
+}
+
+/// iswgraph の代替関数
+/// 印字可能文字（空白やタブ等を含まない）を判別する
+/// 標準関数の iswgraph と同じだが、ロケールを設定していなくてもよい
+///  (iswgraph はロケールを設定しないと正しく動作しない場合がある）
+bool K::str_iswgraph(wchar_t wc) {
+	// 文字 YES
+	// 空白 NO
+	// タブ NO
+	// 改行 NO
+	WORD t = 0;
+	::GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
+	return (t & C1_DEFINED) && !(t & C1_CNTRL) && !(t & C1_SPACE);
+}
+
+/// iswblank の代替関数
+/// ブランク文字（空白やタブ等。改行文字などは含まない）を判別する
+/// 標準関数の iswgraph と同じだが、ロケールを設定していなくてもよい
+///  (iswgraph はロケールを設定しないと正しく動作しない場合がある）
+bool K::str_iswblank(wchar_t wc) {
+	// 文字 NO
+	// 空白 YES
+	// タブ YES
+	// 改行 NO
+	WORD t = 0;
+	::GetStringTypeW(CT_CTYPE1, &wc, 1, &t);
+	return (t & C1_DEFINED) && (t & C1_BLANK);
+}
+
+/// 半角英数かどうか
+bool K::str_iswhalf(wchar_t wc) {
+	WORD t = 0;
+	::GetStringTypeW(CT_CTYPE3, &wc, 1, &t);
+	return (t & C3_HALFWIDTH) != 0;
+}
+
 #pragma endregion // string
 
 

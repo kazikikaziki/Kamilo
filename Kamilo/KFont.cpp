@@ -229,7 +229,7 @@ public:
 	}
 
 	virtual bool get_glyph(wchar_t chr, float fontsize, K_Metrics *met, std::string *out_alpha8) const override {
-		if (!K__iswprint(chr)) {
+		if (!K::str_iswprint(chr)) {
 			// 印字可能ではない（改行文字、制御文字など）
 			// ※空白文字は「印字可能」であることに注意
 			return false;
@@ -1025,7 +1025,7 @@ void Test_font(const char *dir) {
 // フォントをファミリー名でソートする
 struct Pred {
 	bool operator()(const KPlatformFonts::INFO &a, const KPlatformFonts::INFO &b) const {
-		return K__stricmp(a.family.u8(), b.family.u8()) < 0;
+		return K::str_stricmp(a.family.u8(), b.family.u8()) < 0;
 	}
 };
 KPath KPlatformFonts::getFontDirectory() {

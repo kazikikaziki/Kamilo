@@ -592,15 +592,15 @@ public:
 			K::strReplace(info_u8, "${OS_VER}",       productname);
 			K::strReplace(info_u8, "${CPU_NAME}",     cpuname);
 			K::strReplace(info_u8, "${CPU_VENDOR}",   cpuvendor);
-			K::strReplace(info_u8, "${LANGID}",       K__sprintf_std("%d", langid).c_str());
-			K::strReplace(info_u8, "${LANGID_HEX}",   K__sprintf_std("0x%04x", langid).c_str());
-			K::strReplace(info_u8, "${SYSMEM_TOTAL_MB}", K__sprintf_std("%d", info->SysMemTotalKB/1024).c_str());
-			K::strReplace(info_u8, "${SYSMEM_AVAIL_MB}", K__sprintf_std("%d", info->SysMemAvailKB/1024).c_str());
-			K::strReplace(info_u8, "${APPMEM_TOTAL_MB}", K__sprintf_std("%d", info->AppMemTotalKB/1024).c_str());
-			K::strReplace(info_u8, "${APPMEM_AVAIL_MB}", K__sprintf_std("%d", info->AppMemAvailKB/1024).c_str());
-			K::strReplace(info_u8, "${CODE}",         K__sprintf_std("0x%08x", info->ExceptionCode).c_str());
-			K::strReplace(info_u8, "${FLAGS}",        K__sprintf_std("0x%08x", info->ExceptionFlags).c_str());
-			K::strReplace(info_u8, "${ADDRESS}",      K__sprintf_std("0x%08x", (intptr_t)info->ExceptionAddress).c_str());
+			K::strReplace(info_u8, "${LANGID}",       K::str_sprintf("%d", langid).c_str());
+			K::strReplace(info_u8, "${LANGID_HEX}",   K::str_sprintf("0x%04x", langid).c_str());
+			K::strReplace(info_u8, "${SYSMEM_TOTAL_MB}", K::str_sprintf("%d", info->SysMemTotalKB/1024).c_str());
+			K::strReplace(info_u8, "${SYSMEM_AVAIL_MB}", K::str_sprintf("%d", info->SysMemAvailKB/1024).c_str());
+			K::strReplace(info_u8, "${APPMEM_TOTAL_MB}", K::str_sprintf("%d", info->AppMemTotalKB/1024).c_str());
+			K::strReplace(info_u8, "${APPMEM_AVAIL_MB}", K::str_sprintf("%d", info->AppMemAvailKB/1024).c_str());
+			K::strReplace(info_u8, "${CODE}",         K::str_sprintf("0x%08x", info->ExceptionCode).c_str());
+			K::strReplace(info_u8, "${FLAGS}",        K::str_sprintf("0x%08x", info->ExceptionFlags).c_str());
+			K::strReplace(info_u8, "${ADDRESS}",      K::str_sprintf("0x%08x", (intptr_t)info->ExceptionAddress).c_str());
 		}
 
 		fprintf(fp, "%s\n", info_u8.c_str());

@@ -75,7 +75,7 @@ bool KLocalTime::parse(const char *str, const char *fmt, const char *loc) {
 	struct tm tm;
 	memset(&tm, 0, sizeof(tm));
 
-	if (K__strptime_l(str, f, &tm, loc)) {
+	if (K::str_strptime(str, f, &tm, loc)) {
 		time_t t = mktime(&tm);
 		set_time(t);
 		return true;

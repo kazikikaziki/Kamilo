@@ -1148,12 +1148,12 @@ uint32_t KStringUtils::gethash(const char *s, int size) {
 	return ~crc;
 }
 std::string KStringUtils::K_vsprintf(const char *fmt, va_list args) {
-	return K__vsprintf_std(fmt, args);
+	return K::str_vsprintf(fmt, args);
 }
 std::string KStringUtils::K_sprintf(const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	std::string result = K__vsprintf_std(fmt, args);
+	std::string result = K::str_vsprintf(fmt, args);
 	va_end(args);
 	return result;
 }
@@ -2538,12 +2538,12 @@ int KPath::compare_str(const char *p, bool ignore_case, bool ignore_path) const 
 		const char *s2 = strrchr(p,     K__PATH_SLASH);
 		if (s1) { s1++; /* K__PATH_SLASHの次の文字へ */ } else { s1 = m_path; }
 		if (s2) { s2++; /* K__PATH_SLASHの次の文字へ */ } else { s2 = p; }
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+		return ignore_case ? K::str_stricmp(s1, s2) : strcmp(s1, s2);
 	
 	} else {
 		const char *s1 = m_path;
 		const char *s2 = p;
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+		return ignore_case ? K::str_stricmp(s1, s2) : strcmp(s1, s2);
 	}
 }
 int KPath::compare(const KPath &p) const {

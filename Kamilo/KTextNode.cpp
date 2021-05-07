@@ -148,7 +148,7 @@ void KTextBox::addString(const wchar_t *text) {
 	for (const wchar_t *s=text; *s; s++) {
 		if (*s == L'\n') {
 			newLine();
-		} else if (K__iswprint(*s)) {
+		} else if (K::str_iswprint(*s)) {
 			addChar(*s);
 		}
 	}
@@ -260,7 +260,7 @@ void KTextBox::addCharEx(wchar_t code, const Attr &attr) {
 						if (chr->parent >= 0) {
 							// グループ化されている場合は途中改行できない
 						} else {
-							if (K__iswblank(sequence_[i].code)) {
+							if (K::str_iswblank(sequence_[i].code)) {
 								space_index = i;
 								break;
 							}
@@ -1342,7 +1342,7 @@ public:
 			return;
 		}
 		// 印字可能な文字だった場合はテキストボックスに追加
-		if (K__iswprint(chr)) {
+		if (K::str_iswprint(chr)) {
 			tb->addChar(chr);
 		}
 	}

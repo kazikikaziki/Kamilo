@@ -64,15 +64,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 //----------------------------------------------------
 // string
 //----------------------------------------------------
-int K__stricmp(const char *s, const char *t); ///< _stricmp または strcasecmp のエイリアス
-char * K__strptime_l(const char *str, const char *fmt, struct tm *out_tm, const char *_locale);
-std::string K__vsprintf_std(const char *fmt, va_list args);
-std::string K__sprintf_std(const char *fmt, ...);
-
-bool K__iswprint(wchar_t wc); // 印字文字（空白を含む）
-bool K__iswgraph(wchar_t wc); // 印字文字（空白を含まない）
-bool K__iswblank(wchar_t wc); // 空白文字
-bool K__iswhalf(wchar_t wc); // 半角英数
 
 
 // utf8 ==> wide
@@ -192,21 +183,14 @@ public:
 	static bool strToInt(const char *s, int *val);
 	static bool strToUInt32(const char *s, uint32_t *val);
 	static bool strToUInt64(const char *s, uint64_t *val);
-	static int strCaseCmp(const char *s, const char *t) { return K__stricmp(s, t); }
-	static char * strParseTime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale) { return K__strptime_l(str, fmt, out_tm, _locale); }
-	static std::string vsprintf_std(const char *fmt, va_list args) { return K__vsprintf_std(fmt, args); }
-	static std::string sprintf_std(const char *fmt, ...) {
-		va_list args;
-		va_start(args, fmt);
-		std::string result = K__vsprintf_std(fmt, args);
-		va_end(args);
-		return result;
-	}
-
-	static bool isPrintW(wchar_t wc) { return K__iswprint(wc); }
-	static bool isGraphW(wchar_t wc) { return K__iswgraph(wc); }
-	static bool isBlankW(wchar_t wc) { return K__iswblank(wc); }
-	static bool isHalfW(wchar_t wc) { return K__iswhalf(wc); }
+	static int str_stricmp(const char *s, const char *t); ///< _stricmp, strcasecmp
+	static char * str_strptime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale); ///< strptime の代替関数
+	static std::string str_vsprintf(const char *fmt, va_list args);
+	static std::string str_sprintf(const char *fmt, ...);
+	static bool str_iswprint(wchar_t wc);
+	static bool str_iswgraph(wchar_t wc);
+	static bool str_iswblank(wchar_t wc);
+	static bool str_iswhalf(wchar_t wc);
 
 	// utf8 ==> wide
 	static int strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes) { return K__Utf8ToWide(out_ws, max_out_widechars, u8, u8bytes); }
