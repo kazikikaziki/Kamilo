@@ -291,8 +291,8 @@ public:
 			// <img w='250' h='305' offset='0' numcells='217' page='0' layer='0' blend='-1' data0='0'>6 7 8 21 22 23 24 25 37 38 39 40 41 53 54 55 56 57 69 70 71 72</img>
 			int cellarea = m_cellsize + m_cellspace * 2; // 1セルのために必要なサイズ。余白が設定されている場合はそれも含む
 			int numimages = xPack->findAttrInt("numimages");
-			for (int i=0; i<xPack->getNodeCount(); i++) {
-				const KXmlElement *xImg = xPack->getNode(i);
+			for (int i=0; i<xPack->getChildCount(); i++) {
+				const KXmlElement *xImg = xPack->getChild(i);
 				if (!xImg->hasTag("img")) continue;
 
 				int w = xImg->findAttrInt("w");

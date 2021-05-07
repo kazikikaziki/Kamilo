@@ -96,7 +96,7 @@ public:
 		return m_Attrs[index].second.c_str();
 	}
 	virtual void setAttr(const char *name, const char *value) override {
-		if (value == nullptr) { delAttr(name); return; }
+		if (value == nullptr) { removeAttr(name); return; }
 		int index = getAttrIndex(name);
 		if (index >= 0) {
 			m_Attrs[index].second = value; // 既存の属性を変更
@@ -104,7 +104,7 @@ public:
 			m_Attrs.push_back(PairStrStr(name, value)); // 属性を追加
 		}
 	}
-	virtual void delAttr(const char *name) override {
+	virtual void removeAttr(const char *name) override {
 		int index = getAttrIndex(name);
 		if (index >= 0) {
 			m_Attrs.erase(m_Attrs.begin() + index);
@@ -120,31 +120,31 @@ public:
 	virtual void setText(const char *text) override {
 		m_Text = text ? text : "";
 	}
-	virtual int getNodeCount() const override {
+	virtual int getChildCount() const override {
 		return (int)m_Nodes.size();
 	}
-	virtual const KXmlElement * getNode(int index) const override {
+	virtual const KXmlElement * getChild(int index) const override {
 		if (0 <= index && index < (int)m_Nodes.size()) {
 			return m_Nodes[index];
 		}
 		return nullptr;
 	}
-	virtual KXmlElement * getNode(int index) override {
+	virtual KXmlElement * getChild(int index) override {
 		if (0 <= index && index < (int)m_Nodes.size()) {
 			return m_Nodes[index];
 		}
 		return nullptr;
 	}
-	virtual KXmlElement * addNode(const char *tag, int pos) override {
+	virtual KXmlElement * addChild(const char *tag, int pos) override {
 		if (tag && tag[0]) {
 			CXNode *newnode = new CXNode();
 			newnode->m_Tag = tag;
-			addNode(newnode, pos);
+			addChild(newnode, pos);
 			return newnode;
 		}
 		return nullptr;
 	}
-	virtual void addNode(KXmlElement *newnode, int pos) override {
+	virtual void addChild(KXmlElement *newnode, int pos) override {
 		if (newnode) {
 			newnode->grab();
 			if (pos >= 0) {
@@ -154,7 +154,7 @@ public:
 			}
 		}
 	}
-	virtual void deleteNode(int index) override {
+	virtual void removeChild(int index) override {
 		if (0 <= index && index < (int)m_Nodes.size()) {
 			m_Nodes[index]->drop();
 			m_Nodes.erase(m_Nodes.begin() + index);
@@ -257,9 +257,9 @@ KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const 
 bool KXmlElement::writeDoc(KOutputStream &output) const {
 	if (!output.isOpen()) return false;
 	output.writeString("<?xml version=\"1.0\" encoding=\"utf8\" ?>\n");
-	int num = getNodeCount();
+	int num = getChildCount();
 	for (int i=0; i<num; i++) { // ルートではなくその子を書き出す
-		if (!getNode(i)->write(output, 0)) {
+		if (!getChild(i)->write(output, 0)) {
 			return false;
 		}
 	}
@@ -293,7 +293,7 @@ bool KXmlElement::write(KOutputStream &output, int indent) const {
 	}
 
 	// Sub nodes
-	if (getNodeCount() == 0) {
+	if (getChildCount() == 0) {
 		output.writeString("/>\n");
 	} else {
 		if (text && text[0]) {
@@ -302,8 +302,8 @@ bool KXmlElement::write(KOutputStream &output, int indent) const {
 
 		} else {
 			output.writeString(">\n");
-			for (int i=0; i<getNodeCount(); i++) {
-				getNode(i)->write(output, indent+1);
+			for (int i=0; i<getChildCount(); i++) {
+				getChild(i)->write(output, indent+1);
 			}
 			sprintf_s(s, sizeof(s), "%*s</%s>\n", indent*2, "", getTag());
 			output.writeString(s);
@@ -316,8 +316,8 @@ bool KXmlElement::hasTag(const char *tag) const {
 	return mytag && tag && strcmp(mytag, tag)==0;
 }
 int KXmlElement::getChildIndex(const KXmlElement *child) const {
-	for (int i=0; i<getNodeCount(); i++) {
-		if (getNode(i) == child) {
+	for (int i=0; i<getChildCount(); i++) {
+		if (getChild(i) == child) {
 			return i;
 		}
 	}
@@ -365,13 +365,13 @@ void KXmlElement::setAttrFloat(const char *name, float value) {
 }
 bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
 	if (node == nullptr) return false;
-	int n = getNodeCount();
+	int n = getChildCount();
 
 	// 子ノードから探す
 	for (int i=0; i<n; i++) {
-		KXmlElement *nd = getNode(i);
+		KXmlElement *nd = getChild(i);
 		if (nd == node) {
-			deleteNode(i);
+			removeChild(i);
 			return true;
 		}
 	}
@@ -379,7 +379,7 @@ bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
 	// 子ツリーから探す
 	if (in_tree) {
 		for (int i=0; i<n; i++) {
-			KXmlElement *nd = getNode(i);
+			KXmlElement *nd = getChild(i);
 			if (nd->deleteNode(node, true)) {
 				return true;
 			}
@@ -388,9 +388,9 @@ bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
 	return false;
 }
 int KXmlElement::getNodeIndex(const char *tag, int start) const {
-	int n = getNodeCount();
+	int n = getChildCount();
 	for (int i=start; i<n; i++) {
-		const KXmlElement *elm = getNode(i);
+		const KXmlElement *elm = getChild(i);
 		if (elm->hasTag(tag)) {
 			return i;
 		}
@@ -406,17 +406,17 @@ KXmlElement * KXmlElement::findNode(const char *tag, const KXmlElement *start) {
 }
 const KXmlElement * KXmlElement::_findnode_const(const char *tag, const KXmlElement *start) const {
 	int index = 0;
-	int n = getNodeCount();
+	int n = getChildCount();
 	if (start) {
 		for (int i=0; i<n; i++) {
-			if (getNode(i) == start) {
+			if (getChild(i) == start) {
 				index = i+1;
 				break;
 			}
 		}
 	}
 	for (int i=index; i<n; i++) {
-		const KXmlElement *elm = getNode(i);
+		const KXmlElement *elm = getChild(i);
 		if (elm->hasTag(tag)) {
 			return elm;
 		}
@@ -445,19 +445,19 @@ void Test_xml() {
 	);
 	K__Verify(elm);
 	K__Verify(elm->hasTag(""));
-	K__Verify(elm->getNodeCount() == 2);
+	K__Verify(elm->getChildCount() == 2);
 
-	KXmlElement *node1 = elm->getNode(0);
+	KXmlElement *node1 = elm->getChild(0);
 	K__Verify(node1);
 	K__Verify(node1 == elm->findNode("node1"));
 	K__Verify(node1->hasTag("node1"));
-	K__Verify(node1->getNodeCount() == 3); // aaa, bbb, ccc
+	K__Verify(node1->getChildCount() == 3); // aaa, bbb, ccc
 	K__Verify(node1->getAttrCount() == 1);
 	K__Verify(strcmp(node1->getAttrName(0), "pi")==0);
 	K__Verify(strcmp(node1->getAttrValue(0), "314")==0);
 	K__Verify(node1->findAttrInt("pi") == 314);
 
-	KXmlElement *node2 = elm->getNode(1);
+	KXmlElement *node2 = elm->getChild(1);
 	K__Verify(node2);
 	K__Verify(node2 == elm->findNode("node2"));
 	K__Verify(node2->hasTag("node2"));

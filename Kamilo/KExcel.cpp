@@ -118,7 +118,7 @@ public:
 		return (int)m_WorkSheets.size();
 	}
 	std::string getSheetName(int sheetId) const {
-		const KXmlElement *root_elm = m_WorkBookDoc->getNode(0);
+		const KXmlElement *root_elm = m_WorkBookDoc->getChild(0);
 		K__Assert(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
@@ -126,7 +126,7 @@ public:
 
 		int idx = 0;
 		for (int iSheet=sheets_xml->getNodeIndex("sheet"); iSheet>=0; iSheet=sheets_xml->getNodeIndex("sheet", iSheet+1)) {
-			const KXmlElement *xSheet = sheets_xml->getNode(iSheet);
+			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			if (idx == sheetId) {
 				const char *s = xSheet->findAttr("name");
 				#ifdef _DEBUG
@@ -145,7 +145,7 @@ public:
 		return "";
 	}
 	int getSheetByName(const char *name) const {
-		const KXmlElement *root_elm = m_WorkBookDoc->getNode(0);
+		const KXmlElement *root_elm = m_WorkBookDoc->getChild(0);
 		K__Assert(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
@@ -153,7 +153,7 @@ public:
 
 		int idx = 0;
 		for (int iSheet=sheets_xml->getNodeIndex("sheet"); iSheet>=0; iSheet=sheets_xml->getNodeIndex("sheet", iSheet+1)) {
-			const KXmlElement *xSheet = sheets_xml->getNode(iSheet);
+			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			const char *name_u8 = xSheet->findAttr("name");
 			if (name_u8 && strcmp(name, name_u8) == 0) {
 				#ifdef _DEBUG
@@ -178,7 +178,7 @@ public:
 		const KXmlElement *xdoc = m_WorkSheets[sheet];
 		K__Assert(xdoc);
 
-		const KXmlElement *xroot = xdoc->getNode(0);
+		const KXmlElement *xroot = xdoc->getChild(0);
 		K__Assert(xroot);
 
 		const KXmlElement *xdim = xroot->findNode("dimension");
@@ -274,7 +274,7 @@ public:
 		const KXmlElement *doc = m_WorkSheets[sheet];
 		K__Assert(doc);
 
-		const KXmlElement *root_elm = doc->getNode(0);
+		const KXmlElement *root_elm = doc->getChild(0);
 		K__Assert(root_elm);
 
 		const KXmlElement *sheet_xml = root_elm->findNode("sheetData");
@@ -304,10 +304,10 @@ public:
 		const KXmlElement *strings_doc = _LoadXmlFromZip(zr, xlsx_name, "xl/sharedStrings.xml");
 		if (strings_doc) {
 			int stringId = 0;
-			const KXmlElement *string_elm = strings_doc->getNode(0);
+			const KXmlElement *string_elm = strings_doc->getChild(0);
 
-			for (int si=0; si<string_elm->getNodeCount(); si++) {
-				const KXmlElement *si_elm = string_elm->getNode(si);
+			for (int si=0; si<string_elm->getChildCount(); si++) {
+				const KXmlElement *si_elm = string_elm->getChild(si);
 				if (!si_elm->hasTag("si")) continue;
 
 				// パターンA
@@ -330,8 +330,8 @@ public:
 				//   ....
 				// </si>
 				std::string s;
-				for (int r=0; r<si_elm->getNodeCount(); r++) {
-					const KXmlElement *r_elm = si_elm->getNode(r);
+				for (int r=0; r<si_elm->getChildCount(); r++) {
+					const KXmlElement *r_elm = si_elm->getChild(r);
 					if (r_elm->hasTag("r")) {
 						const KXmlElement *t_xml = r_elm->findNode("t");
 						if (t_xml) {
@@ -410,12 +410,12 @@ private:
 		if (sheet_xml == nullptr) return nullptr;
 		if (s==nullptr || s[0]=='\0') return nullptr;
 
-		for (int r=0; r<sheet_xml->getNodeCount(); r++) {
-			const KXmlElement *xRow = sheet_xml->getNode(r);
+		for (int r=0; r<sheet_xml->getChildCount(); r++) {
+			const KXmlElement *xRow = sheet_xml->getChild(r);
 			if (!xRow->hasTag("row")) continue;
 
-			for (int c=0; c<xRow->getNodeCount(); c++) {
-				const KXmlElement *xCell = xRow->getNode(c);
+			for (int c=0; c<xRow->getChildCount(); c++) {
+				const KXmlElement *xCell = xRow->getChild(c);
 				if (!xCell->hasTag("c")) continue;
 
 				const char *str = get_cell_text(xCell);
@@ -434,12 +434,12 @@ private:
 	void scan_cells(const KXmlElement *sheet_xml, KExcelScanCellsCallback *cb) const {
 		if (sheet_xml == nullptr) return;
 
-		for (int r=0; r<sheet_xml->getNodeCount(); r++) {
-			const KXmlElement *xRow = sheet_xml->getNode(r);
+		for (int r=0; r<sheet_xml->getChildCount(); r++) {
+			const KXmlElement *xRow = sheet_xml->getChild(r);
 			if (!xRow->hasTag("row")) continue;
 
-			for (int c=0; c<xRow->getNodeCount(); c++) {
-				const KXmlElement *xCell = xRow->getNode(c);
+			for (int c=0; c<xRow->getChildCount(); c++) {
+				const KXmlElement *xCell = xRow->getChild(c);
 				if (!xCell->hasTag("c")) continue;
 
 				const char *pos = xCell->findAttr("r");
@@ -460,7 +460,7 @@ private:
 		const KXmlElement *doc = m_WorkSheets[sheet];
 		K__Assert(doc);
 
-		const KXmlElement *root_elm = doc->getNode(0);
+		const KXmlElement *root_elm = doc->getChild(0);
 		K__Assert(root_elm);
 
 		return root_elm->findNode("sheetData");
@@ -503,8 +503,8 @@ private:
 		if (row_xml == nullptr) return nullptr;
 		if (col < 0) return nullptr;
 
-		for (int c=0; c<row_xml->getNodeCount(); c++) {
-			const KXmlElement *c_elm = row_xml->getNode(c);
+		for (int c=0; c<row_xml->getChildCount(); c++) {
+			const KXmlElement *c_elm = row_xml->getChild(c);
 			if (!c_elm->hasTag("c")) continue;
 
 			const char *s = c_elm->findAttr("r");

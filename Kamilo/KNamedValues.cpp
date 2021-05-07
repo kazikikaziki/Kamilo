@@ -69,7 +69,7 @@ bool KNamedValues::loadFromString(const char *xml_u8, const char *filename) {
 	bool result = false;
 	KXmlElement *xml = KXmlElement::createFromString(xml_u8, filename);
 	if (xml) {
-		result = loadFromXml(xml->getNode(0), false);
+		result = loadFromXml(xml->getChild(0), false);
 		xml->drop();
 	} else {
 		KLog::printError("E_XML: Failed to load: %s", filename);
@@ -90,8 +90,8 @@ bool KNamedValues::loadFromXml(KXmlElement *elm, bool pack_in_attr) {
 		}
 	} else {
 		// <XXX name="AAA">BBB</XXX>/>
-		for (int i=0; i<elm->getNodeCount(); i++) {
-			KXmlElement *xItem = elm->getNode(i);
+		for (int i=0; i<elm->getChildCount(); i++) {
+			KXmlElement *xItem = elm->getChild(i);
 			const char *key = xItem->findAttr("name");
 			const char *val = xItem->getText();
 			if (key && val) {
@@ -112,7 +112,7 @@ void KNamedValues::saveToXml(KXmlElement *elm, bool pack_in_attr) const {
 		for (int i=0; i<size(); i++) {
 			const char *n = getName(i);
 			const char *v = getString(i);
-			KXmlElement *xPair = elm->addNode("Pair");
+			KXmlElement *xPair = elm->addChild("Pair");
 			xPair->setAttr("name", n);
 			xPair->setText(v);
 		}

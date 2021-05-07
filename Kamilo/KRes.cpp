@@ -431,12 +431,12 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 	}
 	if (mEditInfoXml) {
 		K_assert(mEditInfoXml->hasTag("EditInfo"));
-		xml->addNode(mEditInfoXml);
+		xml->addChild(mEditInfoXml);
 	}
 
 	for (int i=0; i<getKeyCount(); i++) {
 		const SPRITE_KEY *key = getKey(i);
-		KXmlElement *elm = xml->addNode("Page");
+		KXmlElement *elm = xml->addChild("Page");
 		elm->setAttrInt("page", key->edge_page);
 		elm->setAttrInt("dur", key->duration);
 		if (key->this_mark != KMark_NONE) {
@@ -444,25 +444,25 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 			K_MarkToStr(key->this_mark, s);
 			elm->setAttr("mark", s);
 		} else {
-			elm->delAttr("mark");
+			elm->removeAttr("mark");
 		}
 		if (key->next_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->next_mark, s);
 			elm->setAttr("next", s);
 		} else {
-			elm->delAttr("next");
+			elm->removeAttr("next");
 		}
 		if (!key->next_clip.empty()) {
 			elm->setAttr("next_clip", key->next_clip.u8());
 		} else {
-			elm->delAttr("next_clip");
+			elm->removeAttr("next_clip");
 		}
 
 		if (key->edge_name.empty() || key->edge_name.compare(mEdgeFile) == 0) {
 			// このページでは、クリップ元Edgeファイルと同じ画像を使っている
-			elm->delAttr("extern_edge");
-			elm->delAttr("extern_page");
+			elm->removeAttr("extern_edge");
+			elm->removeAttr("extern_page");
 
 		} else {
 			// このページでは、クリップ元と異なるEdgeを使っている
@@ -472,13 +472,13 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 		}
 
 		if (key->user_parameters.size() > 0) {
-			KXmlElement *user = elm->addNode("Parameters");
+			KXmlElement *user = elm->addChild("Parameters");
 			key->user_parameters.saveToXml(user, true);
 		}
 		if (key->xml_data) {
 			KXmlElement *dup = key->xml_data->clone();
 			dup->setTag("Data");
-			elm->addNode(dup);
+			elm->addChild(dup);
 			dup->drop();
 		}
 	}
@@ -496,35 +496,35 @@ void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 	}
 	if (mEditInfoXml) {
 		K_assert(mEditInfoXml->hasTag("EditInfo"));
-		xml->addNode(mEditInfoXml);
+		xml->addChild(mEditInfoXml);
 	}
 	for (int i=0; i<getKeyCount(); i++) {
 		const SPRITE_KEY *key = getKey(i);
-		KXmlElement *elm = xml->addNode("SpriteKey");
+		KXmlElement *elm = xml->addChild("SpriteKey");
 		elm->setAttrInt("dur", key->duration);
 		if (key->this_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->this_mark, s);
 			elm->setAttr("mark", s);
 		} else {
-			elm->delAttr("mark");
+			elm->removeAttr("mark");
 		}
 		if (key->next_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->next_mark, s);
 			elm->setAttr("next", s);
 		} else {
-			elm->delAttr("next");
+			elm->removeAttr("next");
 		}
 		if (!key->next_clip.empty()) {
 			elm->setAttr("next_clip", key->next_clip.u8());
 		} else {
-			elm->delAttr("next_clip");
+			elm->removeAttr("next_clip");
 		}
 		elm->setAttrInt("numlayers", key->num_layers);
 		elm->setAttrInt("edge_page", key->edge_page);
 		for (int l=0; l<key->num_layers; l++) {
-			KXmlElement *xLay = elm->addNode("Layer");
+			KXmlElement *xLay = elm->addChild("Layer");
 			const SPRITE_LAYER &slay = key->layers[l];
 			if (!slay.sprite.empty()) {
 				xLay->setAttr("sprite", slay.sprite.u8());
@@ -538,13 +538,13 @@ void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 		}
 
 		if (key->user_parameters.size() > 0) {
-			KXmlElement *user = elm->addNode("Parameters");
+			KXmlElement *user = elm->addChild("Parameters");
 			key->user_parameters.saveToXml(user, true);
 		}
 		if (key->xml_data) {
 			KXmlElement *dup = key->xml_data->clone();
 			dup->setTag("Data");
-			elm->addNode(dup);
+			elm->addChild(dup);
 			dup->drop();
 		}
 	}
@@ -3830,7 +3830,7 @@ public:
 
 		// 管理データを得る。ロードできなければ作成する
 		KXmlElement *xDoc = getXmlBankDoc(xmlBankName.u8());
-		KXmlElement *xBank = xDoc->getNode(0);
+		KXmlElement *xBank = xDoc->getChild(0);
 
 		// 生データフォルダ内のファイルをインポートする
 		{
@@ -3979,8 +3979,8 @@ private:
 		if (xDoc == nullptr) {
 			xDoc = KXmlElement::create();
 		}
-		if (xDoc->getNodeCount() == 0) {
-			xDoc->addNode("Bank");
+		if (xDoc->getChildCount() == 0) {
+			xDoc->addChild("Bank");
 		}
 		return xDoc;
 	}
@@ -3992,10 +3992,10 @@ private:
 		int idx = getFileNodeIndex(xmlBank, name);
 		KXmlElement *elm = nullptr;
 		if (idx < 0) {
-			elm = xmlBank->addNode("File");
+			elm = xmlBank->addChild("File");
 			elm->setAttr("name", name);
 		} else {
-			elm = xmlBank->getNode(idx);
+			elm = xmlBank->getChild(idx);
 		}
 		K_assert(elm);
 
@@ -4010,9 +4010,9 @@ private:
 
 		// 各ノードを探していく
 		// <... name="filename" time="123456789" />
-		int cnt = xmlBank->getNodeCount();
+		int cnt = xmlBank->getChildCount();
 		for (int i=0; i<cnt; i++) {
-			const KXmlElement *elm = xmlBank->getNode(i);
+			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
 			const char *nameVal = elm->findAttr("name");
@@ -4032,9 +4032,9 @@ private:
 		if (xmlBank == nullptr) return -1;
 		K_assert(xmlBank->hasTag("Bank"));
 
-		int cnt = xmlBank->getNodeCount();
+		int cnt = xmlBank->getChildCount();
 		for (int i=0; i<cnt; i++) {
-			const KXmlElement *elm = xmlBank->getNode(i);
+			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
 			const char *name_str = elm->findAttr("name");
@@ -4203,8 +4203,8 @@ private:
 		// .png から画像を切り取る
 		const int img_w = img.getWidth();
 		const int img_h = img.getHeight();
-		for (int i=0; i<xTex->getNodeCount(); i++) {
-			KXmlElement *xSprite = xTex->getNode(i);
+		for (int i=0; i<xTex->getChildCount(); i++) {
+			KXmlElement *xSprite = xTex->getChild(i);
 			if (xSprite->hasTag("Sprite")) {
 				const char *name_str  = xSprite->findAttr("name", "");
 				const char *blend_str = xSprite->findAttr("blend", def_blend_str);
@@ -4325,8 +4325,8 @@ public:
 
 		KXmlElement *xEditInfo = nullptr;
 		KNamedValues defaultUserParams;
-		for (int i=0; i<xClip->getNodeCount(); i++) {
-			KXmlElement *xElm = xClip->getNode(i);
+		for (int i=0; i<xClip->getChildCount(); i++) {
+			KXmlElement *xElm = xClip->getChild(i);
 			if (xElm->hasTag("Parameters")) {
 				// <Clip> 直下に <Parameters> がある
 				// 全ページに対するデフォルトパラメータとして取得しておく
@@ -4341,8 +4341,8 @@ public:
 
 		// ページ定義
 		int pageindex = 0;
-		for (int i=0; i<xClip->getNodeCount(); i++) {
-			KXmlElement *xPage = xClip->getNode(i);
+		for (int i=0; i<xClip->getChildCount(); i++) {
+			KXmlElement *xPage = xClip->getChild(i);
 			// ページを追加
 			if (xPage->hasTag("Page")) {
 				// ページの基本情報
@@ -4363,8 +4363,8 @@ public:
 
 				KNamedValues user_params = defaultUserParams.clone();
 				int layerindex = 0;
-				for (int j=0; j<xPage->getNodeCount(); j++) {
-					KXmlElement * xElm = xPage->getNode(j);
+				for (int j=0; j<xPage->getChildCount(); j++) {
+					KXmlElement * xElm = xPage->getChild(j);
 					if (xElm->hasTag("Parameters")) {
 						// <Parameters> ノードが指定されている
 						// ページ固有の追加パラメータを読む
@@ -4528,8 +4528,8 @@ public:
 
 		// <EdgeSprites> が子ノード <Page> を持っていれば、ページごとに指定された値を上書きする
 		int page_idx = 0;
-		for (int i=0; i<xEdgeSprites->getNodeCount(); i++) {
-			KXmlElement *xPage = xEdgeSprites->getNode(i);
+		for (int i=0; i<xEdgeSprites->getChildCount(); i++) {
+			KXmlElement *xPage = xEdgeSprites->getChild(i);
 			if (xPage->hasTag("Page")) {
 				SPRITE_ATTR page_params; // このページ固有の設定
 				page_params.readFromXmlAttr(xPage);
@@ -4666,8 +4666,8 @@ public:
 
 		KXmlElement *xEditInfo = nullptr;
 		KNamedValues defaultUserParams;
-		for (int i=0; i<xEdgeAnimation->getNodeCount(); i++) {
-			KXmlElement *xElm = xEdgeAnimation->getNode(i);
+		for (int i=0; i<xEdgeAnimation->getChildCount(); i++) {
+			KXmlElement *xElm = xEdgeAnimation->getChild(i);
 			if (xElm->hasTag("Parameters")) {
 				// <EdgeAnimation> 直下に <Parameters> がある
 				// 全ページに対するデフォルトパラメータとして取得しておく
@@ -4689,8 +4689,8 @@ public:
 		int auto_page_index = 0;
 		int last_page_dur = 8;
 
-		for (int i=0; i<xEdgeAnimation->getNodeCount(); i++) {
-			KXmlElement *xPage = xEdgeAnimation->getNode(i);
+		for (int i=0; i<xEdgeAnimation->getChildCount(); i++) {
+			KXmlElement *xPage = xEdgeAnimation->getChild(i);
 			if (xPage->hasTag("Page")) {
 				// ページを追加
 				const char *externEdgeName = xPage->findAttr("extern_edge"); // 現在のフォルダからの相対パスであることに注意
@@ -4739,8 +4739,8 @@ public:
 				// ページ固有の追加パラメータがあるならそれを読む
 				// <Parameters>
 				KNamedValues user_params = defaultUserParams.clone();
-				for (int j=0; j<xPage->getNodeCount(); j++) {
-					KXmlElement *xElm = xPage->getNode(j);
+				for (int j=0; j<xPage->getChildCount(); j++) {
+					KXmlElement *xElm = xPage->getChild(j);
 					if (xElm->hasTag("Parameters")) {
 						KNamedValues params;
 						params.loadFromXml(xElm, true);
@@ -4803,8 +4803,8 @@ public:
 
 				} else {
 					int clipLayerIndex = 0;
-					for (int j=0; j<xPage->getNodeCount(); j++) {
-						KXmlElement *xLayer = xPage->getNode(j);
+					for (int j=0; j<xPage->getChildCount(); j++) {
+						KXmlElement *xLayer = xPage->getChild(j);
 						if (xLayer->hasTag("Layer")) {
 							// <Layer> ノードが指定されている
 							// 例: <Layer layer="0"/>
@@ -5050,8 +5050,8 @@ public:
 			KLog::printError(u8"E_FILELOADER_RES: XMLの構文解析でエラーが発生しました: %s", xml_name);
 			return;
 		}
-		for (int i=0; i<xDoc->getNodeCount(); i++) {
-			KXmlElement *xElm = xDoc->getNode(i);
+		for (int i=0; i<xDoc->getChildCount(); i++) {
+			KXmlElement *xElm = xDoc->getChild(i);
 
 			if (xElm->hasTag("Texture")) {
 				// テクスチャだけを登録する

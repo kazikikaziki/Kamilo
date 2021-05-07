@@ -35,17 +35,17 @@ public:
 	virtual const char * getAttrName(int index) const = 0;
 	virtual const char * getAttrValue(int index) const = 0;
 	virtual void setAttr(const char *name, const char *value) = 0;
-	virtual void delAttr(const char *name) = 0;
+	virtual void removeAttr(const char *name) = 0;
 
 	virtual const char * getText(const char *def=nullptr) const = 0;
 	virtual void setText(const char *text) = 0;
 
-	virtual int getNodeCount() const = 0;
-	virtual const KXmlElement * getNode(int index) const = 0;
-	virtual KXmlElement * getNode(int index) = 0;
-	virtual KXmlElement * addNode(const char *tag, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
-	virtual void addNode(KXmlElement *newnode, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
-	virtual void deleteNode(int index) = 0;
+	virtual int getChildCount() const = 0;
+	virtual const KXmlElement * getChild(int index) const = 0;
+	virtual KXmlElement * getChild(int index) = 0;
+	virtual KXmlElement * addChild(const char *tag, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
+	virtual void addChild(KXmlElement *newnode, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
+	virtual void removeChild(int index) = 0;
 
 	virtual int getLineNumber() const = 0;
 	virtual KXmlElement * clone() const = 0;
