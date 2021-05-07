@@ -160,61 +160,8 @@ public:
 			m_Nodes.erase(m_Nodes.begin() + index);
 		}
 	}
-	virtual int getChildIndex(const KXmlElement *child) const {
-		for (int i=0; i<(int)m_Nodes.size(); i++) {
-			if (m_Nodes[i] == child) {
-				return i;
-			}
-		}
-		return -1;
-	}
 	virtual int getLineNumber() const override {
 		return m_SourceLine;
-	}
-	virtual bool write(KOutputStream &output, int indent) const override {
-		if (!output.isOpen()) return false;
-		if (indent < 0) indent = 0;
-		char s[1024] = {0};
-
-		// Tag
-		sprintf_s(s, sizeof(s), "%*s<%s", indent*2, "", m_Tag.c_str());
-		output.writeString(s);
-
-		// Attr
-		for (size_t i=0; i<m_Attrs.size(); i++) {
-			const char *k = m_Attrs[i].first.c_str();
-			const char *v = m_Attrs[i].second.c_str();
-			if (k && k[0] && v) {
-				sprintf_s(s, sizeof(s), " %s=\"%s\"", k, v);
-				output.writeString(s);
-			}
-		}
-
-		// Text
-		if (m_Text.size() > 0) {
-			output.writeString("<![CDATA[");
-			output.writeString(m_Text.c_str());
-			output.writeString("]]>");
-		}
-
-		// Sub nodes
-		if (m_Nodes.empty()) {
-			output.writeString("/>\n");
-		} else {
-			if (m_Text.size() > 0) {
-				// テキスト属性と子ノードは両立しない。
-				K__Error(u8"Xml element cannot have both Text Element and Child Elements");
-
-			} else {
-				output.writeString(">\n");
-				for (size_t i=0; i<m_Nodes.size(); i++) {
-					m_Nodes[i]->write(output, indent+1);
-				}
-				sprintf_s(s, sizeof(s), "%*s</%s>\n", indent*2, "", m_Tag.c_str());
-				output.writeString(s);
-			}
-		}
-		return true;
 	}
 	virtual KXmlElement * clone() const override {
 		CXNode *result = new CXNode();
@@ -318,9 +265,63 @@ bool KXmlElement::writeDoc(KOutputStream &output) const {
 	}
 	return true;
 }
+bool KXmlElement::write(KOutputStream &output, int indent) const {
+	if (!output.isOpen()) return false;
+	if (indent < 0) indent = 0;
+	char s[1024] = {0};
+
+	// Tag
+	sprintf_s(s, sizeof(s), "%*s<%s", indent*2, "", getTag());
+	output.writeString(s);
+
+	// Attr
+	for (size_t i=0; i<getAttrCount(); i++) {
+		const char *k = getAttrName(i);
+		const char *v = getAttrValue(i);
+		if (k && k[0] && v) {
+			sprintf_s(s, sizeof(s), " %s=\"%s\"", k, v);
+			output.writeString(s);
+		}
+	}
+
+	// Text
+	const char *text = getText();
+	if (text && text[0]) {
+		output.writeString("<![CDATA[");
+		output.writeString(text);
+		output.writeString("]]>");
+	}
+
+	// Sub nodes
+	if (getNodeCount() == 0) {
+		output.writeString("/>\n");
+	} else {
+		if (text && text[0]) {
+			// テキスト属性と子ノードは両立しない。
+			K__Error(u8"Xml element cannot have both Text Element and Child Elements");
+
+		} else {
+			output.writeString(">\n");
+			for (int i=0; i<getNodeCount(); i++) {
+				getNode(i)->write(output, indent+1);
+			}
+			sprintf_s(s, sizeof(s), "%*s</%s>\n", indent*2, "", getTag());
+			output.writeString(s);
+		}
+	}
+	return true;
+}
 bool KXmlElement::hasTag(const char *tag) const {
 	const char *mytag = getTag();
 	return mytag && tag && strcmp(mytag, tag)==0;
+}
+int KXmlElement::getChildIndex(const KXmlElement *child) const {
+	for (int i=0; i<getNodeCount(); i++) {
+		if (getNode(i) == child) {
+			return i;
+		}
+	}
+	return -1;
 }
 const char * KXmlElement::findAttr(const char *name, const char *def) const {
 	int i = getAttrIndex(name);
