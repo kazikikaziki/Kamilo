@@ -8,8 +8,8 @@
 namespace Kamilo {
 
 void KDirectoryWalker::scanFiles(const char *top_u8, const char *dir_u8, std::vector<Item> &list) {
-	std::wstring wtop = K__Utf8ToWideStd(top_u8);
-	std::wstring wdir = K__Utf8ToWideStd(dir_u8);
+	std::wstring wtop = K::strUtf8ToWide(top_u8);
+	std::wstring wdir = K::strUtf8ToWide(dir_u8);
 	scanFilesW(wtop.c_str(), wdir.c_str(), list);
 }
 void KDirectoryWalker::scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std::vector<Item> &list) {
@@ -35,8 +35,8 @@ void KDirectoryWalker::scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std:
 				Item fitem;
 				fitem.namew = fdata.cFileName;
 				fitem.parentw = wdir;
-				fitem.nameu = K__WideToUtf8Std(fitem.namew);
-				fitem.parentu = K__WideToUtf8Std(fitem.parentw);
+				fitem.nameu = K::strWideToUtf8(fitem.namew);
+				fitem.parentu = K::strWideToUtf8(fitem.parentw);
 				fitem.isdir = (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 				list.push_back(fitem);
 			}

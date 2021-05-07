@@ -99,7 +99,7 @@ std::wstring KStringView::toWide() const {
 	return ws;
 #else
 	std::string u8 = toStdString();
-	return K__Utf8ToWideStd(u8);
+	return K::strUtf8ToWide(u8);
 #endif
 }
 std::string KStringView::toAnsi(const char *_locale) const {
@@ -113,7 +113,7 @@ std::string KStringView::toAnsi(const char *_locale) const {
 #else
 	std::string u8 = toStdString();
 	std::wstring ws = K__Utf8ToWideStd(u8);
-	return K__WideToAnsiStd(ws, _locale);
+	return K::strWideToAnsi(ws, _locale);
 #endif
 }
 uint32_t KStringView::hexToUint() const {
@@ -845,46 +845,46 @@ int KStringUtils::wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *w
 	return K__WideToAnsi(out_ansi, max_out_bytes, ws, _locale);
 }
 std::string KStringUtils::wideToAnsi(const std::wstring &ws, const char *_locale) {
-	return K__WideToAnsiStd(ws, _locale);
+	return K::strWideToAnsi(ws, _locale);
 }
 
 int KStringUtils::ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
 	return K__AnsiToWide(out_wide, max_out_wchars, ansi, _locale);
 }
 std::wstring KStringUtils::ansiToWide(const std::string &ansi, const char *_locale) {
-	return K__AnsiToWideStd(ansi, _locale);
+	return K::strAnsiToWide(ansi, _locale);
 }
 
 int KStringUtils::wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
 	return K__WideToUtf8(out_u8, max_out_bytes, ws);
 }
 std::string KStringUtils::wideToUtf8(const std::wstring &ws) {
-	return K__WideToUtf8Std(ws);
+	return K::strWideToUtf8(ws);
 }
 
 int KStringUtils::utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8) {
 	return K__Utf8ToWide(out_ws, max_out_widechars, u8, 0);
 }
 std::wstring KStringUtils::utf8ToWide(const std::string &u8) {
-	return K__Utf8ToWideStd(u8);
+	return K::strUtf8ToWide(u8);
 }
 
 void KStringUtils::ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale) {
-	std::wstring ws = K__AnsiToWideStd(ansi, _locale);
+	std::wstring ws = K::strAnsiToWide(ansi, _locale);
 	K__WideToUtf8(u8, size, ws.c_str());
 }
 std::string KStringUtils::ansiToUtf8(const std::string &ansi, const char *_locale) {
-	std::wstring ws = K__AnsiToWideStd(ansi, _locale);
-	return K__WideToUtf8Std(ws);
+	std::wstring ws = K::strAnsiToWide(ansi, _locale);
+	return K::strWideToUtf8(ws);
 }
 
 void KStringUtils::utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale) {
-	std::wstring ws = K__Utf8ToWideStd(u8);
+	std::wstring ws = K::strUtf8ToWide(u8);
 	K__WideToAnsi(ansi, size, ws.c_str(), _locale);
 }
 std::string KStringUtils::utf8ToAnsi(const std::string &u8, const char *_locale) {
-	std::wstring ws = K__Utf8ToWideStd(u8);
-	return K__WideToAnsiStd(ws, _locale);
+	std::wstring ws = K::strUtf8ToWide(u8);
+	return K::strWideToAnsi(ws, _locale);
 }
 
 std::wstring KStringUtils::binToWide(const void *data, int size) {
@@ -896,13 +896,13 @@ std::wstring KStringUtils::binToWide(const void *data, int size) {
 
 	// BOM で始まるデータなら UTF8 で確定させる
 	if (K::strStartsWithBom(data, size)) {
-		return K__Utf8ToWideStd((const char *)data);
+		return K::strUtf8ToWide((const char *)data);
 	}
 
 	std::wstring ws;
 
 	// 現在のロケールにおけるマルチバイト文字列として変換
-	ws = K__AnsiToWideStd((const char *)data, "");
+	ws = K::strAnsiToWide((const char *)data, "");
 	if (ws.size() > 0) {
 		return ws;
 	}
@@ -911,13 +911,13 @@ std::wstring KStringUtils::binToWide(const void *data, int size) {
 	// （非日本語環境でゲームを実行しているとき、SJIS保存されたファイルをロードしようとしている場合など）
 	// SJISをUTF8として解釈できる事が多いが、UTF8をSJISとして解釈できることは少ないため、
 	// 先にSJISへの変換を試みる。入力がUTF8の場合は大体失敗してくれるはず。
-	ws = K__AnsiToWideStd((const char *)data, "JPN");
+	ws = K::strAnsiToWide((const char *)data, "JPN");
 	if (ws.size() > 0) {
 		return ws;
 	}
 
 	// BOM なしの UTF8 であると仮定して変換
-	ws = K__Utf8ToWideStd((const char *)data);
+	ws = K::strUtf8ToWide((const char *)data);
 	if (ws.size() > 0) {
 		return ws;
 	}

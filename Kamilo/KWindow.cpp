@@ -445,7 +445,7 @@ public:
 				wchar_t name[MAX_PATH] = {0};
 				DragQueryFileW(hDrop, i, name, MAX_PATH);
 				if (m_cb) {
-					std::string filename_u8 = K__WideToUtf8Std(name);
+					std::string filename_u8 = K::strWideToUtf8(name);
 					m_cb->onWindowDropFile(i, numFiles, filename_u8.c_str());
 				}
 			}

@@ -68,58 +68,22 @@ std::string K__Win32GetErrorStringStd(long hr);
 
 // utf8 ==> wide
 int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes);
-std::wstring K__Utf8ToWideStd(const std::string &u8);
 
 // wide ==> utf8
 int K__WideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
-std::string K__WideToUtf8Std(const std::wstring &ws);
 
 // wide ==> ansi
 int K__WideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale);
 int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc);
-std::string K__WideToAnsiStd(const std::wstring &ws, const char *_locale);
 
 // ansi ==> wide
 int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale);
 int K__AnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc);
-std::wstring K__AnsiToWideStd(const std::string &ansi, const char *_locale);
 
 void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8);
 void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath);
 
 
-struct _StrW {
-	_StrW() {
-	}
-	_StrW(int x) {
-		ws = std::to_wstring(x);
-	}
-	_StrW(float x) {
-		ws = std::to_wstring(x);
-	}
-	_StrW(const std::string &u8) {
-		ws = K__Utf8ToWideStd(u8);
-	}
-	_StrW(const std::wstring &x) {
-		ws = x;
-	}
-	std::wstring ws;
-};
-
-void _OutputW(const std::wstring &ws);
-
-// Win32 の OutputDebugString に可変引数を渡せるようにしたもの。
-// デバッガーの「出力ウィンドウ」に対してだけ文字列を出力する
-template <class... Args> void K__OutputDebugString(Args... args) {
-	_StrW arglist[] = {args...};
-	int numargs = sizeof...(args);
-	std::wstring ws;
-	for (int i=0; i<numargs; i++) {
-		ws += arglist[i].ws;
-	}
-	_OutputW(ws);
-	_OutputW(L"\n");
-}
 
 class K {
 public:
@@ -191,24 +155,10 @@ public:
 	static bool str_iswgraph(wchar_t wc);
 	static bool str_iswblank(wchar_t wc);
 	static bool str_iswhalf(wchar_t wc);
-
-	// utf8 ==> wide
-	static int strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes) { return K__Utf8ToWide(out_ws, max_out_widechars, u8, u8bytes); }
-	static std::wstring strUtf8ToWideStd(const std::string &u8) { return K__Utf8ToWideStd(u8); }
-
-	// wide ==> utf8
-	static int strWideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) { return K__WideToUtf8(out_u8, max_out_bytes, ws); }
-	static std::string strWideToUtf8Std(const std::wstring &ws) { return K__WideToUtf8Std(ws); }
-
-	// wide ==> ansi
-	static int strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) { return K__WideToAnsi(out_ansi, max_out_bytes, ws, _locale); }
-	static int strWideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc) { return K__WideToAnsiL(out_ansi, max_out_bytes, ws, loc); }
-	static std::string strWideToAnsiStd(const std::wstring &ws, const char *_locale) { return K__WideToAnsiStd(ws, _locale); }
-
-	// ansi ==> wide
-	static int strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) { return K__AnsiToWide(out_wide, max_out_wchars, ansi, _locale); }
-	static int strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc) { return K__AnsiToWideL(out_wide, max_out_wchars, ansi, loc); }
-	static std::wstring strAnsiToWideStd(const std::string &ansi, const char *_locale) { return K__AnsiToWideStd(ansi, _locale); }
+	static std::wstring strUtf8ToWide(const std::string &u8);
+	static std::string strWideToUtf8(const std::wstring &ws);
+	static std::string strWideToAnsi(const std::wstring &ws, const char *_locale);
+	static std::wstring strAnsiToWide(const std::string &ansi, const char *_locale);
 
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }
@@ -216,6 +166,39 @@ public:
 };
 
 
+
+struct _StrW {
+	_StrW() {
+	}
+	_StrW(int x) {
+		ws = std::to_wstring(x);
+	}
+	_StrW(float x) {
+		ws = std::to_wstring(x);
+	}
+	_StrW(const std::string &u8) {
+		ws = K::strUtf8ToWide(u8);
+	}
+	_StrW(const std::wstring &x) {
+		ws = x;
+	}
+	std::wstring ws;
+};
+
+void _OutputW(const std::wstring &ws);
+
+// Win32 の OutputDebugString に可変引数を渡せるようにしたもの。
+// デバッガーの「出力ウィンドウ」に対してだけ文字列を出力する
+template <class... Args> void K__OutputDebugString(Args... args) {
+	_StrW arglist[] = {args...};
+	int numargs = sizeof...(args);
+	std::wstring ws;
+	for (int i=0; i<numargs; i++) {
+		ws += arglist[i].ws;
+	}
+	_OutputW(ws);
+	_OutputW(L"\n");
+}
 
 
 } // namespace

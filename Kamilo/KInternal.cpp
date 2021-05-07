@@ -39,7 +39,7 @@ void _OutputW(const std::wstring &ws) {
 static void K__WPrintLn(const wchar_t *ws) {
 #if 1
 	// windows では wprintf があまり信用できないので普通の printf を使う
-	std::string mb = K__WideToAnsiStd(ws, "");
+	std::string mb = K::strWideToAnsi(ws, "");
 	printf("%s\n", mb.c_str());
 #else
 	wprintf(L"%s\n", ws);
@@ -70,7 +70,7 @@ void K__DebugPrint(const char *fmt_u8, ...) {
 	if (g_DebugPrintHook) {
 		g_DebugPrintHook(u8);
 	} else {
-		std::wstring ws = K__Utf8ToWideStd(u8);
+		std::wstring ws = K::strUtf8ToWide(u8);
 		K__WPrintLn(ws.c_str());
 	}
 }
@@ -83,7 +83,7 @@ void K__Print(const char *fmt_u8, ...) {
 	if (g_PrintHook) {
 		g_PrintHook(u8);
 	} else {
-		std::wstring ws = K__Utf8ToWideStd(u8);
+		std::wstring ws = K::strUtf8ToWide(u8);
 		K__WPrintLn(ws.c_str());
 	}
 }
@@ -94,7 +94,7 @@ void K__PrintW(const wchar_t *wfmt, ...) {
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
 	va_end(args);
 	if (g_PrintHook) {
-		std::string u8 = K__WideToUtf8Std(ws);
+		std::string u8 = K::strWideToUtf8(ws);
 		g_PrintHook(u8.c_str());
 	} else {
 		K__WPrintLn(ws);
@@ -109,7 +109,7 @@ void K__Warning(const char *fmt_u8, ...) {
 	if (g_WarningHook) {
 		g_WarningHook(u8);
 	} else {
-		std::wstring ws = K__Utf8ToWideStd(u8);
+		std::wstring ws = K::strUtf8ToWide(u8);
 		K__WPrintLn(ws.c_str());
 	}
 }
@@ -120,7 +120,7 @@ void K__WarningW(const wchar_t *wfmt, ...) {
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
 	va_end(args);
 	if (g_WarningHook) {
-		std::string u8 = K__WideToUtf8Std(ws);
+		std::string u8 = K::strWideToUtf8(ws);
 		g_WarningHook(u8.c_str());
 	} else {
 		K__WPrintLn(ws);
@@ -135,7 +135,7 @@ void K__Error(const char *fmt_u8, ...) {
 	if (g_ErrorHook) {
 		g_ErrorHook(u8);
 	} else {
-		std::wstring ws = K__Utf8ToWideStd(u8);
+		std::wstring ws = K::strUtf8ToWide(u8);
 		K__WPrintLn(ws.c_str());
 	}
 }
@@ -146,7 +146,7 @@ void K__ErrorW(const wchar_t *wfmt, ...) {
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
 	va_end(args);
 	if (g_ErrorHook) {
-		std::string u8 = K__WideToUtf8Std(ws);
+		std::string u8 = K::strWideToUtf8(ws);
 		g_ErrorHook(u8.c_str());
 	} else {
 		K__WPrintLn(ws);
@@ -163,7 +163,7 @@ void K__Verbose(const char *fmt_u8, ...) {
 	if (g_WarningHook) {
 		g_WarningHook(u8);
 	} else {
-		std::wstring ws = K__Utf8ToWideStd(u8);
+		std::wstring ws = K::strUtf8ToWide(u8);
 		K__WPrintLn(ws.c_str());
 	}
 #endif
@@ -202,25 +202,6 @@ int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8
 	return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, u8str, u8bytes, out_ws, max_out_widechars);
 }
 
-// utf8 から wide に変換する
-// ※BOMは取り除かれる
-std::wstring K__Utf8ToWideStd(const std::string &u8) {
-	const char *s = K::strSkipBom(u8.c_str()); // BOMをスキップする
-	if (s[0] == '\0') {
-		return L"";
-	}
-	std::wstring ws;
-	int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, nullptr, 0);
-	if (len == 0) {
-		// 副作用防止のため K__Error などではなく K__RawPrintf を使う
-		K__RawPrintf("Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
-		return L"";
-	}
-	ws.resize(len + 1 + 32); // MultiByteToWideChar は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
-	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, &ws[0], len);
-	ws.resize(wcslen(ws.c_str())); // ws.size が正しい文字列長さを返すように調整する
-	return ws;
-}
 
 // wide から utf8 に変換する
 // out_u8 に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す
@@ -236,15 +217,6 @@ int K__WideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
 	return len + 32; // 指示されたサイズよりも少し大きめの値を返すようにする
 }
 
-// wide から utf8 に変換する
-std::string K__WideToUtf8Std(const std::wstring &ws) {
-	std::string u8;
-	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
-	u8.resize(len + 1 + 32); // WideCharToMultiByte は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
-	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws.c_str(), -1, &u8[0], len, nullptr, nullptr);
-	u8.resize(strlen(u8.c_str())); // u8.size が正しい文字列長さを返すように調整する
-	return u8;
-}
 
 
 int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc) {
@@ -293,20 +265,6 @@ int K__WideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const ch
 		K__Error("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
 	}
 	return num_bytes; // 0=ERROR
-}
-std::string K__WideToAnsiStd(const std::wstring &ws, const char *_locale) {
-	std::string mb;
-	int req_bytes = K__WideToAnsi(nullptr, 0, ws.c_str(), _locale);
-	// 変換後のバイト数（終端文字含む）
-	// req_bytes = 0: エラー
-	// req_bytes = 1: 空文字列なので終端文字のみ
-	// req_bytes > 1: 変換済み
-	if (req_bytes > 0) {
-		mb.resize(req_bytes); // K__WideToAnsi は終端文字も書き込むことに注意。req_bytesは終端文字を含んだサイズである
-		K__WideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
-		mb.resize(strlen(mb.c_str())); // 終端文字を含まないサイズにする
-	}
-	return mb;
 }
 
 
@@ -357,20 +315,6 @@ int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const
 	return num_wchars; // 0=ERROR
 }
 
-std::wstring K__AnsiToWideStd(const std::string &ansi, const char *_locale) {
-	std::wstring ws;
-	int req_wchars = K__AnsiToWide(nullptr, 0, ansi.c_str(), _locale);
-	// 変換後のバイト数（終端文字含む）
-	// req_wchars = 0: エラー
-	// req_wchars = 1: 空文字列なので終端文字のみ
-	// req_wchars > 1: 変換済み
-	if (req_wchars > 0) {
-		ws.resize(req_wchars); // K__Utf8ToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
-		K__AnsiToWide(&ws[0], ws.size(), ansi.c_str(), _locale);
-		ws.resize(wcslen(ws.c_str())); // 終端文字を含まないサイズにする
-	}
-	return ws;
-}
 
 
 
@@ -477,14 +421,14 @@ float K::lerp(float a, float b, float t) {
 
 #pragma region file
 bool K::fileShellOpen(const std::string &path_u8) {
-	std::wstring wpath = K__Utf8ToWideStd(path_u8);
+	std::wstring wpath = strUtf8ToWide(path_u8);
 	int h = (int)::ShellExecuteW(nullptr, L"OPEN", wpath.c_str(), L"", L"", SW_SHOW);
 	return h > 32; // ShellExecute は成功すると 32 より大きい値を返す
 }
 FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
 	// fopen の UTF8 版
-	std::wstring wpath = K__Utf8ToWideStd(path_u8);
-	std::wstring wmode = K__Utf8ToWideStd(mode_u8);
+	std::wstring wpath = strUtf8ToWide(path_u8);
+	std::wstring wmode = strUtf8ToWide(mode_u8);
 	FILE *file = nullptr;
 	if (1) {
 		// _wfopen で開く
@@ -553,7 +497,7 @@ std::string K::sysGetCurrentDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetCurrentDirectoryW(MAX_PATH, wpath);
 	strReplaceChar(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
-	return K__WideToUtf8Std(wpath);
+	return strWideToUtf8(wpath);
 }
 
 /// chdir, SetCurrentDirectory の UTF8 版
@@ -575,14 +519,14 @@ std::string K::sysGetCurrentExecName() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 	strReplaceChar(wpath, L'\\', L'/');
-	return K__WideToUtf8Std(wpath);
+	return strWideToUtf8(wpath);
 }
 std::string K::sysGetCurrentExecDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 	::PathRemoveFileSpecW(wpath);
 	strReplaceChar(wpath, L'\\', L'/');
-	return K__WideToUtf8Std(wpath);
+	return strWideToUtf8(wpath);
 }
 #pragma endregion // sys
 
@@ -623,7 +567,7 @@ std::string K::pathGetFull(const std::string &s) {
 	K__Utf8ToWidePath(wpath, MAX_PATH, s.c_str());
 	if (_wfullpath(wfull, wpath, MAX_PATH)) {
 		strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
-		return K__WideToUtf8Std(wfull);
+		return strWideToUtf8(wfull);
 	} else {
 		return s;
 	}
@@ -839,6 +783,65 @@ bool K::str_iswhalf(wchar_t wc) {
 	return (t & C3_HALFWIDTH) != 0;
 }
 
+// utf8 から wide に変換する
+// ※BOMは取り除かれる
+std::wstring K::strUtf8ToWide(const std::string &u8) {
+	const char *s = K::strSkipBom(u8.c_str()); // BOMをスキップする
+	if (s[0] == '\0') {
+		return L"";
+	}
+	std::wstring ws;
+	int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, nullptr, 0);
+	if (len == 0) {
+		// 副作用防止のため K__Error などではなく K__RawPrintf を使う
+		K__RawPrintf("Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
+		return L"";
+	}
+	ws.resize(len + 1 + 32); // MultiByteToWideChar は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
+	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, &ws[0], len);
+	ws.resize(wcslen(ws.c_str())); // ws.size が正しい文字列長さを返すように調整する
+	return ws;
+}
+
+// wide から utf8 に変換する
+std::string K::strWideToUtf8(const std::wstring &ws) {
+	std::string u8;
+	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	u8.resize(len + 1 + 32); // WideCharToMultiByte は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
+	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws.c_str(), -1, &u8[0], len, nullptr, nullptr);
+	u8.resize(strlen(u8.c_str())); // u8.size が正しい文字列長さを返すように調整する
+	return u8;
+}
+
+std::string K::strWideToAnsi(const std::wstring &ws, const char *_locale) {
+	std::string mb;
+	int req_bytes = K__WideToAnsi(nullptr, 0, ws.c_str(), _locale);
+	// 変換後のバイト数（終端文字含む）
+	// req_bytes = 0: エラー
+	// req_bytes = 1: 空文字列なので終端文字のみ
+	// req_bytes > 1: 変換済み
+	if (req_bytes > 0) {
+		mb.resize(req_bytes); // K__WideToAnsi は終端文字も書き込むことに注意。req_bytesは終端文字を含んだサイズである
+		K__WideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
+		mb.resize(strlen(mb.c_str())); // 終端文字を含まないサイズにする
+	}
+	return mb;
+}
+
+std::wstring K::strAnsiToWide(const std::string &ansi, const char *_locale) {
+	std::wstring ws;
+	int req_wchars = K__AnsiToWide(nullptr, 0, ansi.c_str(), _locale);
+	// 変換後のバイト数（終端文字含む）
+	// req_wchars = 0: エラー
+	// req_wchars = 1: 空文字列なので終端文字のみ
+	// req_wchars > 1: 変換済み
+	if (req_wchars > 0) {
+		ws.resize(req_wchars); // K__Utf8ToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
+		K__AnsiToWide(&ws[0], ws.size(), ansi.c_str(), _locale);
+		ws.resize(wcslen(ws.c_str())); // 終端文字を含まないサイズにする
+	}
+	return ws;
+}
 #pragma endregion // string
 
 

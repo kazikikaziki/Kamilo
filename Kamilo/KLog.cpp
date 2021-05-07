@@ -245,8 +245,8 @@ int KLogConsole::getColorFlags() {
 	return (int)info.wAttributes;
 }
 void KLogConsole::writeLine(const char *u8) {
-	std::wstring ws = K__Utf8ToWideStd(u8);
-	std::string mb = K__WideToAnsiStd(ws, "");
+	std::wstring ws = K::strUtf8ToWide(u8);
+	std::string mb = K::strWideToAnsi(ws, "");
 	fputs(mb.c_str(), stdout);
 	fputs("\n", stdout);
 }
@@ -294,8 +294,8 @@ void KLogConsole::writeRecord(const KLog::Record &rec) {
 
 	// メッセージ文字列
 	if (1) {
-		std::wstring ws = K__Utf8ToWideStd(rec.text_u8); // UTF8-->ANSIの直接変換はできないので一度ワイド文字を経由する
-		std::string mb = K__WideToAnsiStd(ws, ""); // 現ロケールでのマルチバイト文字列
+		std::wstring ws = K::strUtf8ToWide(rec.text_u8); // UTF8-->ANSIの直接変換はできないので一度ワイド文字を経由する
+		std::string mb = K::strWideToAnsi(ws, ""); // 現ロケールでのマルチバイト文字列
 		setColorFlags(msgcolor);
 		printf(" %s\n", mb.c_str());
 	}
@@ -367,7 +367,7 @@ void KLogDebugger::writeLine(const char *u8) {
 	// デバッガーに出力する。
 	// Visual Studio の「出力」ウィンドウでメッセージを見ることができる
 	if (!m_IsOpen) return;
-	std::wstring ws = K__Utf8ToWideStd(u8);
+	std::wstring ws = K::strUtf8ToWide(u8);
 	OutputDebugStringW(ws.c_str());
 	OutputDebugStringW(L"\n");
 }

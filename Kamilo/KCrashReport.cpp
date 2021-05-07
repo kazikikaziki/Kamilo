@@ -509,7 +509,7 @@ public:
 		// 例外チェックモードで自分の複製を起動する
 		
 		std::string exepath_u8 = K::sysGetCurrentExecName();
-		std::wstring exepath_w = K::strUtf8ToWideStd(exepath_u8);
+		std::wstring exepath_w = K::strUtf8ToWide(exepath_u8);
 		ShellExecuteW(NULL, L"OPEN", exepath_w.c_str(), args, NULL, SW_SHOWNORMAL);
 
 		return EXCEPTION_CONTINUE_SEARCH; // EXCEPTION_CONTINUE_SEARCH にしないとアプリ終了時にwindowsエラーログに残らない
@@ -535,7 +535,7 @@ public:
 
 		// プログラム名を検索キーワードにする
 		// ログイベント内の実行ファイル名はディレクトリ名を含まないので、ファイル名だけを使う
-		std::wstring exepath_w = K__Utf8ToWideStd(exepath_u8);
+		std::wstring exepath_w = K::strUtf8ToWide(exepath_u8);
 		const wchar_t *exename = PathFindFileNameW(exepath_w.c_str());
 
 		return _FindErrorLog(limit_seconds, exename, fault_addr);
@@ -658,7 +658,7 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 			fprintf(file, "\n");
 		}
 
-		std::string errmsg_u8 = K__WideToUtf8Std(errmsg);
+		std::string errmsg_u8 = K::strWideToUtf8(errmsg);
 		CWin32ErrorReporting::printErrorText(file, &info, errmsg_u8.c_str());
 
 #if 0
@@ -736,7 +736,7 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 			PathFindFileNameA(exepath_u8.c_str()),
 			report_path_u8.c_str(),
 			comment_u8);
-		std::wstring ws = K__Utf8ToWideStd(s);
+		std::wstring ws = K::strUtf8ToWide(s);
 		MessageBoxW(NULL, ws.c_str(), L"クラッシュ!", MB_ICONERROR|MB_SYSTEMMODAL);
 	}
 	return true;
