@@ -223,17 +223,17 @@ public:
 		const char *s = getDataString(data_col, data_row);
 		// 実数形式で記述されている値を整数として取り出す可能性
 		float f = 0.0f;
-		if (K__strtof(s, &f)) {
+		if (K::strToFloat(s, &f)) {
 			return (int)f;
 		}
 		// 8桁の16進数を取り出す可能性。この場合は符号なしで取り出しておかないといけない
 		unsigned int u = 0;
-		if (K__strtoui32(s, &u)) {
+		if (K::strToUInt32(s, &u)) {
 			return (int)u;
 		}
 		// 普通の整数として取り出す
 		int i = 0;
-		if (K__strtoi(s, &i)) {
+		if (K::strToInt(s, &i)) {
 			return i;
 		}
 		return def;
@@ -241,7 +241,7 @@ public:
 	float getDataFloat(int data_col, int data_row, float def) const {
 		const char *s = getDataString(data_col, data_row);
 		float ret = def;
-		K__strtof(s, &ret);
+		K::strToFloat(s, &ret);
 		return ret;
 	}
 	bool getDataSource(int data_col, int data_row, int *col_in_file, int *row_in_file) const {

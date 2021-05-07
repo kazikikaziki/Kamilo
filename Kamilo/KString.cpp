@@ -937,44 +937,44 @@ const char * KStringUtils::skipUtf8Bom(const char *s) {
 /// 整数への変換が成功すれば val に値をセットして true を返す。
 /// 失敗した場合は何もせずに false を返す
 bool KStringUtils::toIntTry(const char *s, int *val) {
-	return K__strtoi(s, val);
+	return K::strToInt(s, val);
 }
 bool KStringUtils::toIntTry(const std::string &s, int *val) {
-	return K__strtoi(s.c_str(), val);
+	return K::strToInt(s.c_str(), val);
 }
 int KStringUtils::toInt(const char *s, int def) {
 	int retval = def;
-	K__strtoi(s, &retval);
+	K::strToInt(s, &retval);
 	return retval;
 }
 int KStringUtils::toInt(const std::string &s, int def) {
 	return toInt(s.c_str(), def);
 }
 bool KStringUtils::toFloatTry(const char *s, float *val) {
-	return K__strtof(s, val);
+	return K::strToFloat(s, val);
 }
 bool KStringUtils::toFloatTry(const std::string &s, float *val) {
-	return K__strtof(s.c_str(), val);
+	return K::strToFloat(s.c_str(), val);
 }
 
 /// strtof を簡略化したもの
 float KStringUtils::toFloat(const char *s, float def) {
 	float retval = def;
-	K__strtof(s, &retval);
+	K::strToFloat(s, &retval);
 	return retval;
 }
 float KStringUtils::toFloat(const std::string &s, float def) {
 	return toFloat(s.c_str(), def);
 }
 bool KStringUtils::toUintTry(const char *s, uint32_t *val) {
-	return K__strtoui32(s, val);
+	return K::strToUInt32(s, val);
 }
 bool KStringUtils::toUintTry(const std::string &s, uint32_t *val) {
-	return K__strtoui32(s.c_str(), val);
+	return K::strToUInt32(s.c_str(), val);
 }
 uint32_t KStringUtils::toUint(const char *s) {
 	uint32_t retval = 0;
-	K__strtoui32(s, &retval);
+	K::strToUInt32(s, &retval);
 	return retval;
 }
 uint32_t KStringUtils::toUint(const std::string &s) {
@@ -982,10 +982,10 @@ uint32_t KStringUtils::toUint(const std::string &s) {
 }
 
 bool KStringUtils::toUint64Try(const char *s, uint64_t *val) {
-	return K__strtoui64(s, val);
+	return K::strToUInt64(s, val);
 }
 bool KStringUtils::toUint64Try(const std::string &s, uint64_t *val) {
-	return K__strtoui64(s.c_str(), val);
+	return K::strToUInt64(s.c_str(), val);
 }
 
 bool KStringUtils::hexToUintTry(const char *s, uint32_t *val) {

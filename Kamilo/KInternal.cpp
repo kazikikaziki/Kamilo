@@ -171,45 +171,7 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-bool K__strtof(const std::string &s, float *val) {
-	return K__strtof(s.c_str(), val);
-}
-bool K__strtoi(const std::string &s, int *val) {
-	return K__strtoi(s.c_str(), val);
-}
 
-bool K__strtof(const char *s, float *val) {
-	if (s == nullptr) return false;
-	char *err = 0;
-	float result = strtof(s, &err);
-	if (err == s || *err) return false;
-	if (val) *val = result;
-	return true;
-}
-bool K__strtoi(const char *s, int *val) {
-	if (s == nullptr) return false;
-	char *err = 0;
-	int result = strtol(s, &err, 0);
-	if (err == s || *err) return false;
-	if (val) *val = result;
-	return true;
-}
-bool K__strtoui32(const char *s, uint32_t *val) {
-	if (s == nullptr) return false;
-	char *err = 0;
-	uint32_t result = strtoul(s, &err, 0);
-	if (err == s || *err) return false;
-	if (val) *val = result;
-	return true;
-}
-bool K__strtoui64(const char *s, uint64_t *val) {
-	if (s == nullptr) return false;
-	char *err = 0;
-	uint64_t result = _strtoui64(s, &err, 0);
-	if (err == s || *err) return false;
-	if (val) *val = result;
-	return true;
-}
 
 
 /// strptime の代替関数
@@ -797,15 +759,13 @@ bool K::strStartsWithBom(const void *data, int size) {
 bool K::strStartsWithBom(const std::string &s) {
 	return strStartsWithBom(s.data(), s.size());
 }
-int K::strFind(const char *s, const char *sub, int start) {
-	K__Assert(s);
-	K__Assert(sub);
+int K::strFind(const std::string &s, const std::string &sub, int start) {
 	if (start < 0) start = 0;
-	if ((int)strlen(s) < start) return -1; // 範囲外
-	if ((int)strlen(s) == start) return strlen(sub)==0 ? start : -1; // 検索開始位置が文字列末尾の場合、空文字列だけがマッチする
-	if (strlen(sub)==0) return start; // 空文字列はどの場所であっても必ずマッチする。常に検索開始位置にマッチする
-	const char *p = strstr(s + start, sub);
-	return p ? (p - s) : -1;
+	if ((int)s.size() < start) return -1; // 範囲外
+	if ((int)s.size() == start) return sub.empty() ? start : -1; // 検索開始位置が文字列末尾の場合、空文字列だけがマッチする
+	if (sub.empty()) return start; // 空文字列はどの場所であっても必ずマッチする。常に検索開始位置にマッチする
+	const char *p = strstr(s.c_str() + start, sub.c_str());
+	return p ? (p - s.c_str()) : -1;
 }
 void K::strReplace(std::string &s, int start, int count, const std::string &str) {
 	s.erase(start, count);
@@ -835,6 +795,44 @@ void K::strReplaceChar(wchar_t *s, wchar_t before, wchar_t after) {
 			s[i] = after;
 		}
 	}
+}
+bool K::strToFloat(const std::string &s, float *val) {
+	return strToFloat(s.c_str(), val);
+}
+bool K::strToFloat(const char *s, float *val) {
+	if (s == nullptr) return false;
+	char *err = 0;
+	float result = strtof(s, &err);
+	if (err == s || *err) return false;
+	if (val) *val = result;
+	return true;
+}
+bool K::strToInt(const std::string &s, int *val) {
+	return strToInt(s.c_str(), val);
+}
+bool K::strToInt(const char *s, int *val) {
+	if (s == nullptr) return false;
+	char *err = 0;
+	int result = strtol(s, &err, 0);
+	if (err == s || *err) return false;
+	if (val) *val = result;
+	return true;
+}
+bool K::strToUInt32(const char *s, uint32_t *val) {
+	if (s == nullptr) return false;
+	char *err = 0;
+	uint32_t result = strtoul(s, &err, 0);
+	if (err == s || *err) return false;
+	if (val) *val = result;
+	return true;
+}
+bool K::strToUInt64(const char *s, uint64_t *val) {
+	if (s == nullptr) return false;
+	char *err = 0;
+	uint64_t result = _strtoui64(s, &err, 0);
+	if (err == s || *err) return false;
+	if (val) *val = result;
+	return true;
 }
 #pragma endregion // string
 

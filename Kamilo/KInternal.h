@@ -64,12 +64,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 //----------------------------------------------------
 // string
 //----------------------------------------------------
-bool K__strtof(const std::string &s, float *val);
-bool K__strtoi(const std::string &s, int *val);
-bool K__strtof(const char *s, float *val);
-bool K__strtoi(const char *s, int *val);
-bool K__strtoui32(const char *s, uint32_t *val);
-bool K__strtoui64(const char *s, uint64_t *val);
 int K__stricmp(const char *s, const char *t); ///< _stricmp または strcasecmp のエイリアス
 char * K__strptime_l(const char *str, const char *fmt, struct tm *out_tm, const char *_locale);
 std::string K__vsprintf_std(const char *fmt, va_list args);
@@ -187,17 +181,17 @@ public:
 	static const char * strSkipBom(const char *s);
 	static bool strStartsWithBom(const void *data, int size);
 	static bool strStartsWithBom(const std::string &s);
-	static int strFind(const char *s, const char *sub, int start);
+	static int strFind(const std::string &s, const std::string &sub, int start);
 	static void strReplace(std::string &s, int start, int count, const std::string &str);
 	static void strReplace(std::string &s, const std::string &before, const std::string &after);
 	static void strReplaceChar(char *s, char before, char after);
 	static void strReplaceChar(wchar_t *s, wchar_t before, wchar_t after);
-	static bool strToFloat(const std::string &s, float *val) { return K__strtof(s, val); }
-	static bool strToFloat(const char *s, float *val) { return K__strtof(s, val); }
-	static bool strToInt(const std::string &s, int *val) { return K__strtoi(s, val); }
-	static bool strToInt(const char *s, int *val) { return K__strtoi(s, val); }
-	static bool strToUInt32(const char *s, uint32_t *val) { return K__strtoui32(s, val); }
-	static bool strToUInt64(const char *s, uint64_t *val) { return K__strtoui64(s, val); }
+	static bool strToFloat(const std::string &s, float *val);
+	static bool strToFloat(const char *s, float *val);
+	static bool strToInt(const std::string &s, int *val);
+	static bool strToInt(const char *s, int *val);
+	static bool strToUInt32(const char *s, uint32_t *val);
+	static bool strToUInt64(const char *s, uint64_t *val);
 	static int strCaseCmp(const char *s, const char *t) { return K__stricmp(s, t); }
 	static char * strParseTime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale) { return K__strptime_l(str, fmt, out_tm, _locale); }
 	static std::string vsprintf_std(const char *fmt, va_list args) { return K__vsprintf_std(fmt, args); }

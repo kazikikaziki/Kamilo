@@ -390,7 +390,7 @@ private:
 			// val は文字列ID (整数) を表している。
 			// 対応する文字列を文字列テーブルから探す
 			int sid = -1;
-			K__strtoi(val, &sid);
+			K::strToInt(val, &sid);
 			K__Assert(sid >= 0);
 			auto it = m_Strings.find(sid);
 			if (it != m_Strings.end()) {
