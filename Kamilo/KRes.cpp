@@ -421,8 +421,8 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 	KPath edge_name = mEdgeFile.getRelativePathFrom(homeDir);
 	KPath clip_name = mName.getRelativePathFrom(homeDir);
 
-	xml->setAttr("file", edge_name.u8()); // source edge file name
-	xml->setAttr("name", clip_name.u8()); // this clip name
+	xml->setAttrString("file", edge_name.u8()); // source edge file name
+	xml->setAttrString("name", clip_name.u8()); // this clip name
 	if (mFlags & FLAG_LOOP) {
 		xml->setAttrInt("loop", 1);
 	}
@@ -442,19 +442,19 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 		if (key->this_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->this_mark, s);
-			elm->setAttr("mark", s);
+			elm->setAttrString("mark", s);
 		} else {
 			elm->removeAttr("mark");
 		}
 		if (key->next_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->next_mark, s);
-			elm->setAttr("next", s);
+			elm->setAttrString("next", s);
 		} else {
 			elm->removeAttr("next");
 		}
 		if (!key->next_clip.empty()) {
-			elm->setAttr("next_clip", key->next_clip.u8());
+			elm->setAttrString("next_clip", key->next_clip.u8());
 		} else {
 			elm->removeAttr("next_clip");
 		}
@@ -467,7 +467,7 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 		} else {
 			// このページでは、クリップ元と異なるEdgeを使っている
 			KPath edge_erelpath = key->edge_name.getRelativePathFrom(homeDir);
-			elm->setAttr("extern_edge", edge_erelpath.u8()); // xml のあるフォルダからの相対パスで記録する
+			elm->setAttrString("extern_edge", edge_erelpath.u8()); // xml のあるフォルダからの相対パスで記録する
 			elm->setAttrInt("extern_page", key->edge_page);
 		}
 
@@ -487,7 +487,7 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 // <Clip> タグ向けに保存する。レイヤーの内容やスプライトファイル名もすべて記録する
 void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 	KPath file = mEdgeFile.getRelativePathFrom(homeDir);
-	xml->setAttr("name", file.u8());
+	xml->setAttrString("name", file.u8());
 	if (mFlags & FLAG_LOOP) {
 		xml->setAttrInt("loop", 1);
 	}
@@ -505,19 +505,19 @@ void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 		if (key->this_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->this_mark, s);
-			elm->setAttr("mark", s);
+			elm->setAttrString("mark", s);
 		} else {
 			elm->removeAttr("mark");
 		}
 		if (key->next_mark != KMark_NONE) {
 			char s[256] = {0};
 			K_MarkToStr(key->next_mark, s);
-			elm->setAttr("next", s);
+			elm->setAttrString("next", s);
 		} else {
 			elm->removeAttr("next");
 		}
 		if (!key->next_clip.empty()) {
-			elm->setAttr("next_clip", key->next_clip.u8());
+			elm->setAttrString("next_clip", key->next_clip.u8());
 		} else {
 			elm->removeAttr("next_clip");
 		}
@@ -527,13 +527,13 @@ void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 			KXmlElement *xLay = elm->addChild("Layer");
 			const SPRITE_LAYER &slay = key->layers[l];
 			if (!slay.sprite.empty()) {
-				xLay->setAttr("sprite", slay.sprite.u8());
+				xLay->setAttrString("sprite", slay.sprite.u8());
 			}
 			if (!slay.label.empty()) {
-				xLay->setAttr("label", slay.label.u8());
+				xLay->setAttrString("label", slay.label.u8());
 			}
 			if (!slay.command.empty()) {
-				xLay->setAttr("commands", slay.command.u8());
+				xLay->setAttrString("commands", slay.command.u8());
 			}
 		}
 
@@ -3220,7 +3220,7 @@ public:
 
 
 static void _ReadPageMarkAttr(CLayeredSpriteClipBuilder &builder, KXmlElement *xPage, int clip_page_index, const char *xmlName) {
-	const char *mark_str = xPage->findAttr("mark");
+	const char *mark_str = xPage->getAttrString("mark");
 	if (mark_str && mark_str[0]) {
 		KMark mark = KMark_NONE;
 		if (K_StrToMark(mark_str, &mark)) {
@@ -3232,8 +3232,8 @@ static void _ReadPageMarkAttr(CLayeredSpriteClipBuilder &builder, KXmlElement *x
 }
 
 static void _ReadPageNextAttr(CLayeredSpriteClipBuilder &builder, KXmlElement *xPage, int clip_page_index, const char *xmlName) {
-	const char *next_str = xPage->findAttr("next", "");
-	const char *nextclip = xPage->findAttr("next_clip", "");
+	const char *next_str = xPage->getAttrString("next", "");
+	const char *nextclip = xPage->getAttrString("next_clip", "");
 
 	KMark nextmark = KMark_NONE;
 	if (!K_StrToMark(next_str, &nextmark)) {
@@ -3993,7 +3993,7 @@ private:
 		KXmlElement *elm = nullptr;
 		if (idx < 0) {
 			elm = xmlBank->addChild("File");
-			elm->setAttr("name", name);
+			elm->setAttrString("name", name);
 		} else {
 			elm = xmlBank->getChild(idx);
 		}
@@ -4001,7 +4001,7 @@ private:
 
 		char timeVal[256] = {0};
 		sprintf_s(timeVal, sizeof(timeVal), "%lld", timestamp);
-		elm->setAttr("time", timeVal);
+		elm->setAttrString("time", timeVal);
 	}
 	time_t readTimestamp(const KXmlElement *xmlBank, const char *name) const {
 		if (xmlBank == nullptr) return 0;
@@ -4015,9 +4015,9 @@ private:
 			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
-			const char *nameVal = elm->findAttr("name");
+			const char *nameVal = elm->getAttrString("name");
 			if (strcmp(nameVal, name) == 0) {
-				const char *timeVal = elm->findAttr("time"); // time_t は64ビットなので findAttrInt を使ってはいけない
+				const char *timeVal = elm->getAttrString("time"); // time_t は64ビットなので getAttrInt を使ってはいけない
 				time_t timestamp = 0;
 				if (timeVal) {
 					sscanf_s(timeVal, "%lld", &timestamp);
@@ -4037,7 +4037,7 @@ private:
 			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
-			const char *name_str = elm->findAttr("name");
+			const char *name_str = elm->getAttrString("name");
 			if (strcmp(name_str, name) == 0) {
 				return i;
 			}
@@ -4133,7 +4133,7 @@ private:
 		// <Texture file="XXX">
 		KPath image_name;
 		{
-			const char *file_str = xTex->findAttr("file");
+			const char *file_str = xTex->getAttrString("file");
 			if (file_str && file_str[0]) {
 				// パスを含めたファイル名を得る（データフォルダ内での相対パス）
 				// ※file_str は処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとする
@@ -4157,7 +4157,7 @@ private:
 		// <Texture name="XXX">
 		KPath texture_name;
 		{
-			const char *name_str = xTex->findAttr("name");
+			const char *name_str = xTex->getAttrString("name");
 			if (name_str && name_str[0]) {
 				KPath name = KPath(name_str);
 				texture_name = KPath(xml_name).directory().join(name);
@@ -4173,7 +4173,7 @@ private:
 		// フィルターが指定されている場合は画像を加工する
 		// <Texture filter="XXX">
 		KImage img;
-		const char *filter = xTex->findAttr("filter");
+		const char *filter = xTex->getAttrString("filter");
 
 		if (KStringUtils::isEmpty(image_name.u8()) && KStringUtils::isEmpty(filter)) {
 			KLog::printError(
@@ -4194,9 +4194,9 @@ private:
 
 		// スプライトの属性が Texture の属性として記述されている場合、それをスプライト属性のデフォルト値とする
 		// <Texture blend="XXX" pivotX="XXX" pivotY="XXX">
-		const char *def_blend_str = xTex->findAttr("blend");
-		const char *def_px_str = xTex->findAttr("pivotX", "50%");
-		const char *def_py_str = xTex->findAttr("pivotY", "50%");
+		const char *def_blend_str = xTex->getAttrString("blend");
+		const char *def_px_str = xTex->getAttrString("pivotX", "50%");
+		const char *def_py_str = xTex->getAttrString("pivotY", "50%");
 
 		// 子ノードにスプライトが指定されている場合は、スプライトを生成して追加する
 		// <Sprite>
@@ -4206,14 +4206,14 @@ private:
 		for (int i=0; i<xTex->getChildCount(); i++) {
 			KXmlElement *xSprite = xTex->getChild(i);
 			if (xSprite->hasTag("Sprite")) {
-				const char *name_str  = xSprite->findAttr("name", "");
-				const char *blend_str = xSprite->findAttr("blend", def_blend_str);
-				const char *px_str = xSprite->findAttr("pivotX", def_px_str);
-				const char *py_str = xSprite->findAttr("pivotY", def_py_str);
-				const char *x_str  = xSprite->findAttr("x", "0%");
-				const char *y_str  = xSprite->findAttr("y", "0%");
-				const char *w_str  = xSprite->findAttr("w", "100%");
-				const char *h_str  = xSprite->findAttr("h", "100%");
+				const char *name_str  = xSprite->getAttrString("name", "");
+				const char *blend_str = xSprite->getAttrString("blend", def_blend_str);
+				const char *px_str = xSprite->getAttrString("pivotX", def_px_str);
+				const char *py_str = xSprite->getAttrString("pivotY", def_py_str);
+				const char *x_str  = xSprite->getAttrString("x", "0%");
+				const char *y_str  = xSprite->getAttrString("y", "0%");
+				const char *w_str  = xSprite->getAttrString("w", "100%");
+				const char *h_str  = xSprite->getAttrString("h", "100%");
 
 				KPath sprite_name;
 				if (name_str && name_str[0]) {
@@ -4284,7 +4284,7 @@ public:
 		K__ASSERT_RETURN(KBank::getAnimationBank()); 
 	}
 	KPath readClipNameAttr(KXmlElement *elm, const char *xml_name) {
-		const char *str = elm->findAttr("name");
+		const char *str = elm->getAttrString("name");
 		if (str && str[0]) {
 			// name_str が指定されている。
 			// 処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとして、クリップ名を決める
@@ -4314,14 +4314,14 @@ public:
 
 		// 再生設定
 		// <Clip loop="XXX" autoKill="XXX">
-		builder.setLoop(xClip->findAttrInt("loop") != 0);
-		builder.setKillSelf(xClip->findAttrInt("autoKill") != 0);
-		bool nosprite = xClip->findAttrInt("nosprite") != 0; // スプライトを使わないアニメである
+		builder.setLoop(xClip->getAttrInt("loop") != 0);
+		builder.setKillSelf(xClip->getAttrInt("autoKill") != 0);
+		bool nosprite = xClip->getAttrInt("nosprite") != 0; // スプライトを使わないアニメである
 		
 		// デフォルトウェイト
 		// <Clip pagedur="XXX">
 		// ページの固有ウェイトが省略されている場合は、この値を使う
-		int pagedur = xClip->findAttrInt("pagedur", 8);
+		int pagedur = xClip->getAttrInt("pagedur", 8);
 
 		KXmlElement *xEditInfo = nullptr;
 		KNamedValues defaultUserParams;
@@ -4353,12 +4353,12 @@ public:
 				// ページ長さ
 				// <Page dur="6" ... />
 				int page_duration = pagedur;
-				if (xPage->findAttrInt("dur", 0) > 0) {
-					page_duration = xPage->findAttrInt("dur", 0);
+				if (xPage->getAttrInt("dur", 0) > 0) {
+					page_duration = xPage->getAttrInt("dur", 0);
 				}
-				if (xPage->findAttrInt("delay") > 0) {
+				if (xPage->getAttrInt("delay") > 0) {
 					KLog::printWarning(u8"E_FILELOADER_CLIPNODE: delay 属性は削除されました。代わりに dur を使ってください");
-					page_duration = xPage->findAttrInt("delay");
+					page_duration = xPage->getAttrInt("delay");
 				}
 
 				KNamedValues user_params = defaultUserParams.clone();
@@ -4381,7 +4381,7 @@ public:
 						KPath spriePath;
 						if (!nosprite) {
 							{
-								const char *sprite_name = xElm->findAttr("sprite");
+								const char *sprite_name = xElm->getAttrString("sprite");
 								if (KStringUtils::isEmpty(sprite_name)) {
 									KLog::printWarning(u8"E_FILELOADER_CLIPNODE: <Layer> に sprite 属性が指定されていません: %s(%d)",
 										xml_name, xElm->getLineNumber()
@@ -4399,8 +4399,8 @@ public:
 							}
 						}
 						builder.setSprite(pageindex, layerindex, spriePath.u8());
-						builder.setLabel(pageindex, layerindex, xElm->findAttr("label"));
-						builder.setCommand(pageindex, layerindex, xElm->findAttr("command"));
+						builder.setLabel(pageindex, layerindex, xElm->getAttrString("label"));
+						builder.setCommand(pageindex, layerindex, xElm->getAttrString("command"));
 						layerindex++;
 					}
 				}
@@ -4411,7 +4411,7 @@ public:
 					KPath spriePath;
 					if (!nosprite) {
 						{
-							const char *sprite_name = xPage->findAttr("sprite");
+							const char *sprite_name = xPage->getAttrString("sprite");
 							if (KStringUtils::isEmpty(sprite_name)) {
 								KLog::printWarning(u8"E_FILELOADER_CLIPNODE: <Layer> に sprite 属性が指定されていません: %s(%d)",
 									xml_name, xPage->getLineNumber()
@@ -4429,8 +4429,8 @@ public:
 						}
 					}
 					builder.setSprite(pageindex, 0, spriePath.u8());
-					builder.setLabel(pageindex, 0, xPage->findAttr("label"));
-					builder.setCommand(pageindex, 0, xPage->findAttr("command"));
+					builder.setLabel(pageindex, 0, xPage->getAttrString("label"));
+					builder.setCommand(pageindex, 0, xPage->getAttrString("command"));
 				}
 				builder.addParams(pageindex, &user_params);
 				builder.setDuration(pageindex, page_duration);
@@ -4475,7 +4475,7 @@ public:
 		// <EdgeSprites file="###" />
 		KPath edge_name;
 		{
-			const char *file_str = xEdgeSprites->findAttr("file");
+			const char *file_str = xEdgeSprites->getAttrString("file");
 			if (file_str && file_str[0]) {
 				// パスを含めたファイル名を得る（データフォルダ内での相対パス）
 				// ※file_str は処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとする
@@ -4595,7 +4595,7 @@ public:
 		// 入力ファイル名
 		KPath edge_name;
 		{
-			const char *file_str = xEdgeAnimation->findAttr("file");
+			const char *file_str = xEdgeAnimation->getAttrString("file");
 			if (file_str && file_str[0]) {
 				// パスを含めたファイル名を得る（データフォルダ内での相対パス）
 				// ※file_str は処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとする
@@ -4611,7 +4611,7 @@ public:
 		// クリップ名
 		KPath clipName;
 		{
-			const char *name_str = xEdgeAnimation->findAttr("name");
+			const char *name_str = xEdgeAnimation->getAttrString("name");
 			if (name_str && name_str[0]) {
 				// name_str が指定されている。
 				// 処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとして、クリップ名を決める
@@ -4661,8 +4661,8 @@ public:
 
 		// 再生設定
 		// <EdgeAnimation loop="XXX" autoKill="XXX">
-		builder.setLoop(xEdgeAnimation->findAttrInt("loop") != 0);
-		builder.setKillSelf(xEdgeAnimation->findAttrInt("autoKill") != 0);
+		builder.setLoop(xEdgeAnimation->getAttrInt("loop") != 0);
+		builder.setKillSelf(xEdgeAnimation->getAttrInt("autoKill") != 0);
 
 		KXmlElement *xEditInfo = nullptr;
 		KNamedValues defaultUserParams;
@@ -4693,13 +4693,13 @@ public:
 			KXmlElement *xPage = xEdgeAnimation->getChild(i);
 			if (xPage->hasTag("Page")) {
 				// ページを追加
-				const char *externEdgeName = xPage->findAttr("extern_edge"); // 現在のフォルダからの相対パスであることに注意
-				const int externEdgePage = xPage->findAttrInt("extern_page", -1);
+				const char *externEdgeName = xPage->getAttrString("extern_edge"); // 現在のフォルダからの相対パスであることに注意
+				const int externEdgePage = xPage->getAttrInt("extern_page", -1);
 
 				// 使用する EDGE ページ番号
 				// <Page page="0" ... />
 				// ページ番号が未指定ならば前回の page 番号から自動インクリメントされた値を使う
-				const int edgePageIndex = xPage->findAttrInt("page", auto_page_index);
+				const int edgePageIndex = xPage->getAttrInt("page", auto_page_index);
 
 				// 使用する EDGE ページ
 				const KEdgePage *edgepage = edge.getPage(edgePageIndex);
@@ -4732,8 +4732,8 @@ public:
 
 				// ページ長さ
 				// <Page dur="6" ... />
-				if (xPage->findAttrInt("dur") > 0) {
-					page_duration = xPage->findAttrInt("dur");
+				if (xPage->getAttrInt("dur") > 0) {
+					page_duration = xPage->getAttrInt("dur");
 				}
 
 				// ページ固有の追加パラメータがあるならそれを読む
@@ -4808,14 +4808,14 @@ public:
 						if (xLayer->hasTag("Layer")) {
 							// <Layer> ノードが指定されている
 							// 例: <Layer layer="0"/>
-							if (xLayer->findAttr("layer") == nullptr) {
+							if (xLayer->getAttrString("layer") == nullptr) {
 								KLog::printError(
 									u8"E_FILELOADER_EDGEANINODE: <Layer> ノードにレイヤー番号指定 layer='XXX' がありません。"
 									u8"必ずレイヤー番号を指定してください: %s(%d)",
 									xml_name, xLayer->getLineNumber());
 								break;
 							}
-							int edgeLayerIndex = xLayer->findAttrInt("layer", -1);
+							int edgeLayerIndex = xLayer->getAttrInt("layer", -1);
 							if (edgeLayerIndex < 0 || edgepage->getLayerCount() <= edgeLayerIndex) {
 								KLog::printError(
 									u8"E_FILELOADER_EDGEANINODE: %s のページ [%d] にはレイヤー番号 %d が存在しません。"
@@ -4957,7 +4957,7 @@ public:
 		// 入力ファイル名
 		KPath source_name;
 		{
-			const char *file_str = xShader->findAttr("file");
+			const char *file_str = xShader->getAttrString("file");
 			if (file_str && file_str[0]) {
 				// パスを含めたファイル名を得る（データフォルダ内での相対パス）
 				// ※file_str は処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとする

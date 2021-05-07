@@ -95,7 +95,7 @@ public:
 	virtual const char * getAttrValue(int index) const override {
 		return m_Attrs[index].second.c_str();
 	}
-	virtual void setAttr(const char *name, const char *value) override {
+	virtual void setAttrString(const char *name, const char *value) override {
 		if (value == nullptr) { removeAttr(name); return; }
 		int index = findAttrByName(name);
 		if (index >= 0) {
@@ -323,20 +323,20 @@ int KXmlElement::indexOf(const KXmlElement *child) const {
 	}
 	return -1;
 }
-const char * KXmlElement::findAttr(const char *name, const char *def) const {
+const char * KXmlElement::getAttrString(const char *name, const char *def) const {
 	int i = findAttrByName(name);
 	return i>=0 ? getAttrValue(i) : def;
 }
-float KXmlElement::findAttrFloat(const char *name, float def) const {
-	const char *s = findAttr(name);
+float KXmlElement::getAttrFloat(const char *name, float def) const {
+	const char *s = getAttrString(name);
 	if (s == nullptr) return def;
 	char *err = 0;
 	float result = strtof(s, &err);
 	if (err==s || err[0]) return def;
 	return result;
 }
-int KXmlElement::findAttrInt(const char *name, int def) const {
-	const char *s = findAttr(name);
+int KXmlElement::getAttrInt(const char *name, int def) const {
+	const char *s = getAttrString(name);
 	if (s == nullptr) return def;
 	char *err = 0;
 	int result = strtol(s, &err, 0);
@@ -356,12 +356,12 @@ int KXmlElement::findAttrByName(const char *name, int start) const {
 void KXmlElement::setAttrInt(const char *name, int value) {
 	char s[32] = {0};
 	sprintf_s(s, sizeof(s), "%d", value);
-	setAttr(name, s);
+	setAttrString(name, s);
 }
 void KXmlElement::setAttrFloat(const char *name, float value) {
 	char s[32] = {0};
 	sprintf_s(s, sizeof(s), "%g", value);
-	setAttr(name, s);
+	setAttrString(name, s);
 }
 bool KXmlElement::removeChild(KXmlElement *node, bool in_tree) {
 	if (node == nullptr) return false;
@@ -455,7 +455,7 @@ void Test_xml() {
 	K__Verify(node1->getAttrCount() == 1);
 	K__Verify(strcmp(node1->getAttrName(0), "pi")==0);
 	K__Verify(strcmp(node1->getAttrValue(0), "314")==0);
-	K__Verify(node1->findAttrInt("pi") == 314);
+	K__Verify(node1->getAttrInt("pi") == 314);
 
 	KXmlElement *node2 = elm->getChild(1);
 	K__Verify(node2);

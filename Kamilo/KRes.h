@@ -713,9 +713,9 @@ struct SPRITE_ATTR {
 	void readFromXmlAttr(KXmlElement *elm) {
 		clear();
 
-		page = elm->findAttrInt("page", -1);
+		page = elm->getAttrInt("page", -1);
 
-		const char *blend_str = elm->findAttr("blend");
+		const char *blend_str = elm->getAttrString("blend");
 		if (blend_str) {
 			KBlend bl = KVideoUtils::strToBlend(blend_str, KBlend_INVALID);
 			if (bl != KBlend_INVALID) {
@@ -723,7 +723,7 @@ struct SPRITE_ATTR {
 				has_blend = true;
 			}
 		}
-		const char *px_str = elm->findAttr("pivotX");
+		const char *px_str = elm->getAttrString("pivotX");
 		if (px_str) {
 			KNumval numval(px_str);
 			pivot_x = numval.numf;
@@ -731,7 +731,7 @@ struct SPRITE_ATTR {
 			has_pivot_x = true;
 		}
 
-		const char *py_str = elm->findAttr("pivotY");
+		const char *py_str = elm->getAttrString("pivotY");
 		if (py_str) {
 			KNumval numval(py_str);
 			pivot_y = numval.numf;

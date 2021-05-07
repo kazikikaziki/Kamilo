@@ -277,10 +277,10 @@ public:
 
 		const KXmlElement *xPack = xml->findNode("pack");
 		if (xPack) {
-			m_cellsize = xPack->findAttrInt("cellsize");
+			m_cellsize = xPack->getAttrInt("cellsize");
 			K__Assert(m_cellsize > 0);
 
-			m_cellspace = xPack->findAttrInt("cellspace");
+			m_cellspace = xPack->getAttrInt("cellspace");
 			K__Assert(m_cellspace >= 0);
 
 			const KXmlElement *xExtra = xPack->findNode("extra");
@@ -290,24 +290,24 @@ public:
 
 			// <img w='250' h='305' offset='0' numcells='217' page='0' layer='0' blend='-1' data0='0'>6 7 8 21 22 23 24 25 37 38 39 40 41 53 54 55 56 57 69 70 71 72</img>
 			int cellarea = m_cellsize + m_cellspace * 2; // 1セルのために必要なサイズ。余白が設定されている場合はそれも含む
-			int numimages = xPack->findAttrInt("numimages");
+			int numimages = xPack->getAttrInt("numimages");
 			for (int i=0; i<xPack->getChildCount(); i++) {
 				const KXmlElement *xImg = xPack->getChild(i);
 				if (!xImg->hasTag("img")) continue;
 
-				int w = xImg->findAttrInt("w");
-				int h = xImg->findAttrInt("h");
+				int w = xImg->getAttrInt("w");
+				int h = xImg->getAttrInt("h");
 
 				KImgPackItem item;
-				item.pack_offset = xImg->findAttrInt("offset");
+				item.pack_offset = xImg->getAttrInt("offset");
 				item.img = KImage::createFromSize(w, h);
 				item.xcells  = w / cellarea;
 				item.ycells  = h / cellarea;
-				item.extra.page  = xImg->findAttrInt("page");
-				item.extra.layer = xImg->findAttrInt("layer");
-				item.extra.blend = xImg->findAttrInt("blend", -1); // KBlendのデフォルト値は -1 (KBlend_INVALID) であることに注意
-				item.extra.data0 = xImg->findAttrInt("data0");
-				int numcells = xImg->findAttrInt("numcells");
+				item.extra.page  = xImg->getAttrInt("page");
+				item.extra.layer = xImg->getAttrInt("layer");
+				item.extra.blend = xImg->getAttrInt("blend", -1); // KBlendのデフォルト値は -1 (KBlend_INVALID) であることに注意
+				item.extra.data0 = xImg->getAttrInt("data0");
+				int numcells = xImg->getAttrInt("numcells");
 
 				// 空白区切りでセル番号が列挙してある
 				const char *text = xImg->getText(""); // ascii 文字だけだとわかりきっているので、文字列コード考慮しない

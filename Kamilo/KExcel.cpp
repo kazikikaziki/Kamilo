@@ -128,13 +128,13 @@ public:
 		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			if (idx == sheetId) {
-				const char *s = xSheet->findAttr("name");
+				const char *s = xSheet->getAttrString("name");
 				#ifdef _DEBUG
 				{
 					// <sheet> の sheetId には１起算のシート番号が入っていて、
 					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
 					// 一応整合性を確認しておく
-					int id = xSheet->findAttrInt("sheetId", -1);
+					int id = xSheet->getAttrInt("sheetId", -1);
 					K__Assert(id == 1 + idx);
 				}
 				#endif
@@ -154,14 +154,14 @@ public:
 		int idx = 0;
 		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
-			const char *name_u8 = xSheet->findAttr("name");
+			const char *name_u8 = xSheet->getAttrString("name");
 			if (name_u8 && strcmp(name, name_u8) == 0) {
 				#ifdef _DEBUG
 				{
 					// <sheet> の sheetId には１起算のシート番号が入っていて、
 					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
 					// 一応整合性を確認しておく
-					int id = xSheet->findAttrInt("sheetId", -1);
+					int id = xSheet->getAttrInt("sheetId", -1);
 					K__Assert(id == 1 + idx);
 				}
 				#endif
@@ -186,7 +186,7 @@ public:
 
 		// セルの定義範囲を表す文字列を取得する
 		// この文字列は "A1:E199" のようにコロンで左上端セルと右下端セル番号が書いてある
-		const char *attr = xdim->findAttr("ref");
+		const char *attr = xdim->getAttrString("ref");
 
 		// コロンを区切りにして分割
 		char tmp[256];
@@ -257,7 +257,7 @@ public:
 		// 見つかったセルの行列番号を得る
 		int icol = -1;
 		int irow = -1;
-		const char *r = c_xml->findAttr("r");
+		const char *r = c_xml->getAttrString("r");
 		parse_cell_position(r, &icol, &irow);
 
 		if (icol >= 0 && irow >= 0) {
@@ -442,7 +442,7 @@ private:
 				const KXmlElement *xCell = xRow->getChild(c);
 				if (!xCell->hasTag("c")) continue;
 
-				const char *pos = xCell->findAttr("r");
+				const char *pos = xCell->getAttrString("r");
 				int cidx = -1;
 				int ridx = -1;
 				if (parse_cell_position(pos, &cidx, &ridx)) {
@@ -487,7 +487,7 @@ private:
 		// キャッシュから見つからないなら、キャッシュを作りつつ目的のデータを探す
 		const KXmlElement *ret = nullptr;
 		for (const KXmlElement *it=sheet_xml->findNode("row"); it!=nullptr; it=sheet_xml->findNode("row", it)) {
-			int val = it->findAttrInt("r");
+			int val = it->getAttrInt("r");
 			if (val >= 1) {
 				int r = val - 1;
 				m_RowElements[sheet_xml][r] = it;
@@ -507,7 +507,7 @@ private:
 			const KXmlElement *c_elm = row_xml->getChild(c);
 			if (!c_elm->hasTag("c")) continue;
 
-			const char *s = c_elm->findAttr("r");
+			const char *s = c_elm->getAttrString("r");
 			int col_idx = -1;
 			parse_cell_position(s, &col_idx, nullptr);
 			if (col_idx == col) {
@@ -527,7 +527,7 @@ private:
 		// </c>
 
 		// データ型
-		const char *t = cell_xml->findAttr("t");
+		const char *t = cell_xml->getAttrString("t");
 		if (t == nullptr) return nullptr;
 
 		if (strcmp(t, "n") == 0) {

@@ -92,7 +92,7 @@ bool KNamedValues::loadFromXml(KXmlElement *elm, bool pack_in_attr) {
 		// <XXX name="AAA">BBB</XXX>/>
 		for (int i=0; i<elm->getChildCount(); i++) {
 			KXmlElement *xItem = elm->getChild(i);
-			const char *key = xItem->findAttr("name");
+			const char *key = xItem->getAttrString("name");
 			const char *val = xItem->getText();
 			if (key && val) {
 				setString(key, val);
@@ -106,14 +106,14 @@ void KNamedValues::saveToXml(KXmlElement *elm, bool pack_in_attr) const {
 		for (int i=0; i<size(); i++) {
 			const char *n = getName(i);
 			const char *v = getString(i);
-			elm->setAttr(n, v);
+			elm->setAttrString(n, v);
 		}
 	} else {
 		for (int i=0; i<size(); i++) {
 			const char *n = getName(i);
 			const char *v = getString(i);
 			KXmlElement *xPair = elm->addChild("Pair");
-			xPair->setAttr("name", n);
+			xPair->setAttrString("name", n);
 			xPair->setText(v);
 		}
 	}

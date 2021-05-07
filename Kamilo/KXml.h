@@ -35,7 +35,15 @@ public:
 	virtual int getAttrCount() const = 0;
 	virtual const char * getAttrName(int index) const = 0;
 	virtual const char * getAttrValue(int index) const = 0;
-	virtual void setAttr(const char *name, const char *value) = 0;
+
+	const char * getAttrString(const char *name, const char *def=nullptr) const;
+	float getAttrFloat(const char *name, float def=0.0f) const;
+	int getAttrInt(const char *name, int def=0) const;
+
+	virtual void setAttrString(const char *name, const char *value) = 0;
+	void setAttrInt(const char *name, int value);
+	void setAttrFloat(const char *name, float value);
+
 	virtual void removeAttr(const char *name) = 0;
 
 	virtual const char * getText(const char *def=nullptr) const = 0;
@@ -59,12 +67,7 @@ public:
 	int findAttrByName(const char *name, int start=0) const;
 	int findChildByTag(const char *tag, int start=0) const;
 
-	const char * findAttr(const char *name, const char *def=nullptr) const;
-	float findAttrFloat(const char *name, float def=0.0f) const;
-	int findAttrInt(const char *name, int def=0) const;
 
-	void setAttrInt(const char *name, int value);
-	void setAttrFloat(const char *name, float value);
 	const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const;
 	KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr);
 	const KXmlElement * _findnode_const(const char *tag, const KXmlElement *start=nullptr) const;
