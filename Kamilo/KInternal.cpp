@@ -193,91 +193,9 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc) {
-	// ワイド文字列からマルチバイト文字列へ変換する。
-	// 変換後の文字列を格納するために必要なバイト数（終端文字を含む）を返す
-	// この関数は末尾のヌル文字も出力してそれを含めた長さを返すため、文字列長さ＋１のバッファを確保する必要がある
-	// エラーなどで何も出力できない場合は 0 を返す
-	// 空文字列を生成した場合は 1 を返す
-	K__Assert(ws);
-	K__Assert(loc);
-	if (K_USE_WCSTOMBS_SAFE) {
-		// ヌル文字含む長さ
-		// _wcstombs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
-		size_t len_bytes = 0; // ヌル文字含む長さ
-		_wcstombs_s_l(&len_bytes, out_ansi, max_out_bytes, ws, _TRUNCATE, loc); // 必要なサイズを問い合わせるなら out_ansi = nullptr にする
-		return (int)len_bytes; // [0=ERR] [1=EMPTY STRING] [>=2 OK]
-
-	} else {
-		if (out_ansi && max_out_bytes>0) {
-			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
-			int new_strlen = (int)_wcstombs_l(out_ansi, ws, max_out_bytes, loc);
-			K__Assert(new_strlen <= max_out_bytes);
-			if (new_strlen == max_out_bytes) {
-				out_ansi[new_strlen-1] = '\0';
-				return max_out_bytes;
-			} else {
-				return new_strlen + 1; // with null terminator
-			}
-
-		} else {
-			int req_strlen = (int)_wcstombs_l(nullptr, ws, 0, loc);
-			return req_strlen + 1; // with null terminator
-		}
-	}
-}
 
 
 
-int K__AnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc) {
-	// マルチバイト文字列からワイド文字列へ変換する。変換後の文字数（終端文字を含まない）を返す
-	// ※変換できない場合でもエラーメッセージやログを出さない。
-	// 　文字を変換するためではなく、「変換できるかどうかの確認」のために呼ばれる場合があるため。
-	K__Assert(ansi);
-	K__Assert(loc);
-	if (K_USE_MBSTOWCS_SAFE) {
-		// ヌル文字含む長さ
-		// _mbstowcs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
-		size_t len_wchars = 0;
-		_mbstowcs_s_l(&len_wchars, out_wide, max_out_wchars, ansi, _TRUNCATE, loc); // 必要なサイズを問い合わせるなら out_wide = nullptr にする
-		return (int)len_wchars; // [0=ERR] [1=EMPTY STRING] [>=2 OK]
-	
-	} else {
-		if (out_wide && max_out_wchars>0) {
-			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
-			int new_wcslen = (int)_mbstowcs_l(out_wide, ansi, max_out_wchars, loc);
-			K__Assert(new_wcslen <= max_out_wchars);
-			if (new_wcslen == max_out_wchars) {
-				out_wide[new_wcslen-1] = '\0';
-				return max_out_wchars;
-			} else {
-				return new_wcslen + 1; // with null terminator
-			}
-		} else {
-			int req_wcslen = (int)_mbstowcs_l(nullptr, ansi, 0, loc);
-			return req_wcslen + 1; // with null terminator
-		}
-	}
-}
-
-
-/// ANSI文字列からワイド文字への変換
-/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
-/// ロケール引数については K_StrWideToAnsi を参照
-/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
-int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
-	K__Assert(ansi);
-	K__Assert(_locale);
-	int num_wchars = 0;
-	_locale_t loc = _create_locale(LC_CTYPE, _locale);
-	if (loc) {
-		num_wchars = K__AnsiToWideL(out_wide, max_out_wchars, ansi, loc);
-		_free_locale(loc);
-	} else {
-		K__Error("INVALID_LOCALE '%s' at K__AnsiToWide", _locale);
-	}
-	return num_wchars; // 0=ERROR
-}
 
 
 
@@ -827,12 +745,45 @@ int K::strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const
 	int num_bytes = 0;
 	_locale_t loc = _create_locale(LC_CTYPE, _locale);
 	if (loc) {
-		num_bytes = K__WideToAnsiL(out_ansi, max_out_bytes, ws, loc);
+		num_bytes = strWideToAnsiL(out_ansi, max_out_bytes, ws, loc);
 		_free_locale(loc);
 	} else {
 		K__Error("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
 	}
 	return num_bytes; // 0=ERROR
+}
+int K::strWideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc) {
+	// ワイド文字列からマルチバイト文字列へ変換する。
+	// 変換後の文字列を格納するために必要なバイト数（終端文字を含む）を返す
+	// この関数は末尾のヌル文字も出力してそれを含めた長さを返すため、文字列長さ＋１のバッファを確保する必要がある
+	// エラーなどで何も出力できない場合は 0 を返す
+	// 空文字列を生成した場合は 1 を返す
+	K__Assert(ws);
+	K__Assert(loc);
+	if (K_USE_WCSTOMBS_SAFE) {
+		// ヌル文字含む長さ
+		// _wcstombs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
+		size_t len_bytes = 0; // ヌル文字含む長さ
+		_wcstombs_s_l(&len_bytes, out_ansi, max_out_bytes, ws, _TRUNCATE, loc); // 必要なサイズを問い合わせるなら out_ansi = nullptr にする
+		return (int)len_bytes; // [0=ERR] [1=EMPTY STRING] [>=2 OK]
+
+	} else {
+		if (out_ansi && max_out_bytes>0) {
+			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
+			int new_strlen = (int)_wcstombs_l(out_ansi, ws, max_out_bytes, loc);
+			K__Assert(new_strlen <= max_out_bytes);
+			if (new_strlen == max_out_bytes) {
+				out_ansi[new_strlen-1] = '\0';
+				return max_out_bytes;
+			} else {
+				return new_strlen + 1; // with null terminator
+			}
+
+		} else {
+			int req_strlen = (int)_wcstombs_l(nullptr, ws, 0, loc);
+			return req_strlen + 1; // with null terminator
+		}
+	}
 }
 
 std::string K::strWideToAnsi(const std::wstring &ws, const char *_locale) {
@@ -852,14 +803,14 @@ std::string K::strWideToAnsi(const std::wstring &ws, const char *_locale) {
 
 std::wstring K::strAnsiToWide(const std::string &ansi, const char *_locale) {
 	std::wstring ws;
-	int req_wchars = K__AnsiToWide(nullptr, 0, ansi.c_str(), _locale);
+	int req_wchars = strAnsiToWide(nullptr, 0, ansi.c_str(), _locale);
 	// 変換後のバイト数（終端文字含む）
 	// req_wchars = 0: エラー
 	// req_wchars = 1: 空文字列なので終端文字のみ
 	// req_wchars > 1: 変換済み
 	if (req_wchars > 0) {
-		ws.resize(req_wchars); // K__AnsiToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
-		K__AnsiToWide(&ws[0], ws.size(), ansi.c_str(), _locale);
+		ws.resize(req_wchars); // strAnsiToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
+		strAnsiToWide(&ws[0], ws.size(), ansi.c_str(), _locale);
 		ws.resize(wcslen(ws.c_str())); // 終端文字を含まないサイズにする
 	}
 	return ws;
@@ -871,6 +822,56 @@ std::string K::strAnsiToUtf8(const std::string &ansi, const char *_locale) {
 std::string K::strUtf8ToAnsi(const std::string &u8, const char *_locale) {
 	std::wstring ws = strUtf8ToWide(u8);
 	return strWideToAnsi(ws, _locale);
+}
+
+int K::strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc) {
+	// マルチバイト文字列からワイド文字列へ変換する。変換後の文字数（終端文字を含まない）を返す
+	// ※変換できない場合でもエラーメッセージやログを出さない。
+	// 　文字を変換するためではなく、「変換できるかどうかの確認」のために呼ばれる場合があるため。
+	K__Assert(ansi);
+	K__Assert(loc);
+	if (K_USE_MBSTOWCS_SAFE) {
+		// ヌル文字含む長さ
+		// _mbstowcs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
+		size_t len_wchars = 0;
+		_mbstowcs_s_l(&len_wchars, out_wide, max_out_wchars, ansi, _TRUNCATE, loc); // 必要なサイズを問い合わせるなら out_wide = nullptr にする
+		return (int)len_wchars; // [0=ERR] [1=EMPTY STRING] [>=2 OK]
+	
+	} else {
+		if (out_wide && max_out_wchars>0) {
+			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
+			int new_wcslen = (int)_mbstowcs_l(out_wide, ansi, max_out_wchars, loc);
+			K__Assert(new_wcslen <= max_out_wchars);
+			if (new_wcslen == max_out_wchars) {
+				out_wide[new_wcslen-1] = '\0';
+				return max_out_wchars;
+			} else {
+				return new_wcslen + 1; // with null terminator
+			}
+		} else {
+			int req_wcslen = (int)_mbstowcs_l(nullptr, ansi, 0, loc);
+			return req_wcslen + 1; // with null terminator
+		}
+	}
+}
+
+
+/// ANSI文字列からワイド文字への変換
+/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
+/// ロケール引数については K_StrWideToAnsi を参照
+/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
+int K::strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
+	K__Assert(ansi);
+	K__Assert(_locale);
+	int num_wchars = 0;
+	_locale_t loc = _create_locale(LC_CTYPE, _locale);
+	if (loc) {
+		num_wchars = strAnsiToWideL(out_wide, max_out_wchars, ansi, loc);
+		_free_locale(loc);
+	} else {
+		K__Error("INVALID_LOCALE '%s' at K__AnsiToWide", _locale);
+	}
+	return num_wchars; // 0=ERROR
 }
 
 #pragma endregion // string

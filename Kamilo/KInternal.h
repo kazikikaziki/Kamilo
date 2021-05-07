@@ -66,13 +66,7 @@ std::string K__Win32GetErrorStringStd(long hr);
 //----------------------------------------------------
 
 
-// wide ==> ansi
-int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc);
-
 // ansi ==> wide
-int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale);
-int K__AnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc);
-
 void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8);
 void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath);
 
@@ -151,12 +145,15 @@ public:
 	static int strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes);
 	static int strWideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
 	static int strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale);
+	static int strWideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc);
 	static std::wstring strUtf8ToWide(const std::string &u8);
 	static std::string strWideToUtf8(const std::wstring &ws);
 	static std::string strWideToAnsi(const std::wstring &ws, const char *_locale);
 	static std::wstring strAnsiToWide(const std::string &ansi, const char *_locale);
 	static std::string strAnsiToUtf8(const std::string &ansi, const char *_locale);
 	static std::string strUtf8ToAnsi(const std::string &u8, const char *_locale);
+	static int strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale);
+	static int strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc);
 
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }

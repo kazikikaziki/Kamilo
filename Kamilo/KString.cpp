@@ -845,7 +845,7 @@ int KStringUtils::wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *w
 	return K::strWideToAnsi(out_ansi, max_out_bytes, ws, _locale);
 }
 int KStringUtils::ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
-	return K__AnsiToWide(out_wide, max_out_wchars, ansi, _locale);
+	return K::strAnsiToWide(out_wide, max_out_wchars, ansi, _locale);
 }
 int KStringUtils::wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
 	return K::strWideToUtf8(out_u8, max_out_bytes, ws);
