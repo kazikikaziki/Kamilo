@@ -232,10 +232,7 @@ void KNamedValues::setUInt(const char *name, unsigned int value) {
 }
 bool KNamedValues::queryUInt(const char *name, unsigned int *outValue) const {
 	const char *s = getString(name);
-	if (s && KStringUtils::toUintTry(s, outValue)) {
-		return true;
-	}
-	return false;
+	return K::strToUInt32(s, outValue);
 }
 int KNamedValues::getUInt(const char *name, unsigned int defaultValue) const {
 	unsigned int result = defaultValue;

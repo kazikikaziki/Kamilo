@@ -22,41 +22,6 @@ static const int   K_UTF8BOM_LEN = 3;
 
 class KStringUtils {
 public:
-	/// ワイド文字からUTF8への変換
-	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
-	static int wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
-
-	/// UTF8からワイド文字への変換
-	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
-	static int utf8ToWide(wchar_t *out_wide, int max_out_wchars, const char *u8);
-
-	/// ワイド文字列をANSI文字列に変換する
-	/// @return 変換後のワイド文字数（終端文字を含む）
-	///
-	/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
-	///
-	/// @param ws 入力ワイド文字列
-	/// @param out_ansi  得られたANSI文字列
-	/// @param max_out_bytes  取得する文字列の最大バイト数（終端文字含む）
-	/// @param _locale   ロケール識別子。空文字列 "" を指定した場合は現在のシステムロケールを使う
-	/// @return 変換後の文字バイト数（終端文字含まず）
-	///
-	/// ロケール識別子の正式な形は "language[_region[.codepage]]" となっていて、
-	/// 日本語向けなら "jpn" や "japanese", "japanese_japan.932" などと指定する（大小文字は区別しない）。
-	/// ロケール識別子については標準関数の setlocale の解説を参照すること
-	/// @see https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/locale-names-languages-and-country-region-strings
-	///
-	static int wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale="");
-
-	/// ANSI文字列からワイド文字への変換
-	/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
-	/// ロケール引数については K_StrWideToAnsi を参照
-	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
-	static int ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale="");
-
-	static void ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale="");
-	static void utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale="");
-
 	static std::wstring binToWide(const void *data, int size);
 
 	/// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。

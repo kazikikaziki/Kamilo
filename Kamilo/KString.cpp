@@ -841,27 +841,6 @@ bool KString::operator != (const KString &s) const {
 
 #pragma region KStringUtils
 
-int KStringUtils::wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
-	return K::strWideToAnsi(out_ansi, max_out_bytes, ws, _locale);
-}
-int KStringUtils::ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
-	return K::strAnsiToWide(out_wide, max_out_wchars, ansi, _locale);
-}
-int KStringUtils::wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
-	return K::strWideToUtf8(out_u8, max_out_bytes, ws);
-}
-int KStringUtils::utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8) {
-	return K::strUtf8ToWide(out_ws, max_out_widechars, u8, 0);
-}
-void KStringUtils::ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale) {
-	std::wstring ws = K::strAnsiToWide(ansi, _locale);
-	K::strWideToUtf8(u8, size, ws.c_str());
-}
-void KStringUtils::utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale) {
-	std::wstring ws = K::strUtf8ToWide(u8);
-	K::strWideToAnsi(ansi, size, ws.c_str(), _locale);
-}
-
 std::wstring KStringUtils::binToWide(const void *data, int size) {
 	// エンコード不明の文字列からワイド文字列を得る
 	// あくまでも日本語前提なので、ここでは SJIS または UTF8 が使われていると仮定する
@@ -1141,31 +1120,31 @@ void Test_str() {
 		int len = 0;
 
 		// Wide --> Utf8
-		KStringUtils::wideToUtf8(u8, sizeof(u8), test_ws); // 変換する
+		K::strWideToUtf8(u8, sizeof(u8), test_ws); // 変換する
 		K__Verify(strcmp(test_u8, u8) == 0);
 
 		// Utf8 --> Wide
-		KStringUtils::utf8ToWide(ws, sizeof(ws)/sizeof(wchar_t), test_u8); // 変換する
+		K::strUtf8ToWide(ws, sizeof(ws)/sizeof(wchar_t), test_u8, 0); // 変換する
 		K__Verify(wcscmp(test_ws, ws) == 0);
 
 		// Wide --> Ansi (SJIS)
-		KStringUtils::wideToAnsi(mb, sizeof(mb), test_ws, "jpn"); // 変換する
+		K::strWideToAnsi(mb, sizeof(mb), test_ws, "jpn"); // 変換する
 		K__Verify(strcmp(test_mb, mb) == 0);
 
 		// Wide --> Ansi (SJIS)
-		KStringUtils::wideToAnsi(mb, sizeof(mb), test_ws, "japanese"); // 変換する
+		K::strWideToAnsi(mb, sizeof(mb), test_ws, "japanese"); // 変換する
 		K__Verify(strcmp(test_mb, mb) == 0);
 
 		// Wide --> Ansi (SJIS)
-		KStringUtils::wideToAnsi(mb, sizeof(mb), test_ws, "japanese_japan.932"); // 変換する
+		K::strWideToAnsi(mb, sizeof(mb), test_ws, "japanese_japan.932"); // 変換する
 		K__Verify(strcmp(test_mb, mb) == 0);
 
 		// バッファ長さを超えた場合でも必ず終端文字が入る
-		K__Verify(KStringUtils::wideToUtf8(nullptr, 0, L"ABCD_") >= 5+1); // 終端文字を含めたサイズ以上の値を返す
-		K__Verify(KStringUtils::wideToUtf8(nullptr, 0, L"") >= 0+1); // 終端文字を含めたサイズ以上の値を返す
+		K__Verify(K::strWideToUtf8(nullptr, 0, L"ABCD_") >= 5+1); // 終端文字を含めたサイズ以上の値を返す
+		K__Verify(K::strWideToUtf8(nullptr, 0, L"") >= 0+1); // 終端文字を含めたサイズ以上の値を返す
 		{
 			char s[4] = {'\xff', '\xff', '\xff', '\xff'};
-			K__Verify(KStringUtils::wideToUtf8(s, 4, L"ABCD") == 0); // バッファが足りないのでエラーになる
+			K__Verify(K::strWideToUtf8(s, 4, L"ABCD") == 0); // バッファが足りないのでエラーになる
 		}
 
 		char lc[256];
@@ -1174,7 +1153,7 @@ void Test_str() {
 			setlocale(LC_CTYPE, "JPN");
 
 			// Wide --> Ansi (Current Locale)
-			KStringUtils::ansiToWide(ws, sizeof(ws)/sizeof(wchar_t), test_mb, "");
+			K::strAnsiToWide(ws, sizeof(ws)/sizeof(wchar_t), test_mb, "");
 			K__Verify(wcscmp(test_ws, ws) == 0);
 		}
 		setlocale(LC_CTYPE, lc);
@@ -1419,7 +1398,7 @@ bool KPathUtils::K_PathGetFullPath(char *out_path, int out_size, const char *pat
 	K__Utf8ToWidePath(wpath, KPathUtils::MAX_SIZE, path_u8);
 	if (_wfullpath(wfull, wpath, KPathUtils::MAX_SIZE)) {
 		K::strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
-		KStringUtils::wideToUtf8(out_path, out_size, wfull);
+		K::strWideToUtf8(out_path, out_size, wfull);
 		return true;
 	}
 	return false;
@@ -2933,9 +2912,8 @@ void Test_numval() {
 
 #pragma region KCommandLineArgs
 KCommandLineArgs::KCommandLineArgs(const char *cmdline) {
-	char u8[1024] = {0};
-	KStringUtils::ansiToUtf8(u8, sizeof(u8), cmdline);
-	m_tok.tokenize(u8, "/, ");
+	std::string u8 = K::strAnsiToUtf8(cmdline, "");
+	m_tok.tokenize(u8.c_str(), "/, ");
 }
 int KCommandLineArgs::size() const {
 	return m_tok.size();
