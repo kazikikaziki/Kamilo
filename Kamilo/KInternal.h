@@ -66,14 +66,7 @@ std::string K__Win32GetErrorStringStd(long hr);
 //----------------------------------------------------
 
 
-// utf8 ==> wide
-int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes);
-
-// wide ==> utf8
-int K__WideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
-
 // wide ==> ansi
-int K__WideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale);
 int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale_t loc);
 
 // ansi ==> wide
@@ -155,6 +148,9 @@ public:
 	static bool str_iswgraph(wchar_t wc);
 	static bool str_iswblank(wchar_t wc);
 	static bool str_iswhalf(wchar_t wc);
+	static int strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes);
+	static int strWideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
+	static int strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale);
 	static std::wstring strUtf8ToWide(const std::string &u8);
 	static std::string strWideToUtf8(const std::wstring &ws);
 	static std::string strWideToAnsi(const std::wstring &ws, const char *_locale);

@@ -224,7 +224,7 @@ public:
 			}
 			ws[name_len] = '\0';
 		}
-		K__WideToUtf8(out_u8, out_size, ws);
+		K::strWideToUtf8(out_u8, out_size, ws);
 		return name_bytes > 0;
 	}
 

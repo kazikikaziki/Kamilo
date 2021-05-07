@@ -188,34 +188,8 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-// utf8 から wide に変換する
-// out_ws に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す
-// out_ws または max_out_widechars が 0 の場合は変換後の文字数（終端文字を含む）を返す
-// ※BOMは取り除かれる
-int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes) {
-	if (u8bytes <= 0) u8bytes = strlen(u8);
-	const char *u8str = u8;
-	if (K::strStartsWithBom(u8, u8bytes)) { // BOMをスキップする
-		u8str = K::strSkipBom(u8);
-		u8bytes -= K__UTF8BOM_LEN;
-	}
-	return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, u8str, u8bytes, out_ws, max_out_widechars);
-}
 
 
-// wide から utf8 に変換する
-// out_u8 に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す
-// out_u8 または max_out_bytes を 0 にした場合は変換後の文字列を格納するために必要なバイト数を返す（末尾文字を含む）
-int K__WideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
-	// WideCharToMultiByte の戻り値を信用しない
-	// http://blog.livedoor.jp/blackwingcat/archives/976097.html
-	// WideCharToMultiByte は終端文字を「含む」全体のバイト数を返す
-	// エラーの場合は 0 になる
-	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws, -1, out_u8, max_out_bytes, nullptr, nullptr);
-	if (len == 0) return 0; // FAIL
-	if (out_u8 && max_out_bytes > 0) return strlen(out_u8) + 1; // 終端文字を含むバイト数
-	return len + 32; // 指示されたサイズよりも少し大きめの値を返すようにする
-}
 
 
 
@@ -252,20 +226,6 @@ int K__WideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _locale
 		}
 	}
 }
-// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
-int K__WideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
-	K__Assert(ws);
-	K__Assert(_locale);
-	int num_bytes = 0;
-	_locale_t loc = _create_locale(LC_CTYPE, _locale);
-	if (loc) {
-		num_bytes = K__WideToAnsiL(out_ansi, max_out_bytes, ws, loc);
-		_free_locale(loc);
-	} else {
-		K__Error("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
-	}
-	return num_bytes; // 0=ERROR
-}
 
 
 
@@ -300,7 +260,11 @@ int K__AnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _loc
 	}
 }
 
-// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
+
+/// ANSI文字列からワイド文字への変換
+/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
+/// ロケール引数については K_StrWideToAnsi を参照
+/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
 int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
 	K__Assert(ansi);
 	K__Assert(_locale);
@@ -322,11 +286,11 @@ int K__AnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const
 
 void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) {
 	// windows形式のパスに変換する
-	K__Utf8ToWide(out_wpath, num_wchars, path_u8, 0);
+	K::strUtf8ToWide(out_wpath, num_wchars, path_u8, 0);
 	K::strReplaceChar(out_wpath, K__PATH_SLASHW, K__PATH_BACKSLASHW);
 }
 void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) {
-	K__WideToUtf8(out_path_u8, num_bytes, wpath);
+	K::strWideToUtf8(out_path_u8, num_bytes, wpath);
 	K::strReplaceChar(out_path_u8, K__PATH_BACKSLASH, K__PATH_SLASH);
 }
 
@@ -784,6 +748,20 @@ bool K::str_iswhalf(wchar_t wc) {
 }
 
 // utf8 から wide に変換する
+// out_ws に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す
+// out_ws または max_out_widechars が 0 の場合は変換後の文字数（終端文字を含む）を返す
+// ※BOMは取り除かれる
+int K::strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes) {
+	if (u8bytes <= 0) u8bytes = strlen(u8);
+	const char *u8str = u8;
+	if (strStartsWithBom(u8, u8bytes)) { // BOMをスキップする
+		u8str = strSkipBom(u8);
+		u8bytes -= K__UTF8BOM_LEN;
+	}
+	return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, u8str, u8bytes, out_ws, max_out_widechars);
+}
+
+// utf8 から wide に変換する
 // ※BOMは取り除かれる
 std::wstring K::strUtf8ToWide(const std::string &u8) {
 	const char *s = K::strSkipBom(u8.c_str()); // BOMをスキップする
@@ -804,6 +782,20 @@ std::wstring K::strUtf8ToWide(const std::string &u8) {
 }
 
 // wide から utf8 に変換する
+// out_u8 に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す
+// out_u8 または max_out_bytes を 0 にした場合は変換後の文字列を格納するために必要なバイト数を返す（末尾文字を含む）
+int K::strWideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
+	// WideCharToMultiByte の戻り値を信用しない
+	// http://blog.livedoor.jp/blackwingcat/archives/976097.html
+	// WideCharToMultiByte は終端文字を「含む」全体のバイト数を返す
+	// エラーの場合は 0 になる
+	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws, -1, out_u8, max_out_bytes, nullptr, nullptr);
+	if (len == 0) return 0; // FAIL
+	if (out_u8 && max_out_bytes > 0) return strlen(out_u8) + 1; // 終端文字を含むバイト数
+	return len + 32; // 指示されたサイズよりも少し大きめの値を返すようにする
+}
+
+// wide から utf8 に変換する
 std::string K::strWideToUtf8(const std::wstring &ws) {
 	std::string u8;
 	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
@@ -813,16 +805,46 @@ std::string K::strWideToUtf8(const std::wstring &ws) {
 	return u8;
 }
 
+/// ワイド文字列をANSI文字列に変換する
+/// @return 変換後のワイド文字数（終端文字を含む）
+///
+/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
+///
+/// @param ws 入力ワイド文字列
+/// @param out_ansi  得られたANSI文字列
+/// @param max_out_bytes  取得する文字列の最大バイト数（終端文字含む）
+/// @param _locale   ロケール識別子。空文字列 "" を指定した場合は現在のシステムロケールを使う
+/// @return 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
+///
+/// ロケール識別子の正式な形は "language[_region[.codepage]]" となっていて、
+/// 日本語向けなら "jpn" や "japanese", "japanese_japan.932" などと指定する（大小文字は区別しない）。
+/// ロケール識別子については標準関数の setlocale の解説を参照すること
+/// @see https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/locale-names-languages-and-country-region-strings
+///
+int K::strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
+	K__Assert(ws);
+	K__Assert(_locale);
+	int num_bytes = 0;
+	_locale_t loc = _create_locale(LC_CTYPE, _locale);
+	if (loc) {
+		num_bytes = K__WideToAnsiL(out_ansi, max_out_bytes, ws, loc);
+		_free_locale(loc);
+	} else {
+		K__Error("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
+	}
+	return num_bytes; // 0=ERROR
+}
+
 std::string K::strWideToAnsi(const std::wstring &ws, const char *_locale) {
 	std::string mb;
-	int req_bytes = K__WideToAnsi(nullptr, 0, ws.c_str(), _locale);
+	int req_bytes = strWideToAnsi(nullptr, 0, ws.c_str(), _locale);
 	// 変換後のバイト数（終端文字含む）
 	// req_bytes = 0: エラー
 	// req_bytes = 1: 空文字列なので終端文字のみ
 	// req_bytes > 1: 変換済み
 	if (req_bytes > 0) {
-		mb.resize(req_bytes); // K__WideToAnsi は終端文字も書き込むことに注意。req_bytesは終端文字を含んだサイズである
-		K__WideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
+		mb.resize(req_bytes); // strWideToAnsi は終端文字も書き込むことに注意。req_bytesは終端文字を含んだサイズである
+		strWideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
 		mb.resize(strlen(mb.c_str())); // 終端文字を含まないサイズにする
 	}
 	return mb;
@@ -836,7 +858,7 @@ std::wstring K::strAnsiToWide(const std::string &ansi, const char *_locale) {
 	// req_wchars = 1: 空文字列なので終端文字のみ
 	// req_wchars > 1: 変換済み
 	if (req_wchars > 0) {
-		ws.resize(req_wchars); // K__Utf8ToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
+		ws.resize(req_wchars); // K__AnsiToWide は終端文字も書き込む。req_wchars は終端文字を含んだ文字数であることに注意
 		K__AnsiToWide(&ws[0], ws.size(), ansi.c_str(), _locale);
 		ws.resize(wcslen(ws.c_str())); // 終端文字を含まないサイズにする
 	}
@@ -896,12 +918,9 @@ void K__Dialog(const char *u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
-	const int MAX_DIALOG_STR = 1024 * 4;
+	std::wstring ws = K::strUtf8ToWide(u8);
 
-	wchar_t ws[MAX_DIALOG_STR] = {0};
-	K__Utf8ToWide(ws, MAX_DIALOG_STR, u8, 0);
-
-	int btn = MessageBoxW(nullptr, ws, PathFindFileNameW(wpath), MB_ICONSTOP|MB_ABORTRETRYIGNORE);
+	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONSTOP|MB_ABORTRETRYIGNORE);
 	if (btn == IDABORT) {
 		K__Exit();
 	}
@@ -913,12 +932,9 @@ void K__Notify(const char *u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
-	const int MAX_DIALOG_STR = 1024 * 4;
+	std::wstring ws= K::strUtf8ToWide(u8);
 
-	wchar_t ws[MAX_DIALOG_STR] = {0};
-	K__Utf8ToWide(ws, MAX_DIALOG_STR, u8, 0);
-
-	int btn = MessageBoxW(nullptr, ws, PathFindFileNameW(wpath), MB_ICONINFORMATION|MB_OK);
+	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONINFORMATION|MB_OK);
 	if (btn == IDABORT) {
 		K__Exit();
 	}

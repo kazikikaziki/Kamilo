@@ -92,9 +92,9 @@ std::string KStringView::toStdString() const {
 }
 std::wstring KStringView::toWide() const {
 #if 1
-	int len = K__Utf8ToWide(nullptr, 0, mStr, mLen);
+	int len = K::strUtf8ToWide(nullptr, 0, mStr, mLen);
 	std::wstring ws(len + 32, 0);
-	K__Utf8ToWide(&ws[0], ws.size(), mStr, mLen);
+	K::strUtf8ToWide(&ws[0], ws.size(), mStr, mLen);
 	ws.resize(wcslen(ws.c_str())); // ws.size が正しい文字列長さを返すように調整する
 	return ws;
 #else
@@ -105,9 +105,9 @@ std::wstring KStringView::toWide() const {
 std::string KStringView::toAnsi(const char *_locale) const {
 #if 1
 	std::wstring ws = toWide();
-	int len = K__WideToAnsi(nullptr, 0, ws.c_str(), _locale);
+	int len = K::strWideToAnsi(nullptr, 0, ws.c_str(), _locale);
 	std::string mb(len + 32, 0);
-	K__WideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
+	K::strWideToAnsi(&mb[0], mb.size(), ws.c_str(), _locale);
 	mb.resize(strlen(mb.c_str())); // mb.size が正しい文字列長さを返すように調整する
 	return mb;
 #else
@@ -842,25 +842,24 @@ bool KString::operator != (const KString &s) const {
 #pragma region KStringUtils
 
 int KStringUtils::wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
-	return K__WideToAnsi(out_ansi, max_out_bytes, ws, _locale);
+	return K::strWideToAnsi(out_ansi, max_out_bytes, ws, _locale);
 }
 int KStringUtils::ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
 	return K__AnsiToWide(out_wide, max_out_wchars, ansi, _locale);
 }
 int KStringUtils::wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
-	return K__WideToUtf8(out_u8, max_out_bytes, ws);
+	return K::strWideToUtf8(out_u8, max_out_bytes, ws);
 }
 int KStringUtils::utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8) {
-	return K__Utf8ToWide(out_ws, max_out_widechars, u8, 0);
+	return K::strUtf8ToWide(out_ws, max_out_widechars, u8, 0);
 }
 void KStringUtils::ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale) {
 	std::wstring ws = K::strAnsiToWide(ansi, _locale);
-	K__WideToUtf8(u8, size, ws.c_str());
+	K::strWideToUtf8(u8, size, ws.c_str());
 }
-
 void KStringUtils::utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale) {
 	std::wstring ws = K::strUtf8ToWide(u8);
-	K__WideToAnsi(ansi, size, ws.c_str(), _locale);
+	K::strWideToAnsi(ansi, size, ws.c_str(), _locale);
 }
 
 std::wstring KStringUtils::binToWide(const void *data, int size) {

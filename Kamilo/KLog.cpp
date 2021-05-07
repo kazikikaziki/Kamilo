@@ -821,7 +821,7 @@ void KLog::emitv_w(Level lv, const wchar_t *fmt, va_list args) {
 
 	// Wide --> Utf8
 	char u8[K__LOG_SPRINTF_BUFSIZE];
-	K__WideToUtf8(u8, sizeof(u8), ws);
+	K::strWideToUtf8(u8, sizeof(u8), ws);
 
 	emit(lv, u8);
 }

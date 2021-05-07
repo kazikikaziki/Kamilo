@@ -33,7 +33,7 @@ private:
 		wcscat_s(item.name_w, sizeof(item.name_w)/sizeof(wchar_t), type);
 		item.hModule = module;
 		item.hRsrc = FindResourceW(module, name, type);
-		K__WideToUtf8(item.name_u8, sizeof(item.name_u8), item.name_w);
+		K::strWideToUtf8(item.name_u8, sizeof(item.name_u8), item.name_w);
 		K__Assert(item.hRsrc);
 		m_Items.push_back(item);
 	}
