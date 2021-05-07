@@ -18,9 +18,9 @@ namespace Kamilo {
 
 
 #pragma region KXmlElement
-static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug_name, tinyxml2::XMLDocument *tinyxml2_doc, std::string *errmsg) {
+static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug_name, tinyxml2::XMLDocument &tinyxml2_doc, std::string *p_errmsg) {
 	if (xlmtext_u8.empty()) {
-		*errmsg = K__sprintf_std(u8"E_XML: Xml document has no text: %s", debug_name.c_str());
+		*p_errmsg = K__sprintf_std(u8"E_XML: Xml document has no text: %s", debug_name.c_str());
 		return false;
 	}
 
@@ -32,22 +32,22 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 	// For example, Japanese systems traditionally use SHIFT-JIS encoding.
 	// Text encoded as SHIFT-JIS can not be read by TinyXML. 
 	// A good text editor can import SHIFT-JIS and then save as UTF-8.
-	tinyxml2::XMLError xerr = tinyxml2_doc->Parse(K__SkipUtf8Bom(xlmtext_u8.c_str()));
+	tinyxml2::XMLError xerr = tinyxml2_doc.Parse(K__SkipUtf8Bom(xlmtext_u8.c_str()));
 	if (xerr == tinyxml2::XML_SUCCESS) {
-		*errmsg = "";
+		*p_errmsg = "";
 		return true;
 	}
 
-	const char *err_name = tinyxml2_doc->ErrorName();
-	const char *err_msg = tinyxml2_doc->ErrorStr();
-	if (tinyxml2_doc->ErrorLineNum() > 0) {
+	const char *err_name = tinyxml2_doc.ErrorName();
+	const char *err_msg = tinyxml2_doc.ErrorStr();
+	if (tinyxml2_doc.ErrorLineNum() > 0) {
 		// 行番号があるとき
 		char s[1024];
 		sprintf_s(s, sizeof(s),
 			"E_XML: An error occurred while parsing XML document %s(%d): \n%s\n%s\n",
-			debug_name.c_str(), tinyxml2_doc->ErrorLineNum(), err_name, err_msg
+			debug_name.c_str(), tinyxml2_doc.ErrorLineNum(), err_name, err_msg
 		);
-		*errmsg = s;
+		*p_errmsg = s;
 		return false;
 
 	} else {
@@ -57,7 +57,7 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 			"E_XML: An error occurred while parsing XML document %s: \n%s\n%s\n",
 			debug_name.c_str(), err_name, err_msg
 		);
-		*errmsg = s;
+		*p_errmsg = s;
 		return false;
 	}
 }
@@ -300,7 +300,7 @@ KXmlElement * KXmlElement::createFromStream(KInputStream &input, const std::stri
 KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const std::string &filename) {
 	tinyxml2::XMLDocument tiDoc;
 	std::string tiErrMsg;
-	if (_LoadTinyXml(xmlTextU8, filename, &tiDoc, &tiErrMsg)) {
+	if (_LoadTinyXml(xmlTextU8, filename, tiDoc, &tiErrMsg)) {
 		return CXNode::createFromTinyXml(&tiDoc);
 	}
 	K__Error("Failed to read xml: %s: %s", filename, tiErrMsg.c_str());
