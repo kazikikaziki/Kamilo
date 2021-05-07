@@ -54,7 +54,7 @@ private:
 public:
 	CEngineImpl() {
 		zero_clear();
-		m_thread_id = K__GetCurrentThreadId();
+		m_thread_id = K::sysGetCurrentThreadId();
 	}
 	virtual ~CEngineImpl() {
 		shutdown();
@@ -838,7 +838,7 @@ public:
 
 	///////////////////
 	void broadcastSignal(KSig &sig) {
-		if (m_thread_id == K__GetCurrentThreadId()) {
+		if (m_thread_id == K::sysGetCurrentThreadId()) {
 			// メインスレッから配信する。
 			// スレッドセーフを考慮しなくてよいのですぐに配信する
 			broadcastSignalAsync(sig);

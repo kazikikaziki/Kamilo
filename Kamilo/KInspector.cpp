@@ -1479,7 +1479,7 @@ void KDebugGui::K_DebugGui_ImageExportButton(const char *label, KTEXID texid, co
 		char s[256];
 		sprintf_s(s, sizeof(s), "Open: %s", filename);
 		if (ImGui::Button(s)) {
-			K__ShellOpenU8(filename);
+			K::fileShellOpen(filename);
 		}
 	}
 }

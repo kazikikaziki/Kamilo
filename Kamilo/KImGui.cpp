@@ -129,7 +129,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &file
 		char s[256];
 		sprintf_s(s, sizeof(s), "Open: %s", filename.u8());
 		if (ImGui::Button(s)) {
-			K__ShellOpenU8(filename.u8());
+			K::fileShellOpen(filename.u8());
 		}
 	}
 }

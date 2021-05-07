@@ -507,11 +507,10 @@ public:
 		swprintf_s(args, STRLEN, L"errchk:%x", GetCurrentProcessId());
 
 		// 例外チェックモードで自分の複製を起動する
-		char exepath_u8[STRLEN] = {0};
-		wchar_t exepath_w[STRLEN] = {0};
-		K__selfpath_u8(exepath_u8, STRLEN);
-		K__Utf8ToWide(exepath_w, STRLEN, exepath_u8, 0);
-		ShellExecuteW(NULL, L"OPEN", exepath_w, args, NULL, SW_SHOWNORMAL);
+		
+		std::string exepath_u8 = K::sysGetCurrentExecName();
+		std::wstring exepath_w = K::strUtf8ToWideStd(exepath_u8);
+		ShellExecuteW(NULL, L"OPEN", exepath_w.c_str(), args, NULL, SW_SHOWNORMAL);
 
 		return EXCEPTION_CONTINUE_SEARCH; // EXCEPTION_CONTINUE_SEARCH にしないとアプリ終了時にwindowsエラーログに残らない
 	}
@@ -532,8 +531,7 @@ public:
 	// 最も新しいイベントを探すが、それが limit_seconds 秒以上経過していた場合は見つからなかったものとする。
 	// イベントが見つからなかった場合は空文字列を返す。
 	static std::wstring findNewestErrorEventLog(int limit_seconds, intptr_t *fault_addr) {
-		char exepath_u8[256];
-		K__selfpath_u8(exepath_u8, sizeof(exepath_u8));
+		std::string exepath_u8 = K::sysGetCurrentExecName();
 
 		// プログラム名を検索キーワードにする
 		// ログイベント内の実行ファイル名はディレクトリ名を含まないので、ファイル名だけを使う
@@ -643,15 +641,13 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 
 	// 環境情報を得る
 	// 念のために言語情報も得るので、この次で setlocale するよりも前に取得しておく
-	char exepath_u8[_MAX_PATH] = {0};
-	K__selfpath_u8(exepath_u8, _MAX_PATH);
+	std::string exepath_u8 = K::sysGetCurrentExecName();
 
 	// ファイルを保存する
-	char report_path_u8[_MAX_PATH] = {0};
-	K__fullpath_u8(report_path_u8, _MAX_PATH, EXCEPTION_LOG_FILE_NAME);
+	std::string report_path_u8 = K::pathGetFull(EXCEPTION_LOG_FILE_NAME);
 
 	// エラーレポートを書き出す
-	FILE *file = K__fopen_u8(EXCEPTION_LOG_FILE_NAME, "w");
+	FILE *file = K::fileOpen(EXCEPTION_LOG_FILE_NAME, "w");
 	if (file) {
 		fprintf(file, "# coding: utf8\n");
 		fprintf(file, "Application \"%s\" was crashed!\n", exepath_u8);
@@ -737,7 +733,7 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 			u8"\n"
 			u8"--\n"
 			u8"%s\n",
-			PathFindFileNameA(exepath_u8),
+			PathFindFileNameA(exepath_u8.c_str()),
 			report_path_u8,
 			comment_u8);
 		std::wstring ws = K__Utf8ToWideStd(s);

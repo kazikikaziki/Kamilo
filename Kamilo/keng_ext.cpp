@@ -142,12 +142,10 @@ static bool kk_GetTimeStamp(const KPath &filename, time_t *time_cma) {
 
 #pragma region KFiles
 KPath KFiles::getCurrentDirectory() {
-	char s[KPathUtils::MAX_SIZE] = {0};
-	K__getcwd_u8(s, sizeof(s));
-	return s;
+	return K::sysGetCurrentDir();
 }
 bool KFiles::setCurrentDirectory(const KPath &path) {
-	return K__setcwd_u8(path.u8());
+	return K::sysSetCurrentDir(path.u8());
 }
 bool KFiles::exists(const KPath &path) {
 	return KPathUtils::K_PathExists(path.u8());

@@ -62,28 +62,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 
 
 //----------------------------------------------------
-// file
-//----------------------------------------------------
-FILE * K__fopen_u8(const char *path_u8, const char *mode_u8);
-bool K__ShellOpenU8(const char *path_u8);
-std::string K__LoadStringFromFile(const char *filename_u8);
-void K__SaveStringToFile(const char *filename_u8, const std::string &bin);
-
-
-//----------------------------------------------------
-// sys
-//----------------------------------------------------
-uint32_t K__pid(); ///< プロセスIDを得る
-uint32_t K__GetCurrentThreadId();
-void K__getcwd_u8(char *out_u8, int maxsize); ///< カレントディレクトリを UTF8 で得る
-bool K__setcwd_u8(const char *path_u8);
-std::string K__GetExecDirU8();
-std::string K__GetCurrentDirU8();
-void K__SetCurrentDirU8(const std::string &dir);
-void K__selfpath_u8(char *out_u8, int maxsize); ///< 自分の名前を得る（実行ファイル名）
-
-
-//----------------------------------------------------
 // path
 //----------------------------------------------------
 std::string K__PathJoin(const std::string &s1, const std::string &s2);
@@ -200,25 +178,19 @@ public:
 	#pragma endregion
 
 	#pragma region file
-	static bool fileShellOpen(const std::string &path_u8) { return K__ShellOpenU8(path_u8.c_str()); }
-	static FILE * fileOpen(const std::string &path_u8, const std::string &mode_u8) { K__fopen_u8(path_u8.c_str(), mode_u8.c_str()); }
-	static std::string fileLoadString(const std::string &filename) { return K__LoadStringFromFile(filename.c_str()); }
-	static void fileSaveString(const std::string &filename, const std::string &bin) { K__SaveStringToFile(filename.c_str(), bin); }
+	static bool fileShellOpen(const std::string &path_u8);
+	static FILE * fileOpen(const std::string &path_u8, const std::string &mode_u8);
+	static std::string fileLoadString(const std::string &filename);
+	static void fileSaveString(const std::string &filename, const std::string &bin);
 	#pragma endregion // file
 
 	#pragma region sys
-	static uint32_t sysGetCurrentProcessId() { return K__pid(); } ///< 現在のプロセスIDを得る
-	static uint32_t sysGetCurrentThraedId() { return K__GetCurrentThreadId(); } ///< 現在のスレッドIDを得る
-	static std::string sysGetCurrentDir() { return K__GetCurrentDirU8(); } ///< カレントディレクトリを UTF8 で得る
-	static void sysSetCurrentDir(const std::string &dir) { K__SetCurrentDirU8(dir); }
-	static std::string sysGetCurrentExecName() { ///< 自分自身（実行ファイル）のファイル名を得る
-		char s[256] = {0};
-		K__selfpath_u8(s, sizeof(s));
-		return s;
-	}
-	static std::string sysGetCurrentExecDir() { ///< 自分自身（実行ファイル）の親ディレクトリを得る
-		return K__GetExecDirU8();
-	}
+	static uint32_t sysGetCurrentProcessId(); ///< 現在のプロセスIDを得る
+	static uint32_t sysGetCurrentThreadId(); ///< 現在のスレッドIDを得る
+	static std::string sysGetCurrentDir(); ///< カレントディレクトリを UTF8 で得る
+	static bool sysSetCurrentDir(const std::string &dir);
+	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名を得る
+	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリを得る
 	#pragma endregion // sys
 
 	#pragma region path

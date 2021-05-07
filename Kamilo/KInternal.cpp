@@ -357,90 +357,6 @@ int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool 
 
 
 
-/// getpid, GetCurrentProcessId の代替関数
-/// プロセスIDを得る
-/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/getpid.2.html
-uint32_t K__pid() {
-	return GetCurrentProcessId();
-}
-void K__getcwd_u8(char *out_u8, int maxsize) {
-	// getcwd, GetCurrentDirectory の UTF8 版
-	// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/getcwd.2.html
-	K__Assert(out_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	GetCurrentDirectoryW(MAX_PATH, wpath);
-	K__ReplaceW(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
-	K__WideToUtf8(out_u8, maxsize, wpath);
-}
-std::string K__GetCurrentDirU8() {
-	wchar_t wpath[MAX_PATH] = {0};
-	GetCurrentDirectoryW(MAX_PATH, wpath);
-	K__ReplaceW(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
-	return K__WideToUtf8Std(wpath);
-}
-
-bool K__setcwd_u8(const char *path_u8) {
-	// chdir, SetCurrentDirectory の UTF8 版
-	// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/chdir.2.html
-	K__Assert(path_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wpath, MAX_PATH, path_u8);
-	if (SetCurrentDirectoryW(wpath)) {
-		return true;
-	}
-	K__ERROR_MSG(path_u8);
-	return false;
-}
-void K__SetCurrentDirU8(const std::string &dir) {
-	K__setcwd_u8(dir.c_str());
-}
-
-FILE * K__fopen_u8(const char *path_u8, const char *mode_u8) {
-	// fopen の UTF8 版
-	K__Assert(path_u8);
-	K__Assert(mode_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	wchar_t wmode[MAX_PATH] = {0};
-	MultiByteToWideChar(CP_UTF8, 0, path_u8, -1, wpath, MAX_PATH);
-	MultiByteToWideChar(CP_UTF8, 0, mode_u8, -1, wmode, MAX_PATH);
-	FILE *file = nullptr;
-	if (1) {
-		// _wfopen で開く
-		// 読み取りモードで開く場合は、他のアプリが対象ファイルを開いていても成功する
-		file = _wfopen(wpath, wmode);
-		if (file == nullptr) {
-			K__OutputDebugString("*** Failed to open file \"", path_u8, "\"");
-		}
-	} else {
-		errno_t err = _wfopen_s(&file, wpath, wmode);
-		// errno constants
-		// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
-		if (err == ENOENT) {
-			// 指定された名前のファイルが存在しない
-			K__OutputDebugString("*** No file named \"", path_u8, "\"");
-		}
-		if (err == EACCES) {
-			// 指定されたモードでアクセスできない (_wfopen だと成功するかも）
-			K__OutputDebugString("*** Permission denied \"", path_u8, "\"");
-		}
-	}
-	return file;
-}
-std::string K__GetExecDirU8() {
-	wchar_t wpath[MAX_PATH] = {0};
-	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
-	PathRemoveFileSpecW(wpath);
-	K__ReplaceW(wpath, L'\\', L'/');
-	return K__WideToUtf8Std(wpath);
-}
-void K__selfpath_u8(char *out_u8, int maxsize) {
-	// この exe のファイルパス
-	K__Assert(out_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
-	K__ReplaceW(wpath, L'\\', L'/');
-	K__WideToUtf8(out_u8, maxsize, wpath);
-}
 void K__fullpath_u8(char *out_u8, int maxsize, const char *path_u8) {
 	K__Assert(out_u8);
 	K__Assert(path_u8);
@@ -451,13 +367,6 @@ void K__fullpath_u8(char *out_u8, int maxsize, const char *path_u8) {
 		K__ReplaceW(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
 		K__WideToUtf8(out_u8, maxsize, wfull);
 	}
-}
-bool K__ShellOpenU8(const char *path_u8) {
-	K__Assert(path_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wpath, MAX_PATH, path_u8);
-	int h = (int)ShellExecuteW(nullptr, L"OPEN", wpath, L"", L"", SW_SHOW);
-	return h > 32; // ShellExecute は成功すると 32 より大きい値を返す
 }
 void K__ReplaceA(char *s, char before, char after) {
 	K__Assert(s);
@@ -727,22 +636,22 @@ uint64_t K::clockNano64() {
 	{
 		static LARGE_INTEGER s_freq = {0, 0};
 		if (s_freq.QuadPart == 0) {
-			QueryPerformanceFrequency(&s_freq);
+			::QueryPerformanceFrequency(&s_freq);
 		}
 		// https://msdn.microsoft.com/ja-jp/library/cc410966.aspx
 		// マルチプロセッサ環境の場合、QueryPerformanceCounter が必ず同じプロセッサで実行されるように固定する必要がある
 		// SetThreadAffinityMask を使い、指定したスレッドを実行可能なCPUを限定する
 		LARGE_INTEGER time;
-		HANDLE hThread = GetCurrentThread();
-		DWORD_PTR oldmask = SetThreadAffinityMask(hThread, 1);
-		QueryPerformanceCounter(&time);
-		SetThreadAffinityMask(hThread, oldmask);
+		HANDLE hThread = ::GetCurrentThread();
+		DWORD_PTR oldmask = ::SetThreadAffinityMask(hThread, 1);
+		::QueryPerformanceCounter(&time);
+		::SetThreadAffinityMask(hThread, oldmask);
 		return (uint64_t)((double)time.QuadPart / s_freq.QuadPart * 1000000000.0);
 	}
 	#else
 	{
 		struct timespec time;
-		clock_gettime(CLOCK_MONOTONIC, &time);
+		::clock_gettime(CLOCK_MONOTONIC, &time);
 		return (uint64_t)time.tv_sec * 1000000000 + time.tv_nsec;
 	}
 	#endif
@@ -763,17 +672,17 @@ uint32_t K::clockMsec32() {
 static TIMECAPS g_TimeCaps;
 
 void K::sleepPeriodBegin() {
-	timeGetDevCaps(&g_TimeCaps, sizeof(TIMECAPS));
-	timeBeginPeriod(g_TimeCaps.wPeriodMin);
+	::timeGetDevCaps(&g_TimeCaps, sizeof(TIMECAPS));
+	::timeBeginPeriod(g_TimeCaps.wPeriodMin);
 }
 void K::sleepPeriodEnd() {
-	timeEndPeriod(g_TimeCaps.wPeriodMin);
+	::timeEndPeriod(g_TimeCaps.wPeriodMin);
 }
 void K::sleep(int msec) {
 	// だいたいmsecミリ秒待機する。
 	// 精度は問題にせず、適度な時間待機できればそれで良い。
 	// エラーによるスリープ中断 (nanosleepの戻り値チェック) も考慮しない
-	Sleep(msec);
+	::Sleep(msec);
 }
 #pragma endregion // sleep
 
@@ -808,6 +717,124 @@ float K::lerp(float a, float b, float t) {
 
 
 
+#pragma region file
+bool K::fileShellOpen(const std::string &path_u8) {
+	std::wstring wpath = K__Utf8ToWideStd(path_u8);
+	int h = (int)::ShellExecuteW(nullptr, L"OPEN", wpath.c_str(), L"", L"", SW_SHOW);
+	return h > 32; // ShellExecute は成功すると 32 より大きい値を返す
+}
+FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
+	// fopen の UTF8 版
+	std::wstring wpath = K__Utf8ToWideStd(path_u8);
+	std::wstring wmode = K__Utf8ToWideStd(mode_u8);
+	FILE *file = nullptr;
+	if (1) {
+		// _wfopen で開く
+		// 読み取りモードで開く場合は、他のアプリが対象ファイルを開いていても成功する
+		file = ::_wfopen(wpath.c_str(), wmode.c_str());
+		if (file == nullptr) {
+			K__OutputDebugString("*** Failed to open file \"", path_u8, "\"");
+		}
+	} else {
+		errno_t err = ::_wfopen_s(&file, wpath.c_str(), wmode.c_str());
+		// errno constants
+		// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
+		if (err == ENOENT) {
+			// 指定された名前のファイルが存在しない
+			K__OutputDebugString("*** No file named \"", path_u8, "\"");
+		}
+		if (err == EACCES) {
+			// 指定されたモードでアクセスできない (_wfopen だと成功するかも）
+			K__OutputDebugString("*** Permission denied \"", path_u8, "\"");
+		}
+	}
+	return file;
+}
+std::string K::fileLoadString(const std::string &filename_u8) {
+	std::string bin;
+	FILE *file = fileOpen(filename_u8, "r");
+	if (file) {
+		char buf[1024];
+		while (1) {
+			int sz = ::fread(buf, 1, sizeof(buf), file);
+			if (sz == 0) break;
+			bin.append(buf, sz);
+		}
+		::fclose(file);
+	}
+	return bin;
+}
+void K::fileSaveString(const std::string &filename_u8, const std::string &bin) {
+	FILE *file = fileOpen(filename_u8, "w");
+	if (file) {
+		::fwrite(bin.data(), bin.size(), 1, file);
+		::fclose(file);
+	}
+}
+#pragma endregion // file
+
+
+
+
+#pragma region sys
+/// getpid, GetCurrentProcessId の代替関数
+///
+/// プロセスIDを得る
+/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/getpid.2.html
+uint32_t K::sysGetCurrentProcessId() {
+	return ::GetCurrentProcessId();
+}
+
+uint32_t K::sysGetCurrentThreadId() {
+	return ::GetCurrentThreadId();
+}
+
+/// getcwd, GetCurrentDirectory の UTF8 版
+/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/getcwd.2.html
+std::string K::sysGetCurrentDir() {
+	wchar_t wpath[MAX_PATH] = {0};
+	::GetCurrentDirectoryW(MAX_PATH, wpath);
+	K__ReplaceW(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
+	return K__WideToUtf8Std(wpath);
+}
+
+/// chdir, SetCurrentDirectory の UTF8 版
+///
+/// カレントディレクトリ名を utf8 で得る
+/// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/chdir.2.html
+bool K::sysSetCurrentDir(const std::string &dir) {
+	wchar_t wpath[MAX_PATH] = {0};
+	K__Utf8ToWidePath(wpath, MAX_PATH, dir.c_str());
+	if (::SetCurrentDirectoryW(wpath)) {
+		return true; // OK
+	} else {
+		K__ERROR_MSG(dir.c_str());
+		return false; // FAIL
+	}
+}
+
+std::string K::sysGetCurrentExecName() {
+	wchar_t wpath[MAX_PATH] = {0};
+	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
+	K__ReplaceW(wpath, L'\\', L'/');
+	return K__WideToUtf8Std(wpath);
+}
+std::string K::sysGetCurrentExecDir() {
+	wchar_t wpath[MAX_PATH] = {0};
+	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
+	::PathRemoveFileSpecW(wpath);
+	K__ReplaceW(wpath, L'\\', L'/');
+	return K__WideToUtf8Std(wpath);
+}
+#pragma endregion // sys
+
+
+
+
+
+
+
+
 
 
 
@@ -820,28 +847,6 @@ std::string K__Win32GetErrorStringStd(long hr) {
 	char buf[1024] = {0};
 	K__Win32GetErrorString(hr, buf, sizeof(buf));
 	return buf;
-}
-
-std::string K__LoadStringFromFile(const char *filename_u8) {
-	std::string bin;
-	FILE *file = K__fopen_u8(filename_u8, "r");
-	if (file) {
-		char buf[1024];
-		while (1) {
-			int sz = fread(buf, 1, sizeof(buf), file);
-			if (sz == 0) break;
-			bin.append(buf, sz);
-		}
-		fclose(file);
-	}
-	return bin;
-}
-void K__SaveStringToFile(const char *filename_u8, const std::string &bin) {
-	FILE *file = K__fopen_u8(filename_u8, "w");
-	if (file) {
-		fwrite(bin.data(), bin.size(), 1, file);
-		fclose(file);
-	}
 }
 
 
@@ -905,9 +910,6 @@ void K__Notify(const char *u8) {
 
 
 
-uint32_t K__GetCurrentThreadId() {
-	return GetCurrentThreadId();
-}
 
 
 

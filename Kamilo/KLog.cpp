@@ -57,7 +57,7 @@ KLogFile::KLogFile() {
 }
 bool KLogFile::open(const char *filename_u8) {
 	close();
-	FILE *fp = K__fopen_u8(filename_u8, "a");
+	FILE *fp = K::fileOpen(filename_u8, "a");
 	if (fp) {
 		mFile = fp;
 		mFileName = filename_u8;
@@ -89,7 +89,7 @@ void KLogFile::writeRecord(const KLog::Record &rec) {
 	if (mFile == nullptr) return;
 	fprintf(mFile, "%02d-%02d-%02d ", rec.time_year, rec.time_mon, rec.time_mday);
 	fprintf(mFile, "%02d:%02d:%02d.%03d ", rec.time_hour, rec.time_min, rec.time_sec, rec.time_msec);
-	fprintf(mFile, "(%6d) @%08x ", rec.app_msec, K__pid());
+	fprintf(mFile, "(%6d) @%08x ", rec.app_msec, K::sysGetCurrentProcessId());
 	switch (rec.type) {
 	case KLog::LEVEL_AST: fprintf(mFile, "[assertion error] "); break;
 	case KLog::LEVEL_ERR: fprintf(mFile, "[error] "); break;
@@ -111,7 +111,7 @@ bool KLogFile::clampBySeparator(int number) {
 	}
 
 	// テキストをロード
-	std::string text = K__LoadStringFromFile(mFileName.c_str());
+	std::string text = K::fileLoadString(mFileName);
 
 	// 内容修正
 	{
@@ -127,10 +127,10 @@ bool KLogFile::clampBySeparator(int number) {
 	}
 
 	// 新しい内容を書き込む
-	K__SaveStringToFile(mFileName.c_str(), text);
+	K::fileSaveString(mFileName, text);
 
 	// 再び開く
-	mFile = K__fopen_u8(mFileName.c_str(), "a");
+	mFile = K::fileOpen(mFileName, "a");
 	return mFile != nullptr;
 }
 bool KLogFile::clampBySize(int clamp_size_bytes) {
@@ -139,7 +139,7 @@ bool KLogFile::clampBySize(int clamp_size_bytes) {
 	fclose(mFile);
 
 	// テキストをロード
-	std::string text = K__LoadStringFromFile(mFileName.c_str());
+	std::string text = K::fileLoadString(mFileName);
 
 	// 内容修正
 	{
@@ -156,10 +156,10 @@ bool KLogFile::clampBySize(int clamp_size_bytes) {
 	}
 
 	// 新しい内容を書き込む
-	K__SaveStringToFile(mFileName.c_str(), text);
+	K::fileSaveString(mFileName, text);
 
 	// 再び開く
-	mFile = K__fopen_u8(mFileName.c_str(), "a");
+	mFile = K::fileOpen(mFileName, "a");
 	return mFile != nullptr;
 }
 int KLogFile::findSeparatorByIndex(const char *text, size_t size, int index) {

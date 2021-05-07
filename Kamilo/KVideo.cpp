@@ -1653,7 +1653,7 @@ public:
 		} else {
 			m_hWnd = ::GetActiveWindow();
 		}
-		m_video_thread_id = K__GetCurrentThreadId();
+		m_video_thread_id = K::sysGetCurrentThreadId();
 
 		// Direct3D9 オブジェクト。nullptr が指定された場合は新規作成する
 		if (!_initD3D9(d3d9)) {
@@ -2473,7 +2473,7 @@ public:
 	}
 	bool resetDevice(int w, int h, int fullscreen) {
 		K__Print("ResetDevice %dx%d", w, h);
-		if (m_video_thread_id != K__GetCurrentThreadId()) {
+		if (m_video_thread_id != K::sysGetCurrentThreadId()) {
 			K__VIDEO_ERR("%s: Thread not matched", __FUNCTION__);
 			::InvalidateRect(m_hWnd, nullptr, TRUE);
 			return false;

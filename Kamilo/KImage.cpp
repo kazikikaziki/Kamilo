@@ -449,7 +449,7 @@ bool KImage::saveToFileName(const char *filename_u8) const {
 	if (bin.empty()) {
 		return false;
 	}
-	FILE *fp = K__fopen_u8(filename_u8, "wb");
+	FILE *fp = K::fileOpen(filename_u8, "wb");
 	if (fp == nullptr) {
 		return false;
 	}
@@ -458,7 +458,7 @@ bool KImage::saveToFileName(const char *filename_u8) const {
 	return true;
 }
 bool KImage::_loadFromFileName(const char *filename_u8) {
-	FILE *fp = K__fopen_u8(filename_u8, "rb");
+	FILE *fp = K::fileOpen(filename_u8, "rb");
 	if (fp == nullptr) {
 		return false;
 	}

@@ -80,7 +80,7 @@ public:
 			char s[256];
 			sprintf_s(s, sizeof(s), "Open: %s", m_LastOutputFileName.u8());
 			if (ImGui::Button(s)) {
-				K__ShellOpenU8(m_LastOutputFileName.u8());
+				K::fileShellOpen(m_LastOutputFileName.u8());
 			}
 		}
 	}

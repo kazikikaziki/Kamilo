@@ -1689,7 +1689,7 @@ public:
 				ImGui::SameLine();
 				KPath label = KPath::fromFormat("Open: %s", export_filename.u8());
 				if (ImGui::Button(label.u8())) {
-					K__ShellOpenU8(export_filename.u8());
+					K::fileShellOpen(export_filename.u8());
 				}
 			}
 		}
@@ -2746,7 +2746,7 @@ public:
 				std::string s =  KStringUtils::K_sprintf("Open: %s", export_filename.u8());
 				ImGui::SameLine();
 				if (ImGui::Button(s.c_str())) {
-					K__ShellOpenU8(export_filename.u8());
+					K::fileShellOpen(export_filename.u8());
 				}
 			}
 		}

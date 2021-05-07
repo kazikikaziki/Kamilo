@@ -196,7 +196,7 @@ public:
 #pragma region KInputStream
 KInputStream KInputStream::fromFileName(const std::string &filename) {
 	Impl *impl = nullptr;
-	FILE *fp = K__fopen_u8(filename.c_str(), "rb");
+	FILE *fp = K::fileOpen(filename, "rb");
 	if (fp) {
 		impl = new CFileReadImpl(fp, filename);
 	}
@@ -301,7 +301,7 @@ std::string KInputStream::readBin(int readsize) {
 #pragma region KOutputStream
 KOutputStream KOutputStream::fromFileName(const std::string &filename) {
 	Impl *impl = nullptr;
-	FILE *fp = K__fopen_u8(filename.c_str(), "wb");
+	FILE *fp = K::fileOpen(filename, "wb");
 	if (fp) {
 		impl = new CFileWriteImpl(fp, filename);
 	}
