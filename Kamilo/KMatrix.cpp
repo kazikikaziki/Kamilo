@@ -351,7 +351,7 @@ void K_Matrix4FromRotation(float *mout, const float *quat) {
 void K_Matrix4FromSkewX(float *mout, float deg) {
 	assert(mout);
 	assert(-90 < deg && deg < 90);
-	float t = tanf(K__DegToRad(deg));
+	float t = tanf(K::degToRad(deg));
 	float tmp[] = {
 		1, 0, 0, 0,
 		t, 1, 0, 0,
@@ -363,7 +363,7 @@ void K_Matrix4FromSkewX(float *mout, float deg) {
 void K_Matrix4FromSkewY(float *mout, float deg) {
 	assert(mout);
 	assert(-90 < deg && deg < 90);
-	float t = tanf(K__DegToRad(deg));
+	float t = tanf(K::degToRad(deg));
 	float tmp[] = {
 		1, t, 0, 0,
 		0, 1, 0, 0,
@@ -463,7 +463,7 @@ void K_Matrix4FromFrustumFovX(float *mout, float fovx_deg, float aspect_w_div_h,
 	assert(0 < fovx_deg && fovx_deg < 180);
 	assert(aspect_w_div_h > 0);
 	assert(znear < zfar);
-	float fov_rad = K__DegToRad(fovx_deg);
+	float fov_rad = K::degToRad(fovx_deg);
 	float w = 2 * znear * tanf(fov_rad / 2); // 左右の視野角から近クリップ面の幅を得る
 	float h = w / aspect_w_div_h;
 	K_Matrix4FromFrustum(mout, w, h, znear, zfar);
@@ -473,7 +473,7 @@ void K_Matrix4FromFrustumFovY(float *mout, float fovy_deg, float aspect_h_div_w,
 	assert(0 < fovy_deg && fovy_deg < 180);
 	assert(aspect_h_div_w > 0);
 	assert(znear < zfar);
-	float fov_rad = K__DegToRad(fovy_deg);
+	float fov_rad = K::degToRad(fovy_deg);
 	float h = 2 * znear * tanf(fov_rad / 2); // 上下の視野角から近クリップ面での高さを得る
 	float w = h / aspect_h_div_w;
 	K_Matrix4FromFrustum(mout, w, h, znear, zfar);

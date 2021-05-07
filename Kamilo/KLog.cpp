@@ -465,7 +465,7 @@ public:
 
 	CLogContext() {
 		mCallback = nullptr;
-		mStartMsec = K__ClockMsec32();
+		mStartMsec = K::clockMsec32();
 		mInfoEnabled = true;
 		mDebugEnabled = true;
 		mVerboseEnabled = false;
@@ -539,7 +539,7 @@ public:
 			rec.time_min  = st.wMinute;
 			rec.time_sec  = st.wSecond;
 			rec.time_msec = st.wMilliseconds;
-			rec.app_msec = K__ClockMsec32() - mStartMsec;
+			rec.app_msec = K::clockMsec32() - mStartMsec;
 			rec.type = lv;
 			rec.text_u8 = u8;
 		}

@@ -20,7 +20,7 @@ KQuat KQuat::fromZDeg(float deg) {
 KQuat KQuat::fromAxisDeg(const KVec3 &axis, float deg) {
 	// http://marupeke296.com/DXG_No10_Quaternion.html
 	// https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
-	float rad = K__DegToRad(deg);
+	float rad = K::degToRad(deg);
 	float len = axis.getLength();
 	if (len > 0) {
 		float s = sinf(rad / 2.0f) / len;
@@ -220,7 +220,7 @@ float KQuat::radians() const {
 	return 0.0f;
 }
 float KQuat::degrees() const {
-	return K__RadToDeg(radians());
+	return K::radToDeg(radians());
 }
 KQuat KQuat::normalized() const {
 	KQuat out;

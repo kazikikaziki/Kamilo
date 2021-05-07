@@ -388,7 +388,7 @@ void CSoundImpl::updateThreadProc() {
 		updateStreaming();
 
 		// 適当な時間待つだけ。スリープの精度が低くてもよい
-		K__Sleep(interval_msec);
+		K::sleep(interval_msec);
 	}
 }
 #pragma endregion // CSoundImpl

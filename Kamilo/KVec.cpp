@@ -431,15 +431,15 @@ bool KVec2::isNormalized() const {
 }
 KVec2 KVec2::lerp(const KVec2 &a, float t) const {
 	return KVec2(
-		K__Lerp(x, a.x, t),
-		K__Lerp(y, a.y, t)
+		K::lerp(x, a.x, t),
+		K::lerp(y, a.y, t)
 	);
 }
 KVec2 KVec2::getmin(const KVec2 &b) const {
-	return KVec2(K__Min(x, b.x), K__Min(y, b.y));
+	return KVec2(K::min(x, b.x), K::min(y, b.y));
 }
 KVec2 KVec2::getmax(const KVec2 &b) const {
-	return KVec2(K__Max(x, b.x), K__Max(y, b.y));
+	return KVec2(K::max(x, b.x), K::max(y, b.y));
 }
 bool KVec2::equals(const KVec2 &b, float maxerr) const {
 	float dx = fabsf(x - b.x);
@@ -590,16 +590,16 @@ bool KVec3::isNormalized() const {
 }
 KVec3 KVec3::lerp(const KVec3 &a, float t) const {
 	return KVec3(
-		K__Lerp(x, a.x, t),
-		K__Lerp(y, a.y, t),
-		K__Lerp(z, a.z, t)
+		K::lerp(x, a.x, t),
+		K::lerp(y, a.y, t),
+		K::lerp(z, a.z, t)
 	);
 }
 KVec3 KVec3::getmin(const KVec3 &b) const {
-	return KVec3(K__Min(x, b.x), K__Min(y, b.y), K__Min(z, b.z));
+	return KVec3(K::min(x, b.x), K::min(y, b.y), K::min(z, b.z));
 }
 KVec3 KVec3::getmax(const KVec3 &b) const {
-	return KVec3(K__Max(x, b.x), K__Max(y, b.y), K__Max(z, b.z));
+	return KVec3(K::max(x, b.x), K::max(y, b.y), K::max(z, b.z));
 }
 bool KVec3::equals(const KVec3 &b, float maxerr) const {
 	float dx = fabsf(x - b.x);
@@ -718,26 +718,26 @@ bool KVec4::isNormalized() const {
 }
 KVec4 KVec4::lerp(const KVec4 &a, float t) const {
 	return KVec4(
-		K__Lerp(x, a.x, t),
-		K__Lerp(y, a.y, t),
-		K__Lerp(z, a.z, t),
-		K__Lerp(w, a.w, t)
+		K::lerp(x, a.x, t),
+		K::lerp(y, a.y, t),
+		K::lerp(z, a.z, t),
+		K::lerp(w, a.w, t)
 	);
 }
 KVec4 KVec4::getmin(const KVec4 &b) const {
 	return KVec4(
-		K__Min(x, b.x),
-		K__Min(y, b.y),
-		K__Min(z, b.z),
-		K__Min(w, b.w)
+		K::min(x, b.x),
+		K::min(y, b.y),
+		K::min(z, b.z),
+		K::min(w, b.w)
 	);
 }
 KVec4 KVec4::getmax(const KVec4 &b) const {
 	return KVec4(
-		K__Max(x, b.x),
-		K__Max(y, b.y),
-		K__Max(z, b.z),
-		K__Max(w, b.w)
+		K::max(x, b.x),
+		K::max(y, b.y),
+		K::max(z, b.z),
+		K::max(w, b.w)
 	);
 }
 bool KVec4::equals(const KVec4 &b, float maxerr) const {

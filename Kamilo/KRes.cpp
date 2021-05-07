@@ -3804,7 +3804,7 @@ public:
 		mFlags = 0;
 	}
 	bool update(const char *bankDir, const char *dataDir, KPathList *updated_files, KGameUpdateBankFlags flags) {
-		uint32_t starttime = K__ClockMsec32();
+		uint32_t starttime = K::clockMsec32();
 		mFlags = flags;
 
 		KLog::printInfo("Update bank");
@@ -3852,7 +3852,7 @@ public:
 			xDoc->writeDoc(file);
 		}
 		K_Drop(xDoc);
-		KLog::printInfo("Bank updated (%d msec)", K__ClockMsec32() - starttime);
+		KLog::printInfo("Bank updated (%d msec)", K::clockMsec32() - starttime);
 		mFlags = 0;
 		return true;
 	}

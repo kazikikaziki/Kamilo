@@ -61,36 +61,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 
 
 
-
-
-//----------------------------------------------------
-// clock
-//----------------------------------------------------
-uint64_t K__ClockNano64(); ///< システム時刻をナノ秒単位で得る
-inline uint64_t K__ClockMsec64() { return K__ClockNano64() / 1000000; } ///< システム時刻をミリ秒単位で取得する
-inline uint32_t K__ClockMsec32() { return (uint32_t)K__ClockMsec64(); } ///< システム時刻をミリ秒単位で取得する
-
-
-//----------------------------------------------------
-// sleep
-//----------------------------------------------------
-void K__SleepPeriodBegin(); ///< タイマーの精度を変更する
-void K__SleepPeriodEnd();
-void K__Sleep(int msec);
-
-
-//----------------------------------------------------
-// numeric
-//----------------------------------------------------
-float K__DegToRad(float deg);
-float K__RadToDeg(float rad);
-float K__Min(float a, float b);
-float K__Max(float a, float b);
-float K__Lerp(float a, float b, float t);
-int K__Min(int a, int b);
-int K__Max(int a, int b);
-
-
 //----------------------------------------------------
 // file
 //----------------------------------------------------
@@ -208,26 +178,26 @@ template <class... Args> void K__OutputDebugString(Args... args) {
 class K {
 public:
 	#pragma region clock
-	static uint64_t clockNano64() { return K__ClockNano64(); } ///< システム時刻をナノ秒単位で得る
-	static uint64_t clockMsec64() { return K__ClockNano64() / 1000000; } ///< システム時刻をミリ秒単位で取得する
-	static uint32_t clockMsec32() { return (uint32_t)K__ClockMsec64(); } ///< システム時刻をミリ秒単位で取得する
-	#pragma endregion // clock
+	static uint64_t clockNano64(); ///< システム時刻をナノ秒単位で得る
+	static uint64_t clockMsec64(); ///< システム時刻をミリ秒単位で取得する
+	static uint32_t clockMsec32(); ///< システム時刻をミリ秒単位で取得する
+	#pragma endregion
 
 	#pragma region sleep
-	void sleepPeriodBegin() { K__SleepPeriodBegin(); } ///< タイマーの精度を変更する
-	void sleepPeriodEnd() { K__SleepPeriodEnd(); }
-	void sleep(int msec) { K__Sleep(msec); }
-	#pragma endregion // sleep
+	static void sleepPeriodBegin(); ///< タイマーの精度を変更する
+	static void sleepPeriodEnd();
+	static void sleep(int msec);
+	#pragma endregion
 
 	#pragma region numeric
-	static float degToRad(float deg) { return K__DegToRad(deg); }
-	static float radToDeg(float rad) { return K__RadToDeg(rad); }
-	static float lerp(float a, float b, float t) { return K__Lerp(a, b, t); }
-	static float min(float a, float b) { return K__Min(a, b); }
-	static float max(float a, float b) { return K__Max(a, b); }
-	static int min(int a, int b) { return K__Min(a, b); } // ※ここでエラーが起きる場合はNOMINMAXの定義を忘れていて windows.h の min, max と競合している可能性がある
-	static int max(int a, int b) { return K__Max(a, b); }
-	#pragma endregion // numeric
+	static float degToRad(float deg);
+	static float radToDeg(float rad);
+	static float lerp(float a, float b, float t);
+	static float min(float a, float b);
+	static float max(float a, float b);
+	static int min(int a, int b);
+	static int max(int a, int b);
+	#pragma endregion
 
 	#pragma region file
 	static bool fileShellOpen(const std::string &path_u8) { return K__ShellOpenU8(path_u8.c_str()); }

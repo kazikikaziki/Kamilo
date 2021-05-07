@@ -1094,7 +1094,7 @@ private:
 
 	// 連続入力のタイムアウト計測用時刻
 	int get_clock_msec() const {
-		return (int)K__ClockMsec32();
+		return (int)K::clockMsec32();
 	}
 };
 

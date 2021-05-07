@@ -355,24 +355,6 @@ int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool 
 	}
 }
 
-#pragma region Sleep
-static TIMECAPS g_sleep__timecaps;
-
-void K__SleepPeriodBegin() {
-	timeGetDevCaps(&g_sleep__timecaps, sizeof(TIMECAPS));
-	timeBeginPeriod(g_sleep__timecaps.wPeriodMin);
-}
-void K__SleepPeriodEnd() {
-	timeEndPeriod(g_sleep__timecaps.wPeriodMin);
-}
-void K__Sleep(int msec) {
-	// だいたいmsecミリ秒待機する。
-	// 精度は問題にせず、適度な時間待機できればそれで良い。
-	// エラーによるスリープ中断 (nanosleepの戻り値チェック) も考慮しない
-	Sleep(msec);
-}
-#pragma endregion // Sleep
-
 
 
 /// getpid, GetCurrentProcessId の代替関数
@@ -739,8 +721,8 @@ void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) {
 
 
 
-
-uint64_t K__ClockNano64() {
+#pragma region clock
+uint64_t K::clockNano64() {
 	#ifdef _WIN32
 	{
 		static LARGE_INTEGER s_freq = {0, 0};
@@ -765,6 +747,67 @@ uint64_t K__ClockNano64() {
 	}
 	#endif
 }
+uint64_t K::clockMsec64() {
+	return clockNano64() / 1000000;
+}
+uint32_t K::clockMsec32() {
+	return (uint32_t)clockMsec64();
+}
+#pragma endregion // clock
+
+
+
+
+
+#pragma region sleep
+static TIMECAPS g_TimeCaps;
+
+void K::sleepPeriodBegin() {
+	timeGetDevCaps(&g_TimeCaps, sizeof(TIMECAPS));
+	timeBeginPeriod(g_TimeCaps.wPeriodMin);
+}
+void K::sleepPeriodEnd() {
+	timeEndPeriod(g_TimeCaps.wPeriodMin);
+}
+void K::sleep(int msec) {
+	// だいたいmsecミリ秒待機する。
+	// 精度は問題にせず、適度な時間待機できればそれで良い。
+	// エラーによるスリープ中断 (nanosleepの戻り値チェック) も考慮しない
+	Sleep(msec);
+}
+#pragma endregion // sleep
+
+
+
+
+#pragma region numeric
+float K::degToRad(float deg) {
+	return (float)M_PI * deg / 180.0f;
+}
+float K::radToDeg(float rad) {
+	return 180.0f * rad / (float)M_PI;
+}
+float K::min(float a, float b) { // NOMINMAX が未定義だと重複エラーの可能性あり
+	return a<b ? a : b;
+}
+float K::max(float a, float b) { // NOMINMAX が未定義だと重複エラーの可能性あり
+	return a>b ? a : b;
+}
+int K::min(int a, int b) {
+	return a<b ? a : b;
+}
+int K::max(int a, int b) {
+	return a>b ? a : b;
+}
+float K::lerp(float a, float b, float t) {
+	t = (t < 0.0f) ? 0.0f : (t < 1.0f) ? t : 1.0f;
+	return a + (b - a) * t;
+}
+#pragma endregion // numeric
+
+
+
+
 
 
 
@@ -866,28 +909,6 @@ uint32_t K__GetCurrentThreadId() {
 	return GetCurrentThreadId();
 }
 
-float K__DegToRad(float deg) {
-	return (float)M_PI * deg / 180.0f;
-}
-float K__RadToDeg(float rad) {
-	return 180.0f * rad / (float)M_PI;
-}
-float K__Min(float a, float b) {
-	return a<b ? a : b;
-}
-float K__Max(float a, float b) {
-	return a>b ? a : b;
-}
-float K__Lerp(float a, float b, float t) {
-	t = (t < 0.0f) ? 0.0f : (t < 1.0f) ? t : 1.0f;
-	return a + (b - a) * t;
-}
-int K__Min(int a, int b) {
-	return a<b ? a : b;
-}
-int K__Max(int a, int b) {
-	return a>b ? a : b;
-}
 
 
 } // namespace

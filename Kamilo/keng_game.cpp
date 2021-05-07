@@ -414,7 +414,7 @@ public:
 			return m_clock.getGameFrames();
 
 		case KEngine::ST_TIME_MSEC:
-			return K__ClockMsec32();
+			return K::clockMsec32();
 
 		case KEngine::ST_FPS_UPDATE: // 更新関数のFPS値
 			m_clock.getFps(&val, nullptr);
@@ -494,7 +494,7 @@ public:
 		K_assert(m_init_called);
 
 		// タイマー精度を変更する
-		K__SleepPeriodBegin();
+		K::sleepPeriodBegin();
 
 		// インスペクター開始
 		if (KInspector::isInstalled()) {
@@ -541,7 +541,7 @@ public:
 		KWindow::shutdown();
 
 		// タイマー制度戻す
-		K__SleepPeriodEnd();
+		K::sleepPeriodEnd();
 	}
 	void manager_end() {
 		// on_manager_end は追加した順番と逆順で呼び出す

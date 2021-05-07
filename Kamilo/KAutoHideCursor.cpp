@@ -13,13 +13,13 @@ public:
 	bool m_Hiding;
 
 	CAutoHideCursor() {
-		m_Time = K__ClockMsec32();
+		m_Time = K::clockMsec32();
 		m_Hiding = false;
 		KEngine::addManager(this);
 	}
 	virtual void on_manager_frame() override {
 		if (!m_Hiding) {
-			uint32_t diff = K__ClockMsec32() - m_Time;
+			uint32_t diff = K::clockMsec32() - m_Time;
 			if (diff >= 3 * 1000) {
 				m_Hiding = true;
 				KWindow::command("hide_cursor", NULL);
@@ -28,7 +28,7 @@ public:
 	}
 	virtual void on_manager_signal(KSig &sig) override {
 		if (sig.check(K_SIG_WINDOW_MOUSE_MOVE)) {
-			m_Time = K__ClockMsec32();
+			m_Time = K::clockMsec32();
 			if (m_Hiding) {
 				m_Hiding = false;
 				KWindow::command("show_cursor", NULL);

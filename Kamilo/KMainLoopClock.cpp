@@ -27,7 +27,7 @@ void KMainLoopClock::init() {
 	m_fpstime_base = 0;
 	m_fpstime_next = 0;
 	m_fpstime_maxdelay = 500;
-	m_startup_time64 = K__ClockMsec64();
+	m_startup_time64 = K::clockMsec64();
 }
 void KMainLoopClock::setFps(int fps) {
 	m_fps_required = fps;
@@ -89,7 +89,7 @@ bool KMainLoopClock::isPaused() {
 	return m_paused;
 }
 int KMainLoopClock::getTimeMsec() {
-	uint64_t now = K__ClockMsec64();
+	uint64_t now = K::clockMsec64();
 	uint64_t diff = now - m_startup_time64;
 	return (int)diff;
 }
@@ -174,7 +174,7 @@ void KMainLoopClock::syncFreq() {
 	}
 	if (! m_nowait) {
 		while (getWaitMsec() > 0) {
-			K__Sleep(1);
+			K::sleep(1);
 		}
 	}
 }

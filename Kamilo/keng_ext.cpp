@@ -663,7 +663,7 @@ bool KOrderedParameters::getParameter(int index, KPath *key, KPath *val) const {
 
 #pragma region KClock static functions
 uint64_t KClock::getSystemTimeNano64() {
-	return K__ClockNano64();
+	return K::clockNano64();
 }
 uint64_t KClock::getSystemTimeMsec64() {
 	uint64_t nano = getSystemTimeNano64();

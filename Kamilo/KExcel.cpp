@@ -562,10 +562,10 @@ private:
 				row0_ = row;
 				row1_ = row;
 			} else {
-				col0_ = K__Min(col0_, col);
-				col1_ = K__Max(col1_, col);
-				row0_ = K__Min(row0_, row);
-				row1_ = K__Max(row1_, row);
+				col0_ = K::min(col0_, col);
+				col1_ = K::max(col1_, col);
+				row0_ = K::min(row0_, row);
+				row1_ = K::max(row1_, row);
 			}
 		}
 	};
