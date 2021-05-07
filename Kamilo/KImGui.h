@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <inttypes.h>
 
-/// Dear ImGui
-/// - MIT lisence
-/// - https://github.com/ocornut/imgui
+// Dear ImGui
+// - MIT lisence
+// - https://github.com/ocornut/imgui
 #include "imgui/imgui.h"
 
 #include "KVideo.h"

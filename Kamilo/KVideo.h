@@ -830,24 +830,24 @@ private:
 	std::vector<KVec2> m_tmp_uv2;
 };
 
-extern const KColor Gizmo_DefaultLineColor; // Gizmo_DefaultLineColor(0, 1, 0, 1);
+extern const KColor K_GIZMO_LINE_COLOR; // KColor(0, 1, 0, 1);
 
 class KGizmo {
 public:
 	KGizmo();
-	void addLine(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=Gizmo_DefaultLineColor);
+	void addLine(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=K_GIZMO_LINE_COLOR);
 	void addLine(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color, const KColor &color2);
-	void addLineDash(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=Gizmo_DefaultLineColor);
-	void addLine2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=Gizmo_DefaultLineColor);
-	void addAabbSheared(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, float xshear, const KColor &color=Gizmo_DefaultLineColor);
-	void addAabb(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=Gizmo_DefaultLineColor);
-	void addAabbFrame2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=Gizmo_DefaultLineColor);
-	void addAabbFill2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=Gizmo_DefaultLineColor);
-	void addAabbEllipse2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=Gizmo_DefaultLineColor);
+	void addLineDash(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addLine2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addAabbSheared(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, float xshear, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addAabb(const KMatrix4 &matrix, const KVec3 &a, const KVec3 &b, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addAabbFrame2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addAabbFill2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addAabbEllipse2D(const KMatrix4 &matrix, float x0, float y0, float x1, float y1, const KColor &color=K_GIZMO_LINE_COLOR);
 	void addAxis(const KMatrix4 &matrix, const KVec3 &pos, float size);
-	void addMesh(const KMatrix4 &matrix, KMesh *mesh, const KColor &color=Gizmo_DefaultLineColor);
-	void addCircle(const KMatrix4 &matrix, const KVec3 &p, float r, int axis, const KColor &color=Gizmo_DefaultLineColor);
-	void addArrow(const KMatrix4 &matrix, const KVec3 &from, const KVec3 &to, float head, const KColor &color=Gizmo_DefaultLineColor);
+	void addMesh(const KMatrix4 &matrix, KMesh *mesh, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addCircle(const KMatrix4 &matrix, const KVec3 &p, float r, int axis, const KColor &color=K_GIZMO_LINE_COLOR);
+	void addArrow(const KMatrix4 &matrix, const KVec3 &from, const KVec3 &to, float head, const KColor &color=K_GIZMO_LINE_COLOR);
 	void newFrame();
 	void render(const KMatrix4 &projection);
 private:

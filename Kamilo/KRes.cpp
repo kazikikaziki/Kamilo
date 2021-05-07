@@ -320,7 +320,7 @@ bool KSpriteRes::buildFromImageEx(int img_w, int img_h, const KPath &texture_nam
 	mPivot.y = pivot_y;
 	mPivotInPixels = true;
 	mUsingPackedTexture = packed;
-	mPaletteCount = 0; // PALETTE_IMAGE_SIZE
+	mPaletteCount = 0; // K_PALETTE_IMAGE_SIZE
 	mMesh = KMesh();
 	mSubMeshIndex = image_index; // <-- 何番目の画像を取り出すか？
 	mTextureName = texture_name;
@@ -3348,7 +3348,7 @@ void KGameImagePack::makeSpritelistFromPack(const KImgPackR &pack, const KImage 
 			sp->mPivot.y = img_h / 2.0f;
 			sp->mPivotInPixels = true;
 			sp->mUsingPackedTexture = true;
-			sp->mPaletteCount = 0; // PALETTE_IMAGE_SIZE
+			sp->mPaletteCount = 0; // K_PALETTE_IMAGE_SIZE
 			sp->mMesh = KMesh();
 			sp->mSubMeshIndex = ii; // <-- 何番目の画像を取り出すか？
 			sp->mTextureName = tex_name;

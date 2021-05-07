@@ -74,6 +74,9 @@ public:
 	virtual KButtonItem * getButtonItem(int index) const = 0;
 	virtual KButtonItem * findButtonItem(const char *button) const = 0;
 
+	/// ボタンが押されたことにする（次回のポーリング時に反映される）
+	virtual void postButtonDown(const char *button) = 0;
+
 	/// アクションボタンが押されているかどうか
 	/// poll() した段階で入力が成立しているなら true を返す
 	virtual bool isButtonDownByPoll(const char *button, float *out_value) const = 0;
@@ -672,6 +675,11 @@ public:
 
 	// 現在のボタンの状態を得る
 	virtual bool isRawPressed(float *val, KPollFlags flags) const override {
+		if (flags & POLLFLAG_FORCE_PUSH) {
+			if (val) *val = 1.0f;
+			return true;
+		}
+
 		for (auto it=m_keys.begin(); it!=m_keys.end(); ++it) {
 			if ((*it)->isPressed(val, flags)) {
 				return true;
@@ -693,6 +701,8 @@ class CButtonMgrImpl: public KButton, public IKeyHistory {
 	// ポーリング単位での入力履歴。
 	// poll するたびに更新される
 	std::vector<SKeyHistoryItem> m_history_per_poll;
+
+	std::unordered_set<std::string> m_post_buttons;
 
 	KPollFlags m_poll_flags;
 
@@ -745,6 +755,9 @@ public:
 	}
 	virtual int getButtonCount() const override {
 		return (int)m_buttons.size();
+	}
+	virtual void postButtonDown(const char *button) override {
+		m_post_buttons.insert(button);
 	}
 	virtual KButtonItem * findButtonItem(const char *button) const override {
 		for (size_t i=0; i<m_buttons.size(); i++) {
@@ -980,8 +993,19 @@ private:
 		// 全ボタンの入力状態を更新
 		for (size_t i=0; i<m_buttons.size(); i++) {
 			CActionButtonKeyElm *btn = m_buttons[i];
-			btn->poll(m_poll_flags);
+
+			KPollFlags poll_flags = m_poll_flags;
+
+			auto it = m_post_buttons.find(btn->m_name);
+			if (it != m_post_buttons.end()) {
+				// このボタンが押されたことにする
+				poll_flags |= POLLFLAG_FORCE_PUSH;
+			}
+
+			btn->poll(poll_flags);
 		}
+
+		m_post_buttons.clear();
 
 		// 現在時刻
 		int time = get_clock_msec();
@@ -1228,6 +1252,14 @@ public:
 	bool getGameButtonDown(const char *button) const {
 		return m_game_buttons->getButtonDown(button, nullptr);
 	};
+	void postButtonDown(const char *button) {
+		if (m_app_buttons->findButtonItem(button)) {
+			m_app_buttons->postButtonDown(button);
+		}
+		if (m_game_buttons->findButtonItem(button)) {
+			m_game_buttons->postButtonDown(button);
+		}
+	}
 	int isConflict(const char *button1, const char *button2) const {
 		return m_game_buttons->isConflict(button1, button2);
 	}
@@ -1424,9 +1456,11 @@ bool KInputMap::getButtonDown(const char *button) {
 	return getAppButtonDown(button) || getGameButtonDown(button);
 }
 
-
-
-
+/// ボタンを押したことにする
+void KInputMap::postButtonDown(const char *button) {
+	K__Assert(g_InputMap);
+	g_InputMap->postButtonDown(button);
+}
 
 
 

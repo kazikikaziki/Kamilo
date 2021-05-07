@@ -44,7 +44,7 @@ static const uint32_t K__COLOR32_WHITE = 0xFFFFFFFF;
 static const uint32_t K__COLOR32_ZERO = 0x00000000;
 
 
-const KColor Gizmo_DefaultLineColor(0, 1, 0, 1);
+const KColor K_GIZMO_LINE_COLOR(0, 1, 0, 1);
 
 
 #pragma region Def/Type/Utils

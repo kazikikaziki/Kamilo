@@ -393,10 +393,10 @@ bool KColor::equals(const KColor &other, float tolerance) const {
 }
 bool KColor::operator == (const KColor &op) const {
 	return 
-		_Equals(this->r, op.r, MAX_COLOR_ERROR) &&
-		_Equals(this->g, op.g, MAX_COLOR_ERROR) &&
-		_Equals(this->b, op.b, MAX_COLOR_ERROR) &&
-		_Equals(this->a, op.a, MAX_COLOR_ERROR);
+		_Equals(this->r, op.r, K_MAX_COLOR_ERROR) &&
+		_Equals(this->g, op.g, K_MAX_COLOR_ERROR) &&
+		_Equals(this->b, op.b, K_MAX_COLOR_ERROR) &&
+		_Equals(this->a, op.a, K_MAX_COLOR_ERROR);
 }
 bool KColor::operator != (const KColor &op) const {
 	return !(*this == op);

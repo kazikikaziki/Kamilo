@@ -461,7 +461,7 @@ std::string KEdgeDocument::expotyXml() const {
 /// EDGE 背景色に該当するピクセルのみアルファ値が 0 になるが、それ以外のピクセルのアルファは必ず 255 になる
 KImage KEdgeDocument::exportPaletteImage() const {
 	if (m_palettes.empty()) return KImage();
-	KImage pal = KImage::createFromSize(PALETTE_IMAGE_SIZE, PALETTE_IMAGE_SIZE * m_palettes.size());
+	KImage pal = KImage::createFromSize(K_PALETTE_IMAGE_SIZE, K_PALETTE_IMAGE_SIZE * m_palettes.size());
 	uint8_t *dest = pal.lockData();
 	for (size_t p=0; p<m_palettes.size(); p++) {
 		const auto &bgr = m_palettes[p]->m_bgr_colors;

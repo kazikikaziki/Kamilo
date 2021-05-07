@@ -3,7 +3,7 @@
 
 namespace Kamilo {
 
-static const float MAX_COLOR_ERROR = 0.5f / 255.0f;
+const float K_MAX_COLOR_ERROR = 0.5f / 255.0f;
 
 class KColor32;
 

@@ -19,6 +19,7 @@ enum PollFlag {
 	POLLFLAG_NO_KEYBOARD = 1,
 	POLLFLAG_NO_JOYSTICK = 2,
 	POLLFLAG_NO_MOUSE    = 4,
+	POLLFLAG_FORCE_PUSH  = 8,
 };
 typedef int KPollFlags;
 
@@ -85,6 +86,8 @@ public:
 
 	static bool isButtonDown(const char *button);
 	static bool getButtonDown(const char *button);
+
+	static void postButtonDown(const char *button);
 
 	// 互換性
 	static void addButton(const char *button, KButtonFlags flags=0) {

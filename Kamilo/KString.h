@@ -16,7 +16,7 @@
 
 namespace Kamilo {
 
-static const char * TOKEN_DELIMITERS = "\n\r\t ";
+static const char *K_TOKEN_DELIMITERS = "\n\r\t ";
 static const char *K_UTF8BOM_STR = "\xEF\xBB\xBF";
 static const int   K_UTF8BOM_LEN = 3;
 
@@ -317,7 +317,7 @@ public:
 	 bool pathGlob(const KStringView &pattern) const;
 	__nodiscard__ std::string pathNormalized() const;
 	__nodiscard__ std::string pathPushLast(const KStringView &last) const;
-	__nodiscard__ std::vector<KStringView> split(const char *delims=TOKEN_DELIMITERS, bool condense_delims=true, bool _trim=true, int maxcount=0, KStringView *rest=nullptr) const;
+	__nodiscard__ std::vector<KStringView> split(const char *delims=K_TOKEN_DELIMITERS, bool condense_delims=true, bool _trim=true, int maxcount=0, KStringView *rest=nullptr) const;
 	__nodiscard__ std::vector<KStringView> splitComma(int maxcount=0, KStringView *rest=nullptr) const;
 	__nodiscard__ std::vector<KStringView> splitPaths(int maxcount=0, KStringView *rest=nullptr) const;
 	__nodiscard__ std::vector<KStringView> splitLines(bool skip_empty_lines=true, bool _trim=true) const;
@@ -381,7 +381,7 @@ public:
 	__nodiscard__ KString trimUtf8Bom() const;
 	__nodiscard__ KString trim() const;
 	__nodiscard__ KStringView view() const;
-	__nodiscard__ std::vector<KString> split(const char *delims=TOKEN_DELIMITERS, bool condense_delims=true, bool _trim=true, int maxcount=0, KString *rest=nullptr) const;
+	__nodiscard__ std::vector<KString> split(const char *delims=K_TOKEN_DELIMITERS, bool condense_delims=true, bool _trim=true, int maxcount=0, KString *rest=nullptr) const;
 	__nodiscard__ std::vector<KString> splitComma(int maxcount=0, KString *rest=nullptr) const;
 	__nodiscard__ std::vector<KString> splitPaths(int maxcount=0, KString *rest=nullptr) const;
 	__nodiscard__ std::vector<KString> splitLines(bool skip_empty_lines=true, bool _trim=true) const;
@@ -654,7 +654,7 @@ public:
 	KToken();
 
 	/// コンストラクタ。引数は tokenize() と同じ
-	KToken(const char *text, const char *delims=TOKEN_DELIMITERS, bool condense_delims=true, size_t maxtokens=0);
+	KToken(const char *text, const char *delims=K_TOKEN_DELIMITERS, bool condense_delims=true, size_t maxtokens=0);
 
 	/// 文字列 text を文字集合 delim で区切り、トークン配列を得る
 	///

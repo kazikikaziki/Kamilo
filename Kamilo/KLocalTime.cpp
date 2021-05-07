@@ -64,14 +64,14 @@ time_t KLocalTime::get_time() const {
 	return t;
 }
 std::string KLocalTime::format(const char *fmt) const {
-	const char *f = fmt ? fmt : KLocalTime_FORMAT;
+	const char *f = fmt ? fmt : K_TIME_FORMAT;
 	char s[256];
 	struct tm _tm = get_tm();
 	strftime(s, sizeof(s), f, &_tm);
 	return s;
 }
 bool KLocalTime::parse(const char *str, const char *fmt, const char *loc) {
-	const char *f = fmt ? fmt : KLocalTime_FORMAT;
+	const char *f = fmt ? fmt : K_TIME_FORMAT;
 	struct tm tm;
 	memset(&tm, 0, sizeof(tm));
 

@@ -13,7 +13,7 @@ namespace Kamilo {
 
 /// パレットを画像として保存する時の画像サイズ。
 /// ひとつのパレットは、16x16ドットの RGBA32 で画像化される
-static const int PALETTE_IMAGE_SIZE = 16;
+const int K_PALETTE_IMAGE_SIZE = 16;
 
 
 class KEdgePalette;
