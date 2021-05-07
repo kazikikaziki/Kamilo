@@ -1456,7 +1456,7 @@ public:
 				// 部分一致したものだけリストに入れる
 				for (auto it=allnames.cbegin(); it!=allnames.cend(); ++it) {
 					const char *s = it->u8();
-					if (KStringUtils::find(it->u8(), s_filter) >= 0) {
+					if (K::strFind(it->u8(), s_filter) >= 0) {
 						names.push_back(*it);
 					}
 				}
@@ -2438,7 +2438,7 @@ public:
 				// 部分一致したものだけリストに入れる
 				for (auto it=m_clips.cbegin(); it!=m_clips.cend(); ++it) {
 					const char *s = it->first.u8();
-					if (KStringUtils::find(s, s_filter) >= 0) {
+					if (K::strFind(s, s_filter) >= 0) {
 						names.push_back(it->first);
 					}
 				}
@@ -2972,7 +2972,7 @@ private:
 
 				// ラベル名がコマンド開始記号 '@' を含んでいる場合、その直前までを名前文字列とする。
 				// つまり、元のラベルが "#body@blend=add" ならば "body" の部分だけを取り出すことになる
-				int len = KStringUtils::findChar(name_str, '@');
+				int len = K::strFindChar(name_str, '@');
 				if (len >= 0) {
 					name_str = name_str.substr(0, len);
 				}
@@ -3055,7 +3055,7 @@ private:
 			const KEdgeLayer *layer = page->getLayer(i);
 
 			// ラベル文字列が '@' を含んでいる場合、それよりも後の部分がコマンド文字列になる
-			int pos = KStringUtils::findChar(layer->m_label_u8, '@');
+			int pos = K::strFindChar(layer->m_label_u8, '@');
 			if (pos >= 0) {
 				// 文字列が '@' を含んでいた。それよりも後ろの部分を得る
 				cmds[i] = layer->m_label_u8.substr(pos + 1);

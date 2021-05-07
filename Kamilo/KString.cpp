@@ -191,7 +191,7 @@ bool KStringView::endsWith(const char *sub) const {
 	return false;
 }
 KStringView KStringView::trimUtf8Bom() const {
-	const char *s = KStringUtils::skipUtf8Bom(mStr);
+	const char *s = K::strSkipBom(mStr);
 	const char *e = end();
 	return KStringView(s, e-s);
 }
@@ -561,11 +561,11 @@ KString KString::fromAnsi(const std::string &mb, const char *_locale) {
 	return KString::fromWide(ws);
 }
 KString KString::fromBin(const void *data, size_t size) {
-	std::wstring ws = KStringUtils::binToWide(data, size);
+	std::wstring ws = K::strBinToWide(data, size);
 	return KString::fromWide(ws);
 }
 KString KString::fromBin(const std::string &bin) {
-	std::wstring ws = KStringUtils::binToWide(bin.data(), bin.size());
+	std::wstring ws = K::strBinToWide(bin.data(), bin.size());
 	return KString::fromWide(ws);
 }
 KString::KString() {
@@ -636,13 +636,13 @@ bool KString::equals(const KString &s) const {
 	return strcmp(c_str(), s.c_str()) == 0;
 }
 int KString::find(const char *substr, int start) const {
-	return KStringUtils::find(c_str(), substr, start);
+	return K::strFind(c_str(), substr, start);
 }
 int KString::find(const KString &substr, int start) const {
 	return find(substr.c_str(), start);
 }
 int KString::findChar(char chr, int start) const {
-	return KStringUtils::findChar(c_str(), chr, start);
+	return K::strFindChar(c_str(), chr, start);
 }
 bool KString::startsWith(const char *substr) const {
 	return KStringUtils::startsWith(c_str(), substr);
@@ -670,7 +670,7 @@ bool KString::toFloatTry(float *val) const {
 }
 KString KString::replace(int start, int count, const char *str) const {
 	std::string s = toStdString();
-	KStringUtils::replace(s, start, count, str);
+	K::strReplace(s, start, count, str);
 	return s;
 }
 KString KString::replace(int start, int count, const KString &str) const {
@@ -679,7 +679,7 @@ KString KString::replace(int start, int count, const KString &str) const {
 
 KString KString::replace(const char *before, const char *after) const {
 	std::string s = toStdString();
-	KStringUtils::replace(s, before, after);
+	K::strReplace(s, before, after);
 	return s;
 }
 KString KString::replace(const KString &before, const KString &after) const {
@@ -688,7 +688,7 @@ KString KString::replace(const KString &before, const KString &after) const {
 
 KString KString::replaceChar(char before, char after) const {
 	std::string s = toStdString();
-	KStringUtils::replaceChar(const_cast<char*>(s.data()), before, after);
+	K::strReplaceChar(const_cast<char*>(s.data()), before, after);
 	return s;
 }
 KString KString::remove(int start, int count) const {
@@ -734,7 +734,7 @@ KString KString::subString(int start, int count) const {
 	}
 }
 KString KString::trimUtf8Bom() const {
-	const char *s = KStringUtils::skipUtf8Bom(c_str());
+	const char *s = K::strSkipBom(c_str());
 	return s;
 }
 KString KString::trim() const {
@@ -841,50 +841,6 @@ bool KString::operator != (const KString &s) const {
 
 #pragma region KStringUtils
 
-std::wstring KStringUtils::binToWide(const void *data, int size) {
-	// エンコード不明の文字列からワイド文字列を得る
-	// あくまでも日本語前提なので、ここでは SJIS または UTF8 が使われていると仮定する
-	if (data == nullptr || size == 0) {
-		return std::wstring();
-	}
-
-	// BOM で始まるデータなら UTF8 で確定させる
-	if (K::strStartsWithBom(data, size)) {
-		return K::strUtf8ToWide((const char *)data);
-	}
-
-	std::wstring ws;
-
-	// 現在のロケールにおけるマルチバイト文字列として変換
-	ws = K::strAnsiToWide((const char *)data, "");
-	if (ws.size() > 0) {
-		return ws;
-	}
-
-	// SJIS であると仮定して変換
-	// （非日本語環境でゲームを実行しているとき、SJIS保存されたファイルをロードしようとしている場合など）
-	// SJISをUTF8として解釈できる事が多いが、UTF8をSJISとして解釈できることは少ないため、
-	// 先にSJISへの変換を試みる。入力がUTF8の場合は大体失敗してくれるはず。
-	ws = K::strAnsiToWide((const char *)data, "JPN");
-	if (ws.size() > 0) {
-		return ws;
-	}
-
-	// BOM なしの UTF8 であると仮定して変換
-	ws = K::strUtf8ToWide((const char *)data);
-	if (ws.size() > 0) {
-		return ws;
-	}
-
-	// どの方法でも変換できなかった
-	return std::wstring();
-}
-
-/// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
-/// utf8 bom で始まっていない場合はそのまま u8 を返す
-const char * KStringUtils::skipUtf8Bom(const char *s) {
-	return K::strSkipBom(s);
-}
 
 /// strtol を簡略化したもの。
 ///
@@ -1022,46 +978,6 @@ bool KStringUtils::trim(std::string &s) {
 	}
 	return ret;
 }
-int KStringUtils::find(const char *s, const char *sub, int start) {
-	return K::strFind(s, sub, start);
-}
-int KStringUtils::find(const std::string &s, const std::string &sub, int start) {
-	return K::strFind(s.c_str(), sub.c_str(), start);
-}
-int KStringUtils::findChar(const char *s, char chr, int start) {
-	K__Assert(s);
-	if (start < 0) start = 0;
-	if ((int)strlen(s) <= start) return -1;
-	const char *p = strchr(s + start, chr);
-	return p ? (p - s) : -1;
-}
-int KStringUtils::findChar(const std::string &s, char chr, int start) {
-	return findChar(s.c_str(), chr, start);
-}
-void KStringUtils::replace(std::string &s, int start, int count, const char *str) {
-	K__Assert(str);
-	s.erase(start, count);
-	s.insert(start, str);
-}
-void KStringUtils::replace(std::string &s, const char *before, const char *after) {
-	K__Assert(before);
-	K__Assert(after);
-	if (isEmpty(before)) return;
-	int pos = find(s.c_str(), before);
-	while (pos >= 0) {
-		replace(s, pos, strlen(before), after);
-		pos += strlen(after);
-		pos = find(s.c_str(), before, pos);
-	}
-}
-void KStringUtils::replaceChar(char *s, char before, char after) {
-	K__Assert(s);
-	for (size_t i=0; s[i]; i++) {
-		if (s[i] == before) {
-			s[i] = after;
-		}
-	}
-}
 uint32_t KStringUtils::gethash(const char *s, int size) {
 	// CRC32 の計算を行う
 	// 厳密には crc32 ではなく crc32b であることに注意. PHP の crc32 と同じで, ZIP のチェックサムとして使える
@@ -1160,11 +1076,11 @@ void Test_str() {
 	}
 	{
 		std::string s;
-		s="abc";    KStringUtils::replace(s, "a", "");   K__Verify(s=="bc");
-		s="abcabc"; KStringUtils::replace(s, "a", "");   K__Verify(s=="bcbc");
-		s="abcabc"; KStringUtils::replace(s, "a", "ax"); K__Verify(s=="axbcaxbc");
-		s="abc";    KStringUtils::replace(s, "", "x");   K__Verify(s=="abc");
-		s="abc";    KStringUtils::replace(s, "", "");    K__Verify(s=="abc");
+		s="abc";    K::strReplace(s, "a", "");   K__Verify(s=="bc");
+		s="abcabc"; K::strReplace(s, "a", "");   K__Verify(s=="bcbc");
+		s="abcabc"; K::strReplace(s, "a", "ax"); K__Verify(s=="axbcaxbc");
+		s="abc";    K::strReplace(s, "", "x");   K__Verify(s=="abc");
+		s="abc";    K::strReplace(s, "", "");    K__Verify(s=="abc");
 
 		s="   aaabbb "; KStringUtils::trim(s); K__Verify(s=="aaabbb");
 		s="aaabbb ";    KStringUtils::trim(s); K__Verify(s=="aaabbb");
@@ -1186,11 +1102,11 @@ void Test_str() {
 		K__Verify(KStringUtils::endsWith("abc ", "bc") == false);
 		K__Verify(KStringUtils::endsWith("abc", "xabc") == false);
 
-		K__Verify(KStringUtils::find("aaa x", "x") == 4);
-		K__Verify(KStringUtils::find("aaa x", "a") == 0);
-		K__Verify(KStringUtils::find("aaa x", "aaa") == 0);
-		K__Verify(KStringUtils::find("aaa x", " ") == 3);
-		K__Verify(KStringUtils::find("aa", "aaaa") == -1);
+		K__Verify(K::strFind("aaa x", "x") == 4);
+		K__Verify(K::strFind("aaa x", "a") == 0);
+		K__Verify(K::strFind("aaa x", "aaa") == 0);
+		K__Verify(K::strFind("aaa x", " ") == 3);
+		K__Verify(K::strFind("aa", "aaaa") == -1);
 
 		K__Verify(KStringUtils::toInt("12") == 12);
 		K__Verify(KStringUtils::toInt("+12") == 12);
@@ -1353,7 +1269,7 @@ void KPathUtils::K_PathNormalizeEx(char *path_u8, char old_delim, char new_delim
 	K__Assert(isprint(old_delim));
 	K__Assert(isprint(new_delim));
 	KStringUtils::trim(path_u8); // 前後の空白をスキップ
-	KStringUtils::replaceChar(path_u8, old_delim, new_delim); // 区切り文字を置換
+	K::strReplaceChar(path_u8, old_delim, new_delim); // 区切り文字を置換
 	K_PathRemoveLastDelim(path_u8); // 最後の区切り文字は削除する
 }
 void KPathUtils::K_PathNormalizeEx(char *out_path, int out_size, const char *path_u8, char old_delim, char new_delim) {
@@ -2122,10 +2038,6 @@ static void kkpath_strcpy(char *dst, size_t dstlen, const char *src) {
 static void kkpath_strcat(char *dst, size_t dstlen, const char *src) {
 	strcat_s(dst, dstlen, src);
 }
-static void kkpath_replace_char(char *s, char before, char after) {
-	KStringUtils::replaceChar(s, before, after);
-}
-
 // 末尾の区切り文字を取り除き、適切な区切り文字に変換した文字列を得る
 static void kkpath_normalize(char *dest, const char *path, int maxlen, char olddelim, char newdelim) {
 	KPathUtils::K_PathNormalizeEx(dest, maxlen, path, olddelim, newdelim);
@@ -2159,7 +2071,7 @@ KPath::KPath() {
 }
 KPath::KPath(const char *u8) {
 	if (u8 && u8[0]) {
-		u8 = KStringUtils::skipUtf8Bom(u8); // BOMをスキップ
+		u8 = K::strSkipBom(u8); // BOMをスキップ
 		kkpath_normalize(m_path, u8, KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
 	} else {
 		m_path[0] = 0;
@@ -2521,14 +2433,14 @@ bool KPath::isRelative() const {
 std::wstring KPath::toWideString(char sep) const {
 	char tmp[SIZE];
 	kkpath_strcpy(tmp, sizeof(tmp), m_path);
-	kkpath_replace_char(tmp, K__PATH_SLASH, sep);
+	K::strReplaceChar(tmp, K__PATH_SLASH, sep);
 	return K::strUtf8ToWide(tmp);
 }
 std::string KPath::toAnsiString(char sep, const char *_locale) const {
 	K__Assert(_locale);
 	char tmp[SIZE];
 	kkpath_strcpy(tmp, sizeof(tmp), m_path);
-	kkpath_replace_char(tmp, K__PATH_SLASH, sep);
+	K::strReplaceChar(tmp, K__PATH_SLASH, sep);
 	return K::strUtf8ToAnsi(tmp, _locale);
 }
 std::string KPath::toUtf8(char sep) const {

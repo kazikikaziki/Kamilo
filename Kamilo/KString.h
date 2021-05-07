@@ -22,12 +22,6 @@ static const int   K_UTF8BOM_LEN = 3;
 
 class KStringUtils {
 public:
-	static std::wstring binToWide(const void *data, int size);
-
-	/// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
-	/// utf8 bom で始まっていない場合はそのまま u8 を返す
-	static const char * skipUtf8Bom(const char *u8);
-
 	/// strtol を簡略化したもの
 	static int toInt(const char *s, int def=0);
 	static int toInt(const std::string &s, int def=0);
@@ -86,27 +80,6 @@ public:
 	static bool trim(char *s);
 	static bool trim(std::string &s);
 	static bool equals(const char *s1, const char *s2);
-
-
-	/// インデックス start 以降の部分から、文字列 sub に一致する部分を探す。
-	/// みつかれば、その先頭インデックスを返す。そうでなければ -1 を返す。
-	/// sub に空文字列を指定した場合は常に検索開始位置 (start) を返す
-	static int find(const char *s, const char *sub, int start=0);
-	static int find(const std::string &s, const std::string &sub, int start=0);
-
-	/// インデックス start 以降の部分から文字 chr に一致する部分を探す
-	/// みつかれば、そのインデックスを返す。そうでなければ -1 を返す。
-	static int findChar(const char *s, char chr, int start=0);
-	static int findChar(const std::string &s, char chr, int start=0);
-
-	/// start, count で指定された範囲の部分文字列を str で置換する。
-	/// 置換前と置換後の文字数が変化してもよい。
-	/// start には 0 以上 size() 未満の開始インデックスを指定する。
-	/// count には文字数を指定する。-1 を指定した場合、残り全ての文字を対象にする。
-	/// 不正な引数を指定した場合、関数は失敗し、文字列は変化しない。
-	static void replace(std::string &s, int start, int count, const char *str);
-	static void replace(std::string &s, const char *before, const char *after);
-	static void replaceChar(char *s, char before, char after);
 
 	static uint32_t gethash(const char *s, int len=0);
 };

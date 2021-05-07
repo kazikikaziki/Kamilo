@@ -123,7 +123,9 @@ public:
 	static const char * strSkipBom(const char *s);
 	static bool strStartsWithBom(const void *data, int size);
 	static bool strStartsWithBom(const std::string &s);
-	static int strFind(const std::string &s, const std::string &sub, int start);
+	static int strFind(const std::string &s, const std::string &sub, int start=0);
+	static int strFindChar(const char *s, char chr, int start=0);
+	static int strFindChar(const std::string &s, char chr, int start=0);
 	static void strReplace(std::string &s, int start, int count, const std::string &str);
 	static void strReplace(std::string &s, const std::string &before, const std::string &after);
 	static void strReplaceChar(char *s, char before, char after);
@@ -154,6 +156,7 @@ public:
 	static std::string strUtf8ToAnsi(const std::string &u8, const char *_locale);
 	static int strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale);
 	static int strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc);
+	static std::wstring strBinToWide(const void *data, int size);
 
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }

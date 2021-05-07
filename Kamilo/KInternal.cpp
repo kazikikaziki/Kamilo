@@ -477,6 +477,10 @@ bool K::strStartsWithBom(const void *data, int size) {
 bool K::strStartsWithBom(const std::string &s) {
 	return strStartsWithBom(s.data(), s.size());
 }
+
+/// インデックス start 以降の部分から、文字列 sub に一致する部分を探す。
+/// みつかれば、その先頭インデックスを返す。そうでなければ -1 を返す。
+/// sub に空文字列を指定した場合は常に検索開始位置 (start) を返す
 int K::strFind(const std::string &s, const std::string &sub, int start) {
 	if (start < 0) start = 0;
 	if ((int)s.size() < start) return -1; // 範囲外
@@ -485,10 +489,30 @@ int K::strFind(const std::string &s, const std::string &sub, int start) {
 	const char *p = strstr(s.c_str() + start, sub.c_str());
 	return p ? (p - s.c_str()) : -1;
 }
+
+/// インデックス start 以降の部分から文字 chr に一致する部分を探す
+/// みつかれば、そのインデックスを返す。そうでなければ -1 を返す。
+int K::strFindChar(const char *s, char chr, int start) {
+	K__Assert(s);
+	if (start < 0) start = 0;
+	if ((int)strlen(s) <= start) return -1;
+	const char *p = strchr(s + start, chr);
+	return p ? (p - s) : -1;
+}
+int K::strFindChar(const std::string &s, char chr, int start) {
+	return strFindChar(s.c_str(), chr, start);
+}
+
+/// start, count で指定された範囲の部分文字列を str で置換する。
+/// 置換前と置換後の文字数が変化してもよい。
+/// start には 0 以上 size() 未満の開始インデックスを指定する。
+/// count には文字数を指定する。-1 を指定した場合、残り全ての文字を対象にする。
+/// 不正な引数を指定した場合、関数は失敗し、文字列は変化しない。
 void K::strReplace(std::string &s, int start, int count, const std::string &str) {
 	s.erase(start, count);
 	s.insert(start, str);
 }
+
 void K::strReplace(std::string &s, const std::string &before, const std::string &after) {
 	if (before.empty()) return;
 	int pos = strFind(s.c_str(), before.c_str(), 0);
@@ -874,6 +898,44 @@ int K::strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, co
 	return num_wchars; // 0=ERROR
 }
 
+std::wstring K::strBinToWide(const void *data, int size) {
+	// エンコード不明の文字列からワイド文字列を得る
+	// あくまでも日本語前提なので、ここでは SJIS または UTF8 が使われていると仮定する
+	if (data == nullptr || size == 0) {
+		return std::wstring();
+	}
+
+	// BOM で始まるデータなら UTF8 で確定させる
+	if (K::strStartsWithBom(data, size)) {
+		return K::strUtf8ToWide((const char *)data);
+	}
+
+	std::wstring ws;
+
+	// 現在のロケールにおけるマルチバイト文字列として変換
+	ws = K::strAnsiToWide((const char *)data, "");
+	if (ws.size() > 0) {
+		return ws;
+	}
+
+	// SJIS であると仮定して変換
+	// （非日本語環境でゲームを実行しているとき、SJIS保存されたファイルをロードしようとしている場合など）
+	// SJISをUTF8として解釈できる事が多いが、UTF8をSJISとして解釈できることは少ないため、
+	// 先にSJISへの変換を試みる。入力がUTF8の場合は大体失敗してくれるはず。
+	ws = K::strAnsiToWide((const char *)data, "JPN");
+	if (ws.size() > 0) {
+		return ws;
+	}
+
+	// BOM なしの UTF8 であると仮定して変換
+	ws = K::strUtf8ToWide((const char *)data);
+	if (ws.size() > 0) {
+		return ws;
+	}
+
+	// どの方法でも変換できなかった
+	return std::wstring();
+}
 #pragma endregion // string
 
 

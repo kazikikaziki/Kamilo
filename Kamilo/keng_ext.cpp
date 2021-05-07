@@ -61,7 +61,7 @@ static void kkstr_Error(const char *msg, const void *data, int size) {
 
 std::wstring KConv::toWide(const void *data, int size) {
 	// ワイド文字への変換を試みる
-	std::wstring out = KStringUtils::binToWide(data, size);
+	std::wstring out = K::strBinToWide(data, size);
 	if (out.size() > 0) {
 		return out;
 	}
@@ -81,7 +81,7 @@ std::wstring KConv::toWide(const std::string &data) {
 }
 std::string KConv::toUtf8(const void *data, int size) {
 	// ワイド文字への変換を試みる
-	std::wstring ws = KStringUtils::binToWide(data, size);
+	std::wstring ws = K::strBinToWide(data, size);
 	if (ws.size() > 0) {
 		return K::strWideToUtf8(ws);
 	}

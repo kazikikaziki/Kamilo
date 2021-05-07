@@ -489,7 +489,7 @@ void KNode::setName(const KName &name) {
 	}
 #ifdef _DEBUG
 	// パス区切りを含んでいてはいけない。
-	if (KStringUtils::findChar(name.c_str(), '/') >= 0) {
+	if (K::strFindChar(name.c_str(), '/') >= 0) {
 		K__Error("E_INVALID_ENTITY_NAME: %s", name.c_str());
 		return;
 	}

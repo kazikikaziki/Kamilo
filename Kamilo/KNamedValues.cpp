@@ -292,7 +292,7 @@ int KNamedValues::getBinary(const char *name, void *out, int maxsize) const {
 	const char *s = getString(name);
 
 	// コロンよりも左側の文字列を得る。データのバイト数が16進数表記されている
-	int colonPos = KStringUtils::findChar(s, ':');
+	int colonPos = K::strFindChar(s, ':');
 	if (colonPos <= 0) {
 		return 0; // NO DATA 
 	}
