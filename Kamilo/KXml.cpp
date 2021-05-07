@@ -32,7 +32,7 @@ static bool _LoadTinyXml(const std::string &xlmtext_u8, const std::string &debug
 	// For example, Japanese systems traditionally use SHIFT-JIS encoding.
 	// Text encoded as SHIFT-JIS can not be read by TinyXML. 
 	// A good text editor can import SHIFT-JIS and then save as UTF-8.
-	tinyxml2::XMLError xerr = tinyxml2_doc.Parse(K__SkipUtf8Bom(xlmtext_u8.c_str()));
+	tinyxml2::XMLError xerr = tinyxml2_doc.Parse(K::strSkipBom(xlmtext_u8.c_str()));
 	if (xerr == tinyxml2::XML_SUCCESS) {
 		*p_errmsg = "";
 		return true;

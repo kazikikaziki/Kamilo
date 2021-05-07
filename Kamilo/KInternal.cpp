@@ -328,66 +328,10 @@ std::string K__sprintf_std(const char *fmt, ...) {
 
 
 
-void K__ReplaceA(char *s, char before, char after) {
-	K__Assert(s);
-	for (size_t i=0; s[i]; i++) {
-		if (s[i] == before) {
-			s[i] = after;
-		}
-	}
-}
-void K__ReplaceW(wchar_t *s, wchar_t before, wchar_t after) {
-	K__Assert(s);
-	for (size_t i=0; s[i]; i++) {
-		if (s[i] == before) {
-			s[i] = after;
-		}
-	}
-}
-int K__StrFind(const char *s, const char *sub, int start) {
-	K__Assert(s);
-	K__Assert(sub);
-	if (start < 0) start = 0;
-	if ((int)strlen(s) < start) return -1; // 範囲外
-	if ((int)strlen(s) == start) return strlen(sub)==0 ? start : -1; // 検索開始位置が文字列末尾の場合、空文字列だけがマッチする
-	if (strlen(sub)==0) return start; // 空文字列はどの場所であっても必ずマッチする。常に検索開始位置にマッチする
-	const char *p = strstr(s + start, sub);
-	return p ? (p - s) : -1;
-}
-void K__Replace(std::string &s, int start, int count, const char *str) {
-	K__Assert(str);
-	s.erase(start, count);
-	s.insert(start, str);
-}
-void K__Replace(std::string &s, const char *before, const char *after) {
-	K__Assert(before);
-	K__Assert(after);
-	if (strlen(before) == 0) return;
-	int pos = K__StrFind(s.c_str(), before, 0);
-	while (pos >= 0) {
-		K__Replace(s, pos, strlen(before), after);
-		pos += strlen(after);
-		pos = K__StrFind(s.c_str(), before, pos);
-	}
-}
 
 
 
 
-/// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
-/// utf8 bom で始まっていない場合はそのまま u8 を返す
-const char * K__SkipUtf8Bom(const char *s) {
-	K__Assert(s);
-	if (strncmp(s, K__UTF8BOM_STR, K__UTF8BOM_LEN) == 0) {
-		return s + K__UTF8BOM_LEN;
-	} else {
-		return s;
-	}
-}
-
-bool K__StartsWithUtf8Bom(const void *data, int size) {
-	return (size >= K__UTF8BOM_LEN) && (memcmp(data, K__UTF8BOM_STR, K__UTF8BOM_LEN) == 0);
-}
 
 
 // utf8 から wide に変換する
@@ -397,8 +341,8 @@ bool K__StartsWithUtf8Bom(const void *data, int size) {
 int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes) {
 	if (u8bytes <= 0) u8bytes = strlen(u8);
 	const char *u8str = u8;
-	if (K__StartsWithUtf8Bom(u8, u8bytes)) { // BOMをスキップする
-		u8str = K__SkipUtf8Bom(u8);
+	if (K::strStartsWithBom(u8, u8bytes)) { // BOMをスキップする
+		u8str = K::strSkipBom(u8);
 		u8bytes -= K__UTF8BOM_LEN;
 	}
 	return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, u8str, u8bytes, out_ws, max_out_widechars);
@@ -407,7 +351,7 @@ int K__Utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8
 // utf8 から wide に変換する
 // ※BOMは取り除かれる
 std::wstring K__Utf8ToWideStd(const std::string &u8) {
-	const char *s = K__SkipUtf8Bom(u8.c_str()); // BOMをスキップする
+	const char *s = K::strSkipBom(u8.c_str()); // BOMをスキップする
 	if (s[0] == '\0') {
 		return L"";
 	}
@@ -581,11 +525,11 @@ std::wstring K__AnsiToWideStd(const std::string &ansi, const char *_locale) {
 void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) {
 	// windows形式のパスに変換する
 	K__Utf8ToWide(out_wpath, num_wchars, path_u8, 0);
-	K__ReplaceW(out_wpath, K__PATH_SLASHW, K__PATH_BACKSLASHW);
+	K::strReplaceChar(out_wpath, K__PATH_SLASHW, K__PATH_BACKSLASHW);
 }
 void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) {
 	K__WideToUtf8(out_path_u8, num_bytes, wpath);
-	K__ReplaceA(out_path_u8, K__PATH_BACKSLASH, K__PATH_SLASH);
+	K::strReplaceChar(out_path_u8, K__PATH_BACKSLASH, K__PATH_SLASH);
 }
 
 
@@ -754,7 +698,7 @@ uint32_t K::sysGetCurrentThreadId() {
 std::string K::sysGetCurrentDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetCurrentDirectoryW(MAX_PATH, wpath);
-	K__ReplaceW(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
+	strReplaceChar(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
 	return K__WideToUtf8Std(wpath);
 }
 
@@ -776,14 +720,14 @@ bool K::sysSetCurrentDir(const std::string &dir) {
 std::string K::sysGetCurrentExecName() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
-	K__ReplaceW(wpath, L'\\', L'/');
+	strReplaceChar(wpath, L'\\', L'/');
 	return K__WideToUtf8Std(wpath);
 }
 std::string K::sysGetCurrentExecDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 	::PathRemoveFileSpecW(wpath);
-	K__ReplaceW(wpath, L'\\', L'/');
+	strReplaceChar(wpath, L'\\', L'/');
 	return K__WideToUtf8Std(wpath);
 }
 #pragma endregion // sys
@@ -824,13 +768,77 @@ std::string K::pathGetFull(const std::string &s) {
 	wchar_t wfull[MAX_PATH] = {0};
 	K__Utf8ToWidePath(wpath, MAX_PATH, s.c_str());
 	if (_wfullpath(wfull, wpath, MAX_PATH)) {
-		K__ReplaceW(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
+		strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
 		return K__WideToUtf8Std(wfull);
 	} else {
 		return s;
 	}
 }
 #pragma endregion // path
+
+
+
+
+#pragma region string
+/// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
+/// utf8 bom で始まっていない場合はそのまま u8 を返す
+const char * K::strSkipBom(const char *s) {
+	K__Assert(s);
+	if (strncmp(s, K__UTF8BOM_STR, K__UTF8BOM_LEN) == 0) {
+		return s + K__UTF8BOM_LEN;
+	} else {
+		return s;
+	}
+}
+
+bool K::strStartsWithBom(const void *data, int size) {
+	return (size >= K__UTF8BOM_LEN) && (memcmp(data, K__UTF8BOM_STR, K__UTF8BOM_LEN) == 0);
+}
+bool K::strStartsWithBom(const std::string &s) {
+	return strStartsWithBom(s.data(), s.size());
+}
+int K::strFind(const char *s, const char *sub, int start) {
+	K__Assert(s);
+	K__Assert(sub);
+	if (start < 0) start = 0;
+	if ((int)strlen(s) < start) return -1; // 範囲外
+	if ((int)strlen(s) == start) return strlen(sub)==0 ? start : -1; // 検索開始位置が文字列末尾の場合、空文字列だけがマッチする
+	if (strlen(sub)==0) return start; // 空文字列はどの場所であっても必ずマッチする。常に検索開始位置にマッチする
+	const char *p = strstr(s + start, sub);
+	return p ? (p - s) : -1;
+}
+void K::strReplace(std::string &s, int start, int count, const std::string &str) {
+	s.erase(start, count);
+	s.insert(start, str);
+}
+void K::strReplace(std::string &s, const std::string &before, const std::string &after) {
+	if (before.empty()) return;
+	int pos = strFind(s.c_str(), before.c_str(), 0);
+	while (pos >= 0) {
+		strReplace(s, pos, before.size(), after);
+		pos += after.size();
+		pos = strFind(s.c_str(), before.c_str(), pos);
+	}
+}
+void K::strReplaceChar(char *s, char before, char after) {
+	K__Assert(s);
+	for (size_t i=0; s[i]; i++) {
+		if (s[i] == before) {
+			s[i] = after;
+		}
+	}
+}
+void K::strReplaceChar(wchar_t *s, wchar_t before, wchar_t after) {
+	K__Assert(s);
+	for (size_t i=0; s[i]; i++) {
+		if (s[i] == before) {
+			s[i] = after;
+		}
+	}
+}
+#pragma endregion // string
+
+
 
 
 

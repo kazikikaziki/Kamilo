@@ -895,7 +895,7 @@ std::wstring KStringUtils::binToWide(const void *data, int size) {
 	}
 
 	// BOM で始まるデータなら UTF8 で確定させる
-	if (K__StartsWithUtf8Bom(data, size)) {
+	if (K::strStartsWithBom(data, size)) {
 		return K__Utf8ToWideStd((const char *)data);
 	}
 
@@ -929,7 +929,7 @@ std::wstring KStringUtils::binToWide(const void *data, int size) {
 /// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
 /// utf8 bom で始まっていない場合はそのまま u8 を返す
 const char * KStringUtils::skipUtf8Bom(const char *s) {
-	return K__SkipUtf8Bom(s);
+	return K::strSkipBom(s);
 }
 
 /// strtol を簡略化したもの。
@@ -1069,10 +1069,10 @@ bool KStringUtils::trim(std::string &s) {
 	return ret;
 }
 int KStringUtils::find(const char *s, const char *sub, int start) {
-	return K__StrFind(s, sub, start);
+	return K::strFind(s, sub, start);
 }
 int KStringUtils::find(const std::string &s, const std::string &sub, int start) {
-	return K__StrFind(s.c_str(), sub.c_str(), start);
+	return K::strFind(s.c_str(), sub.c_str(), start);
 }
 int KStringUtils::findChar(const char *s, char chr, int start) {
 	K__Assert(s);
@@ -1453,7 +1453,7 @@ bool KPathUtils::K_PathGetFullPath(char *out_path, int out_size, const char *pat
 	wchar_t wfull[KPathUtils::MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, KPathUtils::MAX_SIZE, path_u8);
 	if (_wfullpath(wfull, wpath, KPathUtils::MAX_SIZE)) {
-		K__ReplaceW(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
+		K::strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
 		KStringUtils::wideToUtf8(out_path, out_size, wfull);
 		return true;
 	}

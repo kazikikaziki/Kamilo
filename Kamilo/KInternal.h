@@ -64,13 +64,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 //----------------------------------------------------
 // string
 //----------------------------------------------------
-const char * K__SkipUtf8Bom(const char *s);
-bool K__StartsWithUtf8Bom(const void *data, int size);
-int K__StrFind(const char *s, const char *sub, int start);
-void K__Replace(std::string &s, int start, int count, const char *str);
-void K__Replace(std::string &s, const char *before, const char *after);
-void K__ReplaceW(wchar_t *s, wchar_t before, wchar_t after);
-void K__ReplaceA(char *s, char before, char after);
 bool K__strtof(const std::string &s, float *val);
 bool K__strtoi(const std::string &s, int *val);
 bool K__strtof(const char *s, float *val);
@@ -191,13 +184,14 @@ public:
 	#pragma endregion // path
 
 	#pragma region string
-	static const char * strSkipBom(const char *s) { return K__SkipUtf8Bom(s); }
-	static bool strStartsWithBom(const void *data, int size) { return K__StartsWithUtf8Bom(data, size); }
-	static int strFind(const char *s, const char *sub, int start) { return K__StrFind(s, sub, start); }
-	static void strReplace(std::string &s, int start, int count, const char *str) { K__Replace(s, start, count, str); }
-	static void strReplace(std::string &s, const char *before, const char *after) { K__Replace(s, before, after); }
-	static void strReplaceW(wchar_t *s, wchar_t before, wchar_t after) { K__ReplaceW(s, before, after); }
-	static void strReplaceA(char *s, char before, char after) { K__ReplaceA(s, before, after); }
+	static const char * strSkipBom(const char *s);
+	static bool strStartsWithBom(const void *data, int size);
+	static bool strStartsWithBom(const std::string &s);
+	static int strFind(const char *s, const char *sub, int start);
+	static void strReplace(std::string &s, int start, int count, const std::string &str);
+	static void strReplace(std::string &s, const std::string &before, const std::string &after);
+	static void strReplaceChar(char *s, char before, char after);
+	static void strReplaceChar(wchar_t *s, wchar_t before, wchar_t after);
 	static bool strToFloat(const std::string &s, float *val) { return K__strtof(s, val); }
 	static bool strToFloat(const char *s, float *val) { return K__strtof(s, val); }
 	static bool strToInt(const std::string &s, int *val) { return K__strtoi(s, val); }

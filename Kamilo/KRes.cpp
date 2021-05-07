@@ -864,7 +864,7 @@ void KShaderRes::release() {
 }
 bool KShaderRes::loadFromHLSL(const char *name, const char *code) {
 	clear();
-	const char *unbom_code = K__SkipUtf8Bom(code);
+	const char *unbom_code = K::strSkipBom(code);
 	KSHADERID sh = KVideo::createShaderFromHLSL(unbom_code, name);
 	if (sh == nullptr) {
 		KLog::printError("E_SHADER: failed to build HLSL shader.");

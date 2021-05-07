@@ -18,10 +18,10 @@ namespace Kamilo {
 
 // 文字列 s を xml に組み込めるようにする
 static void _EscapeString(std::string &s) {
-	K__Replace(s, "\\", "\\\\");
-	K__Replace(s, "\"", "\\\"");
-	K__Replace(s, "\n", "\\n");
-	K__Replace(s, "\r", "");
+	K::strReplace(s, "\\", "\\\\");
+	K::strReplace(s, "\"", "\\\"");
+	K::strReplace(s, "\n", "\\n");
+	K::strReplace(s, "\r", "");
 	if (s.find(',') != std::string::npos) {
 		s.insert(0, "\"");
 		s.append("\"");

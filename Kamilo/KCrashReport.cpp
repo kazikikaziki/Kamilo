@@ -587,20 +587,20 @@ public:
 			KSystem::getString(KSystem::STRPROP_CPUVENDOR, cpuvendor, LEN);
 
 			int langid = GetUserDefaultUILanguage();
-			K__Replace(info_u8, "${BUILD_DATE}",   __DATE__);
-			K__Replace(info_u8, "${BUILD_TIME}",   __TIME__);
-			K__Replace(info_u8, "${OS_VER}",       productname);
-			K__Replace(info_u8, "${CPU_NAME}",     cpuname);
-			K__Replace(info_u8, "${CPU_VENDOR}",   cpuvendor);
-			K__Replace(info_u8, "${LANGID}",       K__sprintf_std("%d", langid).c_str());
-			K__Replace(info_u8, "${LANGID_HEX}",   K__sprintf_std("0x%04x", langid).c_str());
-			K__Replace(info_u8, "${SYSMEM_TOTAL_MB}", K__sprintf_std("%d", info->SysMemTotalKB/1024).c_str());
-			K__Replace(info_u8, "${SYSMEM_AVAIL_MB}", K__sprintf_std("%d", info->SysMemAvailKB/1024).c_str());
-			K__Replace(info_u8, "${APPMEM_TOTAL_MB}", K__sprintf_std("%d", info->AppMemTotalKB/1024).c_str());
-			K__Replace(info_u8, "${APPMEM_AVAIL_MB}", K__sprintf_std("%d", info->AppMemAvailKB/1024).c_str());
-			K__Replace(info_u8, "${CODE}",         K__sprintf_std("0x%08x", info->ExceptionCode).c_str());
-			K__Replace(info_u8, "${FLAGS}",        K__sprintf_std("0x%08x", info->ExceptionFlags).c_str());
-			K__Replace(info_u8, "${ADDRESS}",      K__sprintf_std("0x%08x", (intptr_t)info->ExceptionAddress).c_str());
+			K::strReplace(info_u8, "${BUILD_DATE}",   __DATE__);
+			K::strReplace(info_u8, "${BUILD_TIME}",   __TIME__);
+			K::strReplace(info_u8, "${OS_VER}",       productname);
+			K::strReplace(info_u8, "${CPU_NAME}",     cpuname);
+			K::strReplace(info_u8, "${CPU_VENDOR}",   cpuvendor);
+			K::strReplace(info_u8, "${LANGID}",       K__sprintf_std("%d", langid).c_str());
+			K::strReplace(info_u8, "${LANGID_HEX}",   K__sprintf_std("0x%04x", langid).c_str());
+			K::strReplace(info_u8, "${SYSMEM_TOTAL_MB}", K__sprintf_std("%d", info->SysMemTotalKB/1024).c_str());
+			K::strReplace(info_u8, "${SYSMEM_AVAIL_MB}", K__sprintf_std("%d", info->SysMemAvailKB/1024).c_str());
+			K::strReplace(info_u8, "${APPMEM_TOTAL_MB}", K__sprintf_std("%d", info->AppMemTotalKB/1024).c_str());
+			K::strReplace(info_u8, "${APPMEM_AVAIL_MB}", K__sprintf_std("%d", info->AppMemAvailKB/1024).c_str());
+			K::strReplace(info_u8, "${CODE}",         K__sprintf_std("0x%08x", info->ExceptionCode).c_str());
+			K::strReplace(info_u8, "${FLAGS}",        K__sprintf_std("0x%08x", info->ExceptionFlags).c_str());
+			K::strReplace(info_u8, "${ADDRESS}",      K__sprintf_std("0x%08x", (intptr_t)info->ExceptionAddress).c_str());
 		}
 
 		fprintf(fp, "%s\n", info_u8.c_str());
@@ -650,7 +650,7 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 	FILE *file = K::fileOpen(EXCEPTION_LOG_FILE_NAME, "w");
 	if (file) {
 		fprintf(file, "# coding: utf8\n");
-		fprintf(file, "Application \"%s\" was crashed!\n", exepath_u8);
+		fprintf(file, "Application \"%s\" was crashed!\n", exepath_u8.c_str());
 		fprintf(file, "\n");
 
 		if (comment_u8[0]) {
@@ -734,7 +734,7 @@ static bool _ErrorCheckProcess(const char *args, const char *comment_u8, const c
 			u8"--\n"
 			u8"%s\n",
 			PathFindFileNameA(exepath_u8.c_str()),
-			report_path_u8,
+			report_path_u8.c_str(),
 			comment_u8);
 		std::wstring ws = K__Utf8ToWideStd(s);
 		MessageBoxW(NULL, ws.c_str(), L"クラッシュ!", MB_ICONERROR|MB_SYSTEMMODAL);
