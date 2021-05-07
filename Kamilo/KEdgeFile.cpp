@@ -1,5 +1,7 @@
 ﻿#include "KEdgeFile.h"
 #include "KZlib.h"
+#include "KInternal.h"
+
 namespace Kamilo {
 
 
@@ -840,7 +842,7 @@ bool KEdgePalReader::loadFromStream(KInputStream &file) {
 		KEdgePalFile pal;
 		std::string name_mb;
 		readChunk(0x03e9, &name_mb);
-		pal.m_name_u8 = KStringUtils::ansiToUtf8(name_mb, EDGE2_STRING_ENCODING);
+		pal.m_name_u8 = K::strAnsiToUtf8(name_mb, EDGE2_STRING_ENCODING);
 		readChunk(0x03ea, 256*3, pal.m_bgr);
 		readChunk(0x03eb, 256, pal.m_data);
 		m_items.push_back(pal);
@@ -916,7 +918,7 @@ KEdgeBin KEdgeRawReader::unzip(KInputStream &file, uint16_t *zflag) {
 void KEdgeRawReader::scanLayer(KEdgeDocument *e, KEdgePage *page, KEdgeLayer *layer) {
 	std::string label_mb;
 	readChunk(0x03e8, &label_mb);
-	layer->m_label_u8 = KStringUtils::ansiToUtf8(label_mb, EDGE2_STRING_ENCODING);
+	layer->m_label_u8 = K::strAnsiToUtf8(label_mb, EDGE2_STRING_ENCODING);
 
 	readChunk(0x03e9, 4, &layer->m_data_a);
 	readChunk(0x03ea, 1, &layer->m_is_grouped);
@@ -949,7 +951,7 @@ void KEdgeRawReader::scanPage(KEdgeDocument *e, KEdgePage *page) {
 
 	std::string label_mb;
 	readChunk(0x03e8, &label_mb);
-	page->m_label_u8 = KStringUtils::ansiToUtf8(label_mb, EDGE2_STRING_ENCODING);
+	page->m_label_u8 = K::strAnsiToUtf8(label_mb, EDGE2_STRING_ENCODING);
 
 	readChunk(0x03e9, 4, &page->m_data_a);
 	readChunk(0x03ea, 1, &page->m_is_grouped);
@@ -1038,7 +1040,7 @@ void KEdgeRawReader::scanEdge(KEdgeDocument *e) {
 		
 		std::string name_mb;
 		readChunk(0x03e8, 0, &name_mb);
-		pal->m_name_u8 = KStringUtils::ansiToUtf8(name_mb, EDGE2_STRING_ENCODING);
+		pal->m_name_u8 = K::strAnsiToUtf8(name_mb, EDGE2_STRING_ENCODING);
 		
 		readChunk(0x03e9, 4,     &pal->m_data_b);
 		readChunk(0x03ea, 1,     &pal->m_data_c);
@@ -1108,7 +1110,7 @@ void KEdgeRawWriter::writeLayer(KEdgePage *page, int layerindex, int bitdepth) {
 	KEdgeLayer *layer = page->getLayer(layerindex);
 	K_assert(layer);
 
-	std::string label_mb = KStringUtils::utf8ToAnsi(layer->m_label_u8, EDGE2_STRING_ENCODING);
+	std::string label_mb = K::strUtf8ToAnsi(layer->m_label_u8, EDGE2_STRING_ENCODING);
 	writeChunkN(0x03e8, label_mb.c_str());
 	writeChunk4(0x03e9, layer->m_data_a);
 	writeChunk1(0x03ea, layer->m_is_grouped);
@@ -1144,7 +1146,7 @@ void KEdgeRawWriter::writePage(KEdgeDocument *e, int pageindex) {
 	K_assert(page->m_width > 0);
 	K_assert(page->m_height > 0);
 
-	std::string label_mb = KStringUtils::utf8ToAnsi(page->m_label_u8, EDGE2_STRING_ENCODING);
+	std::string label_mb = K::strUtf8ToAnsi(page->m_label_u8, EDGE2_STRING_ENCODING);
 	writeChunkN(0x03e8, label_mb.c_str());
 	writeChunk4(0x03e9, page->m_data_a);
 	writeChunk1(0x03ea, page->m_is_grouped);
@@ -1229,7 +1231,7 @@ void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
 		openChunk(0x0bbb);
 		const KEdgePalette *pal = e->m_palettes[i];
 
-		std::string name_mb = KStringUtils::utf8ToAnsi(pal->m_name_u8, EDGE2_STRING_ENCODING);
+		std::string name_mb = K::strUtf8ToAnsi(pal->m_name_u8, EDGE2_STRING_ENCODING);
 		writeChunkN(0x03e8, name_mb.c_str());
 		writeChunk4(0x03e9, pal->m_data_b);
 		writeChunk1(0x03ea, pal->m_data_c);

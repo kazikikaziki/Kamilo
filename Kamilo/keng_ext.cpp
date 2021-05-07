@@ -83,7 +83,7 @@ std::string KConv::toUtf8(const void *data, int size) {
 	// ワイド文字への変換を試みる
 	std::wstring ws = KStringUtils::binToWide(data, size);
 	if (ws.size() > 0) {
-		return KStringUtils::wideToUtf8(ws);
+		return K::strWideToUtf8(ws);
 	}
 	// 入力バイナリをそのまま返す
 	return std::string((const char*)data, size);

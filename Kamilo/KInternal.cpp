@@ -842,6 +842,15 @@ std::wstring K::strAnsiToWide(const std::string &ansi, const char *_locale) {
 	}
 	return ws;
 }
+std::string K::strAnsiToUtf8(const std::string &ansi, const char *_locale) {
+	std::wstring ws = strAnsiToWide(ansi, _locale);
+	return strWideToUtf8(ws);
+}
+std::string K::strUtf8ToAnsi(const std::string &u8, const char *_locale) {
+	std::wstring ws = strUtf8ToWide(u8);
+	return strWideToAnsi(ws, _locale);
+}
+
 #pragma endregion // string
 
 

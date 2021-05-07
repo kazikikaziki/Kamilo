@@ -47,7 +47,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 		s += "\t<Pos3D>\n";
 		for (int i=0; i<num_vertices; i++) {
 			KVec3 pos = mesh->getPosition(i);
-			s += KStringUtils::K_sprintf("\t\t%f %f %f\n", pos.x, pos.y, pos.z);
+			s += K::str_sprintf("\t\t%f %f %f\n", pos.x, pos.y, pos.z);
 		}
 		s += "\t</Pos3D>\n";
 	}
@@ -56,7 +56,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 		s += "\t<UV>\n";
 		for (int i=0; i<num_vertices; i++) {
 			KVec2 uv = mesh->getTexCoord(i);
-			s += KStringUtils::K_sprintf("\t\t%f %f\n", uv.x, uv.y);
+			s += K::str_sprintf("\t\t%f %f\n", uv.x, uv.y);
 		}
 		s += "\t</UV>\n";
 	}
@@ -65,7 +65,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 		s += "\t<UV2>\n";
 		for (int i=0; i<num_vertices; i++) {
 			KVec2 uv = mesh->getTexCoord2(i);
-			s += KStringUtils::K_sprintf("\t\t%f %f\n", uv.x, uv.y);
+			s += K::str_sprintf("\t\t%f %f\n", uv.x, uv.y);
 		}
 		s += "\t</UV2>\n";
 	}
@@ -74,7 +74,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 		s += "\t<Colors><!-- 0xAARRGGBB --> \n";
 		for (int i=0; i<num_vertices; i++) {
 			KColor32 dif = mesh->getColor32(i);
-			s += KStringUtils::K_sprintf("\t\t0x%08X\n", dif.toUInt32());
+			s += K::str_sprintf("\t\t0x%08X\n", dif.toUInt32());
 		}
 		s += "\t</Colors>\n";
 	}
@@ -83,7 +83,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 		s += "\t<Speculars><!-- 0xAARRGGBB --> \n";
 		for (int i=0; i<num_vertices; i++) {
 			KColor32 spe = mesh->getSpecular32(i);
-			s += KStringUtils::K_sprintf("\t\t0x%08X\n", spe.toUInt32());
+			s += K::str_sprintf("\t\t0x%08X\n", spe.toUInt32());
 		}
 		s += "\t</Speculars>\n";
 	}
@@ -101,7 +101,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 20 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -117,7 +117,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 20 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -133,7 +133,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 20 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -149,7 +149,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 3 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -165,7 +165,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 20 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -181,7 +181,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				s += "\t\t";
 				for (int i=0; i<count; i++) {
 					int idx = indices ? indices[start + i] : (start + i);
-					s += KStringUtils::K_sprintf("%d", idx);
+					s += K::str_sprintf("%d", idx);
 					if ((i+1) % 20 == 0 && (i+1) < count) {
 						s += "\n";
 						s += "\t\t";
@@ -207,7 +207,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 			KVec3 pos = mesh->getPosition(i);
 			KVec2 tex = mesh->getTexCoord(i);
 			KVec2 tex2 = mesh->getTexCoord2(i);
-			s += KStringUtils::K_sprintf("[%4d] xyz(%f %f %f) uv(%f %f) uv2(%f %f)\n", i, pos.x, pos.y, pos.z, tex.x, tex.y, tex2.x, tex2.y);
+			s += K::str_sprintf("[%4d] xyz(%f %f %f) uv(%f %f) uv2(%f %f)\n", i, pos.x, pos.y, pos.z, tex.x, tex.y, tex2.x, tex2.y);
 		}
 		s += "-->\n";
 	}
@@ -597,28 +597,28 @@ void KClipRes::on_track_gui() {
 	}
 	if (ImGui::Button("Export")) {
 		std::string s;
-		s += KStringUtils::K_sprintf("Num pages: %d\n", mKeys.size());
+		s += K::str_sprintf("Num pages: %d\n", mKeys.size());
 		for (size_t ki=0; ki<mKeys.size(); ki++) {
-			s += KStringUtils::K_sprintf("Page[%d] {\n", ki);
+			s += K::str_sprintf("Page[%d] {\n", ki);
 			const SPRITE_KEY &key = mKeys[ki];
-			s += KStringUtils::K_sprintf("\tDur : %d\n", key.duration);
+			s += K::str_sprintf("\tDur : %d\n", key.duration);
 
-			s += KStringUtils::K_sprintf("\tThisMark: %d\n", key.this_mark);
-			s += KStringUtils::K_sprintf("\tNextMark: %d\n", key.next_mark);
+			s += K::str_sprintf("\tThisMark: %d\n", key.this_mark);
+			s += K::str_sprintf("\tNextMark: %d\n", key.next_mark);
 			
 			for (int li=0; li<key.num_layers; li++) {
-				s += KStringUtils::K_sprintf("\tLayer[%d]\n", li);
-				s += KStringUtils::K_sprintf("\t\tSprite : %s\n", key.layers[li].sprite.u8());
-				s += KStringUtils::K_sprintf("\t\tLabel  : %s\n", key.layers[li].label.u8());
-				s += KStringUtils::K_sprintf("\t\tCommand: %s\n", key.layers[li].command.u8());
-				s += KStringUtils::K_sprintf("\t\tParams {\n");
+				s += K::str_sprintf("\tLayer[%d]\n", li);
+				s += K::str_sprintf("\t\tSprite : %s\n", key.layers[li].sprite.u8());
+				s += K::str_sprintf("\t\tLabel  : %s\n", key.layers[li].label.u8());
+				s += K::str_sprintf("\t\tCommand: %s\n", key.layers[li].command.u8());
+				s += K::str_sprintf("\t\tParams {\n");
 				for (int ni=0; ni<key.user_parameters.size(); ni++) {
-					s += KStringUtils::K_sprintf("\t\t\t%s: %s\n", key.user_parameters.getName(ni), key.user_parameters.getString(ni));
+					s += K::str_sprintf("\t\t\t%s: %s\n", key.user_parameters.getName(ni), key.user_parameters.getString(ni));
 				}
-				s += KStringUtils::K_sprintf("\t\t} // Params\n");
-				s += KStringUtils::K_sprintf("\t} // Layer\n");
+				s += K::str_sprintf("\t\t} // Params\n");
+				s += K::str_sprintf("\t} // Layer\n");
 			}
-			s += KStringUtils::K_sprintf("} // Page\n");
+			s += K::str_sprintf("} // Page\n");
 		}
 		s += '\n';
 
@@ -2743,7 +2743,7 @@ public:
 				}
 			}
 			if (KFiles::exists(export_filename)) {
-				std::string s =  KStringUtils::K_sprintf("Open: %s", export_filename.u8());
+				std::string s =  K::str_sprintf("Open: %s", export_filename.u8());
 				ImGui::SameLine();
 				if (ImGui::Button(s.c_str())) {
 					K::fileShellOpen(export_filename.u8());
@@ -3933,7 +3933,7 @@ private:
 							for (int l=0; l<page->getLayerCount(); l++) {
 								int w = page->getLayer(l)->m_image_rgb24.getWidth();
 								int h = page->getLayer(l)->m_image_rgb24.getHeight();
-								std::string s = KStringUtils::K_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "edg", p, l, w, h, w * h * 4);
+								std::string s = K::str_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "edg", p, l, w, h, w * h * 4);
 								g_autolog.write(s.c_str());
 							}
 						}
@@ -3958,7 +3958,7 @@ private:
 							r.read(buf, sizeof(buf));
 							int w = 0, h = 0;
 							KCorePng::readsize(buf, sizeof(buf), &w, &h);
-							std::string s = KStringUtils::K_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "png", 0, 0, w, h, w * h * 4);
+							std::string s = K::str_sprintf("%s, %s, %d, %d, %d, %d, %d\n", name, "png", 0, 0, w, h, w * h * 4);
 							g_autolog.write(s.c_str());
 						}
 					}

@@ -159,6 +159,8 @@ public:
 	static std::string strWideToUtf8(const std::wstring &ws);
 	static std::string strWideToAnsi(const std::wstring &ws, const char *_locale);
 	static std::wstring strAnsiToWide(const std::string &ansi, const char *_locale);
+	static std::string strAnsiToUtf8(const std::string &ansi, const char *_locale);
+	static std::string strUtf8ToAnsi(const std::string &u8, const char *_locale);
 
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }

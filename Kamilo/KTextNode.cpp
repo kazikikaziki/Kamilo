@@ -1575,13 +1575,13 @@ void KTextDrawable::onDrawable_inspector() {
 		updateTextMesh();
 	}
 	// 編集用の文字列を得る
-	std::string s = KStringUtils::wideToUtf8(m_text);
+	std::string s = K::strWideToUtf8(m_text);
 
 	// サイズに余裕を持たせておく
 	s.resize(s.size() + 256);
 
 	if (ImGui::InputTextMultiline("Text", &s[0], s.size())) {
-		m_text = KStringUtils::utf8ToWide(s);
+		m_text = K::strUtf8ToWide(s);
 		updateTextMesh();
 	}
 
@@ -1604,11 +1604,11 @@ void KTextDrawable::setText(const KPath &text) {
 	setText(text.c_str());
 }
 void KTextDrawable::setText(const std::string &text_u8) {
-	std::wstring ws = KStringUtils::utf8ToWide(text_u8);
+	std::wstring ws = K::strUtf8ToWide(text_u8);
 	setText(ws.c_str());
 }
 void KTextDrawable::setText(const char *text_u8) {
-	std::wstring ws = KStringUtils::utf8ToWide(text_u8);
+	std::wstring ws = K::strUtf8ToWide(text_u8);
 	setText(ws.c_str());
 }
 void KTextDrawable::setText(const wchar_t *text) {

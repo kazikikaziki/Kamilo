@@ -1,4 +1,5 @@
 ﻿#include "KNamedValues.h"
+#include "KInternal.h"
 
 namespace Kamilo {
 
@@ -125,7 +126,7 @@ std::string KNamedValues::saveToString(bool pack_in_attr) const {
 		for (int i=0; i<size(); i++) {
 			const char *n = getName(i);
 			const char *v = getString(i);
-			s += KStringUtils::K_sprintf("\t%s = '%s'\n", n, v);
+			s += K::str_sprintf("\t%s = '%s'\n", n, v);
 		}
 		s += "/>\n";
 	} else {
@@ -133,7 +134,7 @@ std::string KNamedValues::saveToString(bool pack_in_attr) const {
 		for (int i=0; i<size(); i++) {
 			const char *n = getName(i);
 			const char *v = getString(i);
-			s += KStringUtils::K_sprintf("  <Pair name='%s'>%s</Pair>\n", n, v);
+			s += K::str_sprintf("  <Pair name='%s'>%s</Pair>\n", n, v);
 		}
 		s += "</KNamedValues>\n";
 	}
@@ -261,10 +262,10 @@ float KNamedValues::getFloat(const char *name, float defaultValue) const {
 void KNamedValues::setFloatArray(const char *name, const float *values, int count) {
 	std::string s;
 	if (count >= 1) {
-		s = KStringUtils::K_sprintf("%g", values[0]);
+		s = K::str_sprintf("%g", values[0]);
 	}
 	for (int i=1; i<count; i++) {
-		s += KStringUtils::K_sprintf(", %g", values[i]);
+		s += K::str_sprintf(", %g", values[i]);
 	}
 	setString(name, s.c_str());
 }
@@ -284,9 +285,9 @@ int KNamedValues::getFloatArray(const char *name, float *outValues, int maxout) 
 }
 void KNamedValues::setBinary(const char *name, const void *data, int size) {
 	std::string s;
-	s = KStringUtils::K_sprintf("%08x:", size);
+	s = K::str_sprintf("%08x:", size);
 	for (int i=0; i<size; i++) {
-		s += KStringUtils::K_sprintf("%02x", ((uint8_t*)data)[i]);
+		s += K::str_sprintf("%02x", ((uint8_t*)data)[i]);
 	}
 	setString(name, s.c_str());
 }

@@ -190,7 +190,7 @@ public:
 			m_TmpString = rawname;
 		} else {
 			// zip内のファイル名が utf8 以外で記録されている
-			m_TmpString = KStringUtils::ansiToUtf8(rawname.c_str());
+			m_TmpString = K::strAnsiToUtf8(rawname, "");
 		}
 		return m_TmpString.c_str();
 	}

@@ -900,7 +900,7 @@ void Test_font_printInfo(const char *output_dir, const char *filename) {
 	if (numfonts > 0) {
 		for (int i=0; i<numfonts; i++) {
 			KFont font = KFont::createFromMemory(bin.data(), bin.size(), i);
-			msg_u8 += KStringUtils::K_sprintf("%s [%d]\n", filename, i);
+			msg_u8 += K::str_sprintf("%s [%d]\n", filename, i);
 			msg_u8 += "\tFamily   : " + _Test_getname(font, KFont::NID_FAMILY   ) + "\n";
 			msg_u8 += "\tCopyRight: " + _Test_getname(font, KFont::NID_COPYRIGHT) + "\n";
 			msg_u8 += "\tVersion  : " + _Test_getname(font, KFont::NID_VERSION  ) + "\n";
@@ -1100,7 +1100,7 @@ void Test_fontscan(const KPath &output_dir) {
 	for (int i=0; i<fonts.size(); i++) {
 		auto it = fonts[i];
 		if (it.tt_flags == KFont::STYLE_NONE) {
-			msg_u8 += KStringUtils::K_sprintf("%s : %s[%d]\n",
+			msg_u8 += K::str_sprintf("%s : %s[%d]\n",
 				it.family.toAnsiString('\\', "").c_str(),
 				it.filename.toAnsiString('\\', "").c_str(),
 				it.ttc_index

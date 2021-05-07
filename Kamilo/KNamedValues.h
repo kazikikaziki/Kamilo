@@ -2,7 +2,6 @@
 #include "KRef.h"
 #include "KLog.h"
 #include "KStream.h"
-#include "KString.h"
 #include "KXml.h"
 #include "KMath.h"
 #include "keng_ext.h"

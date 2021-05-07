@@ -22,22 +22,13 @@ static const int   K_UTF8BOM_LEN = 3;
 
 class KStringUtils {
 public:
-
-	/// sprintf を std::string に対応させたもの
-	static std::string K_sprintf(const char *fmt, ...);
-
-	/// vsprintf を std::string に対応させたもの
-	static std::string K_vsprintf(const char *fmt, va_list args);
-
 	/// ワイド文字からUTF8への変換
 	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
 	static int wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
-	static std::string wideToUtf8(const std::wstring &ws);
 
 	/// UTF8からワイド文字への変換
 	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
 	static int utf8ToWide(wchar_t *out_wide, int max_out_wchars, const char *u8);
-	static std::wstring utf8ToWide(const std::string &u8);
 
 	/// ワイド文字列をANSI文字列に変換する
 	/// @return 変換後のワイド文字数（終端文字を含む）
@@ -56,20 +47,15 @@ public:
 	/// @see https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/locale-names-languages-and-country-region-strings
 	///
 	static int wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale="");
-	static std::string wideToAnsi(const std::wstring &ws, const char *_locale="");
 
 	/// ANSI文字列からワイド文字への変換
 	/// ※ANSI文字列とは、現在のロケールに基づくマルチバイト文字列を表す。日本語環境なら SJIS) 
 	/// ロケール引数については K_StrWideToAnsi を参照
 	/// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
 	static int ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale="");
-	static std::wstring ansiToWide(const std::string &ansi, const char *_locale="");
 
 	static void ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale="");
-	static std::string ansiToUtf8(const std::string &ansi, const char *_locale="");
-
 	static void utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale="");
-	static std::string utf8ToAnsi(const std::string &u8, const char *_locale="");
 
 	static std::wstring binToWide(const void *data, int size);
 

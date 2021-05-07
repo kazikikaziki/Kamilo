@@ -504,7 +504,7 @@ static const char *g_EmptyStr = "";
 KString KString::format(const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	std::string result = KStringUtils::K_vsprintf(fmt, args);
+	std::string result = K::str_vsprintf(fmt, args);
 	va_end(args);
 	return result;
 }
@@ -553,11 +553,11 @@ KString KString::join(const KString *list, int size, const char *sep) {
 	return s;
 }
 KString KString::fromWide(const std::wstring &ws) {
-	std::string u8 = KStringUtils::wideToUtf8(ws);
+	std::string u8 = K::strWideToUtf8(ws);
 	return KString(u8);
 }
 KString KString::fromAnsi(const std::string &mb, const char *_locale) {
-	std::wstring ws = KStringUtils::ansiToWide(mb, _locale);
+	std::wstring ws = K::strAnsiToWide(mb, _locale);
 	return KString::fromWide(ws);
 }
 KString KString::fromBin(const void *data, size_t size) {
@@ -624,10 +624,10 @@ std::string KString::toStdString() const {
 	return std::string(c_str());
 }
 std::string KString::toAnsi(const char *_locale) const {
-	return KStringUtils::utf8ToAnsi(c_str(), _locale);
+	return K::strUtf8ToAnsi(c_str(), _locale);
 }
 std::wstring KString::toWide() const {
-	return KStringUtils::utf8ToWide(c_str());
+	return K::strUtf8ToWide(c_str());
 }
 bool KString::equals(const char *s) const {
 	return strcmp(c_str(), s) == 0;
@@ -844,47 +844,23 @@ bool KString::operator != (const KString &s) const {
 int KStringUtils::wideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
 	return K__WideToAnsi(out_ansi, max_out_bytes, ws, _locale);
 }
-std::string KStringUtils::wideToAnsi(const std::wstring &ws, const char *_locale) {
-	return K::strWideToAnsi(ws, _locale);
-}
-
 int KStringUtils::ansiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
 	return K__AnsiToWide(out_wide, max_out_wchars, ansi, _locale);
 }
-std::wstring KStringUtils::ansiToWide(const std::string &ansi, const char *_locale) {
-	return K::strAnsiToWide(ansi, _locale);
-}
-
 int KStringUtils::wideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws) {
 	return K__WideToUtf8(out_u8, max_out_bytes, ws);
 }
-std::string KStringUtils::wideToUtf8(const std::wstring &ws) {
-	return K::strWideToUtf8(ws);
-}
-
 int KStringUtils::utf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8) {
 	return K__Utf8ToWide(out_ws, max_out_widechars, u8, 0);
 }
-std::wstring KStringUtils::utf8ToWide(const std::string &u8) {
-	return K::strUtf8ToWide(u8);
-}
-
 void KStringUtils::ansiToUtf8(char *u8, int size, const char *ansi, const char *_locale) {
 	std::wstring ws = K::strAnsiToWide(ansi, _locale);
 	K__WideToUtf8(u8, size, ws.c_str());
-}
-std::string KStringUtils::ansiToUtf8(const std::string &ansi, const char *_locale) {
-	std::wstring ws = K::strAnsiToWide(ansi, _locale);
-	return K::strWideToUtf8(ws);
 }
 
 void KStringUtils::utf8ToAnsi(char *ansi, int size, const char *u8, const char *_locale) {
 	std::wstring ws = K::strUtf8ToWide(u8);
 	K__WideToAnsi(ansi, size, ws.c_str(), _locale);
-}
-std::string KStringUtils::utf8ToAnsi(const std::string &u8, const char *_locale) {
-	std::wstring ws = K::strUtf8ToWide(u8);
-	return K::strWideToAnsi(ws, _locale);
 }
 
 std::wstring KStringUtils::binToWide(const void *data, int size) {
@@ -1146,16 +1122,6 @@ uint32_t KStringUtils::gethash(const char *s, int size) {
 		crc = (crc >> 8) ^ table[(crc ^ ((const uint8_t*)s)[i]) & 0xFF];
 	}
 	return ~crc;
-}
-std::string KStringUtils::K_vsprintf(const char *fmt, va_list args) {
-	return K::str_vsprintf(fmt, args);
-}
-std::string KStringUtils::K_sprintf(const char *fmt, ...) {
-	va_list args;
-	va_start(args, fmt);
-	std::string result = K::str_vsprintf(fmt, args);
-	va_end(args);
-	return result;
 }
 
 namespace Test {
@@ -2197,7 +2163,7 @@ const KPath KPath::Empty = KPath();
 KPath KPath::fromAnsi(const char *mb, const char *locale) {
 	K__Assert(mb);
 	K__Assert(locale);
-	return KPath(KStringUtils::ansiToUtf8(mb, locale).c_str());
+	return KPath(K::strAnsiToUtf8(mb, locale));
 }
 KPath KPath::fromUtf8(const char *u8) {
 	return KPath(u8 ? u8 : "");
@@ -2232,7 +2198,7 @@ KPath::KPath(const std::string &u8) {
 }
 KPath::KPath(const wchar_t *ws) {
 	if (ws && ws[0]) {
-		std::string mb = KStringUtils::wideToUtf8(ws);
+		std::string mb = K::strWideToUtf8(ws);
 		kkpath_normalize(m_path, mb.c_str(), KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
 	} else {
 		m_path[0] = 0;
@@ -2241,7 +2207,7 @@ KPath::KPath(const wchar_t *ws) {
 }
 KPath::KPath(const std::wstring &ws) {
 	if (!ws.empty()) {
-		std::string mb = KStringUtils::wideToUtf8(ws);
+		std::string mb = K::strWideToUtf8(ws);
 		kkpath_normalize(m_path, mb.c_str(), KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
 	} else {
 		m_path[0] = 0;
@@ -2578,14 +2544,14 @@ std::wstring KPath::toWideString(char sep) const {
 	char tmp[SIZE];
 	kkpath_strcpy(tmp, sizeof(tmp), m_path);
 	kkpath_replace_char(tmp, K__PATH_SLASH, sep);
-	return KStringUtils::utf8ToWide(tmp);
+	return K::strUtf8ToWide(tmp);
 }
 std::string KPath::toAnsiString(char sep, const char *_locale) const {
 	K__Assert(_locale);
 	char tmp[SIZE];
 	kkpath_strcpy(tmp, sizeof(tmp), m_path);
 	kkpath_replace_char(tmp, K__PATH_SLASH, sep);
-	return KStringUtils::utf8ToAnsi(tmp, _locale);
+	return K::strUtf8ToAnsi(tmp, _locale);
 }
 std::string KPath::toUtf8(char sep) const {
 	std::string u8 = m_path;
