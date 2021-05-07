@@ -325,49 +325,9 @@ std::string K__sprintf_std(const char *fmt, ...) {
 	va_end(args);
 	return result;
 }
-std::string K__PathJoin(const std::string &s1, const std::string &s2) {
-	if (s1.empty()) return s2;
-	if (s2.empty()) return s1;
-	return s1 + "/" + s2;
-}
-std::string K__PathRenameExtension(const std::string &path, const std::string &ext) {
-	size_t pos = path.rfind('.');
-	if (pos != std::string::npos) {
-		return path.substr(0, pos) + ext;
-	} else {
-		return path + ext;
-	}
-}
-int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path) {
-	K__Assert(path1);
-	K__Assert(path2);
-	if (ignore_path) {
-		const char *s1 = strrchr(path1, K__PATH_SLASH);
-		const char *s2 = strrchr(path2, K__PATH_SLASH);
-		if (s1) { s1++; /* K__PATH_SLASH の次の文字へ */ } else { s1 = path1; }
-		if (s2) { s2++; /* K__PATH_SLASH の次の文字へ */ } else { s2 = path2; }
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
-	
-	} else {
-		const char *s1 = path1;
-		const char *s2 = path2;
-		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
-	}
-}
 
 
 
-void K__fullpath_u8(char *out_u8, int maxsize, const char *path_u8) {
-	K__Assert(out_u8);
-	K__Assert(path_u8);
-	wchar_t wpath[MAX_PATH] = {0};
-	wchar_t wfull[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wpath, MAX_PATH, path_u8);
-	if (_wfullpath(wfull, wpath, MAX_PATH)) {
-		K__ReplaceW(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
-		K__WideToUtf8(out_u8, maxsize, wfull);
-	}
-}
 void K__ReplaceA(char *s, char before, char after) {
 	K__Assert(s);
 	for (size_t i=0; s[i]; i++) {
@@ -831,7 +791,46 @@ std::string K::sysGetCurrentExecDir() {
 
 
 
-
+#pragma region path
+std::string K::pathJoin(const std::string &s1, const std::string &s2) {
+	if (s1.empty()) return s2;
+	if (s2.empty()) return s1;
+	return s1 + "/" + s2;
+}
+std::string K::pathRenameExtension(const std::string &path, const std::string &ext) {
+	size_t pos = path.rfind('.');
+	if (pos != std::string::npos) {
+		return path.substr(0, pos) + ext;
+	} else {
+		return path + ext;
+	}
+}
+int K::pathCompare(const std::string &path1, const std::string &path2, bool ignore_case, bool ignore_path) {
+	if (ignore_path) {
+		const char *s1 = strrchr(path1.c_str(), K__PATH_SLASH);
+		const char *s2 = strrchr(path2.c_str(), K__PATH_SLASH);
+		if (s1) { s1++; /* K__PATH_SLASH の次の文字へ */ } else { s1 = path1.c_str(); }
+		if (s2) { s2++; /* K__PATH_SLASH の次の文字へ */ } else { s2 = path2.c_str(); }
+		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+	
+	} else {
+		const char *s1 = path1.c_str();
+		const char *s2 = path2.c_str();
+		return ignore_case ? K__stricmp(s1, s2) : strcmp(s1, s2);
+	}
+}
+std::string K::pathGetFull(const std::string &s) {
+	wchar_t wpath[MAX_PATH] = {0};
+	wchar_t wfull[MAX_PATH] = {0};
+	K__Utf8ToWidePath(wpath, MAX_PATH, s.c_str());
+	if (_wfullpath(wfull, wpath, MAX_PATH)) {
+		K__ReplaceW(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
+		return K__WideToUtf8Std(wfull);
+	} else {
+		return s;
+	}
+}
+#pragma endregion // path
 
 
 

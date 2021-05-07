@@ -1740,7 +1740,7 @@ bool KPathUtils::K_PathGetTimeStamp(const char *path_u8, time_t *out_time_cma) {
 
 /// パス同士を比較する
 int KPathUtils::K_PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path) {
-	return K__PathCompare(path1, path2, ignore_case, ignore_path);
+	return K::pathCompare(path1, path2, ignore_case, ignore_path);
 }
 
 /// パスの末尾部分を last と比較する

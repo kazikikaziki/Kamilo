@@ -78,7 +78,7 @@ public:
 			update();
 		}
 		for (size_t i=0; i<m_Items.size(); i++) {
-			if (K__PathCompare(m_Items[i].name_u8, name, true, true) == 0) {
+			if (K::pathCompare(m_Items[i].name_u8, name, true, true) == 0) {
 				return (int)i;
 			}
 		}

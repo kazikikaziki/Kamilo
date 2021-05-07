@@ -1204,9 +1204,9 @@ int KUnzipper::getComment(std::string *out_bin) {
 namespace Test {
 
 void Test_zip(const char *output_dir) {
-	const std::string name1 = K__PathJoin(output_dir, "Test_zip(plain).zip");
-	const std::string name2 = K__PathJoin(output_dir, "Test_zip(password).zip");
-	const std::string name3 = K__PathJoin(output_dir, "Test_zip(each_file_has_deferent_passwords).zip");
+	const std::string name1 = K::pathJoin(output_dir, "Test_zip(plain).zip");
+	const std::string name2 = K::pathJoin(output_dir, "Test_zip(password).zip");
+	const std::string name3 = K::pathJoin(output_dir, "Test_zip(each_file_has_deferent_passwords).zip");
 
 	const char *jptest1 = "日本語テキスト\n";
 	const char *jptest2 = "SJISでのダメ文字を含む日本語ファイル名を付けてみる\n";

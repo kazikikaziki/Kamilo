@@ -62,16 +62,6 @@ std::string K__Win32GetErrorStringStd(long hr);
 
 
 //----------------------------------------------------
-// path
-//----------------------------------------------------
-std::string K__PathJoin(const std::string &s1, const std::string &s2);
-std::string K__PathRenameExtension(const std::string &path, const std::string &ext);
-int K__PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path);
-void K__fullpath_u8(char *out_u8, int maxsize, const char *path_u8);
-
-
-
-//----------------------------------------------------
 // string
 //----------------------------------------------------
 const char * K__SkipUtf8Bom(const char *s);
@@ -189,19 +179,15 @@ public:
 	static uint32_t sysGetCurrentThreadId(); ///< 現在のスレッドIDを得る
 	static std::string sysGetCurrentDir(); ///< カレントディレクトリを UTF8 で得る
 	static bool sysSetCurrentDir(const std::string &dir);
-	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名を得る
-	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリを得る
+	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名をフルパスで得る
+	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリをフルパスで得る
 	#pragma endregion // sys
 
 	#pragma region path
-	static std::string pathJoin(const std::string &s1, const std::string &s2) { return K__PathJoin(s1, s2); }
-	static std::string pathRenameExtension(const std::string &path, const std::string &ext) { return K__PathRenameExtension(path, ext); }
-	static int pathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path) { K__PathCompare(path1, path2, ignore_case, ignore_path); }
-	static std::string pathGetFull(const std::string &s) {
-		char t[256] = {0};
-		K__fullpath_u8(t, sizeof(t), s.c_str());
-		return t;
-	}
+	static std::string pathJoin(const std::string &s1, const std::string &s2);
+	static std::string pathRenameExtension(const std::string &path, const std::string &ext);
+	static int pathCompare(const std::string &path1, const std::string &path2, bool ignore_case, bool ignore_path);
+	static std::string pathGetFull(const std::string &s);
 	#pragma endregion // path
 
 	#pragma region string

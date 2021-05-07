@@ -65,7 +65,7 @@ static KXmlElement * _LoadXmlFromZip(KUnzipper &zr, const std::string &zip_name,
 		return nullptr;
 	}
 
-	std::string doc_name = K__PathJoin(zip_name, entry_name);
+	std::string doc_name = K::pathJoin(zip_name, entry_name);
 	KXmlElement *xdoc = KXmlElement::createFromString(xml_u8, doc_name);
 	if (xdoc == nullptr) {
 		K__Error("E_XML: Failed to read xml document: '%s' from archive '%s'", entry_name.c_str(), zip_name.c_str());
