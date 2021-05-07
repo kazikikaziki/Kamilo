@@ -363,7 +363,7 @@ void KXmlElement::setAttrFloat(const char *name, float value) {
 	sprintf_s(s, sizeof(s), "%g", value);
 	setAttr(name, s);
 }
-bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
+bool KXmlElement::removeChild(KXmlElement *node, bool in_tree) {
 	if (node == nullptr) return false;
 	int n = getChildCount();
 
@@ -380,7 +380,7 @@ bool KXmlElement::deleteNode(KXmlElement *node, bool in_tree) {
 	if (in_tree) {
 		for (int i=0; i<n; i++) {
 			KXmlElement *nd = getChild(i);
-			if (nd->deleteNode(node, true)) {
+			if (nd->removeChild(node, true)) {
 				return true;
 			}
 		}

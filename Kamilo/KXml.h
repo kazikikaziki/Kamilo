@@ -30,6 +30,7 @@ public:
 public:
 	virtual const char * getTag() const = 0;
 	virtual void setTag(const char *tag) = 0;
+	bool hasTag(const char *tag) const;
 
 	virtual int getAttrCount() const = 0;
 	virtual const char * getAttrName(int index) const = 0;
@@ -46,6 +47,7 @@ public:
 	virtual KXmlElement * addChild(const char *tag, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
 	virtual void addChild(KXmlElement *newnode, int pos=-1) = 0; // ノードを追加する。挿入したい場合は挿入インデックスを pos に指定する. pos=-1 の場合は末尾に追加
 	virtual void removeChild(int index) = 0;
+	bool removeChild(KXmlElement *node, bool in_tree);
 
 	virtual int getLineNumber() const = 0;
 	virtual KXmlElement * clone() const = 0;
@@ -53,7 +55,6 @@ public:
 	#pragma region Helper
 	bool writeDoc(KOutputStream &output) const;
 	bool write(KOutputStream &output, int indent=0) const;
-	bool hasTag(const char *tag) const;
 	int getChildIndex(const KXmlElement *child) const;
 	const char * findAttr(const char *name, const char *def=nullptr) const;
 	float findAttrFloat(const char *name, float def=0.0f) const;
@@ -61,7 +62,6 @@ public:
 	int getAttrIndex(const char *name, int start=0) const;
 	void setAttrInt(const char *name, int value);
 	void setAttrFloat(const char *name, float value);
-	bool deleteNode(KXmlElement *node, bool in_tree);
 	int getNodeIndex(const char *tag, int start=0) const;
 	const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const;
 	KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr);
