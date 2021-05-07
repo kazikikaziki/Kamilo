@@ -2965,7 +2965,7 @@ private:
 			const KEdgeLayer *layer = page->getLayer(i);
 			const std::string label = layer->m_label_u8;
 
-			if (KStringUtils::startsWith(label, "#")) {
+			if (K::strStartsWith(label, "#")) {
 				// ラベル名が # で始まっている。# を取り除いた部分をレイヤー名として抜き出す。
 				// 例えば "#body" と指定されている場合、"body" がこのレイヤの名前になる
 				std::string name_str = label.substr(1);

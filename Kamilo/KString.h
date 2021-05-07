@@ -64,17 +64,6 @@ public:
 	static bool toUint64Try(const char *s, uint64_t *val);
 	static bool toUint64Try(const std::string &s, uint64_t *val);
 
-	/// 文字列 s が sub で始まっているかどうか。
-	///
-	/// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
-	static bool startsWith(const char *s, const char *sub);
-	static bool startsWith(const std::string &s, const std::string &sub);
-
-	/// 文字列 s が sub で終わっているかどうか。
-	///
-	/// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
-	static bool endsWith(const char *s, const char *sub);
-	static bool endsWith(const std::string &s, const std::string &sub);
 
 	static bool isEmpty(const char *s);
 	static bool trim(char *s);

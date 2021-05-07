@@ -130,6 +130,10 @@ public:
 	static void strReplace(std::string &s, const std::string &before, const std::string &after);
 	static void strReplaceChar(char *s, char before, char after);
 	static void strReplaceChar(wchar_t *s, wchar_t before, wchar_t after);
+	static bool strStartsWith(const char *s, const char *sub);
+	static bool strStartsWith(const std::string &s, const std::string &sub);
+	static bool strEndsWith(const char *s, const char *sub);
+	static bool strEndsWith(const std::string &s, const std::string &sub);
 	static bool strToFloat(const std::string &s, float *val);
 	static bool strToFloat(const char *s, float *val);
 	static bool strToInt(const std::string &s, int *val);

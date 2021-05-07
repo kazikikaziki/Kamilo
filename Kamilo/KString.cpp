@@ -645,13 +645,13 @@ int KString::findChar(char chr, int start) const {
 	return K::strFindChar(c_str(), chr, start);
 }
 bool KString::startsWith(const char *substr) const {
-	return KStringUtils::startsWith(c_str(), substr);
+	return K::strStartsWith(c_str(), substr);
 }
 bool KString::startsWith(const KString &substr) const {
 	return startsWith(substr.c_str());
 }
 bool KString::endsWith(const char *substr) const {
-	return KStringUtils::endsWith(c_str(), substr);
+	return K::strEndsWith(c_str(), substr);
 }
 bool KString::endsWith(const KString &substr) const {
 	return endsWith(substr.c_str());
@@ -913,42 +913,7 @@ bool KStringUtils::hexToUintTry(const char *s, uint32_t *val) {
 	return false;
 }
 
-bool KStringUtils::startsWith(const char *s, const char *sub) {
-	K__Assert(s);
-	K__Assert(sub);
-	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
-		return true;
-	}
-	size_t slen = strlen(s);
-	size_t sublen = strlen(sub);
-	if (sublen <= slen) {
-		if (strncmp(s, sub, strlen(sub)) == 0) {
-			return true;
-		}
-	}
-	return false;
-}
-bool KStringUtils::startsWith(const std::string &s, const std::string &sub) {
-	return startsWith(s.c_str(), sub.c_str());
-}
-bool KStringUtils::endsWith(const char *s, const char *sub) {
-	K__Assert(s);
-	K__Assert(sub);
-	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
-		return true;
-	}
-	size_t slen = strlen(s);
-	size_t sublen = strlen(sub);
-	if (sublen <= slen) {
-		if (strncmp(s + slen - sublen, sub, sublen) == 0) {
-			return true;
-		}
-	}
-	return false;
-}
-bool KStringUtils::endsWith(const std::string &s, const std::string &sub) {
-	return endsWith(s.c_str(), sub.c_str());
-}
+
 bool KStringUtils::equals(const char *s1, const char *s2) {
 	return s1 && s2 && strcmp(s1, s2)==0;
 }
@@ -1088,19 +1053,19 @@ void Test_str() {
 		s="aaabbb";     KStringUtils::trim(s); K__Verify(s=="aaabbb");
 		s="";           KStringUtils::trim(s); K__Verify(s=="");
 
-		K__Verify(KStringUtils::startsWith("abc", "ab") == true);
-		K__Verify(KStringUtils::startsWith("", "abc") == false);
-		K__Verify(KStringUtils::startsWith("abc", "") == true);
-		K__Verify(KStringUtils::startsWith("", "") == true);
-		K__Verify(KStringUtils::startsWith(" abc", "ab") == false);
-		K__Verify(KStringUtils::startsWith("abc", "abcd") == false);
+		K__Verify(K::strStartsWith("abc", "ab") == true);
+		K__Verify(K::strStartsWith("", "abc") == false);
+		K__Verify(K::strStartsWith("abc", "") == true);
+		K__Verify(K::strStartsWith("", "") == true);
+		K__Verify(K::strStartsWith(" abc", "ab") == false);
+		K__Verify(K::strStartsWith("abc", "abcd") == false);
 
-		K__Verify(KStringUtils::endsWith("abc", "bc") == true);
-		K__Verify(KStringUtils::endsWith("", "abc") == false);
-		K__Verify(KStringUtils::endsWith("abc", "") == true);
-		K__Verify(KStringUtils::endsWith("", "") == true);
-		K__Verify(KStringUtils::endsWith("abc ", "bc") == false);
-		K__Verify(KStringUtils::endsWith("abc", "xabc") == false);
+		K__Verify(K::strEndsWith("abc", "bc") == true);
+		K__Verify(K::strEndsWith("", "abc") == false);
+		K__Verify(K::strEndsWith("abc", "") == true);
+		K__Verify(K::strEndsWith("", "") == true);
+		K__Verify(K::strEndsWith("abc ", "bc") == false);
+		K__Verify(K::strEndsWith("abc", "xabc") == false);
 
 		K__Verify(K::strFind("aaa x", "x") == 4);
 		K__Verify(K::strFind("aaa x", "a") == 0);

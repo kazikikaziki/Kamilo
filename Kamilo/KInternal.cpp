@@ -538,6 +538,50 @@ void K::strReplaceChar(wchar_t *s, wchar_t before, wchar_t after) {
 		}
 	}
 }
+/// 文字列 s が sub で始まっているかどうか。
+///
+/// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
+bool K::strStartsWith(const char *s, const char *sub) {
+	K__Assert(s);
+	K__Assert(sub);
+	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
+		return true;
+	}
+	size_t slen = strlen(s);
+	size_t sublen = strlen(sub);
+	if (sublen <= slen) {
+		if (strncmp(s, sub, strlen(sub)) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+bool K::strStartsWith(const std::string &s, const std::string &sub) {
+	return strStartsWith(s.c_str(), sub.c_str());
+}
+
+/// 文字列 s が sub で終わっているかどうか。
+///
+/// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
+bool K::strEndsWith(const char *s, const char *sub) {
+	K__Assert(s);
+	K__Assert(sub);
+	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
+		return true;
+	}
+	size_t slen = strlen(s);
+	size_t sublen = strlen(sub);
+	if (sublen <= slen) {
+		if (strncmp(s + slen - sublen, sub, sublen) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+bool K::strEndsWith(const std::string &s, const std::string &sub) {
+	return strEndsWith(s.c_str(), sub.c_str());
+}
+
 bool K::strToFloat(const std::string &s, float *val) {
 	return strToFloat(s.c_str(), val);
 }

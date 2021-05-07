@@ -89,7 +89,7 @@ public:
 		std::vector<std::string> keys;
 		for (int i=0; i<m_Values.size(); i++) {
 			const char *key = m_Values.getName(i);
-			if (KStringUtils::startsWith(key, prefix)) {
+			if (K::strStartsWith(key, prefix)) {
 				keys.push_back(key);
 			}
 		}
