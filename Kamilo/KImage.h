@@ -9,7 +9,6 @@
 #include <vector>
 #include <unordered_map>
 #include <inttypes.h>
-#include "KRef.h"
 #include "KColor.h"
 #include "KStream.h"
 

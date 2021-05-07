@@ -6,7 +6,7 @@
 #pragma once
 #include "KImage.h"
 #include "KMatrix.h"
-
+#include "KRef.h"
 
 #pragma region Core Video
 #define MO_VIDEO_ENABLE_HALF_PIXEL  1
