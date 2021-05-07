@@ -208,8 +208,8 @@ public:
 
 private:
 	static int findSeparatorByIndex(const char *text, size_t size, int index);
-	std::string mFileName;
-	FILE *mFile;
+	std::string m_FileName;
+	FILE *m_File;
 };
 
 class KLogConsole {
@@ -260,7 +260,7 @@ public:
 	int getColorFlags();
 private:
 	void getLevelColorFlags(char type, uint16_t *typecolor, uint16_t *msgcolor);
-	FILE *mStdout;
+	FILE *m_Stdout;
 };
 
 class KLogDebugger {
@@ -272,7 +272,7 @@ public:
 	void writeLine(const char *u8);
 	void writeRecord(const KLog::Record &rec);
 private:
-	bool mIsOpen;
+	bool m_IsOpen;
 };
 
 namespace Test {

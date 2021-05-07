@@ -53,65 +53,65 @@ namespace Kamilo {
 
 #pragma region KLogFile
 KLogFile::KLogFile() {
-	mFile = nullptr;
+	m_File = nullptr;
 }
 bool KLogFile::open(const char *filename_u8) {
 	close();
 	FILE *fp = K::fileOpen(filename_u8, "a");
 	if (fp) {
-		mFile = fp;
-		mFileName = filename_u8;
+		m_File = fp;
+		m_FileName = filename_u8;
 	} else {
-		mFile = nullptr;
-		mFileName = "";
+		m_File = nullptr;
+		m_FileName = "";
 		K__RawPrintf("[Log] ERROR Failed to open log file: '%s'", filename_u8);
 	}
-	return mFile != nullptr;
+	return m_File != nullptr;
 }
 bool KLogFile::isOpen() {
-	return mFile != nullptr;
+	return m_File != nullptr;
 }
 void KLogFile::close() {
-	if (mFile) {
-		fflush(mFile);
-		fclose(mFile);
-		mFile = nullptr;
-		mFileName = "";
+	if (m_File) {
+		fflush(m_File);
+		fclose(m_File);
+		m_File = nullptr;
+		m_FileName = "";
 	}
 }
 void KLogFile::writeLine(const char *u8) {
-	if (mFile == nullptr) return;
-	fputs(u8, mFile);
-	fputs("\n", mFile);
-	fflush(mFile);
+	if (m_File == nullptr) return;
+	fputs(u8, m_File);
+	fputs("\n", m_File);
+	fflush(m_File);
 }
 void KLogFile::writeRecord(const KLog::Record &rec) {
-	if (mFile == nullptr) return;
-	fprintf(mFile, "%02d-%02d-%02d ", rec.time_year, rec.time_mon, rec.time_mday);
-	fprintf(mFile, "%02d:%02d:%02d.%03d ", rec.time_hour, rec.time_min, rec.time_sec, rec.time_msec);
-	fprintf(mFile, "(%6d) @%08x ", rec.app_msec, K::sysGetCurrentProcessId());
+	if (m_File == nullptr) return;
+	fprintf(m_File, "%02d-%02d-%02d ", rec.time_year, rec.time_mon, rec.time_mday);
+	fprintf(m_File, "%02d:%02d:%02d.%03d ", rec.time_hour, rec.time_min, rec.time_sec, rec.time_msec);
+	fprintf(m_File, "(%6d) @%08x ", rec.app_msec, K::sysGetCurrentProcessId());
 	switch (rec.type) {
-	case KLog::LEVEL_AST: fprintf(mFile, "[assertion error] "); break;
-	case KLog::LEVEL_ERR: fprintf(mFile, "[error] "); break;
-	case KLog::LEVEL_WRN: fprintf(mFile, "[warning] "); break;
-	case KLog::LEVEL_INF: fprintf(mFile, "[info] "); break;
-	case KLog::LEVEL_DBG: fprintf(mFile, "[debug] "); break;
-	case KLog::LEVEL_VRB: fprintf(mFile, "[verbose] "); break;
-	default:       fprintf(mFile, "[%c] ", rec.type); break;
+	case KLog::LEVEL_AST: fprintf(m_File, "[assertion error] "); break;
+	case KLog::LEVEL_ERR: fprintf(m_File, "[error] "); break;
+	case KLog::LEVEL_WRN: fprintf(m_File, "[warning] "); break;
+	case KLog::LEVEL_INF: fprintf(m_File, "[info] "); break;
+	case KLog::LEVEL_DBG: fprintf(m_File, "[debug] "); break;
+	case KLog::LEVEL_VRB: fprintf(m_File, "[verbose] "); break;
+	default:       fprintf(m_File, "[%c] ", rec.type); break;
 	}
-	fprintf(mFile, "%s\n", rec.text_u8.c_str());
-	fflush(mFile);
+	fprintf(m_File, "%s\n", rec.text_u8.c_str());
+	fflush(m_File);
 }
 bool KLogFile::clampBySeparator(int number) {
 	// いったん閉じる (writeモードなので)
-	if (mFile) {
-		fflush(mFile);
-		fclose(mFile);
-		mFile = nullptr;
+	if (m_File) {
+		fflush(m_File);
+		fclose(m_File);
+		m_File = nullptr;
 	}
 
 	// テキストをロード
-	std::string text = K::fileLoadString(mFileName);
+	std::string text = K::fileLoadString(m_FileName);
 
 	// 内容修正
 	{
@@ -127,19 +127,19 @@ bool KLogFile::clampBySeparator(int number) {
 	}
 
 	// 新しい内容を書き込む
-	K::fileSaveString(mFileName, text);
+	K::fileSaveString(m_FileName, text);
 
 	// 再び開く
-	mFile = K::fileOpen(mFileName, "a");
-	return mFile != nullptr;
+	m_File = K::fileOpen(m_FileName, "a");
+	return m_File != nullptr;
 }
 bool KLogFile::clampBySize(int clamp_size_bytes) {
 	// いったん閉じる (writeモードなので) 
-	fflush(mFile);
-	fclose(mFile);
+	fflush(m_File);
+	fclose(m_File);
 
 	// テキストをロード
-	std::string text = K::fileLoadString(mFileName);
+	std::string text = K::fileLoadString(m_FileName);
 
 	// 内容修正
 	{
@@ -156,11 +156,11 @@ bool KLogFile::clampBySize(int clamp_size_bytes) {
 	}
 
 	// 新しい内容を書き込む
-	K::fileSaveString(mFileName, text);
+	K::fileSaveString(m_FileName, text);
 
 	// 再び開く
-	mFile = K::fileOpen(mFileName, "a");
-	return mFile != nullptr;
+	m_File = K::fileOpen(m_FileName, "a");
+	return m_File != nullptr;
 }
 int KLogFile::findSeparatorByIndex(const char *text, size_t size, int index) {
 	// 区切り線を探す
@@ -204,22 +204,22 @@ int KLogFile::findSeparatorByIndex(const char *text, size_t size, int index) {
 
 #pragma region KLogConsole
 KLogConsole::KLogConsole() {
-	mStdout = nullptr;
+	m_Stdout = nullptr;
 }
 bool KLogConsole::open() {
 	close();
 	#ifndef _CONSOLE
 	AllocConsole();
-	freopen_s(&mStdout, "CON", "w", stdout);
+	freopen_s(&m_Stdout, "CON", "w", stdout);
 	#endif
 	return true;
 }
 bool KLogConsole::isOpen() {
-	return mStdout != nullptr;
+	return m_Stdout != nullptr;
 }
 void KLogConsole::close() {
-	if (mStdout) fclose(mStdout);
-	mStdout = nullptr;
+	if (m_Stdout) fclose(m_Stdout);
+	m_Stdout = nullptr;
 	#ifndef _CONSOLE
 	if (0) {
 		FreeConsole();
@@ -350,29 +350,29 @@ void KLogConsole::getLevelColorFlags(char type, uint16_t *typecolor, uint16_t *m
 
 #pragma region KLogDebugger
 KLogDebugger::KLogDebugger() {
-	mIsOpen = false;
+	m_IsOpen = false;
 }
 bool KLogDebugger::open() {
 	close();
-	mIsOpen = K__IsDebuggerPresent();
-	return mIsOpen;
+	m_IsOpen = K__IsDebuggerPresent();
+	return m_IsOpen;
 }
 bool KLogDebugger::isOpen() {
-	return mIsOpen;
+	return m_IsOpen;
 }
 void KLogDebugger::close() {
-	mIsOpen = false;
+	m_IsOpen = false;
 }
 void KLogDebugger::writeLine(const char *u8) {
 	// デバッガーに出力する。
 	// Visual Studio の「出力」ウィンドウでメッセージを見ることができる
-	if (!mIsOpen) return;
+	if (!m_IsOpen) return;
 	std::wstring ws = K__Utf8ToWideStd(u8);
 	OutputDebugStringW(ws.c_str());
 	OutputDebugStringW(L"\n");
 }
 void KLogDebugger::writeRecord(const KLog::Record &rec) {
-	if (!mIsOpen) return;
+	if (!m_IsOpen) return;
 	char s[K__LOG_SPRINTF_BUFSIZE];
 	sprintf_s(s, sizeof(s), "[%c] %s", rec.type, rec.text_u8.c_str());
 	writeLine(s);
@@ -382,65 +382,65 @@ void KLogDebugger::writeRecord(const KLog::Record &rec) {
 
 #if USE_LOG_THREAD
 class CLogThread: public KThread {
-	std::mutex mMutex;
-	std::queue<KLog::Record> mQueue;
-	std::queue<KLog::Record> mBuf;
-	bool mIsBusy;
-	int mLocked;
+	std::mutex m_Mutex;
+	std::queue<KLog::Record> m_Queue;
+	std::queue<KLog::Record> m_Buf;
+	bool m_IsBusy;
+	int m_Locked;
 public:
 	CLogThread() {
-		mIsBusy = false;
-		mLocked = 0;
+		m_IsBusy = false;
+		m_Locked = 0;
 	}
 	virtual void run() override {
 		while (1) {
 			// 待機キューにメッセージがたまるまで待機する。
 			// or メッセージ処理がロックされている場合も、ロック解除まで待機する
-			while (mBuf.empty() || mLocked > 0) {
-				mIsBusy = false;
+			while (m_Buf.empty() || m_Locked > 0) {
+				m_IsBusy = false;
 				if (shouldExit()) {
 					goto end;
 				}
 				Sleep(10);
 			}
 
-			mIsBusy = true;
+			m_IsBusy = true;
 
 			// 待機キューにあるメッセージを実行キューに移動する
-			mMutex.lock();
-			while (!mBuf.empty()) {
-				mQueue.push(mBuf.front());
-				mBuf.pop();
+			m_Mutex.lock();
+			while (!m_Buf.empty()) {
+				m_Queue.push(m_Buf.front());
+				m_Buf.pop();
 			}
-			mMutex.unlock();
+			m_Mutex.unlock();
 
 			// 実行キューのメッセージを出力する
-			while (!mQueue.empty()) {
-				const KLog::Record &rec = mQueue.front();
+			while (!m_Queue.empty()) {
+				const KLog::Record &rec = m_Queue.front();
 				KLog::printRecord_unsafe(rec);
-				mQueue.pop();
+				m_Queue.pop();
 			}
 		}
 	end:
-		mIsBusy = false;
-		mLocked = 0;
+		m_IsBusy = false;
+		m_Locked = 0;
 	}
 
 	void post_emit(const KLog::Record &rec) {
-		mMutex.lock();
-		mBuf.push(rec);
-		mMutex.unlock();
+		m_Mutex.lock();
+		m_Buf.push(rec);
+		m_Mutex.unlock();
 	}
 	void wait_for_idle() {
-		while (mIsBusy) {
+		while (m_IsBusy) {
 			Sleep(1);
 		}
 	}
 	void lock() {
-		mLocked++;
+		m_Locked++;
 	}
 	void unlock() {
-		mLocked--;
+		m_Locked--;
 	}
 };
 static CLogThread g_LogThread;
@@ -448,30 +448,30 @@ static CLogThread g_LogThread;
 
 
 class CLogContext {
-	std::mutex mMutex;
-	KLog::Callback *mCallback;
-	KLogFile mFile;
-	KLogConsole mConsole;
-	KLogDebugger mDebugger;
-	uint32_t mStartMsec;
-	int mDialogMuted; // ダイアログ抑制のスタックカウンタ
-	bool mInfoEnabled;
-	bool mDebugEnabled;
-	bool mVerboseEnabled;
-	bool mDialogEnabled;
+	std::mutex m_Mutex;
+	KLog::Callback *m_Callback;
+	KLogFile m_File;
+	KLogConsole m_Console;
+	KLogDebugger m_Debugger;
+	uint32_t m_StartMsec;
+	int m_DialogMuted; // ダイアログ抑制のスタックカウンタ
+	bool m_InfoEnabled;
+	bool m_DebugEnabled;
+	bool m_VerboseEnabled;
+	bool m_DialogEnabled;
 public:
-	int mTraceDepth;
-	std::recursive_mutex mTraceMutex;
+	int m_TraceDepth;
+	std::recursive_mutex m_TraceMutex;
 
 	CLogContext() {
-		mCallback = nullptr;
-		mStartMsec = K::clockMsec32();
-		mInfoEnabled = true;
-		mDebugEnabled = true;
-		mVerboseEnabled = false;
-		mDialogEnabled = true;
-		mDialogMuted = 0;
-		mTraceDepth = 0;
+		m_Callback = nullptr;
+		m_StartMsec = K::clockMsec32();
+		m_InfoEnabled = true;
+		m_DebugEnabled = true;
+		m_VerboseEnabled = false;
+		m_DialogEnabled = true;
+		m_DialogMuted = 0;
+		m_TraceDepth = 0;
 
 	#if USE_LOG_THREAD
 		g_LogThread.start();
@@ -483,42 +483,42 @@ public:
 	#endif
 	}
 	bool isLevelEnabled(KLog::Level lv) const {
-		if (lv==KLog::LEVEL_VRB && !mVerboseEnabled) return false;
-		if (lv==KLog::LEVEL_DBG && !mDebugEnabled) return false;
-		if (lv==KLog::LEVEL_INF && !mInfoEnabled) return false;
+		if (lv==KLog::LEVEL_VRB && !m_VerboseEnabled) return false;
+		if (lv==KLog::LEVEL_DBG && !m_DebugEnabled) return false;
+		if (lv==KLog::LEVEL_INF && !m_InfoEnabled) return false;
 		return true;
 	}
 	void printRecord_unsafe(const KLog::Record &rec) {
-		mMutex.lock();
+		m_Mutex.lock();
 		if (rec.type == KLog::LEVEL_NUL) {
 			//
 			// 属性なしテキスト
 			//
-			if (mDebugger.isOpen()) {
-				mDebugger.writeLine(rec.text_u8.c_str());
+			if (m_Debugger.isOpen()) {
+				m_Debugger.writeLine(rec.text_u8.c_str());
 			}
-			if (mConsole.isOpen()) {
-				mConsole.writeLine(rec.text_u8.c_str());
+			if (m_Console.isOpen()) {
+				m_Console.writeLine(rec.text_u8.c_str());
 			}
-			if (mFile.isOpen()) {
-				mFile.writeLine(rec.text_u8.c_str());
+			if (m_File.isOpen()) {
+				m_File.writeLine(rec.text_u8.c_str());
 			}
 
 		} else {
 			//
 			// 属性付きテキスト
 			//
-			if (mDebugger.isOpen()) {
-				mDebugger.writeRecord(rec);
+			if (m_Debugger.isOpen()) {
+				m_Debugger.writeRecord(rec);
 			}
-			if (mConsole.isOpen()) {
-				mConsole.writeRecord(rec);
+			if (m_Console.isOpen()) {
+				m_Console.writeRecord(rec);
 			}
-			if (mFile.isOpen()) {
-				mFile.writeRecord(rec);
+			if (m_File.isOpen()) {
+				m_File.writeRecord(rec);
 			}
 		}
-		mMutex.unlock();
+		m_Mutex.unlock();
 	}
 
 	// テキストを出力する。
@@ -539,7 +539,7 @@ public:
 			rec.time_min  = st.wMinute;
 			rec.time_sec  = st.wSecond;
 			rec.time_msec = st.wMilliseconds;
-			rec.app_msec = K::clockMsec32() - mStartMsec;
+			rec.app_msec = K::clockMsec32() - m_StartMsec;
 			rec.type = lv;
 			rec.text_u8 = u8;
 		}
@@ -585,8 +585,8 @@ public:
 			bool no_dialog = true;
 
 			// ユーザーによる処理を試みる
-			if (mCallback) {
-				mCallback->on_log_output(lv, u8, &no_emit, &no_dialog);
+			if (m_Callback) {
+				m_Callback->on_log_output(lv, u8, &no_emit, &no_dialog);
 			}
 
 			if (!no_dialog) {
@@ -609,18 +609,18 @@ public:
 	void setFileName(const char *filename_u8) {
 		threadLock(); // 出力設定が変化するので、処理中の出力処理が終わるまで待たないとダメ
 		if (filename_u8 && filename_u8[0]) {
-			mFile.open(filename_u8);
-			mFile.clampBySeparator(-2); // 過去2回分のログだけ残し、それ以外を削除
+			m_File.open(filename_u8);
+			m_File.clampBySeparator(-2); // 過去2回分のログだけ残し、それ以外を削除
 			K__RawPrintf("[Log] file open: %s", filename_u8);
 		} else {
 			K__RawPrintf("[Log] file close");
-			mFile.close();
+			m_File.close();
 		}
 		threadUnlock();
 	}
 	void setCallback(KLog::Callback *cb) {
 		threadLock();
-		mCallback = cb;
+		m_Callback = cb;
 		threadUnlock();
 	}
 	void setConsoleEnabled(bool enabled) {
@@ -628,77 +628,77 @@ public:
 		if (enabled) {
 			// コンソールへの出力を有効にする
 			// 順番に注意：有効にしてからログを出す
-			mConsole.open();
+			m_Console.open();
 			K__RawPrintf("[Log] console on");
 		} else {
 			// コンソールへの出力を停止する。
 			// 順番に注意：ログを出してから無効にする
 			K__RawPrintf("[Log] console off");
-			mConsole.close();
+			m_Console.close();
 		}
 		threadUnlock();
 	}
 	void setDebuggerEnabled(bool value) {
 		threadLock();
 		if (value) {
-			mDebugger.open();
+			m_Debugger.open();
 			K__RawPrintf("[Log] debugger on");
 		} else {
 			K__RawPrintf("[Log] debugger off");
-			mDebugger.close();
+			m_Debugger.close();
 		}
 		threadUnlock();
 	}
 	void setLevel_info(bool value) {
 		threadLock();
-		mInfoEnabled = value;
+		m_InfoEnabled = value;
 		K__RawPrintf("[Log] level info %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void setLevel_debug(bool value) {
 		threadLock();
-		mDebugEnabled = value;
+		m_DebugEnabled = value;
 		K__RawPrintf("[Log] level debug %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void setLevel_verbose(bool value) {
 		threadLock();
-		mVerboseEnabled = value;
+		m_VerboseEnabled = value;
 		K__RawPrintf("[Log] level verbose %s", value ? "on" :"off");;
 		threadUnlock();
 	}
 	void setDialogEnabled(bool value) {
 		threadLock();
-		mDialogEnabled = value;
+		m_DialogEnabled = value;
 		K__RawPrintf("[Log] dialog %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void muteDialog() {
 		threadLock();
-		mDialogMuted++;
+		m_DialogMuted++;
 		threadUnlock();
 	}
 	void unmuteDialog() {
 		threadLock();
-		mDialogMuted--;
+		m_DialogMuted--;
 		threadUnlock();
 	}
 	int getState(KLog::State s) {
 		switch (s) {
 		case KLog::STATE_HAS_OUTPUT_CONSOLE:
-			return mConsole.isOpen() ? 1 : 0;
+			return m_Console.isOpen() ? 1 : 0;
 		case KLog::STATE_HAS_OUTPUT_FILE:
-			return mFile.isOpen() ? 1 : 0;
+			return m_File.isOpen() ? 1 : 0;
 		case KLog::STATE_HAS_OUTPUT_DEBUGGER:
-			return mDebugger.isOpen() ? 1 : 0;
+			return m_Debugger.isOpen() ? 1 : 0;
 		case KLog::STATE_LEVEL_INFO:
-			return mInfoEnabled ? 1 : 0;
+			return m_InfoEnabled ? 1 : 0;
 		case KLog::STATE_LEVEL_DEBUG:
-			return mDebugEnabled ? 1 : 0;
+			return m_DebugEnabled ? 1 : 0;
 		case KLog::STATE_LEVEL_VERBOSE:
-			return mVerboseEnabled ? 1 : 0;
+			return m_VerboseEnabled ? 1 : 0;
 		case KLog::STATE_DIALOG_ALLOWED:
-			return (mDialogEnabled && mDialogMuted <= 0) ? 1 : 0;
+			return (m_DialogEnabled && m_DialogMuted <= 0) ? 1 : 0;
 		default:
 			return 0;
 		}
@@ -849,10 +849,10 @@ void KLog::rawEmitf(const char *fmt, ...) {
 	va_end(args);
 }
 void KLog::printTrace(const char *file, int line) {
-	std::string indent = std::string(g_Log.mTraceDepth * 2, '*');
-	g_Log.mTraceMutex.lock();
+	std::string indent = std::string(g_Log.m_TraceDepth * 2, '*');
+	g_Log.m_TraceMutex.lock();
 	emitf(LEVEL_NUL, "[TRACE] %s%s(%d)", indent.c_str(), file, line);
-	g_Log.mTraceMutex.unlock();
+	g_Log.m_TraceMutex.unlock();
 }
 void KLog::printTracef(const char *file, int line, const char *fmt, ...) {
 	char s[1024] = {0};
@@ -861,10 +861,10 @@ void KLog::printTracef(const char *file, int line, const char *fmt, ...) {
 	sprintf_s(s, sizeof(s), fmt, args);
 	va_end(args);
 
-	std::string indent = std::string(g_Log.mTraceDepth * 2, '*');
-	g_Log.mTraceMutex.lock();
+	std::string indent = std::string(g_Log.m_TraceDepth * 2, '*');
+	g_Log.m_TraceMutex.lock();
 	emitf(LEVEL_NUL, "[TRACE] %s%s(%d): %s", indent.c_str(), file, line, s);
-	g_Log.mTraceMutex.unlock();
+	g_Log.m_TraceMutex.unlock();
 }
 void KLog::printSeparator() {
 	g_Log.printCutline();
