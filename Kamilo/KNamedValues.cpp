@@ -2,69 +2,61 @@
 
 namespace Kamilo {
 
-class CNamedValuesImpl {
-	typedef std::pair<std::string, std::string> Pair;
-	std::vector<Pair> m_Items;
-public:
-	int size() const {
-		return (int)m_Items.size();
-	}
-	void clear() {
-		m_Items.clear();
-	}
-	void remove(const char *name) {
-		int index = find(name);
-		if (index >= 0) {
-			m_Items.erase(m_Items.begin() + index);
-		}
-	}
-	const char * getName(int index) const {
-		if (0 <= index && index < (int)m_Items.size()) {
-			return m_Items[index].first.c_str();
-		} else {
-			return nullptr;
-		}
-	}
-	const char * getString(int index) const {
-		if (0 <= index && index < (int)m_Items.size()) {
-			return m_Items[index].second.c_str();
-		} else {
-			return nullptr;
-		}
-	}
-	void setString(const char *name, const char *value) {
-		if (name && name[0]) {
-			int index = find(name);
-			if (index >= 0) {
-				m_Items[index].second = value ? value : "";
-			} else {
-				m_Items.push_back(Pair(name, value));
-			}
-		}
-	}
-	int find(const char *name) const {
-		for (int i=0; i<m_Items.size(); i++) {
-			if (m_Items[i].first.compare(name) == 0) {
-				return i;
-			}
-		}
-		return -1;
-	}
-};
-
-
 #pragma region KNamedValues
 KNamedValues::KNamedValues() {
-	m_Impl = std::shared_ptr<CNamedValuesImpl>(new CNamedValuesImpl());
+}
+int KNamedValues::_size() const {
+	return (int)m_Items.size();
+}
+void KNamedValues::_clear() {
+	m_Items.clear();
+}
+void KNamedValues::_remove(const char *name) {
+	int index = find(name);
+	if (index >= 0) {
+		m_Items.erase(m_Items.begin() + index);
+	}
+}
+const char * KNamedValues::_getName(int index) const {
+	if (0 <= index && index < (int)m_Items.size()) {
+		return m_Items[index].first.c_str();
+	} else {
+		return nullptr;
+	}
+}
+const char * KNamedValues::_getString(int index) const {
+	if (0 <= index && index < (int)m_Items.size()) {
+		return m_Items[index].second.c_str();
+	} else {
+		return nullptr;
+	}
+}
+void KNamedValues::_setString(const char *name, const char *value) {
+	if (name && name[0]) {
+		int index = find(name);
+		if (index >= 0) {
+			m_Items[index].second = value ? value : "";
+		} else {
+			m_Items.push_back(Pair(name, value));
+		}
+	}
+}
+int KNamedValues::_find(const char *name) const {
+	for (int i=0; i<m_Items.size(); i++) {
+		if (m_Items[i].first.compare(name) == 0) {
+			return i;
+		}
+	}
+	return -1;
 }
 int KNamedValues::size() const {
-	return m_Impl->size();
+	return _size();
 }
 void KNamedValues::clear() {
-	m_Impl->clear();
+	_clear();
 }
 void KNamedValues::remove(const char *name) {
-	m_Impl->remove(name);
+	_remove(name);
 }
 KNamedValues KNamedValues::clone() const {
 	KNamedValues nv;
@@ -148,13 +140,13 @@ std::string KNamedValues::saveToString(bool pack_in_attr) const {
 	return s;
 }
 const char * KNamedValues::getName(int index) const {
-	return m_Impl->getName(index);
+	return _getName(index);
 }
 const char * KNamedValues::getString(int index) const {
-	return m_Impl->getString(index);
+	return _getString(index);
 }
 void KNamedValues::setString(const char *name, const char *value) {
-	m_Impl->setString(name, value);
+	_setString(name, value);
 }
 bool KNamedValues::loadFromFile(const char *filename) {
 	bool success = false;
@@ -181,7 +173,7 @@ void KNamedValues::append(const KNamedValues &nv) {
 	}
 }
 int KNamedValues::find(const char *name) const {
-	return m_Impl->find(name);
+	return _find(name);
 }
 bool KNamedValues::contains(const char *name) const {
 	return find(name) >= 0;

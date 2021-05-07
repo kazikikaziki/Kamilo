@@ -59,7 +59,15 @@ public:
 	int getBinary(const char *name, void *out, int maxsize) const;
 
 private:
-	std::shared_ptr<CNamedValuesImpl> m_Impl;
+	int _size() const;
+	void _clear();
+	void _remove(const char *name);
+	const char * _getName(int index) const;
+	const char * _getString(int index) const;
+	void _setString(const char *name, const char *value);
+	int _find(const char *name) const;
+	typedef std::pair<std::string, std::string> Pair;
+	std::vector<Pair> m_Items;
 };
 
 
