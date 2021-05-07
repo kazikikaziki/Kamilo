@@ -55,14 +55,16 @@ public:
 	#pragma region Helper
 	bool writeDoc(KOutputStream &output) const;
 	bool write(KOutputStream &output, int indent=0) const;
-	int getChildIndex(const KXmlElement *child) const;
+	int indexOf(const KXmlElement *child) const;
+	int findAttrByName(const char *name, int start=0) const;
+	int findChildByTag(const char *tag, int start=0) const;
+
 	const char * findAttr(const char *name, const char *def=nullptr) const;
 	float findAttrFloat(const char *name, float def=0.0f) const;
 	int findAttrInt(const char *name, int def=0) const;
-	int getAttrIndex(const char *name, int start=0) const;
+
 	void setAttrInt(const char *name, int value);
 	void setAttrFloat(const char *name, float value);
-	int getNodeIndex(const char *tag, int start=0) const;
 	const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const;
 	KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr);
 	const KXmlElement * _findnode_const(const char *tag, const KXmlElement *start=nullptr) const;

@@ -97,7 +97,7 @@ public:
 	}
 	virtual void setAttr(const char *name, const char *value) override {
 		if (value == nullptr) { removeAttr(name); return; }
-		int index = getAttrIndex(name);
+		int index = findAttrByName(name);
 		if (index >= 0) {
 			m_Attrs[index].second = value; // 既存の属性を変更
 		} else {
@@ -105,7 +105,7 @@ public:
 		}
 	}
 	virtual void removeAttr(const char *name) override {
-		int index = getAttrIndex(name);
+		int index = findAttrByName(name);
 		if (index >= 0) {
 			m_Attrs.erase(m_Attrs.begin() + index);
 		}
@@ -315,7 +315,7 @@ bool KXmlElement::hasTag(const char *tag) const {
 	const char *mytag = getTag();
 	return mytag && tag && strcmp(mytag, tag)==0;
 }
-int KXmlElement::getChildIndex(const KXmlElement *child) const {
+int KXmlElement::indexOf(const KXmlElement *child) const {
 	for (int i=0; i<getChildCount(); i++) {
 		if (getChild(i) == child) {
 			return i;
@@ -324,7 +324,7 @@ int KXmlElement::getChildIndex(const KXmlElement *child) const {
 	return -1;
 }
 const char * KXmlElement::findAttr(const char *name, const char *def) const {
-	int i = getAttrIndex(name);
+	int i = findAttrByName(name);
 	return i>=0 ? getAttrValue(i) : def;
 }
 float KXmlElement::findAttrFloat(const char *name, float def) const {
@@ -343,7 +343,7 @@ int KXmlElement::findAttrInt(const char *name, int def) const {
 	if (err==s || *err) return def;
 	return result;
 }
-int KXmlElement::getAttrIndex(const char *name, int start) const {
+int KXmlElement::findAttrByName(const char *name, int start) const {
 	if (name && name[0]) {
 		for (int i=start; i<getAttrCount(); i++) {
 			if (strcmp(getAttrName(i), name) == 0) {
@@ -387,7 +387,7 @@ bool KXmlElement::removeChild(KXmlElement *node, bool in_tree) {
 	}
 	return false;
 }
-int KXmlElement::getNodeIndex(const char *tag, int start) const {
+int KXmlElement::findChildByTag(const char *tag, int start) const {
 	int n = getChildCount();
 	for (int i=start; i<n; i++) {
 		const KXmlElement *elm = getChild(i);

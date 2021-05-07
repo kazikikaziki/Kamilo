@@ -125,7 +125,7 @@ public:
 		K__Assert(sheets_xml);
 
 		int idx = 0;
-		for (int iSheet=sheets_xml->getNodeIndex("sheet"); iSheet>=0; iSheet=sheets_xml->getNodeIndex("sheet", iSheet+1)) {
+		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			if (idx == sheetId) {
 				const char *s = xSheet->findAttr("name");
@@ -152,7 +152,7 @@ public:
 		K__Assert(sheets_xml);
 
 		int idx = 0;
-		for (int iSheet=sheets_xml->getNodeIndex("sheet"); iSheet>=0; iSheet=sheets_xml->getNodeIndex("sheet", iSheet+1)) {
+		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			const char *name_u8 = xSheet->findAttr("name");
 			if (name_u8 && strcmp(name, name_u8) == 0) {
