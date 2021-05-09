@@ -212,6 +212,18 @@ void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) {
 	K::strReplaceChar(out_path_u8, K__PATH_BACKSLASH, K__PATH_SLASH);
 }
 
+std::wstring K__Utf8ToWidePath(const std::string &path_u8) {
+	// windows形式のパスに変換する
+	std::wstring ws = K::strUtf8ToWide(path_u8);
+	K::strReplaceChar(ws, K__PATH_SLASHW, K__PATH_BACKSLASHW);
+	return ws;
+}
+std::string K__WideToUtf8Path(const std::wstring &wpath) {
+	// windows形式のパスに変換する
+	std::string s = K::strWideToUtf8(wpath);
+	K::strReplaceChar(s, K__PATH_BACKSLASH, K__PATH_SLASH);
+	return s;
+}
 
 
 #pragma region clock
@@ -334,9 +346,70 @@ FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
 	}
 	return file;
 }
-std::string K::fileLoadString(const std::string &filename_u8) {
+
+/// 指定されたファイルのバイト数を得る
+/// サイズを取得できない場合は false を返す
+bool K::fileGetSize(const std::string &path_u8, int *out_size) {
+	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	//
+	HANDLE hFile = CreateFileW(wpath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (hFile != INVALID_HANDLE_VALUE) {
+		DWORD dwSize = GetFileSize(hFile, nullptr);
+		CloseHandle(hFile);
+		if (dwSize != (DWORD)(-1)) {
+			if (out_size) *out_size = (int)dwSize;
+			return true;
+		}
+	}
+	return false;
+}
+
+/// FILETIME から time_t へ変換する
+static time_t _FILETIME_to_timet(const FILETIME *ft) {
+	// FILETIME ==> time_t
+	K__Assert(ft);
+	K__Assert(sizeof(time_t) == 8); // 64bit
+	// FILETIMEを等価な64ビットのファイル時刻形式（1601/1/1 0:00から100ナノ秒刻み）に変換
+	uint64_t ntfs64 = ((uint64_t)ft->dwHighDateTime << 32) | ft->dwLowDateTime;
+	// NTFSで使われている64ビットのファイル時刻形式から
+	// time_t 形式（1970/1/1 0:00から1秒刻み）を得る
+	uint64_t basetime = 116444736000000000; // FILETIME at 1970/1/1 0:00
+	uint64_t nsec  = 10000000; // 100nsec --> sec (10 * 1000 * 1000)
+	return (time_t)((ntfs64 - basetime) / nsec);
+}
+
+
+/// パスで指定されたファイルのタイムスタンプを得る
+/// time_cma time_t の配列 Create, Modify, Access の順で値が入る
+/// 時刻を取得できない場合は false を返す
+/// @code
+///		time_t cma[] = {0, 0, 0};
+///		K_PathGetTimeStamp("myfile.txt", cma);
+///		// cma[0] <-- creation time
+///		// cma[1] <-- modify time
+///		// cma[2] <-- access time
+/// @endcode
+bool K::fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma) {
+	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	//
+	HANDLE hFile = CreateFileW(wpath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (hFile != INVALID_HANDLE_VALUE) {
+		FILETIME ctm, mtm, atm;
+		GetFileTime(hFile, &ctm, &atm, &mtm);
+		CloseHandle(hFile);
+		if (out_time_cma) {
+			out_time_cma[0] = _FILETIME_to_timet(&ctm); // creation
+			out_time_cma[1] = _FILETIME_to_timet(&mtm); // modify
+			out_time_cma[2] = _FILETIME_to_timet(&atm); // access
+		}
+		return true;
+	}
+	return false;
+}
+
+std::string K::fileLoadString(const std::string &path_u8) {
 	std::string bin;
-	FILE *file = fileOpen(filename_u8, "r");
+	FILE *file = fileOpen(path_u8, "r");
 	if (file) {
 		char buf[1024];
 		while (1) {
@@ -348,8 +421,8 @@ std::string K::fileLoadString(const std::string &filename_u8) {
 	}
 	return bin;
 }
-void K::fileSaveString(const std::string &filename_u8, const std::string &bin) {
-	FILE *file = fileOpen(filename_u8, "w");
+void K::fileSaveString(const std::string &path_u8, const std::string &bin) {
+	FILE *file = fileOpen(path_u8, "w");
 	if (file) {
 		::fwrite(bin.data(), bin.size(), 1, file);
 		::fclose(file);
@@ -387,9 +460,8 @@ std::string K::sysGetCurrentDir() {
 /// カレントディレクトリ名を utf8 で得る
 /// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/chdir.2.html
 bool K::sysSetCurrentDir(const std::string &dir) {
-	wchar_t wpath[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wpath, MAX_PATH, dir.c_str());
-	if (::SetCurrentDirectoryW(wpath)) {
+	std::wstring wdir = K__Utf8ToWidePath(dir);
+	if (::SetCurrentDirectoryW(wdir.c_str())) {
 		return true; // OK
 	} else {
 		K__ERROR_MSG(dir.c_str());
@@ -419,8 +491,90 @@ std::string K::sysGetCurrentExecDir() {
 std::string K::pathJoin(const std::string &s1, const std::string &s2) {
 	if (s1.empty()) return s2;
 	if (s2.empty()) return s1;
-	return s1 + "/" + s2;
+	if (pathIsRelative(s2)) {
+		std::string ss1 = pathRemoveLastDelim(s1);
+		return ss1 + "/" + s2;
+	} else {
+		return s2; // 後続が絶対パスの場合は連結しない
+	}
 }
+
+std::string K::pathRemoveLastDelim(const std::string &path) {
+	std::string s = path;
+	if (s.back() == K__PATH_BACKSLASH) {
+		s.pop_back();
+	}
+	if (s.back() == K__PATH_SLASH) {
+		s.pop_back();
+	}
+	return s;
+}
+std::string K::pathAppendLastDelim(const std::string &path) {
+	std::string s = path;
+	if (s.back() == K__PATH_BACKSLASH) {
+		s.pop_back();
+	}
+	if (s.back() != K__PATH_SLASH) {
+		s.push_back(K__PATH_SLASH);
+	}
+	return s;
+}
+
+static int _FindLastDelim(const std::string &path) {
+	int sl = path.find_last_of(K__PATH_SLASH);
+	int bs = path.find_last_of(K__PATH_BACKSLASH);
+	return (sl > bs) ? sl : bs; // max(sl, bs)
+}
+
+std::string K::pathGetParent(const std::string &path) {
+	int pos = _FindLastDelim(path);
+	if (pos >= 0) {
+		return path.substr(0, pos);
+	} else {
+		return "";
+	}
+}
+std::string K::pathGetLast(const std::string &path) {
+	int pos = _FindLastDelim(path);
+	if (pos >= 0) {
+		return path.substr(pos+1);
+	} else {
+		return path;
+	}
+}
+
+bool K::pathHasDelim(const std::string &path) {
+	if ((int)path.find(K__PATH_SLASH) >= 0) {
+		return true;
+	}
+	if ((int)path.find(K__PATH_BACKSLASH) >= 0) {
+		return true;
+	}
+	return false;
+}
+
+/// パス末尾の拡張子部分を返す (ドットを含む)
+std::string K::pathGetExt(const std::string &path) {
+	// 末尾の "." を探す
+	int pos = (int)path.find_last_of('.');
+	if (pos < 0) {
+		return "";
+	}
+
+	// "." よりも後にパス区切り文字 "/" があったらダメ (例: "aaa.zip/ccc")
+	// それは拡張子とはみなさない
+	if ((int)path.find_last_of(K__PATH_SLASH) > pos) {
+		return "";
+	}
+
+	// "." よりも後にパス区切り文字 "\\" があったらダメ (例: "aaa.zip/ccc")
+	// それは拡張子とはみなさない
+	if ((int)path.find_last_of(K__PATH_BACKSLASH) > pos) {
+		return "";
+	}
+	return path.substr(pos);
+}
+
 std::string K::pathRenameExtension(const std::string &path, const std::string &ext) {
 	size_t pos = path.rfind('.');
 	if (pos != std::string::npos) {
@@ -443,16 +597,175 @@ int K::pathCompare(const std::string &path1, const std::string &path2, bool igno
 		return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
 	}
 }
+// 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
+std::string K::pathNormalize(const std::string &path, char old_delim, char new_delim) {
+	K__Assert(isprint(old_delim));
+	K__Assert(isprint(new_delim));
+	std::string s = path;
+	strTrim(s); // 前後の空白を削除
+	strReplaceChar(s, old_delim, new_delim); // 区切り文字を置換
+	return pathRemoveLastDelim(s); // 最後の区切り文字は削除する
+}
+std::string K::pathNormalize(const std::string &path) {
+	return pathNormalize(path, K__PATH_BACKSLASH, K__PATH_SLASH);
+}
+
+/// 2つのパスの先頭部分に含まれる共通のサブパスの文字列長さを得る（区切り文字を含む）
+int K::pathGetCommonSize(const std::string &path1, const std::string &path2) {
+	int len = 0;
+	for (int i=0; ; i++) {
+		if (path1[i] == path2[i]) {
+			if (path1[i] == K__PATH_SLASH || path1[i] == K__PATH_BACKSLASH) {
+				len = i+1;
+			}
+			if (path1[i] == '\0') {
+				len = i;
+				break;
+			}
+		} else {
+			break;
+		}
+	}
+	return len;
+}
+
 std::string K::pathGetFull(const std::string &s) {
-	wchar_t wpath[MAX_PATH] = {0};
+	std::wstring wpath = K__Utf8ToWidePath(s);
 	wchar_t wfull[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wpath, MAX_PATH, s.c_str());
-	if (_wfullpath(wfull, wpath, MAX_PATH)) {
+	if (_wfullpath(wfull, wpath.c_str(), MAX_PATH)) {
 		strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
 		return strWideToUtf8(wfull);
 	} else {
 		return s;
 	}
+}
+
+/// base から path への相対パスを得る
+std::string K::pathGetRelative(const std::string &path, const std::string &base) {
+	// パス区切り文字で区切る
+	auto tok_path = strSplit(path, "/\\", true, true, 0, nullptr);
+	auto tok_base = strSplit(base, "/\\", true, true, 0, nullptr);
+	int numtok_path = tok_path.size();
+	int numtok_base = tok_base.size();
+
+	// 先頭の共通パス部分をスキップ
+	int c = 0;
+	while (c<numtok_path && c<numtok_base) {
+		if (tok_path[c].compare(tok_base[c]) != 0) {
+			break;
+		}
+		c++;
+	}
+
+	// 必要な数だけ ".." で上に行く
+	std::string relpath;
+	for (int i=c; i<numtok_base; i++) {
+		relpath = pathJoin(relpath, "..");
+	}
+
+	// 登り切ったので、今度は目的地までパスを下げていく
+	for (int i=c; i<numtok_path; i++) {
+		int len = tok_path[i].size();
+		relpath = pathJoin(relpath, tok_path[i]);
+	}
+
+	return relpath;
+}
+
+/// ファイル名 glob パターンと一致しているかどうかを調べる
+///
+/// ワイルドカードは * のみ利用可能。
+/// ワイルドカード * はパス区切り記号 / とは一致しない。
+/// @code
+/// K_PathGlob("abc", "*") ===> true
+/// K_PathGlob("abc", "a*") ===> true
+/// K_PathGlob("abc", "ab*") ===> true
+/// K_PathGlob("abc", "abc*") ===> true
+/// K_PathGlob("abc", "a*c") ===> true
+/// K_PathGlob("abc", "*abc") ===> true
+/// K_PathGlob("abc", "*bc") ===> true
+/// K_PathGlob("abc", "*c") ===> true
+/// K_PathGlob("abc", "*a*b*c*") ===> true
+/// K_PathGlob("abc", "*bc*") ===> true
+/// K_PathGlob("abc", "*c*") ===> true
+/// K_PathGlob("aaa/bbb.ext", "a*.ext") ===> false // ワイルドカード * はパス区切り文字を含まない
+/// K_PathGlob("aaa/bbb.ext", "a*/*.ext") ===> true
+/// K_PathGlob("aaa/bbb.ext", "a*/*.*t") ===> true
+/// K_PathGlob("aaa/bbb.ext", "aaa/*.ext") ===> true
+/// K_PathGlob("aaa/bbb.ext", "aaa/bbb*ext") ===> true
+/// K_PathGlob("aaa/bbb.ext", "aaa*bbb*ext") ===> false
+/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") ===> true
+/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") ===> false
+/// K_PathGlob("aaa/bbb.ext", "*.aaa") ===> false
+/// K_PathGlob("aaa/bbb.ext", "aaa*bbb") ===> false
+/// K_PathGlob("aaa/bbb.ext", "*/*.ext") ===> true
+/// K_PathGlob("aaa/bbb.ext", "*/*.*") ===> true
+/// @endcode
+bool K::pathGlob(const char *path, const char *glob) {
+	if (path == nullptr || path[0] == '\0') {
+		return false;
+	}
+	if (glob == nullptr || glob[0] == '\0') {
+		return false;
+	}
+	if (glob[0]=='*' && glob[1]=='\0') {
+		return true;
+	}
+	int p = 0;
+	int g = 0;
+	while (1) {
+		const char *sp = path + p;
+		const char *sg = glob + g;
+		if (*sg == '*') {
+			if (/*strcmp(sg, "*") == 0*/sg[0]=='*' && sg[1]=='\0') {
+				return true; // 末尾が * だった場合は全てにマッチする
+			}
+			const char *subglob = sg + 1; // '*' の次の文字列
+			for (const char *subpath=sp; *subpath; subpath++) {
+				if (subpath[0] == K__PATH_SLASH && subglob[0] != K__PATH_SLASH) {
+					return false; // 区切り文字を跨いで判定しない
+				}
+				if (pathGlob(subpath, subglob)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if (*sp == K__PATH_SLASH && *sg == '\0') {
+			return true; // パス単位で一致しているならOK
+		}
+		if (*sp == L'\0' && *sg == '\0') {
+			return true;
+		}
+		if (*sp != *sg) {
+			return false;
+		}
+		p++;
+		g++;
+	}
+	return true;
+}
+bool K::pathGlob(const std::string &path, const std::string &glob) {
+	return pathGlob(path.c_str(), glob.c_str());
+}
+
+bool K::pathIsRelative(const std::string &path) {
+	std::wstring wpath = K__Utf8ToWidePath(path);
+	return PathIsRelativeW(wpath.c_str());
+}
+bool K::pathIsDir(const std::string &path) {
+	// パスが実在し、かつディレクトリである
+	std::wstring wpath = K__Utf8ToWidePath(path);
+	return PathIsDirectoryW(wpath.c_str());
+}
+bool K::pathIsFile(const std::string &path) {
+	// パスが実在し、かつ非ディレクトリである
+	std::wstring wpath = K__Utf8ToWidePath(path);
+	return PathFileExistsW(wpath.c_str()) && !PathIsDirectoryW(wpath.c_str()); // パスが存在し、かつディレクトリでないならファイルであるとする
+}
+bool K::pathExists(const std::string &path) {
+	std::wstring wpath = K__Utf8ToWidePath(path);
+	return PathFileExistsW(wpath.c_str());
 }
 #pragma endregion // path
 
@@ -509,8 +822,12 @@ int K::strFindChar(const std::string &s, char chr, int start) {
 /// count には文字数を指定する。-1 を指定した場合、残り全ての文字を対象にする。
 /// 不正な引数を指定した場合、関数は失敗し、文字列は変化しない。
 void K::strReplace(std::string &s, int start, int count, const std::string &str) {
+#if 1
+	s.replace(start, count, str);
+#else
 	s.erase(start, count);
 	s.insert(start, str);
+#endif
 }
 
 void K::strReplace(std::string &s, const std::string &before, const std::string &after) {
@@ -535,6 +852,20 @@ void K::strReplaceChar(wchar_t *s, wchar_t before, wchar_t after) {
 	for (size_t i=0; s[i]; i++) {
 		if (s[i] == before) {
 			s[i] = after;
+		}
+	}
+}
+void K::strReplaceChar(std::string &s, char before, char after) {
+	for (auto it=s.begin(); it!=s.end(); ++it) {
+		if (*it == before) {
+			*it = after;
+		}
+	}
+}
+void K::strReplaceChar(std::wstring &ws, wchar_t before, wchar_t after) {
+	for (auto it=ws.begin(); it!=ws.end(); ++it) {
+		if (*it == before) {
+			*it = after;
 		}
 	}
 }
@@ -580,6 +911,89 @@ bool K::strEndsWith(const char *s, const char *sub) {
 }
 bool K::strEndsWith(const std::string &s, const std::string &sub) {
 	return strEndsWith(s.c_str(), sub.c_str());
+}
+void K::strTrim(std::string &s) {
+	// trim left
+	while (!s.empty() && isascii(s.front()) && isblank(s.front())) {
+		s.erase(s.begin());
+	}
+
+	// trim right
+	while (!s.empty() && isascii(s.back()) && isblank(s.back())) {
+		s.pop_back();
+	}
+}
+
+
+// delim 分割のために使う文字。複数指定できる。
+//		カンマで区切る場合 ","
+//		カンマと改行で区切る場合 ",\r\n"
+//		空白で区切る場合 " "
+//		空白とタブで区切る場合 " \t"
+// condense_delims 分割文字が連続している場合、それをまとめて一つの分割文字とするか
+//		例えばカンマ区切り文字列の場合 "aaa,,bbb" を "aaa" "" "bbb" の３要素に分割したいなら condense_delims を false にする。
+//		改行区切り文字列で "aaa\n\nbbbb" を "aaa" "bbb" の２要素に分割したいなら連続する \n をまとめて扱いたいので condense_delims を true にする
+// tirm 分割したときに前後の空白文字を取り除くか
+//		"aaa   , bbb" を分割したとき "aaa   " と " bbb" のようにしたいなら _trim=false にする。"aaa" と "bbb" にしたいなら _trim=true にする
+// maxcount 分割後の最大要素数。0だと上限なし。1だと分割しない＝元の文字列そのまま。2以上を指定した場合は、先頭から順番に分割していく。残った文字列は rest に入る
+//      "aaa=bbb=ccc" を '=' で分割すると以下のようになる
+//      maxcount=0 ==> returns: {"aaa", "bbb", "ccc"} rest: ""
+//      maxcount=1 ==> returns: {"aaa"}               rest: "bbb=ccc"
+//      maxcount=2 ==> returns: {"aaa", "bbb"}        rest: "ccc"
+//      maxcount=3 ==> returns: {"aaa", "bbb", "ccc"} rest: ""
+std::vector<std::string> K::strSplit(const std::string &str, const std::string &delims, bool condense_delims, bool _trim, int maxcount, std::string *p_rest) {
+	std::vector<std::string> result;
+	int s = 0; // 開始インデックス
+	int i = 0;
+	int len = str.size();
+	while (i < len) {
+		if (delims.find(str[i]) != std::string::npos) {
+			// 分割文字が見つかった or 末尾に達した
+			// [トークンを登録する]
+			// デリミタ圧縮が有効 (condense_delims) ならばトークン長さをチェック (s < p) し、
+			// 長さが 0 ならデリミタが連続しているのでトークン追加しない。
+			// デリミタ圧縮無効ならば長さチェックしない（長さが 0 であっても有効なトークンとして追加する）
+			if (!condense_delims || s<i) {
+				std::string sv = str.substr(s, i-s);
+				if (_trim) {
+					strTrim(sv);
+				}
+				result.push_back(sv);
+			} 
+			// デリミタをスキップして次トークンの先頭に移動する
+			// condense_delims がセットされているならば連続するデリミタを1つの塊として扱う
+			size_t span = 1;
+			if (condense_delims) {
+				span = strspn(str.c_str()+i, delims.c_str());
+			}
+			i += span;
+			s = i;
+			// 最大トークン数に達したら終了する
+			if (maxcount > 0 && result.size() == maxcount) {
+				break;
+			}
+		} else {
+			i++;
+		}
+	}
+
+	// 末尾トークンがまだ残っているなら、それを登録
+	if (s < len) {
+		// s が終端文字に達していない。
+		// 入力文字列がまだ残っている
+		std::string rest = str.substr(s, len - s);
+		if (maxcount <= 0 || (int)result.size() < maxcount) { // 最後のトークンを追加
+			if (_trim) {
+				strTrim(rest);
+			}
+			if (p_rest) *p_rest = ""; // 余りなし
+			result.push_back(rest);
+		
+		} else {
+			if (p_rest) *p_rest = rest; // 最後の文字列を余り文字列としてセット
+		}
+	}
+	return result;
 }
 
 bool K::strToFloat(const std::string &s, float *val) {
@@ -1054,6 +1468,85 @@ void K__Notify(const char *u8) {
 
 
 
+namespace Test {
+void Test_internal_path() {
+	
+	char p[256] = {"bbb"};
+	PathAppendA(p, "c:/aaa");
+
+	strcpy(p, "filename.exe");
+	PathRemoveFileSpecA(p);
+
+	strcpy(p, "filename.exe");
+	const char *ss = PathFindFileName(p);
+
+	{
+		char s[256] = {0};
+		K__Verify(K::pathJoin("", "aaa")        == "aaa");
+		K__Verify(K::pathJoin("aaa", "")        == "aaa");
+		K__Verify(K::pathJoin("", "aaa/")       == "aaa/");
+		K__Verify(K::pathJoin("aaa", "")        == "aaa");
+		K__Verify(K::pathJoin("aaa", "bbb")     == "aaa/bbb");
+		K__Verify(K::pathJoin("aaa/bbb", "ccc") == "aaa/bbb/ccc");
+		K__Verify(K::pathJoin("aaa/", "bbb")   == "aaa/bbb"); // aaa//bbb にはならない
+		K__Verify(K::pathJoin("aaa/", "/bbb")   == "/bbb"); // 後続が絶対パスだった場合は、そのパスで置き換える
+		K__Verify(K::pathGetParent("aaa.exe")     == "");
+		K__Verify(K::pathGetParent("aaa/bbb.exe") == "aaa");
+		K__Verify(K::pathGetParent("aaa/bbb/ccc") == "aaa/bbb");
+		K__Verify(K::pathRenameExtension("aaa/bbb", ".exe") == "aaa/bbb.exe");
+		K__Verify(K::pathRenameExtension("aaa/bbb.exe", "") == "aaa/bbb");
+		K__Verify(K::pathRenameExtension("aaa/bbb", "")     == "aaa/bbb");
+		K__Verify(K::pathGetExt("bbb/aaa.exe")         == ".exe");
+		K__Verify(K::pathGetExt("bbb/aaa.exe.zip")     == ".zip");
+		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
+		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
+		K__Verify(K::pathGetExt("bbb/aaa")             == "");
+		K__Verify(K::pathGetLast("bbb/aaa.exe")        == "aaa.exe");
+		K__Verify(K::pathGetLast("aaa.exe")            == "aaa.exe");
+	}
+	{
+		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
+		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ddd") == 8);
+		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb_ccc") == 4);
+		K__Verify(K::pathGetCommonSize("aaa", "") == 0);
+		K__Verify(K::pathGetCommonSize("", "") == 0);
+	}
+	{
+		K__Verify(K::pathGetRelative("aa/bb/cc", "aa")       == "bb/cc");
+		K__Verify(K::pathGetRelative("aa/bb/cc", "aa/bb")    == "cc");
+		K__Verify(K::pathGetRelative("aa/bb/cc", "aa/bb/ee") == "../cc");
+		K__Verify(K::pathGetRelative("aa/bb/cc", "ee/ff")    == "../../aa/bb/cc");
+		K__Verify(K::pathGetRelative("", "aa")               == "..");
+		K__Verify(K::pathGetRelative("aa", "")               == "aa");
+		K__Verify(K::pathGetRelative("", "")                 == "");
+	}
+	{
+		K__Verify(K::pathGlob("abc", "*") == true);
+		K__Verify(K::pathGlob("abc", "a*") == true);
+		K__Verify(K::pathGlob("abc", "ab*") == true);
+		K__Verify(K::pathGlob("abc", "abc*") == true);
+		K__Verify(K::pathGlob("abc", "a*c") == true);
+		K__Verify(K::pathGlob("abc", "*abc") == true);
+		K__Verify(K::pathGlob("abc", "*bc") == true);
+		K__Verify(K::pathGlob("abc", "*c") == true);
+		K__Verify(K::pathGlob("abc", "*a*b*c*") == true);
+		K__Verify(K::pathGlob("abc", "*bc*") == true);
+		K__Verify(K::pathGlob("abc", "*c*") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "a*.ext") == false); // ワイルドカード * はパス区切り文字を含まない
+		K__Verify(K::pathGlob("aaa/bbb.ext", "a*/*.ext") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "a*/*.*t") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa/*.ext") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa/bbb*ext") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa*bbb*ext") == false);
+		K__Verify(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") == true);
+		K__Verify(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") == false);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "*.aaa") == false);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa*bbb") == false);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.ext") == true);
+		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
+	}
+}
+} // Test
 
 
 

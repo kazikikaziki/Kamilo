@@ -2978,7 +2978,7 @@ private:
 				}
 
 				// 前後の空白をカット
-				KStringUtils::trim(name_str);
+				K::strTrim(name_str);
 
 				// レイヤー名を決定
 				KPath name_new = KPath::fromUtf8(name_str.c_str());

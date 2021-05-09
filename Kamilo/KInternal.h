@@ -8,6 +8,7 @@
 #include <inttypes.h> // uint32_t, uint64_t
 #include <stdarg.h> // va_list
 #include <string>
+#include <vector>
 
 #define K__UTF8BOM_STR    "\xEF\xBB\xBF" 
 #define K__UTF8BOM_LEN    3 
@@ -99,8 +100,10 @@ public:
 	#pragma region file
 	static bool fileShellOpen(const std::string &path_u8);
 	static FILE * fileOpen(const std::string &path_u8, const std::string &mode_u8);
-	static std::string fileLoadString(const std::string &filename);
-	static void fileSaveString(const std::string &filename, const std::string &bin);
+	static bool fileGetSize(const std::string &path_u8, int *out_size); ///< ファイルのバイト数を得る
+	static bool fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma); ///< ファイルのタイムスタンプを得る
+	static std::string fileLoadString(const std::string &path_u8);
+	static void fileSaveString(const std::string &path_u8, const std::string &bin);
 	#pragma endregion // file
 
 	#pragma region sys
@@ -113,10 +116,26 @@ public:
 	#pragma endregion // sys
 
 	#pragma region path
-	static std::string pathJoin(const std::string &s1, const std::string &s2);
+	static std::string pathJoin(const std::string &path1, const std::string &path2);
+	static std::string pathRemoveLastDelim(const std::string &path); ///< パスの末尾が / で終わっている場合、それを取り除く
+	static std::string pathAppendLastDelim(const std::string &path); ///< パスの末尾が / で終わるようにする
+	static std::string pathGetParent(const std::string &path); ///< 末尾のサブパスを取り除く
+	static std::string pathGetLast(const std::string &path); ///< 末尾のサブパスを得る
+	static bool pathHasDelim(const std::string &path); ///< パス区切り文字を含んでいる場合は true
 	static std::string pathRenameExtension(const std::string &path, const std::string &ext);
+	static std::string pathGetExt(const std::string &path); ///< パスの拡張子部分を返す (ドットを含む)
 	static int pathCompare(const std::string &path1, const std::string &path2, bool ignore_case, bool ignore_path);
-	static std::string pathGetFull(const std::string &s);
+	static std::string pathNormalize(const std::string &path); ///< 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
+	static std::string pathNormalize(const std::string &path, char old_delim, char new_delim); ///< 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
+	static int pathGetCommonSize(const std::string &path1, const std::string &path2); ///< 2つのパスの先頭部分に含まれる共通のサブパスの文字列長さを得る（区切り文字を含む）
+	static bool pathIsRelative(const std::string &path);
+	static bool pathIsDir(const std::string &path); ///< パスが実在し、かつディレクトリかどうか調べる
+	static bool pathIsFile(const std::string &path); ///< パスが実在し、かつ非ディレクトリかどうか調べる
+	static bool pathExists(const std::string &path); /// <パスが実在するか調べる
+	static std::string pathGetFull(const std::string &path);
+	static std::string pathGetRelative(const std::string &path, const std::string &base); ///< base から path への相対パスを得る
+	static bool pathGlob(const char *path, const char *glob);
+	static bool pathGlob(const std::string &path, const std::string &glob); ///< path が glob パターンと一致しているかどうか調べる
 	#pragma endregion // path
 
 	#pragma region string
@@ -130,10 +149,14 @@ public:
 	static void strReplace(std::string &s, const std::string &before, const std::string &after);
 	static void strReplaceChar(char *s, char before, char after);
 	static void strReplaceChar(wchar_t *s, wchar_t before, wchar_t after);
+	static void strReplaceChar(std::string &s, char before, char after);
+	static void strReplaceChar(std::wstring &ws, wchar_t before, wchar_t after);
 	static bool strStartsWith(const char *s, const char *sub);
 	static bool strStartsWith(const std::string &s, const std::string &sub);
 	static bool strEndsWith(const char *s, const char *sub);
 	static bool strEndsWith(const std::string &s, const std::string &sub);
+	static void strTrim(std::string &s);
+	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, bool condense_delims, bool _trim, int maxcount, std::string *p_rest);
 	static bool strToFloat(const std::string &s, float *val);
 	static bool strToFloat(const char *s, float *val);
 	static bool strToInt(const std::string &s, int *val);
@@ -202,5 +225,9 @@ template <class... Args> void K__OutputDebugString(Args... args) {
 	_OutputW(L"\n");
 }
 
+
+namespace Test {
+void Test_internal_path();
+}
 
 } // namespace

@@ -688,7 +688,7 @@ KString KString::replace(const KString &before, const KString &after) const {
 
 KString KString::replaceChar(char before, char after) const {
 	std::string s = toStdString();
-	K::strReplaceChar(const_cast<char*>(s.data()), before, after);
+	K::strReplaceChar(s, before, after);
 	return s;
 }
 KString KString::remove(int start, int count) const {
@@ -739,7 +739,7 @@ KString KString::trimUtf8Bom() const {
 }
 KString KString::trim() const {
 	std::string s = toStdString();
-	KStringUtils::trim(s);
+	K::strTrim(s);
 	return s;
 }
 KStringView KString::view() const {
@@ -1047,11 +1047,11 @@ void Test_str() {
 		s="abc";    K::strReplace(s, "", "x");   K__Verify(s=="abc");
 		s="abc";    K::strReplace(s, "", "");    K__Verify(s=="abc");
 
-		s="   aaabbb "; KStringUtils::trim(s); K__Verify(s=="aaabbb");
-		s="aaabbb ";    KStringUtils::trim(s); K__Verify(s=="aaabbb");
-		s="   aaabbb";  KStringUtils::trim(s); K__Verify(s=="aaabbb");
-		s="aaabbb";     KStringUtils::trim(s); K__Verify(s=="aaabbb");
-		s="";           KStringUtils::trim(s); K__Verify(s=="");
+		s="   aaabbb "; K::strTrim(s); K__Verify(s=="aaabbb");
+		s="aaabbb ";    K::strTrim(s); K__Verify(s=="aaabbb");
+		s="   aaabbb";  K::strTrim(s); K__Verify(s=="aaabbb");
+		s="aaabbb";     K::strTrim(s); K__Verify(s=="aaabbb");
+		s="";           K::strTrim(s); K__Verify(s=="");
 
 		K__Verify(K::strStartsWith("abc", "ab") == true);
 		K__Verify(K::strStartsWith("", "abc") == false);

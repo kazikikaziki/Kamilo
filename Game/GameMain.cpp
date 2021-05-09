@@ -3,6 +3,9 @@
 using namespace Kamilo;
 
 void GameMain() {
+	Test::Test_internal_path();
+	
+
 	K::sysSetCurrentDir(K::sysGetCurrentExecDir()); // exe の場所をカレントディレクトリにする
 	KEngineDef def;
 	def.resolution_x = 800;
