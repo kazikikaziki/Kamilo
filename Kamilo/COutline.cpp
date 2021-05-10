@@ -55,6 +55,7 @@ static KSHADERID _GetTextShader() {
 }
 
 COutline::COutline() {
+	m_Color = KColor::BLACK;
 }
 void COutline::apply(KNode *node) {
 	KDrawable *drawable = KDrawable::of(node);
