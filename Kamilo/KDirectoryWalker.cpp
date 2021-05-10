@@ -7,20 +7,18 @@
 
 namespace Kamilo {
 
-void KDirectoryWalker::scanFiles(const char *top_u8, const char *dir_u8, std::vector<Item> &list) {
+void KDirectoryWalker::scanFiles(const std::string &top_u8, const std::string &dir_u8, std::vector<Item> &list) {
 	std::wstring wtop = K::strUtf8ToWide(top_u8);
 	std::wstring wdir = K::strUtf8ToWide(dir_u8);
 	scanFilesW(wtop.c_str(), wdir.c_str(), list);
 }
-void KDirectoryWalker::scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std::vector<Item> &list) {
-	K__Assert(wdir);
-
+void KDirectoryWalker::scanFilesW(const std::wstring &wtop, const std::wstring &wdir, std::vector<Item> &list) {
 	// 検索パターンを作成
 	wchar_t wpattern[MAX_PATH] = {0};
 	{
 		wchar_t wtmp[MAX_PATH] = {0};
-		PathAppendW(wtmp, wtop);
-		PathAppendW(wtmp, wdir);
+		PathAppendW(wtmp, wtop.c_str());
+		PathAppendW(wtmp, wdir.c_str());
 		GetFullPathNameW(wtmp, MAX_PATH, wpattern, NULL);
 		PathAppendW(wpattern, L"*");
 	}
@@ -44,9 +42,7 @@ void KDirectoryWalker::scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std:
 		FindClose(hFind);
 	}
 }
-void KDirectoryWalker::scanW(const wchar_t *wtop, const wchar_t *wdir, Callback *cb) {
-	K__Assert(wtop);
-	K__Assert(wdir);
+void KDirectoryWalker::scanW(const std::wstring &wtop, const std::wstring &wdir, Callback *cb) {
 	K__Assert(cb);
 	std::vector<Item> list;
 	scanFilesW(wtop, wdir, list);
@@ -56,7 +52,7 @@ void KDirectoryWalker::scanW(const wchar_t *wtop, const wchar_t *wdir, Callback 
 			cb->onDir(it->nameu.c_str(), it->parentu.c_str(), &enter);
 			if (enter) {
 				wchar_t wsub[MAX_PATH] = {0};
-				wcscpy_s(wsub, MAX_PATH, wdir);
+				wcscpy_s(wsub, MAX_PATH, wdir.c_str());
 				PathAppendW(wsub, it->namew.c_str());
 				scanW(wtop, wsub, cb);
 				cb->onDirExit(it->nameu.c_str(), it->parentu.c_str());
@@ -66,11 +62,9 @@ void KDirectoryWalker::scanW(const wchar_t *wtop, const wchar_t *wdir, Callback 
 		}
 	}
 }
-void KDirectoryWalker::walk(const char *dir_u8, KDirectoryWalker::Callback *cb) {
-	K__Assert(dir_u8);
+void KDirectoryWalker::walk(const std::string &dir_u8, KDirectoryWalker::Callback *cb) {
 	K__Assert(cb);
-	wchar_t wdir[MAX_PATH] = {0};
-	K__Utf8ToWidePath(wdir, MAX_PATH, dir_u8);
+	std::wstring wdir = K::strUtf8ToWide(dir_u8);
 	scanW(wdir, L"", cb);
 }
 

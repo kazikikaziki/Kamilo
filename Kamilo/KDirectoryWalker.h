@@ -34,7 +34,7 @@ public:
 	/// dir 直下にあるファイルおよびディレクトリを巡回する。
 	/// ディレクトリまたはファイルを見つけるたびに cb が呼ばれる。
 	/// KDirectoryWalker::Callback::onDir の実装によってサブフォルダを再帰スキャンするかどうかが決まる
-	static void walk(const char *dir_u8, Callback *cb);
+	static void walk(const std::string &dir_u8, Callback *cb);
 
 	// [current_dir]/wtop/wdir にあるファイルの一覧を得る。
 	// wtop: 検索起点のパス（絶対パスまたは空文字列でも良い）
@@ -44,10 +44,10 @@ public:
 	//
 	// 検索する場所 = [current_dir]/wtop/wdir
 	// 得られるファイル名 = wdir/[filename]
-	static void scanFilesW(const wchar_t *wtop, const wchar_t *wdir, std::vector<Item> &list);
-	static void scanFiles(const char *top_u8, const char *dir_u8, std::vector<Item> &list);
+	static void scanFilesW(const std::wstring &wtop, const std::wstring &wdir, std::vector<Item> &list);
+	static void scanFiles(const std::string &top_u8, const std::string &dir_u8, std::vector<Item> &list);
 
-	static void scanW(const wchar_t *wtop, const wchar_t *wdir, Callback *cb);
+	static void scanW(const std::wstring &wtop, const std::wstring &wdir, Callback *cb);
 };
 
 } // namespace
