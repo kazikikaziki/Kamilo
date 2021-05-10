@@ -748,7 +748,9 @@ bool K::pathGlob(const char *path, const char *glob) {
 bool K::pathGlob(const std::string &path, const std::string &glob) {
 	return pathGlob(path.c_str(), glob.c_str());
 }
-
+std::vector<std::string> K::pathSplit(const std::string &s) {
+	return strSplit(s, "\\/", true, false, 0, nullptr);
+}
 bool K::pathIsRelative(const std::string &path) {
 	std::wstring wpath = K__Utf8ToWidePath(path);
 	return PathIsRelativeW(wpath.c_str());
@@ -992,6 +994,47 @@ std::vector<std::string> K::strSplit(const std::string &str, const std::string &
 		} else {
 			if (p_rest) *p_rest = rest; // 最後の文字列を余り文字列としてセット
 		}
+	}
+	return result;
+}
+
+std::vector<std::string> K::strSplitLines(const std::string &str, bool skip_empty_lines, bool _trim) {
+	// strSplit("\r\n") としてしまうと空行が検出できなくなる（\r\n\r\n をまとめて一つの改行文字として処理してしまう）
+	// かといって condense_delims を false にすると \r \n \r \n のように分割されて３つの空行があると判定されてしまうため
+	// どちらにしても strSplit 関数ではうまく処理できない。行分割専用のコードを使う
+	std::vector<std::string> result;
+	const char *s = nullptr;
+	int len = 0;
+	for (int i=0; i<str.size(); i++) {
+		if (str[i]=='\r' && str[i+1]=='\n') { // 改行コードが2文字
+			std::string line(s, len);
+			if (_trim) strTrim(line);
+			if (!skip_empty_lines || !line.empty()) {
+				result.push_back(line);
+			}
+			i++; // ※1文字余計に進める
+			s = nullptr;
+			len = 0;
+
+		} else if (str[i]=='\r' || str[i]=='\n') { // 改行コードが1文字
+			std::string line(s, len);
+			if (_trim) strTrim(line);
+			if (!skip_empty_lines || !line.empty()) {
+				result.push_back(line);
+			}
+			s = nullptr;
+			len = 0;
+			
+		} else if (len == 0) {
+			s = str.c_str() + i;
+			len = 1;
+
+		} else {
+			len++;
+		}
+	}
+	if (len > 0) {
+		result.push_back(std::string(s, len));
 	}
 	return result;
 }
@@ -1480,6 +1523,9 @@ void Test_internal_path() {
 	strcpy(p, "filename.exe");
 	const char *ss = PathFindFileName(p);
 
+	strcpy(p, "");
+	PathRenameExtensionA(p, ".exe");
+
 	{
 		char s[256] = {0};
 		K__Verify(K::pathJoin("", "aaa")        == "aaa");
@@ -1490,9 +1536,15 @@ void Test_internal_path() {
 		K__Verify(K::pathJoin("aaa/bbb", "ccc") == "aaa/bbb/ccc");
 		K__Verify(K::pathJoin("aaa/", "bbb")   == "aaa/bbb"); // aaa//bbb にはならない
 		K__Verify(K::pathJoin("aaa/", "/bbb")   == "/bbb"); // 後続が絶対パスだった場合は、そのパスで置き換える
+		K__Verify(K::pathGetParent("")            == "");
 		K__Verify(K::pathGetParent("aaa.exe")     == "");
 		K__Verify(K::pathGetParent("aaa/bbb.exe") == "aaa");
 		K__Verify(K::pathGetParent("aaa/bbb/ccc") == "aaa/bbb");
+		K__Verify(K::pathGetLast("")                == "");
+		K__Verify(K::pathGetLast("aaa.exe")         == "aaa.exe");
+		K__Verify(K::pathGetLast("bbb/aaa.exe")     == "aaa.exe");
+		K__Verify(K::pathGetLast("ccc/bbb/aaa.exe") == "aaa.exe");
+		K__Verify(K::pathRenameExtension("", ".exe")== ".exe");
 		K__Verify(K::pathRenameExtension("aaa/bbb", ".exe") == "aaa/bbb.exe");
 		K__Verify(K::pathRenameExtension("aaa/bbb.exe", "") == "aaa/bbb");
 		K__Verify(K::pathRenameExtension("aaa/bbb", "")     == "aaa/bbb");
@@ -1501,8 +1553,6 @@ void Test_internal_path() {
 		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
 		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
 		K__Verify(K::pathGetExt("bbb/aaa")             == "");
-		K__Verify(K::pathGetLast("bbb/aaa.exe")        == "aaa.exe");
-		K__Verify(K::pathGetLast("aaa.exe")            == "aaa.exe");
 	}
 	{
 		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
@@ -1544,6 +1594,13 @@ void Test_internal_path() {
 		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa*bbb") == false);
 		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.ext") == true);
 		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
+	}
+	{
+		auto tok = K::strSplit("aaa/bbb ccc/ddd", "/", true, false, 0, nullptr);
+		K__Verify(tok.size() == 3);
+		K__Verify(tok[0] == "aaa");
+		K__Verify(tok[1] == "bbb ccc");
+		K__Verify(tok[2] == "ddd");
 	}
 }
 } // Test

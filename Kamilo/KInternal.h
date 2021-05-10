@@ -136,6 +136,7 @@ public:
 	static std::string pathGetRelative(const std::string &path, const std::string &base); ///< base から path への相対パスを得る
 	static bool pathGlob(const char *path, const char *glob);
 	static bool pathGlob(const std::string &path, const std::string &glob); ///< path が glob パターンと一致しているかどうか調べる
+	static std::vector<std::string> pathSplit(const std::string &s);
 	#pragma endregion // path
 
 	#pragma region string
@@ -156,7 +157,8 @@ public:
 	static bool strEndsWith(const char *s, const char *sub);
 	static bool strEndsWith(const std::string &s, const std::string &sub);
 	static void strTrim(std::string &s);
-	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, bool condense_delims, bool _trim, int maxcount, std::string *p_rest);
+	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, bool condense_delims=true, bool _trim=true, int maxcount=0, std::string *p_rest=nullptr);
+	static std::vector<std::string> strSplitLines(const std::string &s, bool skip_empty_lines=true, bool _trim=true);
 	static bool strToFloat(const std::string &s, float *val);
 	static bool strToFloat(const char *s, float *val);
 	static bool strToInt(const std::string &s, int *val);
