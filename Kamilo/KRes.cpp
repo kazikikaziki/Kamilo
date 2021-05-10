@@ -196,6 +196,28 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 				KLog::printError("NOT SUPPORTED");
 				break;
 			}
+			if (1) {
+				s += "\t<Material>\n";
+				s += K::str_sprintf("\t\tcolor   =#%08x\n", sub->material.color.toColor32());
+				s += K::str_sprintf("\t\tspecular=#%08x\n", sub->material.specular.toColor32());
+				s += K::str_sprintf("\t\tblend   =(KBlend)%d\n", sub->material.blend);
+				s += K::str_sprintf("\t\filter   =(KFilter)%d\n", sub->material.filter);
+				s += K::str_sprintf("\t\ttexture =%p\n", sub->material.texture);
+				s += K::str_sprintf("\t\tshader  =%p\n", sub->material.shader);
+				s += K::str_sprintf("\t\twrap    =%d\n", sub->material.wrap);
+				s += K::str_sprintf("\t\tcb      =%p\n", sub->material.cb);
+				s += K::str_sprintf("\t\tcb_data =%p\n", sub->material.cb_data);
+				s += "\t</Material>\n";
+			}
+			if (1) {
+				const KMatrix4 &tr = sub->transform;
+				s += "\t<Transform>\n";
+				s += K::str_sprintf("\t\t%f %f %f %f\n", tr.m[ 0], tr.m[ 1], tr.m[ 2], tr.m[ 3]);
+				s += K::str_sprintf("\t\t%f %f %f %f\n", tr.m[ 4], tr.m[ 5], tr.m[ 6], tr.m[ 7]);
+				s += K::str_sprintf("\t\t%f %f %f %f\n", tr.m[ 8], tr.m[ 9], tr.m[10], tr.m[11]);
+				s += K::str_sprintf("\t\t%f %f %f %f\n", tr.m[12], tr.m[13], tr.m[14], tr.m[15]);
+				s += "\t</Transform>\n";
+			}
 		}
 	}
 	s += "</Mesh>\n";
