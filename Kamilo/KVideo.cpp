@@ -3426,6 +3426,8 @@ KVertex * KMesh::lock(int offset, int count) {
 	return nullptr;
 }
 void KMesh::unlock() {
+	// 頂点情報のどれかが書き換えられたものとする
+	m_changed |= ALL;
 }
 int * KMesh::lockIndices(int offset, int count) {
 	if (offset >= 0 && count > 0) {
@@ -3437,6 +3439,8 @@ int * KMesh::lockIndices(int offset, int count) {
 	return nullptr;
 }
 void KMesh::unlockIndices() {
+	// インデックスが書き換えられたものとする
+	m_changed |= IDX;
 }
 #pragma endregion // KMesh
 
