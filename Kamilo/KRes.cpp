@@ -3696,7 +3696,7 @@ private:
 			return false;
 		}
 		KPath nameInDataDir = KPath(dataDir).join(name);
-		if (!KPathUtils::K_PathExists(nameInDataDir.u8())) {
+		if (!K::pathExists(nameInDataDir.u8())) {
 			KLog::printError("File does not exist: %s", nameInDataDir.u8());
 			return false;
 		}
@@ -3995,7 +3995,7 @@ private:
 	}
 	KXmlElement * getXmlBankDoc(const char *xmlNameInBank) {
 		KXmlElement *xDoc = nullptr;
-		if (KPathUtils::K_PathExists(xmlNameInBank)) {
+		if (K::pathExists(xmlNameInBank)) {
 			xDoc = KXmlElement::createFromFileName(xmlNameInBank);
 		}
 		if (xDoc == nullptr) {

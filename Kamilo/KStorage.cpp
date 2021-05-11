@@ -98,7 +98,7 @@ public:
 		KPathUtils::K_PathPushLast(realname, sizeof(realname), name);
 
 		// ファイルの存在を確認
-		if (!KPathUtils::K_PathExists(realname)) {
+		if (!K::pathExists(realname)) {
 			return false;
 		}
 

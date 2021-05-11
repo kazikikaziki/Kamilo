@@ -124,7 +124,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &file
 			K__Print("Export texture image %s", filename.u8());
 		}
 	}
-	if (KPathUtils::K_PathExists(filename.u8())) {
+	if (K::pathExists(filename.u8())) {
 		ImGui::SameLine();
 		char s[256];
 		sprintf_s(s, sizeof(s), "Open: %s", filename.u8());

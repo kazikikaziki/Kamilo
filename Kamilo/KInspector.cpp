@@ -1474,7 +1474,7 @@ void KDebugGui::K_DebugGui_ImageExportButton(const char *label, KTEXID texid, co
 	}
 
 	// エクスポートしたファイルを開く
-	if (KPathUtils::K_PathExists(filename)) {
+	if (K::pathExists(filename)) {
 		ImGui::SameLine();
 		char s[256];
 		sprintf_s(s, sizeof(s), "Open: %s", filename);
