@@ -157,7 +157,7 @@ bool KFiles::isDirectory(const KPath &path) {
 	return KPathUtils::K_PathIsDir(path.u8());
 }
 bool KFiles::copy(const KPath &src, const KPath &dst, bool overwrite) {
-	return K_FileCopy(src.u8(), dst.u8(), overwrite);
+	return K::fileCopy(src.u8(), dst.u8(), overwrite);
 }
 time_t KFiles::getLastModificationTime(const KPath &filename) {
 	time_t time_cma[] = {0, 0, 0};
@@ -165,22 +165,22 @@ time_t KFiles::getLastModificationTime(const KPath &filename) {
 	return time_cma[1];
 }
 bool KFiles::makeDirectory(const KPath &dir, int *err) {
-	return K_FileMakeDir(dir.u8());
+	return K::fileMakeDir(dir.u8());
 }
 bool KFiles::removeFile(const KPath &path) {
-	return K_FileRemove(path.u8());
+	return K::fileRemove(path.u8());
 }
 bool KFiles::removeDirectory(const KPath &dir) {
-	return K_FileRemoveEmptyDir(dir.u8());
+	return K::fileRemoveEmptyDir(dir.u8());
 }
 bool KFiles::removeDirectoryTree(const KPath &dir) {
-	return K_FileRemoveEmptyDirTree(dir.u8());
+	return K::fileRemoveEmptyDirTree(dir.u8());
 }
 bool KFiles::removeFilesInDirectory(const KPath &dir, bool subdir) {
 	if (subdir) {
-		return K_FileRemoveFilesInDirTree(dir.u8());
+		return K::fileRemoveFilesInDirTree(dir.u8());
 	} else {
-		return K_FileRemoveFilesInDir(dir.u8());
+		return K::fileRemoveFilesInDir(dir.u8());
 	}
 }
 class Scan_cb: public KDirectoryWalker::Callback {

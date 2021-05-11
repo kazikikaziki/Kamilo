@@ -3945,7 +3945,7 @@ private:
 				// .edg自体もコピーする
 				KPath nameInData = KPath(dataDir).join(name);
 				KPath nameInBank = KPath(bankDir).join(name);
-				K_FileCopy(nameInData.u8(), nameInBank.u8(), true);
+				K::fileCopy(nameInData.u8(), nameInBank.u8(), true);
 #endif
 				if (EXPORT_CONTENTS_DEBUG_DATA) {
 					KEdgeDocument doc;
@@ -3970,7 +3970,7 @@ private:
 		{
 			KPath nameInData = KPath(dataDir).join(name);
 			KPath nameInBank = KPath(bankDir).join(name);
-			if (K_FileCopy(nameInData.u8(), nameInBank.u8(), true)) {
+			if (K::fileCopy(nameInData.u8(), nameInBank.u8(), true)) {
 				if (EXPORT_CONTENTS_DEBUG_DATA) {
 					if (KPath(name).hasExtension(".png")) {
 						KPath path = KPath(dataDir).join(name);
@@ -4068,7 +4068,7 @@ private:
 	}
 	bool updateBankDir(const char *bankDir, const char *dataDir) {
 		if (!K::pathIsDir(bankDir)) {
-			if (!K_FileMakeDir(bankDir)) {
+			if (!K::fileMakeDir(bankDir)) {
 				KLog::printError("Failed to make bank directory: %s", bankDir);
 				return false;
 			}
@@ -4085,7 +4085,7 @@ private:
 			}
 
 			if (!K::pathIsDir(dirInBank.u8())) {
-				if (!K_FileMakeDir(dirInBank.u8())) {
+				if (!K::fileMakeDir(dirInBank.u8())) {
 					KLog::printError("Failed to make directory: %s", dirInBank.u8());
 					return false;
 				}
