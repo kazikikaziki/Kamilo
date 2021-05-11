@@ -142,24 +142,12 @@ public:
 	/// パスが実在するか調べる
 	static bool K_PathExists(const char *path_u8);
 
-	/// パスで指定されたファイルのバイト数を得る
-	static bool K_PathGetFileSize(const char *path_u8, int *out_size);
-
 	/// パスで指定されたファイルのタイムスタンプを得る
 	static bool K_PathGetTimeStamp(const char *path_u8, time_t *out_time_cma);
 
 	static time_t K_PathGetTimeStamp_Creation(const char *path_u8) { time_t cma[3]; K_PathGetTimeStamp(path_u8, cma); return cma[0]; }
 	static time_t K_PathGetTimeStamp_Modify(const char *path_u8)   { time_t cma[3]; K_PathGetTimeStamp(path_u8, cma); return cma[1]; }
 	static time_t K_PathGetTimeStamp_Access(const char *path_u8)   { time_t cma[3]; K_PathGetTimeStamp(path_u8, cma); return cma[2]; }
-
-	/// パス同士を比較する
-	static int K_PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path);
-
-	/// パスの末尾部分を last と比較する
-	static int K_PathCompareLast(const char *path, const char *last);
-
-	/// パスの拡張子を ext と比較する
-	static int K_PathCompareExt(const char *path, const char *ext);
 };
 #pragma endregion // Path
 

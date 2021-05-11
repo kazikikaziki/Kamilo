@@ -1500,25 +1500,6 @@ bool KPathUtils::K_PathExists(const char *path_u8) {
 	return PathFileExistsW(wpath);
 }
 
-/// パスで指定されたファイルのバイト数を得る
-/// サイズを取得できない場合は false を返す
-bool KPathUtils::K_PathGetFileSize(const char *path_u8, int *out_size) {
-	K__Assert(path_u8);
-	wchar_t wpath[MAX_SIZE] = {0};
-	K__Utf8ToWidePath(wpath, MAX_SIZE, path_u8);
-	//
-	HANDLE hFile = CreateFileW(wpath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	if (hFile != INVALID_HANDLE_VALUE) {
-		DWORD dwSize = GetFileSize(hFile, nullptr);
-		CloseHandle(hFile);
-		if (dwSize != (DWORD)(-1)) {
-			if (out_size) *out_size = (int)dwSize;
-			return true;
-		}
-	}
-	return false;
-}
-
 /// FILETIME から time_t へ変換する
 static time_t K__FileTimeToTimeT(const FILETIME *ft) {
 	// FILETIME ==> time_t
@@ -1561,21 +1542,6 @@ bool KPathUtils::K_PathGetTimeStamp(const char *path_u8, time_t *out_time_cma) {
 		return true;
 	}
 	return false;
-}
-
-/// パス同士を比較する
-int KPathUtils::K_PathCompare(const char *path1, const char *path2, bool ignore_case, bool ignore_path) {
-	return K::pathCompare(path1, path2, ignore_case, ignore_path);
-}
-
-/// パスの末尾部分を last と比較する
-int KPathUtils::K_PathCompareLast(const char *path, const char *last) {
-	return strcmp(K_PathGetLast(path), last);
-}
-
-/// パスの拡張子を ext と比較する
-int KPathUtils::K_PathCompareExt(const char *path, const char *ext) {
-	return strcmp(K_PathGetExt(path), ext);
 }
 
 namespace Test {

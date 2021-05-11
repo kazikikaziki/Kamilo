@@ -72,10 +72,10 @@ public:
 			KDirectoryWalker::walk(m_Dir.c_str(), this);
 		}
 		for (auto it=m_Names.begin(); it!=m_Names.end(); ++it) {
-			if (KPathUtils::K_PathCompare(it->c_str(), name, true, false) == 0) {
+			if (K::pathCompare(it->c_str(), name, true, false) == 0) {
 				// [大小文字区別なし]で比較した
 				// 念のために。[大小文字区別あり]でも比較する
-				if (KPathUtils::K_PathCompare(it->c_str(), name, false, false) != 0) {
+				if (K::pathCompare(it->c_str(), name, false, false) != 0) {
 					K__Print(
 						u8"W_FILEANME_CASE: ファイル名 '%s' が指定されましたが、実際のファイル名は '%s' です。大小文字だけが異なる同名ファイルは"
 						u8"アーカイブ化したときに正しくロードできない可能性があります。必ず大小文字も一致させてください", name, it->c_str()
@@ -170,7 +170,7 @@ public:
 	virtual KInputStream createFileReader(const char *filename) override {
 		for (int i=0; i<m_Unzipper.getEntryCount(); i++) {
 			const char *s = getFileName(i);
-			if (KPathUtils::K_PathCompare(s, filename, false, false) == 0) {
+			if (K::pathCompare(s, filename, false, false) == 0) {
 				std::string bin;
 				m_Unzipper.getEntryData(i, m_Password.c_str(), &bin);
 

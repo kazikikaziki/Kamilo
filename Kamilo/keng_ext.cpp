@@ -164,11 +164,6 @@ time_t KFiles::getLastModificationTime(const KPath &filename) {
 	KPathUtils::K_PathGetTimeStamp(filename.u8(), time_cma);
 	return time_cma[1];
 }
-size_t KFiles::getFileSize(const KPath &filename) {
-	int sz = 0;
-	KPathUtils::K_PathGetFileSize(filename.u8(), &sz);
-	return (size_t)sz;
-}
 bool KFiles::makeDirectory(const KPath &dir, int *err) {
 	return K_FileMakeDir(dir.u8());
 }

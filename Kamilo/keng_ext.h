@@ -120,9 +120,6 @@ public:
 	/// ファイルの最終更新日時を得る
 	static time_t getLastModificationTime(const KPath &filename);
 
-	/// ファイルサイズを得る
-	static size_t getFileSize(const KPath &filename);
-
 	/// dir 直下にあるファイルおよびディレクトリの名前リストを返す
 	///
 	/// 各ファイル名は dir からの相対パスの形式になっている
