@@ -62,13 +62,6 @@ public:
 	///
 	/// 各ファイル名は dir からの相対パスの形式になっている
 	static KPathList scanFiles(const KPath &dir);
-
-	/// dir 及びそのサブフォルダに含まれているファイルおよびディレクトリの名前リストを返す
-	///
-	/// 各ファイル名は dir からの相対パスの形式になっている
-	/// @snippet KFile.cpp Test_files_scan
-	static KPathList scanFilesInTree(const KPath &dir);
-
 };
 
 
@@ -833,7 +826,6 @@ private:
 
 
 namespace Test {
-void Test_files_scan();
 void Test_chunk();
 void Test_bezier();
 void Test_luapp();

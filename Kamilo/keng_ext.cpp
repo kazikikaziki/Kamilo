@@ -146,29 +146,6 @@ time_t KFiles::getLastModificationTime(const KPath &filename) {
 	KPathUtils::K_PathGetTimeStamp(filename.u8(), time_cma);
 	return time_cma[1];
 }
-class Scan_cb: public KDirectoryWalker::Callback {
-public:
-	KPathList m_list;
-	bool m_scan_in_subdir;
-
-	Scan_cb() {
-		m_scan_in_subdir = false;
-	}
-
-	virtual void onDir(const char *name_u8, const char *parent_u8, bool *enter) override {
-		m_list.push_back(KPath(parent_u8).join(name_u8));
-		*enter = m_scan_in_subdir;
-	}
-	virtual void onFile(const char *name_u8, const char *parent_u8) override {
-		m_list.push_back(KPath(parent_u8).join(name_u8));
-	}
-};
-KPathList KFiles::scanFilesInTree(const KPath &dir) {
-	Scan_cb cb;
-	cb.m_scan_in_subdir = true;
-	KDirectoryWalker::walk(dir.u8(), &cb);
-	return cb.m_list;
-}
 #pragma endregion KFiles
 
 
@@ -394,23 +371,6 @@ void KChunkedFileWriter::writeChunk4(chunk_id_t id, uint32_t data) {
 
 
 namespace Test {
-/// [Test_files_scan] <--- Doxgen @snippet コマンドからの参照用なので削除してはいけない
-void Test_files_scan() {
-	KPath dir = "c:\\windows\\media";
-	KPathList files = KFiles::scanFilesInTree(dir);
-	for (size_t i=0; i<files.size(); i++) {
-		KPath path = dir.join(files[i]);
-		if (K::pathIsDir(path.c_str())) {
-			OutputDebugStringW(L"* ");
-		} else {
-			OutputDebugStringW(L"  ");
-		}
-		OutputDebugStringW(path.toWideString().c_str());
-		OutputDebugStringW(L"\n");
-	}
-}
-/// [Test_files_scan] <--- Doxgen @snippet コマンドからの参照用なので削除してはいけない
-
 
 /// [Test_chunk] <--- Doxgen @snippet コマンドからの参照用なので削除してはいけない
 void Test_chunk() {

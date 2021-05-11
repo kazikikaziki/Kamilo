@@ -1986,6 +1986,20 @@ void Test_internal_path() {
 		K__Verify(K::pathExists("__dirtest__") == false);
 		K::sysSetCurrentDir(dir);
 	}
+	{
+		std::string dir = "c:\\windows\\media";
+		std::vector<std::string> files = K::fileGetListInDir(dir);
+		for (size_t i=0; i<files.size(); i++) {
+			std::string path = K::pathJoin(dir, files[i]);
+			std::string s;
+			if (K::pathIsDir(path.c_str())) {
+				s = "* ";
+			} else {
+				s = "  ";
+			}
+			K__OutputDebugString(s, path);
+		}
+	}
 }
 } // Test
 
