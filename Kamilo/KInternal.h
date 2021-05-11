@@ -102,6 +102,14 @@ public:
 	static FILE * fileOpen(const std::string &path_u8, const std::string &mode_u8);
 	static bool fileGetSize(const std::string &path_u8, int *out_size); ///< ファイルのバイト数を得る
 	static bool fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma); ///< ファイルのタイムスタンプを得る
+	static bool fileCopy(const std::string &src_u8, const std::string &dst_u8, bool overwrite); ///< ファイルをコピーする
+	static bool fileMakeDir(const std::string &dir_u8); ///< ディレクトリを作成する
+	static bool fileRemove(const std::string &path_u8); ///< ファイルを削除する
+	static bool fileRemoveEmptyDir(const std::string &dir_u8); ///< 空のディレクトリを削除する
+	static bool fileRemoveEmptyDirTree(const std::string &dir_u8); ///< 空のディレクトリを再帰的に削除する
+	static bool fileRemoveFilesInDir(const std::string &dir_u8); ///< dir ディレクトリ内にある全ての非ディレクトリファイルを削除する
+	static bool fileRemoveFilesInDirTree(const std::string &dir_u8); ///< dir ディレクトリ内にある全ての非ディレクトリファイルを再帰的に削除する
+	static std::vector<std::string> fileGetListInDir(const std::string &dir_u8); ///< dir 直下のファイル名リストを得る
 	static std::string fileLoadString(const std::string &path_u8);
 	static void fileSaveString(const std::string &path_u8, const std::string &bin);
 	#pragma endregion // file

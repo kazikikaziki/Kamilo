@@ -13,6 +13,15 @@
 #define K_USE_MBSTOWCS_SAFE  1
 #define K_USE_WCSTOMBS_SAFE  1
 
+
+// ファイルまたはディレクトリをコピー、削除する場合に確認のダイアログを出す。テスト用
+// （ファイルに書き込む場合はなにもしない）
+#ifndef K_FILE_SAFE
+#	define K_FILE_SAFE 0
+#endif
+
+
+
 namespace Kamilo {
 
 static void (*g_DebugPrintHook)(const char *u8) = nullptr;
@@ -405,6 +414,324 @@ bool K::fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma) {
 		return true;
 	}
 	return false;
+}
+
+static std::vector<std::wstring> _FileGetListW(const wchar_t *wdir, bool dir_only) {
+	// 検索パターンを作成
+	wchar_t wpattern[MAX_PATH] = {0};
+	{
+		wchar_t wtmp[MAX_PATH] = {0};
+		PathAppendW(wtmp, wdir);
+		GetFullPathNameW(wtmp, MAX_PATH, wpattern, NULL);
+		PathAppendW(wpattern, L"*");
+	}
+	// ここで wpattern は
+	// "d:\\system\\*"
+	// のような文字列になっている。ワイルドカードに注意！！
+	std::vector<std::wstring> list;
+	WIN32_FIND_DATAW fdata;
+	HANDLE hFind = FindFirstFileW(wpattern, &fdata);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (fdata.cFileName[0] != L'.') {
+				if (dir_only) {
+					if (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+						list.push_back(fdata.cFileName);
+					}
+				} else {
+					list.push_back(fdata.cFileName);
+				}
+			}
+		} while (FindNextFileW(hFind, &fdata));
+		FindClose(hFind);
+	}
+	return list;
+}
+static bool _FileConfirm(const wchar_t *op, const wchar_t *path1, const wchar_t *path2) {
+	if (K_FILE_SAFE) {
+		wchar_t wmsg[1024] = {0};
+		wchar_t fullpath1[MAX_PATH] = {0};
+		wchar_t fullpath2[MAX_PATH] = {0};
+		if (path1) {
+			GetFullPathNameW(path1, MAX_PATH, fullpath1, nullptr);
+		} else {
+			wcscpy_s(fullpath1, MAX_PATH, L"<null>");
+		}
+		if (path2) {
+			GetFullPathNameW(path2, MAX_PATH, fullpath2, nullptr);
+		} else {
+			wcscpy_s(fullpath2, MAX_PATH, L"<null>");
+		}
+		swprintf_s(wmsg, sizeof(wmsg)/sizeof(wchar_t),
+			L"K_FILE_SAVE スイッチが有効になっているため、ファイルに対して操作する前に確認を行います。\n\n"
+			L"次の操作を許可しますか？\n"
+			L"Func  = %s\n"
+			L"Path1 = %s\n"
+			L"Path2 = %s\n",
+			op,
+			fullpath1,
+			fullpath2
+		);
+		int btn = MessageBoxW(nullptr, wmsg, L"ファイルに対する操作", MB_ICONWARNING|MB_OKCANCEL);
+		return btn == IDOK;
+	} else {
+		// 確認しない
+		return true;
+	}
+}
+static bool _FileIsRemovableDirectoryW(const wchar_t *wdir) {
+	K__Assert(wdir);
+	// カレントディレクトリは指定できない
+	if (wdir[0]==0 || wcscmp(wdir, L".")==0 || wcscmp(wdir, L"./")==0) {
+		K__PrintW(L"E_REMOVE_DIR_FILES: path includes myself: %s", wdir);
+		return false;
+	}
+	// ディレクトリ階層を登るような相対パスは指定できない（意図しないフォルダを消す事故の軽減）
+	// 念のため、文字列 ".." を含むパスを一律禁止する
+	if (wcsstr(wdir, L"..") != nullptr) {
+		K__PrintW(L"E_REMOVE_DIR_FILES: path includes parent directory: %s", wdir);
+		return false;
+	}
+	// 絶対パスは指定できない（間違ってルートディレクトリを指定する事故の軽減）
+	if (!PathIsRelativeW(wdir)) {
+		K__PrintW(L"E_REMOVE_DIR_FILES: path is absolute: %s", wdir);
+		return false;
+	}
+	// ディレクトリではなくファイル名だったらダメ
+	if (PathFileExistsW(wdir) && !PathIsDirectoryW(wdir)) {
+		K__PrintW(L"E_REMOVE_DIR_FILES: path is not a directory: %s", wdir);
+		return false;
+	}
+	return true;
+}
+static bool _FileRemoveFileW(const wchar_t *wpath) {
+	K__Assert(wpath);
+	if (!PathFileExistsW(wpath)) {
+		return true; // 該当パスが存在しない場合は、削除に成功したものとする
+	}
+	if (PathIsDirectoryW(wpath)) {
+		return false; // ディレクトリは削除できない
+	}
+	if (!_FileConfirm(L"DeleteFile", wpath, nullptr)) {
+		return false;
+	}
+	K__PrintW(L"DeleteFileW: %s", wpath);
+	if (DeleteFileW(wpath)) {
+		return true;
+	}
+	wchar_t full[MAX_PATH] = {0};
+	GetFullPathNameW(wpath, MAX_PATH, full, nullptr);
+	K__ErrorW(L"DeleteFileW FAIL!: %s (%s)", wpath, full);
+	return false;
+}
+static bool _FileRemoveEmptyDirectoryW(const wchar_t *wdir) {
+	K__Assert(wdir);
+	if (!PathFileExistsW(wdir)) {
+		return true; // 該当パスが存在しない場合は、削除に成功したものとする
+	}
+	if (!PathIsDirectoryW(wdir)) {
+		return false; // 非ディレクトリは削除できない
+	}
+	if (!_FileConfirm(L"RemoveDirectoryW", wdir, nullptr)) {
+		return false;
+	}
+	K__PrintW(L"RemoveDirectoryW: %s", wdir);
+	if (RemoveDirectoryW(wdir)) {
+		return true;
+	}
+	wchar_t full[MAX_PATH] = {0};
+	GetFullPathNameW(wdir, MAX_PATH, full, nullptr);
+	K__ErrorW(L"RemoveDirectoryW FAIL!: %s (%s)", wdir, full);
+	return false;
+}
+static bool _FileRemoveEmptyDirectoryTreeW(const wchar_t *wdir) {
+	K__Assert(wdir);
+	if (! _FileIsRemovableDirectoryW(wdir)) {
+		return false;
+	}
+
+	// ディレクトリを走査
+	std::vector<std::wstring> files = _FileGetListW(wdir, true);
+
+	// 空のサブディレクトリを削除
+	bool all_ok = true;
+	for (auto it=files.begin(); it!=files.end(); ++it) {
+		wchar_t wsub[MAX_PATH] = {0};
+		PathAppendW(wsub, wdir);
+		PathAppendW(wsub, it->c_str());
+		if (PathIsDirectoryW(wsub)) {
+			if (!_FileRemoveEmptyDirectoryTreeW(wsub)) {
+				all_ok = false; // fail
+			}
+		}
+	}
+
+	// ディレクトリを削除
+	if (!_FileRemoveEmptyDirectoryW(wdir)) {
+		all_ok = false; // fail
+	}
+	// 全てのファイルの削除に成功した時のみ true.
+	// 初めからファイルが存在しない場合は成功とみなす
+	return all_ok;
+}
+static bool _FileRemoveNonDirFilesInDirectoryW(const wchar_t *wdir, bool subdir) {
+	K__Assert(wdir);
+	if (! _FileIsRemovableDirectoryW(wdir)) {
+		return false;
+	}
+
+	// ディレクトリを走査
+	std::vector<std::wstring> list = _FileGetListW(wdir, false);
+
+	// 全ての非ディレクトリファイルの削除に成功した時のみ true.
+	// 初めからファイルが存在しない場合は成功とみなす
+	bool all_ok = true;
+
+	// 非ディレクトリファイルを削除
+	for (auto it=list.begin(); it!=list.end(); ++it) {
+		wchar_t wsub[MAX_PATH] = {0};
+		PathAppendW(wsub, wdir);
+		PathAppendW(wsub, it->c_str());
+		if (PathIsDirectoryW(wsub)) {
+			if (subdir) {
+				_FileRemoveNonDirFilesInDirectoryW(wsub, true);
+			}
+		} else {
+			if (!_FileRemoveFileW(wsub)) {
+				all_ok = false; // fail
+			}
+		}
+	}
+	return all_ok; // すべて削除できた場合のみ true を返す
+}
+
+
+/// ファイルをコピーする
+///
+/// @param src コピー元ファイル名
+/// @param dest コピー先ファイル名
+/// @param overwrite 上書きするかどうか
+/// @arg true  コピー先に同名のファイルが存在するなら上書きし、成功したら true を返す
+/// @arg false コピー先に同名のファイルがある場合にはコピーをせず、false を返す
+/// @return 成功したかどうか
+bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool overwrite) {
+	std::wstring wsrc = K__Utf8ToWidePath(src_u8);
+	std::wstring wdst = K__Utf8ToWidePath(dst_u8);
+	if (!_FileConfirm(L"CopyFile", wsrc.c_str(), wdst.c_str())) {
+		return false;
+	}
+	if (!CopyFileW(wsrc.c_str(), wdst.c_str(), !overwrite)) {
+		// エラー原因の確認用
+		char err[256] = {0};
+		K__Win32GetErrorString(GetLastError(), err, sizeof(err));
+		K__Error("Faield to CopyFile(): %s", err);
+		return false;
+	}
+	return true;
+}
+
+/// ディレクトリを作成する
+///
+/// 既にディレクトリが存在する場合は成功したとみなす。
+/// ディレクトリが既に存在するかどうかを確認するためには directoryExists() を使う
+bool K::fileMakeDir(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	if (PathIsDirectoryW(wdir.c_str())) {
+		return true; // already exists
+	}
+	if (!_FileConfirm(L"CreateDirectory", wdir.c_str(), nullptr)) {
+		return false;
+	}
+	if (CreateDirectoryW(wdir.c_str(), nullptr)) {
+		return true;
+	}
+	char err[256] = {0};
+	K__Win32GetErrorString(GetLastError(), err, sizeof(err));
+	K__Error("Faield to CreateDirectory(): %s", err);
+	return false;
+}
+
+/// ファイルを削除する
+///
+/// 指定されたファイルを削除できたなら true を返す。
+/// 指定されたファイルが初めから存在しない場合も、削除に成功したものとして true を返す。
+/// それ以外の場合は false を返す
+/// @attention ディレクトリは削除できない
+bool K::fileRemove(const std::string &path_u8) {
+	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	return _FileRemoveFileW(wpath.c_str());
+}
+
+/// 空のディレクトリを削除する
+///
+/// 指定されたディレクトリが空であればそれを削除する。成功したら true を返す。
+/// ディレクトリが初めから存在しなかった場合も削除に成功したものとして true を返す。
+/// それ以外の場合は false を返す
+/// @note 空でないディレクトリは削除できない
+bool K::fileRemoveEmptyDir(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	return _FileRemoveEmptyDirectoryW(wdir.c_str());
+}
+
+/// 空のディレクトリを再帰的に削除する
+///
+/// dir ディレクトリ内にあるすべての空ディレクトリを再帰的に削除する。
+/// 空でないディレクトリは無視する。dir に含まれる全ディレクトリを削除できた場合に限り true を返す。
+/// dir ディレクトリが初めから存在しなかった場合も削除に成功したものとして true を返す。
+/// それ以外の場合は false を返す
+bool K::fileRemoveEmptyDirTree(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	return _FileRemoveEmptyDirectoryTreeW(wdir.c_str());
+}
+
+/// dir ディレクトリ内にある全ての非ディレクトリファイルを削除する
+///
+/// 全てのファイルの削除に成功した時のみ true を返す。
+/// 初めからファイルが存在しなかった場合は成功とみなす
+/// この関数が成功すれば dir 内にはディレクトリだけが残る
+bool K::fileRemoveFilesInDir(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	return _FileRemoveNonDirFilesInDirectoryW(wdir.c_str(), false);
+}
+
+/// dir ディレクトリ内にある全ての非ディレクトリファイルを再帰的に削除する
+/// 
+/// 全てのファイルの削除に成功した時のみ true を返す。
+/// 初めからファイルが存在しなかった場合は成功とみなす
+/// この関数が成功すれば dir 内にはディレクトリ構造だけが残る
+bool K::fileRemoveFilesInDirTree(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	return _FileRemoveNonDirFilesInDirectoryW(wdir.c_str(), true);
+}
+
+// dir 直下のファイル名リストを得る
+std::vector<std::string> K::fileGetListInDir(const std::string &dir_u8) {
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+
+	// 検索パターンを作成
+	wchar_t wpattern[MAX_PATH] = {0};
+	{
+		wchar_t wtmp[MAX_PATH] = {0};
+		PathAppendW(wtmp, wdir.c_str());
+		GetFullPathNameW(wtmp, MAX_PATH, wpattern, NULL);
+		PathAppendW(wpattern, L"*");
+	}
+	// ここで wpattern は
+	// "d:\\system\\*"
+	// のような文字列になっている。ワイルドカードに注意！！
+	std::vector<std::string> list;
+	WIN32_FIND_DATAW fdata;
+	HANDLE hFind = FindFirstFileW(wpattern, &fdata);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (fdata.cFileName[0] != L'.') {
+				std::string fn = strWideToUtf8(fdata.cFileName);
+				list.push_back(fn);
+			}
+		} while (FindNextFileW(hFind, &fdata));
+		FindClose(hFind);
+	}
+	return list;
 }
 
 std::string K::fileLoadString(const std::string &path_u8) {
@@ -1601,6 +1928,27 @@ void Test_internal_path() {
 		K__Verify(tok[0] == "aaa");
 		K__Verify(tok[1] == "bbb ccc");
 		K__Verify(tok[2] == "ddd");
+	}
+	if (0) {
+		std::string dir = K::sysGetCurrentDir();
+		K::sysSetCurrentDir(K::sysGetCurrentExecDir());
+		K__Verify(K::fileMakeDir("__dirtest__"));
+		K__Verify(K::fileMakeDir("__dirtest__/111"));
+		K__Verify(K::fileMakeDir("__dirtest__/222"));
+		K__Verify(K::pathExists("__dirtest__"));
+		fclose(K::fileOpen("__dirtest__/aaa.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/bbb.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/ccc.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/111/aaa.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/111/eee.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/111/fff.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/222/aaa.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/222/xxx.txt", "w"));
+		fclose(K::fileOpen("__dirtest__/222/yyy.txt", "w"));
+		K__Verify(K::fileRemoveFilesInDirTree("__dirtest__"));
+		K__Verify(K::fileRemoveEmptyDirTree("__dirtest__"));
+		K__Verify(K::pathExists("__dirtest__") == false);
+		K::sysSetCurrentDir(dir);
 	}
 }
 } // Test
