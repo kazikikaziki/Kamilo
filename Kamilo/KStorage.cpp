@@ -50,7 +50,7 @@ class CFolderArchive: public KArchive, public KDirectoryWalker::Callback {
 public:
 	CFolderArchive(const char *dir, int *err) {
 		m_Dir = dir;
-		if (!KPathUtils::K_PathIsDir(dir)) {
+		if (!K::pathIsDir(dir)) {
 			K__Error("CFolderArchive: Directory not exists: '%s'", dir);
 			*err = 1;
 		} else {
@@ -103,7 +103,7 @@ public:
 		}
 
 		// ディレクトリ名でないことを確認
-		if (KPathUtils::K_PathIsDir(realname)) {
+		if (K::pathIsDir(realname)) {
 			return false;
 		}
 

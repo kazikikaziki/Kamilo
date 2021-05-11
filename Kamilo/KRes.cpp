@@ -3650,7 +3650,7 @@ public:
 			KLog::printError("Filename cannot be empty");
 			return false;
 		}
-		if (!KPathUtils::K_PathIsDir(bankDir)) {
+		if (!K::pathIsDir(bankDir)) {
 			KLog::printError("Directory does not exist: %s", bankDir);
 			return false;
 		}
@@ -3834,7 +3834,7 @@ public:
 		if (KStringUtils::isEmpty(dataDir)) { KLog::printError("dataDir cannot be empty"); return false; }
 
 		// 生データフォルダは必須
-		if (!KPathUtils::K_PathIsDir(dataDir)) {
+		if (!K::pathIsDir(dataDir)) {
 			KLog::printError("Data directory does not exist: %s", dataDir);
 			mFlags = 0;
 			return false;
@@ -4067,7 +4067,7 @@ private:
 		return -1;
 	}
 	bool updateBankDir(const char *bankDir, const char *dataDir) {
-		if (!KPathUtils::K_PathIsDir(bankDir)) {
+		if (!K::pathIsDir(bankDir)) {
 			if (!K_FileMakeDir(bankDir)) {
 				KLog::printError("Failed to make bank directory: %s", bankDir);
 				return false;
@@ -4079,12 +4079,12 @@ private:
 		for (auto it=cb.mDirs.begin(); it!=cb.mDirs.end(); ++it) {
 			KPath dirInBank = KPath(bankDir).join(*it);
 
-			if (KPathUtils::K_PathIsFile(dirInBank.u8())) {
+			if (K::pathIsFile(dirInBank.u8())) {
 				KLog::printError("Failed to make directory: %s\n(non-directory-file with the same name already exist)", dirInBank.u8());
 				return false;
 			}
 
-			if (!KPathUtils::K_PathIsDir(dirInBank.u8())) {
+			if (!K::pathIsDir(dirInBank.u8())) {
 				if (!K_FileMakeDir(dirInBank.u8())) {
 					KLog::printError("Failed to make directory: %s", dirInBank.u8());
 					return false;
