@@ -704,33 +704,51 @@ bool K::fileRemoveFilesInDirTree(const std::string &dir_u8) {
 	return _FileRemoveNonDirFilesInDirectoryW(wdir.c_str(), true);
 }
 
-// dir 直下のファイル名リストを得る
-std::vector<std::string> K::fileGetListInDir(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
-
+static void _FileGetList(const wchar_t *wdir, const wchar_t* wsub, bool recurse, std::vector<std::string> &list) {
 	// 検索パターンを作成
 	wchar_t wpattern[MAX_PATH] = {0};
 	{
+		// 検索場所は wdir/wsubdir になる
 		wchar_t wtmp[MAX_PATH] = {0};
-		PathAppendW(wtmp, wdir.c_str());
+		if (wdir[0]) PathAppendW(wtmp, wdir);
+		if (wsub[0]) PathAppendW(wtmp, wsub);
 		GetFullPathNameW(wtmp, MAX_PATH, wpattern, NULL);
 		PathAppendW(wpattern, L"*");
 	}
 	// ここで wpattern は
 	// "d:\\system\\*"
 	// のような文字列になっている。ワイルドカードに注意！！
-	std::vector<std::string> list;
 	WIN32_FIND_DATAW fdata;
 	HANDLE hFind = FindFirstFileW(wpattern, &fdata);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if (fdata.cFileName[0] != L'.') {
-				std::string fn = strWideToUtf8(fdata.cFileName);
-				list.push_back(fn);
+				// wdir からの相対パス (wsubdir/filename) で記録
+				wchar_t tmp[MAX_PATH] = {0};
+				if (wsub[0]) PathAppendW(tmp, wsub);
+				PathAppendW(tmp, fdata.cFileName);
+				list.push_back(K__WideToUtf8Path(tmp));
+				if (recurse && (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+					_FileGetList(wdir, tmp, true, list);
+				}
 			}
 		} while (FindNextFileW(hFind, &fdata));
 		FindClose(hFind);
 	}
+}
+
+// dir 直下のファイル名リストを得る
+std::vector<std::string> K::fileGetListInDir(const std::string &dir_u8) {
+	std::vector<std::string> list;
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	_FileGetList(wdir.c_str(), L"", false, list);
+	return list;
+}
+
+std::vector<std::string> K::fileGetListInDirTree(const std::string &dir_u8) {
+	std::vector<std::string> list;
+	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	_FileGetList(wdir.c_str(), L"", true, list);
 	return list;
 }
 

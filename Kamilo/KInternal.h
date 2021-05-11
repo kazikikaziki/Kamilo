@@ -110,6 +110,7 @@ public:
 	static bool fileRemoveFilesInDir(const std::string &dir_u8); ///< dir ディレクトリ内にある全ての非ディレクトリファイルを削除する
 	static bool fileRemoveFilesInDirTree(const std::string &dir_u8); ///< dir ディレクトリ内にある全ての非ディレクトリファイルを再帰的に削除する
 	static std::vector<std::string> fileGetListInDir(const std::string &dir_u8); ///< dir 直下のファイル名リストを得る
+	static std::vector<std::string> fileGetListInDirTree(const std::string &dir_u8); ///< dir 直下のファイル名リストを得る
 	static std::string fileLoadString(const std::string &path_u8);
 	static void fileSaveString(const std::string &path_u8, const std::string &bin);
 	#pragma endregion // file
