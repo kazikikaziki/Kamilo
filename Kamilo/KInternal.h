@@ -132,7 +132,8 @@ public:
 	static bool pathHasDelim(const std::string &path); ///< パス区切り文字を含んでいる場合は true
 	static std::string pathRenameExtension(const std::string &path, const std::string &ext);
 	static std::string pathGetExt(const std::string &path); ///< パスの拡張子部分を返す (ドットを含む)
-	static int pathCompare(const std::string &path1, const std::string &path2, bool ignore_case, bool ignore_path);
+	static int pathCompare(const std::string &path1, const std::string &path2, bool ignore_case=false, bool ignore_path=false); ///< パス同士を比較する
+	static int pathCompareExt(const std::string &path1, const std::string &path2, bool ignore_case=false); ///< 拡張子だけ比較する
 	static std::string pathNormalize(const std::string &path); ///< 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 	static std::string pathNormalize(const std::string &path, char old_delim, char new_delim); ///< 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 	static int pathGetCommonSize(const std::string &path1, const std::string &path2); ///< 2つのパスの先頭部分に含まれる共通のサブパスの文字列長さを得る（区切り文字を含む）

@@ -953,6 +953,13 @@ int K::pathCompare(const std::string &path1, const std::string &path2, bool igno
 		return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
 	}
 }
+int K::pathCompareExt(const std::string &path1, const std::string &path2, bool ignore_case) {
+	std::string e1 = pathGetExt(path1);
+	std::string e2 = pathGetExt(path2);
+	const char *s1 = e1.c_str();
+	const char *s2 = e2.c_str();
+	return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
+}
 // 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 std::string K::pathNormalize(const std::string &path, char old_delim, char new_delim) {
 	K__Assert(isprint(old_delim));
