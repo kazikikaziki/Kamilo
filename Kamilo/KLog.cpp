@@ -210,6 +210,14 @@ bool KLogConsole::open() {
 	close();
 	#ifndef _CONSOLE
 	AllocConsole();
+	if (0) {
+		// コンソールウィンドウがタスクバーに出ないようにする
+		std::string title = K::str_sprintf("%s (#%d)", K::sysGetCurrentExecName().c_str(), K::sysGetCurrentProcessId());
+		SetConsoleTitleA(title.c_str()); // プロセスIDを含めたユニークなタイトルを用意して設定する
+		Sleep(20); // 確実に更新されるまで待つ
+		HWND hWnd = FindWindowA(NULL, title.c_str()); // タイトルをもとにしてコンソールウィンドウを探す
+		SetWindowLongA(hWnd, GWL_EXSTYLE, WS_EX_TOOLWINDOW); // ツールウィンドウ用のウィンドウスタイルを適用する
+	}
 	freopen_s(&m_Stdout, "CON", "w", stdout);
 	#endif
 	return true;
