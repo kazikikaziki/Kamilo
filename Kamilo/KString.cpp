@@ -364,7 +364,7 @@ bool KStringView::pathGlob(const KStringView &pattern) const {
 	char tmp[MAXSIZE] = {0};
 	strncpy(tmp, mStr, MAXSIZE-1);
 	tmp[MAXSIZE-1] = '\0';
-	return KPathUtils::K_PathGlob(tmp, pattern.mStr);
+	return K::pathGlob(tmp, pattern.mStr);
 }
 std::string KStringView::pathNormalized() const {
 	char tmp[KPathUtils::MAX_SIZE] = {0};
@@ -1578,80 +1578,6 @@ int KPathUtils::K_PathCompareExt(const char *path, const char *ext) {
 	return strcmp(K_PathGetExt(path), ext);
 }
 
-/// ファイル名 glob パターンと一致しているかどうかを調べる
-///
-/// ワイルドカードは * のみ利用可能。
-/// ワイルドカード * はパス区切り記号 / とは一致しない。
-/// @code
-/// K_PathGlob("abc", "*") ===> true
-/// K_PathGlob("abc", "a*") ===> true
-/// K_PathGlob("abc", "ab*") ===> true
-/// K_PathGlob("abc", "abc*") ===> true
-/// K_PathGlob("abc", "a*c") ===> true
-/// K_PathGlob("abc", "*abc") ===> true
-/// K_PathGlob("abc", "*bc") ===> true
-/// K_PathGlob("abc", "*c") ===> true
-/// K_PathGlob("abc", "*a*b*c*") ===> true
-/// K_PathGlob("abc", "*bc*") ===> true
-/// K_PathGlob("abc", "*c*") ===> true
-/// K_PathGlob("aaa/bbb.ext", "a*.ext") ===> false // ワイルドカード * はパス区切り文字を含まない
-/// K_PathGlob("aaa/bbb.ext", "a*/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "a*/*.*t") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa/bbb*ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa*bbb*ext") ===> false
-/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") ===> true
-/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") ===> false
-/// K_PathGlob("aaa/bbb.ext", "*.aaa") ===> false
-/// K_PathGlob("aaa/bbb.ext", "aaa*bbb") ===> false
-/// K_PathGlob("aaa/bbb.ext", "*/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "*/*.*") ===> true
-/// @endcode
-bool KPathUtils::K_PathGlob(const char *path, const char *glob) {
-	if (path == nullptr || path[0] == '\0') {
-		return false;
-	}
-	if (glob == nullptr || glob[0] == '\0') {
-		return false;
-	}
-	if (glob[0]=='*' && glob[1]=='\0') {
-		return true;
-	}
-	int p = 0;
-	int g = 0;
-	while (1) {
-		const char *sp = path + p;
-		const char *sg = glob + g;
-		if (*sg == '*') {
-			if (/*strcmp(sg, "*") == 0*/sg[0]=='*' && sg[1]=='\0') {
-				return true; // 末尾が * だった場合は全てにマッチする
-			}
-			const char *subglob = sg + 1; // '*' の次の文字列
-			for (const char *subpath=sp; *subpath; subpath++) {
-				if (subpath[0] == K__PATH_SLASH && subglob[0] != K__PATH_SLASH) {
-					return false; // 区切り文字を跨いで判定しない
-				}
-				if (K_PathGlob(subpath, subglob)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		if (*sp == K__PATH_SLASH && *sg == '\0') {
-			return true; // パス単位で一致しているならOK
-		}
-		if (*sp == L'\0' && *sg == '\0') {
-			return true;
-		}
-		if (*sp != *sg) {
-			return false;
-		}
-		p++;
-		g++;
-	}
-	return true;
-}
-
 namespace Test {
 void Test_path() {
 	{
@@ -1722,31 +1648,6 @@ void Test_path() {
 		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "aa");  K__Verify(strcmp(s, "..") == 0);
 		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa", "");  K__Verify(strcmp(s, "aa") == 0);
 		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "");    K__Verify(strcmp(s, "") == 0);
-	}
-	{
-		K__Verify(KPathUtils::K_PathGlob("abc", "*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "a*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "ab*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "abc*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "a*c") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*abc") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*bc") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*c") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*a*b*c*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*bc*") == true);
-		K__Verify(KPathUtils::K_PathGlob("abc", "*c*") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "a*.ext") == false); // ワイルドカード * はパス区切り文字を含まない
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "a*/*.ext") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "a*/*.*t") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "aaa/*.ext") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "aaa/bbb*ext") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "aaa*bbb*ext") == false);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") == false);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "*.aaa") == false);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "aaa*bbb") == false);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "*/*.ext") == true);
-		K__Verify(KPathUtils::K_PathGlob("aaa/bbb.ext", "*/*.*") == true);
 	}
 }
 } // Test
@@ -2374,7 +2275,7 @@ int KPath::compare(const KPath &p, bool ignore_case, bool ignore_path) const {
 	return compare_str(p.m_path, ignore_case, ignore_path);
 }
 bool KPath::glob(const KPath &pattern) const {
-	return KPathUtils::K_PathGlob(m_path, pattern.m_path);
+	return K::pathGlob(m_path, pattern.m_path);
 }
 const char * KPath::c_str() const {
 	return m_path;

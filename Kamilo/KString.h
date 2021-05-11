@@ -160,9 +160,6 @@ public:
 
 	/// パスの拡張子を ext と比較する
 	static int K_PathCompareExt(const char *path, const char *ext);
-
-	/// path が glob パターンと一致しているかどうか調べる
-	static bool K_PathGlob(const char *path, const char *glob);
 };
 #pragma endregion // Path
 

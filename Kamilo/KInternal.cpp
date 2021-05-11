@@ -1004,29 +1004,29 @@ std::string K::pathGetRelative(const std::string &path, const std::string &base)
 /// ワイルドカードは * のみ利用可能。
 /// ワイルドカード * はパス区切り記号 / とは一致しない。
 /// @code
-/// K_PathGlob("abc", "*") ===> true
-/// K_PathGlob("abc", "a*") ===> true
-/// K_PathGlob("abc", "ab*") ===> true
-/// K_PathGlob("abc", "abc*") ===> true
-/// K_PathGlob("abc", "a*c") ===> true
-/// K_PathGlob("abc", "*abc") ===> true
-/// K_PathGlob("abc", "*bc") ===> true
-/// K_PathGlob("abc", "*c") ===> true
-/// K_PathGlob("abc", "*a*b*c*") ===> true
-/// K_PathGlob("abc", "*bc*") ===> true
-/// K_PathGlob("abc", "*c*") ===> true
-/// K_PathGlob("aaa/bbb.ext", "a*.ext") ===> false // ワイルドカード * はパス区切り文字を含まない
-/// K_PathGlob("aaa/bbb.ext", "a*/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "a*/*.*t") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa/bbb*ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "aaa*bbb*ext") ===> false
-/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") ===> true
-/// K_PathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") ===> false
-/// K_PathGlob("aaa/bbb.ext", "*.aaa") ===> false
-/// K_PathGlob("aaa/bbb.ext", "aaa*bbb") ===> false
-/// K_PathGlob("aaa/bbb.ext", "*/*.ext") ===> true
-/// K_PathGlob("aaa/bbb.ext", "*/*.*") ===> true
+/// K::pathGlob("abc", "*") ===> true
+/// K::pathGlob("abc", "a*") ===> true
+/// K::pathGlob("abc", "ab*") ===> true
+/// K::pathGlob("abc", "abc*") ===> true
+/// K::pathGlob("abc", "a*c") ===> true
+/// K::pathGlob("abc", "*abc") ===> true
+/// K::pathGlob("abc", "*bc") ===> true
+/// K::pathGlob("abc", "*c") ===> true
+/// K::pathGlob("abc", "*a*b*c*") ===> true
+/// K::pathGlob("abc", "*bc*") ===> true
+/// K::pathGlob("abc", "*c*") ===> true
+/// K::pathGlob("aaa/bbb.ext", "a*.ext") ===> false // ワイルドカード * はパス区切り文字を含まない
+/// K::pathGlob("aaa/bbb.ext", "a*/*.ext") ===> true
+/// K::pathGlob("aaa/bbb.ext", "a*/*.*t") ===> true
+/// K::pathGlob("aaa/bbb.ext", "aaa/*.ext") ===> true
+/// K::pathGlob("aaa/bbb.ext", "aaa/bbb*ext") ===> true
+/// K::pathGlob("aaa/bbb.ext", "aaa*bbb*ext") ===> false
+/// K::pathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") ===> true
+/// K::pathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") ===> false
+/// K::pathGlob("aaa/bbb.ext", "*.aaa") ===> false
+/// K::pathGlob("aaa/bbb.ext", "aaa*bbb") ===> false
+/// K::pathGlob("aaa/bbb.ext", "*/*.ext") ===> true
+/// K::pathGlob("aaa/bbb.ext", "*/*.*") ===> true
 /// @endcode
 bool K::pathGlob(const char *path, const char *glob) {
 	if (path == nullptr || path[0] == '\0') {
