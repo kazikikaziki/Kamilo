@@ -63,6 +63,7 @@ public:
 	#pragma region Helper
 	bool writeDoc(KOutputStream &output) const;
 	bool write(KOutputStream &output, int indent=0) const;
+	std::string toString(int indent) const;
 	int indexOf(const KXmlElement *child) const;
 	int findAttrByName(const char *name, int start=0) const;
 	int findChildByTag(const char *tag, int start=0) const;

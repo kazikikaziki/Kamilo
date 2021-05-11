@@ -266,6 +266,16 @@ bool KXmlElement::writeDoc(KOutputStream &output) const {
 	return true;
 }
 bool KXmlElement::write(KOutputStream &output, int indent) const {
+#if 1
+	if (output.isOpen()) {
+		std::string s = toString(indent);
+		if (!s.empty()) {
+			output.writeString(s);
+			return true;
+		}
+	}
+	return false;
+#else
 	if (!output.isOpen()) return false;
 	if (indent < 0) indent = 0;
 	char s[1024] = {0};
@@ -310,6 +320,49 @@ bool KXmlElement::write(KOutputStream &output, int indent) const {
 		}
 	}
 	return true;
+#endif
+}
+std::string KXmlElement::toString(int indent) const {
+	std::string s;
+
+	if (indent < 0) indent = 0;
+	// Tag
+	s += K::str_sprintf("%*s<%s", indent*2, "", getTag());
+
+	// Attr
+	for (size_t i=0; i<getAttrCount(); i++) {
+		const char *k = getAttrName(i);
+		const char *v = getAttrValue(i);
+		if (k && k[0] && v) {
+			s += K::str_sprintf(" %s=\"%s\"", k, v);
+		}
+	}
+
+	// Text
+	const char *text = getText();
+	if (text && text[0]) {
+		s += "<![CDATA[";
+		s += text;
+		s += "]]>";
+	}
+
+	// Sub nodes
+	if (getChildCount() == 0) {
+		s += "/>\n";
+	} else {
+		if (text && text[0]) {
+			// テキスト属性と子ノードは両立しない。
+			K__Error(u8"Xml element cannot have both Text Element and Child Elements");
+
+		} else {
+			s += ">\n";
+			for (int i=0; i<getChildCount(); i++) {
+				s += getChild(i)->toString(indent+1);
+			}
+			s += K::str_sprintf("%*s</%s>\n", indent*2, "", getTag());
+		}
+	}
+	return s;
 }
 bool KXmlElement::hasTag(const char *tag) const {
 	const char *mytag = getTag();
