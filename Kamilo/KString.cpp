@@ -367,14 +367,13 @@ bool KStringView::pathGlob(const KStringView &pattern) const {
 	return K::pathGlob(tmp, pattern.mStr);
 }
 std::string KStringView::pathNormalized() const {
-	char tmp[KPathUtils::MAX_SIZE] = {0};
-	KPathUtils::K_PathNormalize(tmp, sizeof(tmp), mStr);
-	return tmp;
+	std::string tmp = toStdString();
+	return K::pathNormalize(tmp);
 }
 std::string KStringView::pathPushLast(const KStringView &last) const {
-	char tmp[KPathUtils::MAX_SIZE] = {0};
-	KPathUtils::K_PathPushLast(tmp, sizeof(tmp), mStr, last.mStr);
-	return tmp;
+	std::string s1 = toStdString();
+	std::string s2 = last.toStdString();
+	return K::pathJoin(s1, s2);
 }
 // delim 分割のために使う文字。複数指定できる。
 //		カンマで区切る場合 ","

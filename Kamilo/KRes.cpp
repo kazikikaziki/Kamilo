@@ -1707,7 +1707,7 @@ public:
 				}
 			}
 
-			if (KFiles::exists(export_filename)) {
+			if (K::pathExists(export_filename.u8())) {
 				ImGui::SameLine();
 				KPath label = KPath::fromFormat("Open: %s", export_filename.u8());
 				if (ImGui::Button(label.u8())) {
@@ -2764,7 +2764,7 @@ public:
 					KLog::unmuteDialog();
 				}
 			}
-			if (KFiles::exists(export_filename)) {
+			if (K::pathExists(export_filename.u8())) {
 				std::string s =  K::str_sprintf("Open: %s", export_filename.u8());
 				ImGui::SameLine();
 				if (ImGui::Button(s.c_str())) {
@@ -3912,7 +3912,7 @@ private:
 
 		// 現在のデータファイルのタイムスタンプ
 		KPath nameInData = KPath(dataDir).join(name);
-		if (!KPathUtils::K_PathExists(nameInData.u8())) {
+		if (!K::pathExists(nameInData.u8())) {
 			KLog::printError("Data file does not exist: %s", nameInData.u8());
 			return -1;
 		}

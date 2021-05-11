@@ -815,16 +815,45 @@ std::string K::sysGetCurrentExecDir() {
 
 
 #pragma region path
-std::string K::pathJoin(const std::string &s1, const std::string &s2) {
-	if (s1.empty()) return s2;
-	if (s2.empty()) return s1;
-	if (pathIsRelative(s2)) {
-		std::string ss1 = pathRemoveLastDelim(s1);
-		return ss1 + "/" + s2;
-	} else {
-		return s2; // 後続が絶対パスの場合は連結しない
+static void _PathRemoveLastDelimInline(std::string &path) {
+	if (path.back() == K__PATH_BACKSLASH) {
+		path.pop_back();
+	}
+	if (path.back() == K__PATH_SLASH) {
+		path.pop_back();
 	}
 }
+static void _PathAppendLastDelimInline(std::string &path) {
+	if (path.back() == K__PATH_BACKSLASH) {
+		path.pop_back();
+	}
+	if (path.back() != K__PATH_SLASH) {
+		path.push_back(K__PATH_SLASH);
+	}
+}
+
+std::string K::pathJoin(const std::string &s1, const std::string &s2) {
+	if (s1.empty()) {
+		// "" + "morepath" ==> "morepath"
+		return s2;
+	}
+	if (s2.empty()) {
+		// "basepath" + "" ==> "basepath"
+		return s1;
+	}
+	std::string ret;
+	if (pathIsRelative(s2)) {
+		ret = s1; // 先行パス
+		_PathAppendLastDelimInline(ret); // デリミタ追加
+		ret += s2; // 後続パス追加
+		_PathRemoveLastDelimInline(ret); // 末尾のデリミタを取り除く
+	} else {
+		ret = s2; // 後続パスが絶対パスの場合は連結しない
+		_PathRemoveLastDelimInline(ret); // 末尾のデリミタを取り除く
+	}
+	return ret;
+}
+
 
 std::string K::pathRemoveLastDelim(const std::string &path) {
 	std::string s = path;

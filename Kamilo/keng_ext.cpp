@@ -141,21 +141,6 @@ static bool kk_GetTimeStamp(const KPath &filename, time_t *time_cma) {
 
 
 #pragma region KFiles
-KPath KFiles::getCurrentDirectory() {
-	return K::sysGetCurrentDir();
-}
-bool KFiles::setCurrentDirectory(const KPath &path) {
-	return K::sysSetCurrentDir(path.u8());
-}
-bool KFiles::exists(const KPath &path) {
-	return KPathUtils::K_PathExists(path.u8());
-}
-bool KFiles::isFile(const KPath &path) {
-	return KPathUtils::K_PathIsFile(path.u8());
-}
-bool KFiles::isDirectory(const KPath &path) {
-	return KPathUtils::K_PathIsDir(path.u8());
-}
 bool KFiles::copy(const KPath &src, const KPath &dst, bool overwrite) {
 	return K::fileCopy(src.u8(), dst.u8(), overwrite);
 }
@@ -443,7 +428,7 @@ void Test_files_scan() {
 	KPathList files = KFiles::scanFilesInTree(dir);
 	for (size_t i=0; i<files.size(); i++) {
 		KPath path = dir.join(files[i]);
-		if (KFiles::isDirectory(path)) {
+		if (K::pathIsDir(path.c_str())) {
 			OutputDebugStringW(L"* ");
 		} else {
 			OutputDebugStringW(L"  ");

@@ -76,7 +76,7 @@ public:
 		if (ImGui::Button("Snap shot!")) {
 			m_DoShot = true;
 		}
-		if (KFiles::exists(m_LastOutputFileName)) {
+		if (K::pathExists(m_LastOutputFileName.u8())) {
 			char s[256];
 			sprintf_s(s, sizeof(s), "Open: %s", m_LastOutputFileName.u8());
 			if (ImGui::Button(s)) {
@@ -146,7 +146,7 @@ public:
 
 			// 重複を確認する。重複していればインデックス番号を付加する
 			int num = 1;
-			while (KFiles::exists(m_NextOutputFileName)) {
+			while (K::pathExists(m_NextOutputFileName.u8())) {
 				m_NextOutputFileName = KPath::fromFormat("%s_%d.png", name.u8(), num);
 				num++;
 			}

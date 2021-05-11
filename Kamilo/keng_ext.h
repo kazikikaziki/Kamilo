@@ -55,21 +55,6 @@ public:
 /// 実行中の環境におけるファイル操作
 class KFiles {
 public:
-	/// カレントディレクトリを得る
-	static KPath getCurrentDirectory();
-
-	/// カレントディレクトリを変更する
-	static bool setCurrentDirectory(const KPath &path);
-
-	/// パスが実在し、ディレクトリかどうか調べる
-	static bool isDirectory(const KPath &path);
-
-	/// パスが実在し、それが非ディレクトリかどうか調べる
-	static bool isFile(const KPath &path);
-
-	/// パスが実在するか調べる
-	static bool exists(const KPath &path);
-
 	/// ファイルをコピーする
 	///
 	/// @param src コピー元ファイル名
