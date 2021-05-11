@@ -663,6 +663,10 @@ void KClipRes::gui_key(const SPRITE_KEY &key, int framenumber) const {
 			for (int i=0; i<(int)key.user_parameters.size(); i++) {
 				ImGui::BulletText("%s: '%s'", key.user_parameters.getName(i), key.user_parameters.getString(i));
 			}
+			if (key.xml_data) {
+				std::string s = key.xml_data->toString(0);
+				ImGui::Text("%s", s.c_str());
+			}
 			ImGui::TreePop();
 		}
 		ImGui::Unindent();
