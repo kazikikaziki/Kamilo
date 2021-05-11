@@ -1649,7 +1649,7 @@ public:
 
 			if (export_images) {
 				KPath dir = "~ExportedSprites";
-				if (KFiles::makeDirectory(dir)) {
+				if (K::fileMakeDir(dir.u8())) {
 					for (auto it=names.cbegin(); it!=names.cend(); ++it) {
 						const KPath &name = *it;
 						KImage img = exportSpriteImage(name, texbank, 0, nullptr);

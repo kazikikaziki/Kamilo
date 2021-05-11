@@ -55,53 +55,6 @@ public:
 /// 実行中の環境におけるファイル操作
 class KFiles {
 public:
-	/// ファイルをコピーする
-	///
-	/// @param src コピー元ファイル名
-	/// @param dest コピー先ファイル名
-	/// @param overwrite 上書きするかどうか
-	/// @arg true  コピー先に同名のファイルが存在するなら上書きし、成功したら true を返す
-	/// @arg false コピー先に同名のファイルがある場合にはコピーをせず、false を返す
-	/// @return 成功したかどうか
-	static bool copy(const KPath &src, const KPath &dest, bool overwrite);
-
-	/// ディレクトリを作成する
-	///
-	/// 既にディレクトリが存在する場合は成功したとみなす。
-	/// ディレクトリが既に存在するかどうかを確認するためには directoryExists() を使う
-	static bool makeDirectory(const KPath &dir, int *err=nullptr);
-
-	/// ファイルを削除する
-	///
-	/// 指定されたファイルを削除できたなら true を返す。
-	/// 指定されたファイルが初めから存在しない場合も、削除に成功したものとして true を返す。
-	/// それ以外の場合は false を返す
-	/// @attention ディレクトリは削除できない
-	static bool removeFile(const KPath &path);
-
-	/// ディレクトリを削除する
-	///
-	/// 指定されたディレクトリが空であればそれを削除する。成功したら true を返す。
-	/// ディレクトリが初めから存在しなかった場合も削除に成功したものとして true を返す。
-	/// それ以外の場合は false を返す
-	/// @note 空でないディレクトリは削除できない
-	static bool removeDirectory(const KPath &dir);
-
-	/// ディレクトリを再帰的に削除する
-	///
-	/// dir ディレクトリを再帰的に操作し、最も深いディレクトリから順番に削除していく。
-	/// 空でないディレクトリは無視する。dir 以下に含まれるすべてのディレクトリを削除できた場合に限り true を返す。
-	/// dir ディレクトリが初めから存在しなかった場合も削除に成功したものとして true を返す。
-	/// それ以外の場合は false を返す
-	static bool removeDirectoryTree(const KPath &dir);
-
-	/// dir ディレクトリ内にある全ての非ディレクトリファイルを削除する
-	///
-	/// subdir が true の場合は子ディレクトリに対して再帰的に removeFilesInDirectory を実行する。
-	/// 全てのファイルの削除に成功した時のみ true を返す。
-	/// 初めからファイルが存在しなかった場合は成功とみなす
-	static bool removeFilesInDirectory(const KPath &dir, bool subdir);
-
 	/// ファイルの最終更新日時を得る
 	static time_t getLastModificationTime(const KPath &filename);
 

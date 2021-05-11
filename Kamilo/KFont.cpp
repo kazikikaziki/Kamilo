@@ -1044,7 +1044,7 @@ void KPlatformFonts::scan() {
 
 	// フォントフォルダ内のファイルを列挙
 	KPath font_dir = getFontDirectory();
-	KPathList files = KFiles::scanFiles(font_dir);
+	std::vector<std::string> files = K::fileGetListInDir(font_dir.u8());
 	for (auto it=files.begin(); it!=files.end(); ++it) {
 		KPath filename = font_dir.join(*it);
 		KInputStream file = KInputStream::fromFileName(filename.u8());

@@ -141,32 +141,10 @@ static bool kk_GetTimeStamp(const KPath &filename, time_t *time_cma) {
 
 
 #pragma region KFiles
-bool KFiles::copy(const KPath &src, const KPath &dst, bool overwrite) {
-	return K::fileCopy(src.u8(), dst.u8(), overwrite);
-}
 time_t KFiles::getLastModificationTime(const KPath &filename) {
 	time_t time_cma[] = {0, 0, 0};
 	KPathUtils::K_PathGetTimeStamp(filename.u8(), time_cma);
 	return time_cma[1];
-}
-bool KFiles::makeDirectory(const KPath &dir, int *err) {
-	return K::fileMakeDir(dir.u8());
-}
-bool KFiles::removeFile(const KPath &path) {
-	return K::fileRemove(path.u8());
-}
-bool KFiles::removeDirectory(const KPath &dir) {
-	return K::fileRemoveEmptyDir(dir.u8());
-}
-bool KFiles::removeDirectoryTree(const KPath &dir) {
-	return K::fileRemoveEmptyDirTree(dir.u8());
-}
-bool KFiles::removeFilesInDirectory(const KPath &dir, bool subdir) {
-	if (subdir) {
-		return K::fileRemoveFilesInDirTree(dir.u8());
-	} else {
-		return K::fileRemoveFilesInDir(dir.u8());
-	}
 }
 class Scan_cb: public KDirectoryWalker::Callback {
 public:
@@ -185,12 +163,6 @@ public:
 		m_list.push_back(KPath(parent_u8).join(name_u8));
 	}
 };
-KPathList KFiles::scanFiles(const KPath &dir) {
-	Scan_cb cb;
-	cb.m_scan_in_subdir = false;
-	KDirectoryWalker::walk(dir.u8(), &cb);
-	return cb.m_list;
-}
 KPathList KFiles::scanFilesInTree(const KPath &dir) {
 	Scan_cb cb;
 	cb.m_scan_in_subdir = true;
