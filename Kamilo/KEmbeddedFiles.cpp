@@ -73,7 +73,7 @@ public:
 	}
 
 public:
-	int getIndexOfName(const char *name) {
+	int getIndexOfName(const std::string &name) {
 		if (m_Items.empty()) {
 			update();
 		}
@@ -84,7 +84,7 @@ public:
 		}
 		return -1; // not found
 	}
-	KInputStream createStreamByName(const char *name) {
+	KInputStream createStreamByName(const std::string &name) {
 		int size = 0;
 		const void *data = getData(getIndexOfName(name), &size);
 		if (data) {
@@ -101,10 +101,10 @@ public:
 
 static CWin32ResourceFiles g_ResFiles;
 
-bool KEmbeddedFiles::contains(const char *name) {
+bool KEmbeddedFiles::contains(const std::string &name) {
 	return g_ResFiles.getIndexOfName(name) >= 0;
 }
-KInputStream KEmbeddedFiles::createInputStream(const char *name) {
+KInputStream KEmbeddedFiles::createInputStream(const std::string &name) {
 	return g_ResFiles.createStreamByName(name);
 }
 const char * KEmbeddedFiles::name(int index) {

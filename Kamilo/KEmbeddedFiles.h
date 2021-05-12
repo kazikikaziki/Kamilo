@@ -35,8 +35,8 @@ namespace Kamilo {
 ///
 class KEmbeddedFiles {
 public:
-	static KInputStream createInputStream(const char *name);
-	static bool contains(const char *name);
+	static KInputStream createInputStream(const std::string &name);
+	static bool contains(const std::string &name);
 	static const char * name(int index);
 	static int count();
 };

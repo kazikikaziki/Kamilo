@@ -33,7 +33,7 @@ public:
 	void append(const KNamedValues &nv);
 	int find(const std::string &name) const;
 	bool contains(const std::string &name) const;
-	const char * getString(const std::string &name, const std::string &defaultValue=nullptr) const;
+	const char * getString(const std::string &name, const std::string &defaultValue="") const;
 
 	void setBool(const std::string &name, bool value);
 	bool queryBool(const std::string &name, bool *outValue) const;

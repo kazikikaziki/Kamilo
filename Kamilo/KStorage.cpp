@@ -24,10 +24,10 @@ namespace Kamilo {
 #pragma region CWin32ResourceArchive
 class CWin32ResourceArchive: public KArchive {
 public:
-	virtual bool contains(const char *name) override {
+	virtual bool contains(const std::string &name) override {
 		return KEmbeddedFiles::contains(name);
 	}
-	virtual KInputStream createFileReader(const char *name) override {
+	virtual KInputStream createFileReader(const std::string &name) override {
 		return KEmbeddedFiles::createInputStream(name);
 	}
 	virtual int getFileCount() override {
@@ -48,10 +48,10 @@ class CFolderArchive: public KArchive, public KDirectoryWalker::Callback {
 	std::string m_Dir;
 	std::vector<std::string> m_Names;
 public:
-	CFolderArchive(const char *dir, int *err) {
+	CFolderArchive(const std::string &dir, int *err) {
 		m_Dir = dir;
 		if (!K::pathIsDir(dir)) {
-			K__Error("CFolderArchive: Directory not exists: '%s'", dir);
+			K__Error("CFolderArchive: Directory not exists: '%s'", dir.c_str());
 			*err = 1;
 		} else {
 			*err = 0;
@@ -65,15 +65,15 @@ public:
 	}
 
 	// 大小文字だけが異なる同名ファイルがあった時に警告する
-	void check_filename_case(const char *name) {
+	void check_filename_case(const std::string &name) {
 		if (m_Names.empty()) {
 			KDirectoryWalker::walk(m_Dir.c_str(), this);
 		}
 		for (auto it=m_Names.begin(); it!=m_Names.end(); ++it) {
-			if (K::pathCompare(it->c_str(), name, true, false) == 0) {
+			if (K::pathCompare(*it, name, true, false) == 0) {
 				// [大小文字区別なし]で比較した
 				// 念のために。[大小文字区別あり]でも比較する
-				if (K::pathCompare(it->c_str(), name, false, false) != 0) {
+				if (K::pathCompare(*it, name, false, false) != 0) {
 					K__Print(
 						u8"W_FILEANME_CASE: ファイル名 '%s' が指定されましたが、実際のファイル名は '%s' です。大小文字だけが異なる同名ファイルは"
 						u8"アーカイブ化したときに正しくロードできない可能性があります。必ず大小文字も一致させてください", name, it->c_str()
@@ -84,7 +84,7 @@ public:
 	}
 
 	// ファイルが存在する？
-	virtual bool contains(const char *name) override {
+	virtual bool contains(const std::string &name) override {
 		// 大小文字が異なるだけの同名ファイルをチェック
 		if (K_CASE_CHECK) {
 			check_filename_case(name);
@@ -106,7 +106,7 @@ public:
 		// ファイルとして存在する
 		return true;
 	}
-	virtual KInputStream createFileReader(const char *name) override {
+	virtual KInputStream createFileReader(const std::string &name) override {
 		// 大小文字が異なるだけの同名ファイルをチェック
 		if (K_CASE_CHECK) {
 			check_filename_case(name);
@@ -130,7 +130,7 @@ public:
 		return m_Names[index].c_str();
 	}
 };
-KArchive * KArchive::createFolderReader(const char *dir) {
+KArchive * KArchive::createFolderReader(const std::string &dir) {
 	int err = 0;
 	CFolderArchive *ar = new CFolderArchive(dir, &err);
 	if (err == 0) {
@@ -149,19 +149,19 @@ class CZipArchive: public KArchive {
 	std::string m_Password;
 	std::string m_TmpString;
 public:
-	CZipArchive(KInputStream &input, const char *password, int *err) {
+	CZipArchive(KInputStream &input, const std::string &password, int *err) {
 		m_Unzipper.open(input);
 		if (!m_Unzipper.isOpen()) {
 			*err = 1;
 			return;
 		}
-		m_Password = password ? password : "";
+		m_Password = password;
 	}
-	virtual bool contains(const char *filename) override {
+	virtual bool contains(const std::string &filename) override {
 		KInputStream r = createFileReader(filename);
 		return r.isOpen();
 	}
-	virtual KInputStream createFileReader(const char *filename) override {
+	virtual KInputStream createFileReader(const std::string &filename) override {
 		for (int i=0; i<m_Unzipper.getEntryCount(); i++) {
 			const char *s = getFileName(i);
 			if (K::pathCompare(s, filename, false, false) == 0) {
@@ -190,7 +190,7 @@ public:
 	}
 };
 
-KArchive * KArchive::createZipReader(const char *zip, const char *password) {
+KArchive * KArchive::createZipReader(const std::string &zip, const std::string &password) {
 	KArchive *ar = nullptr;
 	KInputStream file = KInputStream::fromFileName(zip);
 	if (file.isOpen()) {
@@ -227,13 +227,13 @@ public:
 		}
 	}
 
-	virtual bool contains(const char *name) override {
+	virtual bool contains(const std::string &name) override {
 		if (PAC_CASE_CEHCK) {
 			check_filename_case(name);
 		}
 		return m_PacReader.getIndexByName(name, false, false) >= 0;
 	}
-	virtual KInputStream createFileReader(const char *name) override {
+	virtual KInputStream createFileReader(const std::string &name) override {
 		if (PAC_CASE_CEHCK) {
 			check_filename_case(name);
 		}
@@ -252,14 +252,14 @@ public:
 		return m_TmpString.c_str();
 	}
 };
-KArchive * KArchive::createPacReader(const char *filename) {
+KArchive * KArchive::createPacReader(const std::string &filename) {
 	KArchive *archive = nullptr;
 	KInputStream file = KInputStream::fromFileName(filename);
 	KPacFileReader reader = KPacFileReader::fromStream(file);
 	if (reader.isOpen()) {
 		archive = new CPacFile(reader);
 	} else {
-		K__Error("E_FILE_FAIL: Failed to open a pac file: '%s'", filename);
+		K__Error("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
 	}
 	return archive;
 }
@@ -267,7 +267,7 @@ KArchive * KArchive::createPacReader(const char *filename) {
 
 
 // リソースに埋め込まれた zip ファイルからロード
-KArchive * KArchive::createEmbeddedZipReader(const char *filename, const char *password) {
+KArchive * KArchive::createEmbeddedZipReader(const std::string &filename, const std::string &password) {
 	// リソースとして埋め込まれた zip ファイルを得る
 	KInputStream file = KEmbeddedFiles::createInputStream(filename);
 
@@ -285,7 +285,7 @@ KArchive * KArchive::createEmbeddedZipReader(const char *filename, const char *p
 }
 
 // リソースに埋め込まれた pac ファイルからロード
-KArchive * KArchive::createEmbeddedPacReader(const char *filename) {
+KArchive * KArchive::createEmbeddedPacReader(const std::string &filename) {
 	CPacFile *ar = nullptr;
 
 	// リソースとして埋め込まれた pac ファイルを得る
@@ -405,7 +405,7 @@ public:
 			// ローダーを順番に試す
 			for (size_t i=0; i<m_Archives.size(); i++) {
 				KArchive *ar = m_Archives[i];
-				KInputStream file = ar->createFileReader(filename.c_str());
+				KInputStream file = ar->createFileReader(filename);
 				if (file.isOpen()) {
 					return file;
 				}

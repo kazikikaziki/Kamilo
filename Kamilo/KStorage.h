@@ -10,18 +10,18 @@ class CFileLoaderImpl; // internal
 
 class KArchive: public virtual KRef {
 public:
-	static KArchive * createFolderReader(const char *dir);
-	static KArchive * createZipReader(const char *zip, const char *password=nullptr);
-	static KArchive * createPacReader(const char *filename);
+	static KArchive * createFolderReader(const std::string &dir);
+	static KArchive * createZipReader(const std::string &zip, const std::string &password="");
+	static KArchive * createPacReader(const std::string &filename);
 	static KArchive * createEmbeddedReader();
-	static KArchive * createEmbeddedZipReader(const char *filename, const char *password=nullptr);
-	static KArchive * createEmbeddedPacReader(const char *filename);
+	static KArchive * createEmbeddedZipReader(const std::string &filename, const std::string &password="");
+	static KArchive * createEmbeddedPacReader(const std::string &filename);
 public:
 	/// ファイルが存在するかどうか
-	virtual bool contains(const char *filename) = 0;
+	virtual bool contains(const std::string &filename) = 0;
 
 	/// ファイルを取得しようとしたときに呼ばれる
-	virtual KInputStream createFileReader(const char *filename) = 0;
+	virtual KInputStream createFileReader(const std::string &filename) = 0;
 
 	/// ロード可能なファイル数を返す
 	virtual int getFileCount() = 0;
