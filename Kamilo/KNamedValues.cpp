@@ -196,7 +196,7 @@ bool KNamedValues::queryBool(const std::string &name, bool *outValue) const {
 		assert(strcmp(s, "on" ) != 0);
 		assert(strcmp(s, "off" ) != 0);
 		int val = 0;
-		if (KStringUtils::toIntTry(s, &val)) {
+		if (K::strToInt(s, &val)) {
 			if (outValue) *outValue = val != 0;
 			return true;
 		}
@@ -215,7 +215,7 @@ void KNamedValues::setInteger(const std::string &name, int value) {
 }
 bool KNamedValues::queryInteger(const std::string &name, int *outValue) const {
 	const char *s = getString(name);
-	if (s && KStringUtils::toIntTry(s, outValue)) {
+	if (s && K::strToInt(s, outValue)) {
 		return true;
 	}
 	return false;
@@ -246,7 +246,7 @@ void KNamedValues::setFloat(const std::string &name, float value) {
 }
 bool KNamedValues::queryFloat(const std::string &name, float *outValue) const {
 	const char *s = getString(name);
-	if (s && KStringUtils::toFloatTry(s, outValue)) {
+	if (s && K::strToFloat(s, outValue)) {
 		return true;
 	}
 	return false;
@@ -272,7 +272,9 @@ int KNamedValues::getFloatArray(const std::string &name, float *outValues, int m
 	if (outValues) {
 		int idx = 0;
 		while (idx<(int)tok.size() && idx<maxout) {
-			outValues[idx] = KStringUtils::toFloat(tok[idx]);
+			float f = 0.0f;
+			K::strToFloat(tok[idx], &f);
+			outValues[idx] = f;
 			idx++;
 		}
 		return idx;
@@ -301,7 +303,8 @@ int KNamedValues::getBinary(const std::string &name, void *out, int maxsize) con
 	char szstr[16] = {0};
 	strncpy(szstr, s, colonPos);
 	szstr[colonPos] = '\0';
-	int sz = KStringUtils::toInt(szstr);
+	int sz = 0;
+	K::strToInt(szstr, &sz);
 
 	if (sz <= 0) {
 		return 0; // Empty
@@ -312,7 +315,9 @@ int KNamedValues::getBinary(const std::string &name, void *out, int maxsize) con
 		uint8_t *out_u8 = (uint8_t*)out;
 		for (int i=0; i<copysize; i++) {
 			char hex[3] = {s[start+i*2], s[start+i*2+1], '\0'};
-			out_u8[i] = KStringUtils::toInt(hex);
+			int val = 0;
+			K::strToInt(hex, &val);
+			out_u8[i] = val;
 		}
 		return copysize;
 	} else {

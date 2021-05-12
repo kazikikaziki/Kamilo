@@ -3829,17 +3829,17 @@ public:
 	CBankUpdator() {
 		mFlags = 0;
 	}
-	bool update(const char *bankDir, const char *dataDir, KPathList *updated_files, KGameUpdateBankFlags flags) {
+	bool update(const std::string &bankDir, const std::string &dataDir, KPathList *p_updated_files, KGameUpdateBankFlags flags) {
 		uint32_t starttime = K::clockMsec32();
 		mFlags = flags;
 
 		KLog::printInfo("Update bank");
-		if (KStringUtils::isEmpty(bankDir)) { KLog::printError("bankDir cannot be empty"); return false; }
-		if (KStringUtils::isEmpty(dataDir)) { KLog::printError("dataDir cannot be empty"); return false; }
+		if (bankDir.empty()) { KLog::printError("bankDir cannot be empty"); return false; }
+		if (dataDir.empty()) { KLog::printError("dataDir cannot be empty"); return false; }
 
 		// 生データフォルダは必須
 		if (!K::pathIsDir(dataDir)) {
-			KLog::printError("Data directory does not exist: %s", dataDir);
+			KLog::printError("Data directory does not exist: %s", dataDir.c_str());
 			mFlags = 0;
 			return false;
 		}
@@ -3847,7 +3847,7 @@ public:
 		// 生バンクフォルダが無ければ作成する＆フォルダ構造がデータフォルダと同じになるようにする
 		// （少なくとも、データフォルダ内にあるサブフォルダは必ずバンクフォルダ内にも存在するように）
 		if (!updateBankDir(bankDir, dataDir)) {
-			KLog::printError("Bank directory does not exist: %s", bankDir);
+			KLog::printError("Bank directory does not exist: %s", bankDir.c_str());
 			mFlags = 0;
 			return false;
 		}
@@ -3865,8 +3865,8 @@ public:
 			for (auto it=cb.mFiles.begin(); it!=cb.mFiles.end(); it++) {
 				const char *name = it->u8();
 				if (updateFile(name, bankDir, dataDir, xBank) > 0) {
-					if (updated_files) {
-						updated_files->push_back(name);
+					if (p_updated_files) {
+						p_updated_files->push_back(name);
 					}
 				}
 			}
@@ -3909,21 +3909,17 @@ private:
 	// 更新されているならキャッシュフォルダにコピーし、管理データを更新して 1 を返す
 	// 無変更ならば何もせずに 0 を返す
 	// エラーが発生したなら -1 を返す
-	int updateFile(const char *name, const char *bankDir, const char *dataDir, KXmlElement *xmlBank) {
-		K_assert(name);
-		K_assert(bankDir);
-		K_assert(dataDir);
-
+	int updateFile(const std::string &name, const std::string &bankDir, const std::string &dataDir, KXmlElement *xmlBank) {
 		// 現在のデータファイルのタイムスタンプ
-		KPath nameInData = KPath(dataDir).join(name);
-		if (!K::pathExists(nameInData.u8())) {
-			KLog::printError("Data file does not exist: %s", nameInData.u8());
+		std::string nameInData = K::pathJoin(dataDir, name);
+		if (!K::pathExists(nameInData)) {
+			KLog::printError("Data file does not exist: %s", nameInData.c_str());
 			return -1;
 		}
-		time_t timestampInData = K::fileGetTimeStamp_Modify(nameInData.u8());
+		time_t timestampInData = K::fileGetTimeStamp_Modify(nameInData.c_str());
 
 		// 前回バンクを更新したときに利用したデータファイルのタイムスタンプ
-		KPath nameInBank = KPath(bankDir).join(name);
+		std::string nameInBank = K::pathJoin(bankDir, name);
 		time_t timestampInBank = readTimestamp(xmlBank, name);
 
 		// データフォルダとバンクフォルダの両方にファイルが存在し、タイムスタンプも変わっていなければ更新不要
@@ -3938,13 +3934,13 @@ private:
 			}
 			return 1;
 		}
-		KLog::printError("Failed to import file: %s", nameInData.u8());
+		KLog::printError("Failed to import file: %s", nameInData.c_str());
 		return -1;
 	}
-	bool onUpdateFile(const char *name, const char *bankDir, const char *dataDir) {
-		if (KPath(name).hasExtension(".edg")) {
+	bool onUpdateFile(const std::string &name, const std::string &bankDir, const std::string &dataDir) {
+		if (K::pathCompareExt(name, ".edg") == 0) {
 			CEdgeImporter imp;
-			if (imp.importFile(name, bankDir, dataDir, mFlags)) {
+			if (imp.importFile(name.c_str(), bankDir.c_str(), dataDir.c_str(), mFlags)) {
 #if 1
 				// .edg自体もコピーする
 				KPath nameInData = KPath(dataDir).join(name);
@@ -4010,16 +4006,16 @@ private:
 		}
 		return xDoc;
 	}
-	void writeTimestamp(KXmlElement *xmlBank, const char *name, time_t timestamp) {
+	void writeTimestamp(KXmlElement *xmlBank, const std::string &name, time_t timestamp) {
 		if (xmlBank == nullptr) return;
-		if (KStringUtils::isEmpty(name)) return;
+		if (name.empty()) return;
 		K_assert(xmlBank->hasTag("Bank"));
 
 		int idx = getFileNodeIndex(xmlBank, name);
 		KXmlElement *elm = nullptr;
 		if (idx < 0) {
 			elm = xmlBank->addChild("File");
-			elm->setAttrString("name", name);
+			elm->setAttrString("name", name.c_str());
 		} else {
 			elm = xmlBank->getChild(idx);
 		}
@@ -4029,9 +4025,9 @@ private:
 		sprintf_s(timeVal, sizeof(timeVal), "%lld", timestamp);
 		elm->setAttrString("time", timeVal);
 	}
-	time_t readTimestamp(const KXmlElement *xmlBank, const char *name) const {
+	time_t readTimestamp(const KXmlElement *xmlBank, const std::string &name) const {
 		if (xmlBank == nullptr) return 0;
-		if (KStringUtils::isEmpty(name)) return 0;
+		if (name.empty()) return 0;
 		K_assert(xmlBank->hasTag("Bank"));
 
 		// 各ノードを探していく
@@ -4041,8 +4037,8 @@ private:
 			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
-			const char *nameVal = elm->getAttrString("name");
-			if (strcmp(nameVal, name) == 0) {
+			const std::string &nameVal = elm->getAttrString("name", "");
+			if (nameVal.compare(name) == 0) {
 				const char *timeVal = elm->getAttrString("time"); // time_t は64ビットなので getAttrInt を使ってはいけない
 				time_t timestamp = 0;
 				if (timeVal) {
@@ -4053,8 +4049,8 @@ private:
 		}
 		return 0; // not found
 	}
-	int getFileNodeIndex(const KXmlElement *xmlBank, const char *name) const {
-		if (name == nullptr) return -1;
+	int getFileNodeIndex(const KXmlElement *xmlBank, const std::string &name) const {
+		if (name.empty()) return -1;
 		if (xmlBank == nullptr) return -1;
 		K_assert(xmlBank->hasTag("Bank"));
 
@@ -4063,17 +4059,17 @@ private:
 			const KXmlElement *elm = xmlBank->getChild(i);
 			K_assert(elm->hasTag("File"));
 
-			const char *name_str = elm->getAttrString("name");
-			if (strcmp(name_str, name) == 0) {
+			const char *name_str = elm->getAttrString("name", "");
+			if (name.compare(name_str) == 0) {
 				return i;
 			}
 		}
 		return -1;
 	}
-	bool updateBankDir(const char *bankDir, const char *dataDir) {
+	bool updateBankDir(const std::string &bankDir, const std::string &dataDir) {
 		if (!K::pathIsDir(bankDir)) {
 			if (!K::fileMakeDir(bankDir)) {
-				KLog::printError("Failed to make bank directory: %s", bankDir);
+				KLog::printError("Failed to make bank directory: %s", bankDir.c_str());
 				return false;
 			}
 		}
@@ -4081,16 +4077,16 @@ private:
 		KDirectoryWalker::walk(dataDir, &cb);
 
 		for (auto it=cb.mDirs.begin(); it!=cb.mDirs.end(); ++it) {
-			KPath dirInBank = KPath(bankDir).join(*it);
+			std::string dirInBank = K::pathJoin(bankDir, it->c_str());
 
-			if (K::pathIsFile(dirInBank.u8())) {
-				KLog::printError("Failed to make directory: %s\n(non-directory-file with the same name already exist)", dirInBank.u8());
+			if (K::pathIsFile(dirInBank)) {
+				KLog::printError("Failed to make directory: %s\n(non-directory-file with the same name already exist)", dirInBank.c_str());
 				return false;
 			}
 
-			if (!K::pathIsDir(dirInBank.u8())) {
-				if (!K::fileMakeDir(dirInBank.u8())) {
-					KLog::printError("Failed to make directory: %s", dirInBank.u8());
+			if (!K::pathIsDir(dirInBank)) {
+				if (!K::fileMakeDir(dirInBank)) {
+					KLog::printError("Failed to make directory: %s", dirInBank.c_str());
 					return false;
 				}
 			}

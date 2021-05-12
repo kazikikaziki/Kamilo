@@ -558,7 +558,9 @@ private:
 				KNode *node = nullptr;
 				if (text[0] == '#') {
 					// # で始まっていれば ID 番号が入力されたものとする
-					EID e = EID_from(KStringUtils::toInt(text+1));
+					int i = 0;
+					K::strToInt(text+1, &i);
+					EID e = EID_from(i);
 					node = KNodeTree::findNodeById(e);
 				} else {
 					// 該当するエンティティ名を探す

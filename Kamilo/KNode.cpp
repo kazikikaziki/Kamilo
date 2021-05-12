@@ -1537,8 +1537,8 @@ public:
 		return ret;
 	}
 	
-	KNode * find_name_in_tree_unsafe(const KNode *start, const char *name) const {
-		if (KStringUtils::isEmpty(name)) return nullptr; // 空文字列では検索できない
+	KNode * find_name_in_tree_unsafe(const KNode *start, const std::string &name) const {
+		if (name.empty()) return nullptr; // 空文字列では検索できない
 		if (K::pathHasDelim(name)) return nullptr; // ディレクトリ部分を含んではいけない
 		if (start == nullptr) {
 			start = getRoot();
@@ -1568,8 +1568,8 @@ public:
 		unlock();
 		return ret;
 	}
-	KNode * find_namepath_in_tree_unsafe(const KNode *start, const char *path) const {
-		if (KStringUtils::isEmpty(path)) return nullptr; // 空文字列では検索できない
+	KNode * find_namepath_in_tree_unsafe(const KNode *start, const std::string &path) const {
+		if (path.empty()) return nullptr; // 空文字列では検索できない
 		if (start == nullptr) {
 			start = getRoot();
 		}
@@ -1585,9 +1585,9 @@ public:
 		}
 		return nullptr;
 	}
-	bool has_name_in_tree_unsafe(const KNode *node, const char *path) const {
+	bool has_name_in_tree_unsafe(const KNode *node, const std::string &path) const {
 		if (node == nullptr) return false;
-		if (KStringUtils::isEmpty(path)) return false;
+		if (path.empty()) return false;
 
 		#if IGNORE_REMOVING_NODES
 		// 削除マークがついている場合は、もう削除済みとして扱う
@@ -1616,7 +1616,7 @@ public:
 		}
 
 		// 親ノードと親パスを比較する
-		return has_name_in_tree_unsafe(node->getParent(), tmp.c_str());
+		return has_name_in_tree_unsafe(node->getParent(), tmp);
 	}
 	KNode * getRoot() const {
 		return m_root;
