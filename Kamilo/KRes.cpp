@@ -3409,45 +3409,45 @@ void KGameImagePack::makeSpritelistFromPack(const KImgPackR &pack, const KImage 
 }
 
 // imageListName には元データのファイル名を指定する。例えば "player/player.edg" など
-KImgPackR KGameImagePack::loadPackR_fromCache(KStorage &storage, const char *imageListName, KImage *result_image) {
+KImgPackR KGameImagePack::loadPackR_fromCache(KStorage &storage, const std::string &imageListName, KImage *result_image) {
 	if (result_image == nullptr) {
 		return KImgPackR();
 	}
-	if (KStringUtils::isEmpty(imageListName)) {
+	if (imageListName.empty()) {
 		KLog::printError("Filename cannot be empty"); 
 		return KImgPackR();
 	}
-	KPath metaName = KPath(imageListName).joinString(".meta");
-	KPath pngName = KPath(imageListName).joinString(".png");
+	std::string metaName = imageListName + ".meta";
+	std::string pngName = imageListName + ".png";
 
-	std::string metaData = storage.loadBinary(metaName.u8(), false);
-	std::string pngData = storage.loadBinary(pngName.u8(), false);
+	std::string metaData = storage.loadBinary(metaName, false);
+	std::string pngData = storage.loadBinary(pngName, false);
 
 	if (metaData.size() == 0) {
-		KLog::printError("Failed to read KImgPackR meta-data: %s", metaName.u8()); 
+		KLog::printError("Failed to read KImgPackR meta-data: %s", metaName.c_str()); 
 		return KImgPackR();
 	}
 	if (pngData.size() == 0) {
-		KLog::printError("Failed to read KImgPackR image-data: %s", pngName.u8()); 
+		KLog::printError("Failed to read KImgPackR image-data: %s", pngName.c_str()); 
 		return KImgPackR();
 	}
 	KImgPackR packR;
-	if (!packR.loadFromMetaString(metaData.c_str())) {
-		KLog::printError("Failed to makeread KImgPackR from meta-data: %s", metaName.u8()); 
+	if (!packR.loadFromMetaString(metaData)) {
+		KLog::printError("Failed to makeread KImgPackR from meta-data: %s", metaName.c_str()); 
 		return KImgPackR();
 	}
 	*result_image = KImage::createFromFileInMemory(pngData);
 	if (result_image->empty()) {
-		KLog::printError("Failed to load png: %s", pngName.u8()); 
+		KLog::printError("Failed to load png: %s", pngName.c_str()); 
 		return KImgPackR();
 	}
 	return packR;
 }
-bool KGameImagePack::loadSpriteList(KStorage &storage, KSpriteList *sprites, const char *imageListName) {
+bool KGameImagePack::loadSpriteList(KStorage &storage, KSpriteList *sprites, const std::string &imageListName) {
 	KImage tex_image;
 	KImgPackR packR = loadPackR_fromCache(storage, imageListName, &tex_image);
 	if (packR.empty()) {
-		KLog::printError("Failed to load packR: %s", imageListName);
+		KLog::printError("Failed to load packR: %s", imageListName.c_str());
 		return false;
 	}
 	KPath tex_name = KGamePath::getEdgeAtlasPngPath(imageListName);
@@ -4495,13 +4495,13 @@ public:
 
 		// 入力ファイル名
 		// <EdgeSprites file="###" />
-		KPath edge_name;
+		std::string edge_name;
 		{
 			const char *file_str = xEdgeSprites->getAttrString("file");
 			if (file_str && file_str[0]) {
 				// パスを含めたファイル名を得る（データフォルダ内での相対パス）
 				// ※file_str は処理中の XML ファイルがあるフォルダからの相対パスで指定されているものとする
-				edge_name = KGamePath::evalPath(KPath(file_str), xml_name, ".edg");
+				edge_name = KGamePath::evalPath(KPath(file_str), xml_name, ".edg").c_str();
 			} else {
 				KLog::printError(u8"E_FILELOADER_EDGESPRITENODE: <EdgeSprites> に file 属性が指定されていません: %s(%d)",
 					xml_name, xEdgeSprites->getLineNumber()
@@ -4530,9 +4530,9 @@ public:
 		// sprites には .edg ファイル内のページとレイヤーのうち、無視属性でないすべての絵がはいる。
 		// 無視属性かどうかの判定は KGameEdgeBuilder::isIgnorablePage 等を参照すること
 		KSpriteList sprites;
-		if (!KGameImagePack::loadSpriteList(m_Storage, &sprites, edge_name.u8())) {
+		if (!KGameImagePack::loadSpriteList(m_Storage, &sprites, edge_name)) {
 			KLog::printError(u8"E_FILELOADER_EDGESPRITENODE: <EdgeSprites> で指定されたファイル '%s' からはスプライトを生成できませんでした: %s(%d)",
-				edge_name.u8(), xml_name, xEdgeSprites->getLineNumber()
+				edge_name.c_str(), xml_name, xEdgeSprites->getLineNumber()
 			);
 			return false;
 		}
@@ -4583,7 +4583,7 @@ public:
 
 		// スプライトを登録
 		for (auto it=sprites.m_items.begin(); it!=sprites.m_items.end(); ++it) {
-			KPath sprite_name = KGamePath::getSpriteAssetPath(edge_name.u8(), it->page, it->layer);
+			KPath sprite_name = KGamePath::getSpriteAssetPath(edge_name, it->page, it->layer);
 
 			// ここでスプライトを登録するが、第3引数 update_mesh は false にしておくこと。
 			// it->def にはすでにメッシュが入っているが、空白のスプライトでは it->def.mesh の頂点数があえて 0 になっている場合がある。

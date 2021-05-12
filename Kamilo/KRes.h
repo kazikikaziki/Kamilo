@@ -602,10 +602,10 @@ public:
 	/// paths: ファイル名とフォルダ名の情報
 	/// cellsize: ブロック化サイズ。キャッシュファイルを保存する時に使う。
 	/// flags: キャッシュ生成用のフラグ。キャッシュファイルを保存する時に使う。
-	static bool loadSpriteList(KStorage &storage, KSpriteList *sprites, const char *imageListName);
+	static bool loadSpriteList(KStorage &storage, KSpriteList *sprites, const std::string &imageListName);
 
 	static void makeSpritelistFromPack(const KImgPackR &pack, const KImage &pack_image, const KPath &tex_name, KSpriteList *sprites);
-	static KImgPackR loadPackR_fromCache(KStorage &storage, const char *imageListName, KImage *image);
+	static KImgPackR loadPackR_fromCache(KStorage &storage, const std::string &imageListName, KImage *image);
 };
 
 
