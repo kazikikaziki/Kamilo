@@ -1543,7 +1543,7 @@ public:
 	
 	KNode * find_name_in_tree_unsafe(const KNode *start, const char *name) const {
 		if (KStringUtils::isEmpty(name)) return nullptr; // 空文字列では検索できない
-		if (KPathUtils::K_PathHasDelim(name)) return nullptr; // ディレクトリ部分を含んではいけない
+		if (K::pathHasDelim(name)) return nullptr; // ディレクトリ部分を含んではいけない
 		if (start == nullptr) {
 			start = getRoot();
 		}
@@ -1601,18 +1601,16 @@ public:
 		#endif
 		
 		// 与えられたパスの末尾部分と自分の名前が一致しないとダメ
-		const char *last = KPathUtils::K_PathGetLast(path);
+		std::string last = K::pathGetLast(path);
 		if (!node->hasName(last)) {
 			return false;
 		}
 
 		// パスの親部分を得る
-		char tmp[KPathUtils::MAX_SIZE];
-		strcpy_s(tmp, sizeof(tmp), path);
-		KPathUtils::K_PathPopLast(tmp);
+		std::string tmp = K::pathGetParent(path);
 
 		// 親パスがないならここで比較終了
-		if (KStringUtils::isEmpty(tmp)) {
+		if (tmp.empty()) {
 			return true;
 		}
 
@@ -1622,7 +1620,7 @@ public:
 		}
 
 		// 親ノードと親パスを比較する
-		return has_name_in_tree_unsafe(node->getParent(), tmp);
+		return has_name_in_tree_unsafe(node->getParent(), tmp.c_str());
 	}
 	KNode * getRoot() const {
 		return m_root;

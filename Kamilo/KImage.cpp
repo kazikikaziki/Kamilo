@@ -444,7 +444,7 @@ std::string KImage::saveToMemory(int png_compress_level) const {
 	}
 	return bin;
 }
-bool KImage::saveToFileName(const char *filename_u8) const {
+bool KImage::saveToFileName(const std::string &filename_u8) const {
 	std::string bin = saveToMemory(1);
 	if (bin.empty()) {
 		return false;
@@ -457,7 +457,7 @@ bool KImage::saveToFileName(const char *filename_u8) const {
 	fclose(fp);
 	return true;
 }
-bool KImage::_loadFromFileName(const char *filename_u8) {
+bool KImage::_loadFromFileName(const std::string &filename_u8) {
 	FILE *fp = K::fileOpen(filename_u8, "rb");
 	if (fp == nullptr) {
 		return false;
@@ -699,7 +699,7 @@ KImage KImage::createFromStream(KInputStream &input) {
 	std::string bin = input.readBin();
 	return createFromFileInMemory(bin);
 }
-KImage KImage::createFromFileName(const char *filename) {
+KImage KImage::createFromFileName(const std::string &filename) {
 	KImage img;
 	img._loadFromFileName(filename);
 	return img;

@@ -97,7 +97,7 @@ public:
 	static KImage createFromPixels(int w, int h, KColorFormat fmt, const void *data);
 	static KImage createFromFileInMemory(const void *bin, size_t size);
 	static KImage createFromFileInMemory(const std::string &bin);
-	static KImage createFromFileName(const char *filename);
+	static KImage createFromFileName(const std::string &filename);
 	static KImage createFromStream(KInputStream &input);
 	static KImage createFromImageRect(const KImage &source, int x, int y, int w, int h);
 
@@ -167,7 +167,7 @@ public:
 	/// 画像の png フォーマット表現を返す。
 	/// @param png_compress_level PNGの圧縮レベルを指定する。0で無圧縮、9で最大圧縮
 	std::string saveToMemory(int png_compress_level=1) const;
-	bool saveToFileName(const char *filename) const;
+	bool saveToFileName(const std::string &filename) const;
 
 	/// source の部分画像を、書き込み座標 (x, y) を左上とする矩形にコピーする
 	/// @note RGBA32 フォーマットでのみ利用可能
@@ -226,7 +226,7 @@ private:
 	/// @see https://github.com/nothings/stb
 	bool _loadFromMemory(const void *bin, size_t size);
 	bool _loadFromMemory(const std::string &bin);
-	bool _loadFromFileName(const char *filename);
+	bool _loadFromFileName(const std::string &filename);
 
 	void get_info(int *w, int *h, KColorFormat *f) const;
 

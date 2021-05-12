@@ -60,9 +60,7 @@ public:
 
 	virtual void onFile(const char *name_u8, const char *parent_u8) override {
 		// KDirectoryWalker::walk でファイル（ディレクトリではない）を列挙するたびに呼ばれる。ファイルリストに登録する
-		char path[KPathUtils::MAX_SIZE] = {0};
-		KPathUtils::K_PathPushLast(path, sizeof(path), parent_u8);
-		KPathUtils::K_PathPushLast(path, sizeof(path), name_u8);
+		std::string path = K::pathJoin(parent_u8, name_u8);
 		m_Names.push_back(path);
 	}
 
@@ -93,9 +91,7 @@ public:
 		}
 
 		// 実際のファイル名を得る
-		char realname[KPathUtils::MAX_SIZE] = {0};
-		KPathUtils::K_PathPushLast(realname, sizeof(realname), m_Dir.c_str());
-		KPathUtils::K_PathPushLast(realname, sizeof(realname), name);
+		std::string realname = K::pathJoin(m_Dir, name);
 
 		// ファイルの存在を確認
 		if (!K::pathExists(realname)) {
@@ -117,14 +113,12 @@ public:
 		}
 
 		// 実際のファイル名を得る
-		char realname[KPathUtils::MAX_SIZE] = {0};
-		KPathUtils::K_PathPushLast(realname, sizeof(realname), m_Dir.c_str());
-		KPathUtils::K_PathPushLast(realname, sizeof(realname), name);
+		std::string realname = K::pathJoin(m_Dir, name);
 
 		// KInputStream を取得
 		KInputStream file = KInputStream::fromFileName(realname);
 		if (file.isOpen()) {
-			K__OutputDebugString( __FUNCTION__, ": ", realname, " ==> OK");
+			K__OutputDebugString( __FUNCTION__, ": ", realname.c_str(), " ==> OK");
 			return file;
 		}
 		return KInputStream();
