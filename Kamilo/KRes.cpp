@@ -4195,9 +4195,9 @@ private:
 		// フィルターが指定されている場合は画像を加工する
 		// <Texture filter="XXX">
 		KImage img;
-		const char *filter = xTex->getAttrString("filter");
+		std::string filter = xTex->getAttrString("filter", "");
 
-		if (KStringUtils::isEmpty(image_name.u8()) && KStringUtils::isEmpty(filter)) {
+		if (image_name.empty() && filter.empty()) {
 			KLog::printError(
 				u8"E_FILELOADER_TEX: テクスチャの生成元画像ファイルが指定されていない場合は filter 属性で"
 				u8"生成画像を指定する必要がありますが、生成元画像とフィルターの両方が省略されています: %s", texture_name.u8()
@@ -4271,25 +4271,25 @@ private:
 		return true;
 	}
 
-	bool getTextureImage(KImage &result_image, const char *image_name, const char *filter) {
+	bool getTextureImage(KImage &result_image, const std::string &image_name, const std::string &filter) {
 		// 画像をロード
-		if (!KStringUtils::isEmpty(image_name)) {
+		if (!image_name.empty()) {
 			std::string bin = m_Storage.loadBinary(image_name, true);
 			if (bin.empty()) {
-				KLog::printError("Failed to read binary: %s", image_name);
+				KLog::printError("Failed to read binary: %s", image_name.c_str());
 				return false;
 			}
 			result_image = KImage::createFromFileInMemory(bin);
 			if (result_image.empty()) {
-				KLog::printError("Failed to load image: %s", image_name);
+				KLog::printError("Failed to load image: %s", image_name.c_str());
 				return false;
 			}
 		}
 
 		// フィルタを適用
-		if (filter && m_Callback) {
+		if (!filter.empty() && m_Callback) {
 			if (!m_Callback->onImageFilter(filter, result_image)) {
-				KLog::printError("Unknown image filter: %s", filter);
+				KLog::printError("Unknown image filter: %s", filter.c_str());
 			}
 		}
 		return true;

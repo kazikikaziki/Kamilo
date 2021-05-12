@@ -327,39 +327,39 @@ public:
 			m_Archives.push_back(ar);
 		}
 	}
-	bool addFolder(const char *dir) {
-		KArchive *ar = KArchive::createFolderReader(dir);
+	bool addFolder(const std::string &dir) {
+		KArchive *ar = KArchive::createFolderReader(dir.c_str());
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにディレクトリ %s を追加しました", dir);
+			K__Print(u8"検索パスにディレクトリ %s を追加しました", dir.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a dir: '%s'", dir);
+			K__Warning("E_FILE_FAIL: Failed to open a dir: '%s'", dir.c_str());
 			return false;
 		}
 	}
-	bool addZipFile(const char *filename, const char *password) {
-		KArchive *ar = KArchive::createZipReader(filename, password);
+	bool addZipFile(const std::string &filename, const std::string &password) {
+		KArchive *ar = KArchive::createZipReader(filename.c_str(), password.c_str());
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにZIPファイル %s を追加しました", filename);
+			K__Print(u8"検索パスにZIPファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a zip file: '%s'", filename);
+			K__Warning("E_FILE_FAIL: Failed to open a zip file: '%s'", filename.c_str());
 			return false;
 		}
 	}
-	bool addPacFile(const char *filename) {
-		KArchive *ar = KArchive::createPacReader(filename);
+	bool addPacFile(const std::string &filename) {
+		KArchive *ar = KArchive::createPacReader(filename.c_str());
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにPACファイル %s を追加しました", filename);
+			K__Print(u8"検索パスにPACファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a pac file: '%s'", filename);
+			K__Warning("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
 			return false;
 		}
 	}
@@ -375,19 +375,19 @@ public:
 			return false;
 		}
 	}
-	bool addEmbeddedPacFileLoader(const char *filename) {
-		KArchive *ar = KArchive::createEmbeddedPacReader(filename);
+	bool addEmbeddedPacFileLoader(const std::string &filename) {
+		KArchive *ar = KArchive::createEmbeddedPacReader(filename.c_str());
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスに埋め込み pac ファイルを追加しました: %s", filename);
+			K__Print(u8"検索パスに埋め込み pac ファイルを追加しました: %s", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a embedded pac file: '%s'", filename);
+			K__Warning("E_FILE_FAIL: Failed to open a embedded pac file: '%s'", filename.c_str());
 			return false;
 		}
 	}
-	KInputStream getInputStream(const char *filename, bool should_exists) {
+	KInputStream getInputStream(const std::string &filename, bool should_exists) {
 		// 絶対パスで指定されている場合は普通のファイルとして開く
 		if (!KPath(filename).isRelative()) {
 			KInputStream file = KInputStream::fromFileName(filename);
@@ -405,22 +405,22 @@ public:
 			// ローダーを順番に試す
 			for (size_t i=0; i<m_Archives.size(); i++) {
 				KArchive *ar = m_Archives[i];
-				KInputStream file = ar->createFileReader(filename);
+				KInputStream file = ar->createFileReader(filename.c_str());
 				if (file.isOpen()) {
 					return file;
 				}
 			}
 		}
 		if (should_exists) {
-			K__Error("Failed to open file: %s", filename);
+			K__Error("Failed to open file: %s", filename.c_str());
 		}
 		return KInputStream();
 	}
-	bool contains(const char *filename) {
+	bool contains(const std::string &filename) {
 		KInputStream file = getInputStream(filename, false);
 		return file.isOpen();
 	}
-	std::string loadBinary(const char *filename, bool should_exists) {
+	std::string loadBinary(const std::string &filename, bool should_exists) {
 		KInputStream file = getInputStream(filename, should_exists);
 		return file.readBin();
 	}
@@ -448,28 +448,28 @@ void KStorage::clear() {
 void KStorage::addArchive(KArchive *cb) {
 	return m_Impl->addArchive(cb);
 }
-bool KStorage::addFolder(const char *dir) {
+bool KStorage::addFolder(const std::string &dir) {
 	return m_Impl->addFolder(dir);
 }
-bool KStorage::addZipFile(const char *filename, const char *password) {
+bool KStorage::addZipFile(const std::string &filename, const std::string &password) {
 	return m_Impl->addZipFile(filename, password);
 }
-bool KStorage::addPacFile(const char *filename) {
+bool KStorage::addPacFile(const std::string &filename) {
 	return m_Impl->addPacFile(filename);
 }
 bool KStorage::addEmbeddedFiles() {
 	return m_Impl->addEmbeddedFiles();
 }
-bool KStorage::addEmbeddedPacFileLoader(const char *filename) {
+bool KStorage::addEmbeddedPacFileLoader(const std::string &filename) {
 	return m_Impl->addEmbeddedPacFileLoader(filename);
 }
-KInputStream KStorage::getInputStream(const char *filename, bool should_exists) {
+KInputStream KStorage::getInputStream(const std::string &filename, bool should_exists) {
 	return m_Impl->getInputStream(filename, should_exists);
 }
-std::string KStorage::loadBinary(const char *filename, bool should_exists) {
+std::string KStorage::loadBinary(const std::string &filename, bool should_exists) {
 	return m_Impl->loadBinary(filename, should_exists);
 }
-bool KStorage::contains(const char *filename) {
+bool KStorage::contains(const std::string &filename) {
 	return m_Impl->contains(filename);
 }
 KArchive * KStorage::getLoader(int index) {

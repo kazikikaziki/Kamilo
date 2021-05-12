@@ -46,15 +46,15 @@ public:
 	void addArchive(KArchive *cb);
 
 	/// 通常フォルダを検索対象に追加する
-	bool addFolder(const char *dir);
+	bool addFolder(const std::string &dir);
 
 	/// Zipファイルを検索対象に追加する
 	/// @see KPacFileReader
-	bool addZipFile(const char *filename, const char *password);
+	bool addZipFile(const std::string &filename, const std::string &password);
 
 	/// パックファイルを検索対象に追加する
 	/// @see KPacFileReader
-	bool addPacFile(const char *filename);
+	bool addPacFile(const std::string &filename);
 
 	/// アプリケーションに埋め込まれたファイル（リソースファイル）を検索対象に追加する
 	/// @see KEmbeddedFiles
@@ -63,19 +63,19 @@ public:
 	/// アプリケーションに埋め込まれたパックファイルを検索対象に追加する
 	/// @see KPacFileReader
 	/// @see KEmbeddedFiles
-	bool addEmbeddedPacFileLoader(const char *filename);
+	bool addEmbeddedPacFileLoader(const std::string &filename);
 
 	/// 指定した名前のファイルがあれば KReader を返す
 	/// should_exists が true の場合、ファイルが見つからなければエラーログを出す
-	KInputStream getInputStream(const char *filename, bool should_exists=true);
+	KInputStream getInputStream(const std::string &filename, bool should_exists=true);
 	
 	/// 指定されたファイルが存在すれば、その内容をすべてバイナリモードで読み取る
 	/// 戻り値は文字列型だが、ファイル内容のバイナリを無加工で保持している
 	/// should_exists が true の場合、ファイルが見つからなければエラーログを出す
-	std::string loadBinary(const char *filename, bool should_exists=true);
+	std::string loadBinary(const std::string &filename, bool should_exists=true);
 
 	/// 指定されたファイルが存在するか調べる
-	bool contains(const char *filename);
+	bool contains(const std::string &filename);
 
 	KArchive * getLoader(int index);
 	int getLoaderCount();

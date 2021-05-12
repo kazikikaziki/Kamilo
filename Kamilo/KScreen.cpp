@@ -220,32 +220,32 @@ public:
 
 	#pragma region KScreen
 	bool command(const char *s, void *n, int *retval) {
-		if (KStringUtils::equals(s, "set_filter")) {
+		if (K_StrEq(s, "set_filter")) {
 			m_use_filter = (int)n != 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_debugdraw")) {
+		if (K_StrEq(s, "set_debugdraw")) {
 			m_show_debug = (int)n != 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "get_debugdraw")) {
+		if (K_StrEq(s, "get_debugdraw")) {
 			*retval = m_show_debug ? 1 : 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_debugdraw2")) {
+		if (K_StrEq(s, "set_debugdraw2")) {
 			m_show_debug2 = (int)n != 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "get_debugdraw2")) {
+		if (K_StrEq(s, "get_debugdraw2")) {
 			*retval = m_show_debug2 ? 1 : 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_basesize")) {
+		if (K_StrEq(s, "set_basesize")) {
 			int *vals = (int*)n;
 			setGameSize(vals[0], vals[1]);
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_bgcolor")) {
+		if (K_StrEq(s, "set_bgcolor")) {
 			float *rgba = (float*)n;
 			m_bgcolor.r = rgba[0];
 			m_bgcolor.g = rgba[1];
@@ -253,12 +253,12 @@ public:
 			m_bgcolor.a = rgba[3];
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_alpha_filling")) {
+		if (K_StrEq(s, "set_alpha_filling")) {
 			int *vals = (int*)n;
 			m_alpha_filling = vals[0]!=0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "get_bgcolor")) {
+		if (K_StrEq(s, "get_bgcolor")) {
 			float *rgba = (float*)n;
 			rgba[0] = m_bgcolor.r;
 			rgba[1] = m_bgcolor.g;
@@ -267,16 +267,16 @@ public:
 			*retval = (int)m_bgcolor.toColor32().toUInt32();
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_outline_enabled")) {
+		if (K_StrEq(s, "set_outline_enabled")) {
 			int *vals = (int*)n;
 			m_user_outline_enabled = vals[0]!=0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "get_outline_enabled")) {
+		if (K_StrEq(s, "get_outline_enabled")) {
 			*retval = m_user_outline_enabled ? 1: 0;
 			return true;
 		}
-		if (KStringUtils::equals(s, "set_outline_filter_callback")) {
+		if (K_StrEq(s, "set_outline_filter_callback")) {
 			m_user_outline_filter = reinterpret_cast<KEntityFilterCallback*>(n);
 			return true;
 		}

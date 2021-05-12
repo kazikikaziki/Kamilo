@@ -134,14 +134,18 @@ inline void K_MarkToStr(KMark mark, char *s, bool shorten=false) {
 	strcpy(s, "");
 	return;
 }
+
+inline bool K_StrEq(const char *s, const char *t) {
+	return s && t && strcmp(s, t) == 0;
+}
 inline bool K_StrToMark(const char *s, KMark *mark) {
-	if (KStringUtils::equals(s, "END"  )) { *mark = KMark_END; return true; }
-	if (KStringUtils::equals(s, "MARKA")) { *mark = KMark_A; return true; }
-	if (KStringUtils::equals(s, "MARKB")) { *mark = KMark_B; return true; }
-	if (KStringUtils::equals(s, "MARKC")) { *mark = KMark_C; return true; }
-	if (KStringUtils::equals(s, "MARKD")) { *mark = KMark_D; return true; }
-	if (KStringUtils::equals(s, "MARKE")) { *mark = KMark_E; return true; }
-	if (KStringUtils::equals(s, "")) { *mark = KMark_NONE; return true; }
+	if (K_StrEq(s, "END"  )) { *mark = KMark_END; return true; }
+	if (K_StrEq(s, "MARKA")) { *mark = KMark_A; return true; }
+	if (K_StrEq(s, "MARKB")) { *mark = KMark_B; return true; }
+	if (K_StrEq(s, "MARKC")) { *mark = KMark_C; return true; }
+	if (K_StrEq(s, "MARKD")) { *mark = KMark_D; return true; }
+	if (K_StrEq(s, "MARKE")) { *mark = KMark_E; return true; }
+	if (K_StrEq(s, "")) { *mark = KMark_NONE; return true; }
 	return false;
 }
 
@@ -750,7 +754,7 @@ struct SPRITE_ATTR {
 
 class CXresLoaderCallback {
 public:
-	virtual bool onImageFilter(const char *filter, KImage &img) = 0;
+	virtual bool onImageFilter(const std::string &filter, KImage &img) = 0;
 	virtual void onLoadClip(KClipRes *clip) {}
 };
 
