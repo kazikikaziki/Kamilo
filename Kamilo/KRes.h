@@ -484,24 +484,24 @@ public:
 	///  addFontFromInstalledFonts("msgothic_ui", "msgothic.ttc", 1);
 	///  addFontFromInstalledFonts("msgothic_p",  "msgothic.ttc", 2);
 	/// @endcode
-	virtual bool addFontFromStream(const char *alias, KInputStream &input, const char *filename, int ttc_index, KFont *out_font) = 0;
-	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
-	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
+	virtual bool addFontFromStream(const std::string &alias, KInputStream &input, const std::string &filename, int ttc_index, KFont *out_font) = 0;
+	virtual bool addFontFromFileName(const std::string &alias, const std::string &filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
+	virtual bool addFontFromInstalledFonts(const std::string &alias, const std::string &filename, int ttc_index, bool should_exists, KFont *out_font) = 0;
 
 	/// 指定されたフォントを追加する。内部で参照カウンタを増やす
 	/// 古い同名フォントがある場合は、古いフォントを削除してから追加する。
 	/// 追加に失敗した場合は false を返す
 	/// @param alias このフォントにつける名前
 	/// @param font フォントオブジェクト
-	virtual bool addFont(const char *alias, KFont &font) = 0;
+	virtual bool addFont(const std::string &alias, KFont &font) = 0;
 
-	virtual void deleteFont(const char *alias) = 0;
+	virtual void deleteFont(const std::string &alias) = 0;
 
 	/// 指定された名前のフォントを返す。
 	/// フォントがない場合、fallback 引数にしたがって NULL または代替フォントを返す
 	/// @param alias フォント名(addFontでフォントを追加するときに指定した、ユーザー定義のフォント名）
 	/// @param fallback  フォントが見つからなかったとき、代替フォントを返すなら true. NULL を返すなら false
-	virtual KFont getFont(const char *alias, bool fallback=true) const = 0;
+	virtual KFont getFont(const std::string &alias, bool fallback=true) const = 0;
 
 	/// なんでも良いから適当なフォントを取得したい時に使う。
 	/// setDefaultFont によってデフォルトフォントが設定されていれば、それを返す。
@@ -515,7 +515,7 @@ public:
 	/// フォントが見つからなかった場合に使う代替フォントを指定する。
 	/// このフォントは既に addFont で追加済みでなければならない。
 	/// @param alias フォント名(addFontでフォントを追加するときに指定した、ユーザー定義のフォント名）
-	virtual void setDefaultFont(const char *alias) = 0;
+	virtual void setDefaultFont(const std::string &alias) = 0;
 };
 
 class KAnimationBank {
@@ -651,9 +651,9 @@ public:
 
 	/// Edgeドキュメントをロードする
 	/// ※使用後は drop で参照カウンタを捨てる必要がある
-	static bool loadFromFileName(KEdgeDocument *edge, const char *filename);
-	static bool loadFromStream(KEdgeDocument *edge, KInputStream &file, const char *debugname);
-	static bool loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const char *debugname);
+	static bool loadFromFileName(KEdgeDocument *edge, const std::string &filename);
+	static bool loadFromStream(KEdgeDocument *edge, KInputStream &file, const std::string &debugname);
+	static bool loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const std::string &debugname);
 };
 
 

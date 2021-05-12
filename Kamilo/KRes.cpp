@@ -2566,15 +2566,15 @@ public:
 	virtual void clearFonts() override {
 		m_fonts.clear();
 	}
-	virtual bool addFont(const char *alias, KFont &font) override {
-		if (KStringUtils::isEmpty(alias)) return false;
+	virtual bool addFont(const std::string &alias, KFont &font) override {
+		if (alias.empty()) return false;
 		if (!font.isOpen()) return false;
 		deleteFont(alias);
 		m_fonts[alias] = font;
 		m_fontnames.push_back(alias);
 		return true;
 	}
-	virtual bool addFontFromStream(const char *alias, KInputStream &input, const char *filename, int ttc_index, KFont *out_font) override {
+	virtual bool addFontFromStream(const std::string &alias, KInputStream &input, const std::string &filename, int ttc_index, KFont *out_font) override {
 		// ファイルをロード
 		std::string bin = input.readBin();
 		if (!bin.empty()) {
@@ -2590,7 +2590,7 @@ public:
 		}
 		return false;
 	}
-	virtual bool addFontFromFileName(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
+	virtual bool addFontFromFileName(const std::string &alias, const std::string &filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
 		KInputStream input = KInputStream::fromFileName(filename);
 		if (input.isOpen()) {
@@ -2599,11 +2599,11 @@ public:
 			}
 		}
 		if (should_exists) {
-			KLog::printError(u8"E_FONT: フォントファイル '%s' のロードに失敗しました", filename);
+			KLog::printError(u8"E_FONT: フォントファイル '%s' のロードに失敗しました", filename.c_str());
 		}
 		return false;
 	}
-	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
+	virtual bool addFontFromInstalledFonts(const std::string &alias, const std::string &filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
 		std::string sysfont = K::pathJoin(KPlatformFonts::getFontDirectory(), filename);
 		KFont font = KFont::createFromFileName(sysfont.c_str(), ttc_index);
@@ -2616,11 +2616,11 @@ public:
 			}
 		}
 		if (should_exists) {
-			KLog::printError(u8"E_FONT: フォントファイル '%s' はシステムにインストールされていません", filename);
+			KLog::printError(u8"E_FONT: フォントファイル '%s' はシステムにインストールされていません", filename.c_str());
 		}
 		return false;
 	}
-	virtual void deleteFont(const char *name) override {
+	virtual void deleteFont(const std::string &name) override {
 		{
 			auto it = m_fonts.find(name);
 			if (it != m_fonts.end()) {
@@ -2662,7 +2662,7 @@ public:
 		}
 		return m_system_default_font;
 	}
-	virtual KFont getFont(const char *name, bool fallback) const override {
+	virtual KFont getFont(const std::string &name, bool fallback) const override {
 		// name で指定されたフォントを探す
 		{
 			auto it = m_fonts.find(name);
@@ -2676,7 +2676,7 @@ public:
 
 		return KFont();
 	}
-	virtual void setDefaultFont(const char *name) override {
+	virtual void setDefaultFont(const std::string &name) override {
 		m_fallback_name = name;
 	}
 };
@@ -3596,7 +3596,7 @@ bool KGameEdgeBuilder::parseLabel(const KPath &label, KGameEdgeLayerLabel *out) 
 	}
 	return true;
 }
-bool KGameEdgeBuilder::loadFromStream(KEdgeDocument *edge, KInputStream &file, const char *debugname) {
+bool KGameEdgeBuilder::loadFromStream(KEdgeDocument *edge, KInputStream &file, const std::string &debugname) {
 	if (edge && edge->loadFromStream(file)) {
 		// Edge ドキュメントに含まれる無視属性のページやレイヤーを削除する。
 		// 無視属性のページは元から存在しないものとしてページ番号を再割り当てすることに注意。
@@ -3604,29 +3604,29 @@ bool KGameEdgeBuilder::loadFromStream(KEdgeDocument *edge, KInputStream &file, c
 		removeIgnorableElements(edge);
 		return true;
 	} else {
-		KLog::printError("E_EDGE_FAIL: Filed to load: %s", debugname);
+		KLog::printError("E_EDGE_FAIL: Filed to load: %s", debugname.c_str());
 		return false;
 	}
 }
-bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const char *name) {
+bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const std::string &debugname) {
 	K_assert(edge);
 	bool ret = false;
 	KInputStream file = KInputStream::fromMemory(data, size);
 	if (file.isOpen()) {
-		ret = loadFromStream(edge, file, name);
+		ret = loadFromStream(edge, file, debugname);
 	} else {
-		KLog::printError("E_MEM_READER_FAIL: %s", name);
+		KLog::printError("E_MEM_READER_FAIL: %s", debugname.c_str());
 	}
 	return ret;
 }
-bool KGameEdgeBuilder::loadFromFileName(KEdgeDocument *edge, const char *filename) {
+bool KGameEdgeBuilder::loadFromFileName(KEdgeDocument *edge, const std::string &filename) {
 	K_assert(edge);
 	bool ret = false;
 	KInputStream file = KInputStream::fromFileName(filename);
 	if (file.isOpen()) {
 		ret = loadFromStream(edge, file, filename);
 	} else {
-		KLog::printError("E_EDGE_FAIL: STREAM ERROR: %s", filename);
+		KLog::printError("E_EDGE_FAIL: STREAM ERROR: %s", filename.c_str());
 	}
 	return ret;
 }
@@ -3647,16 +3647,16 @@ static const char *BANK_INFO_FILENAME = "$info.xml";
 
 class CEdgeImporter {
 public:
-	bool importFile(const char *filepath, const char *bankDir, const char *dataDir, KGameUpdateBankFlags bankflags) {
+	bool importFile(const std::string &filepath, const std::string &bankDir, const std::string &dataDir, KGameUpdateBankFlags bankflags) {
 		return importFileEx(filepath, bankDir, dataDir, 16, KPaletteImportFlag_DEFAULT, bankflags);
 	}
-	bool importFileEx(const char *filepath, const char *bankDir, const char *dataDir, int cellsize, KPaletteImportFlags palflags, KGameUpdateBankFlags bankflags) {
-		if (KStringUtils::isEmpty(filepath)) {
+	bool importFileEx(const std::string &filepath, const std::string &bankDir, const std::string &dataDir, int cellsize, KPaletteImportFlags palflags, KGameUpdateBankFlags bankflags) {
+		if (filepath.empty()) {
 			KLog::printError("Filename cannot be empty");
 			return false;
 		}
 		if (!K::pathIsDir(bankDir)) {
-			KLog::printError("Directory does not exist: %s", bankDir);
+			KLog::printError("Directory does not exist: %s", bankDir.c_str());
 			return false;
 		}
 
@@ -3673,13 +3673,13 @@ public:
 		}
 
 		// 正しいディレクトリとファイル名に分ける
-		KPath dir = KPath(bankDir).join(filepath).directory();
-		KPath name = KPath(filepath).filename();
+		std::string dir = K::pathGetParent(K::pathJoin(bankDir, filepath));
+		std::string name = K::pathGetLast(filepath);
 
 		// キャッシュとして画像パックを保存
-		KPath packPngName = dir.join(name).joinString(".png");
-		KPath packMetaName = dir.join(name).joinString(".meta");
-		if (!packW.saveToFileNames(packPngName.u8(), packMetaName.u8())) {
+		std::string packPngName = K::pathJoin(dir, name) + ".png";
+		std::string packMetaName = K::pathJoin(dir, name) + ".meta";
+		if (!packW.saveToFileNames(packPngName, packMetaName)) {
 			return false;
 		}
 
@@ -3688,30 +3688,30 @@ public:
 		bool with_index = (palflags & KPaletteImportFlag_MAKE_INDEXED_TRUE) || (palflags & KPaletteImportFlag_MAKE_INDEXED_AUTO);
 		if ((bankflags & KGameUpdateBankFlags_SAVE_RGB) && with_index) {
 			KImgPackW packW_d = makePackW(edgeDoc, KPaletteImportFlag_MAKE_INDEXED_FALSE);
-			KPath packPngName = dir.join(std::string("$") + name.u8()).joinString(".png");
-			packW_d.saveToFileNames(packPngName.u8(), ""); // png のみ保存する。meta は不要
+			std::string packPngName = K::pathJoin(dir, "$" + name) + ".png";
+			packW_d.saveToFileNames(packPngName, ""); // png のみ保存する。meta は不要
 		}
 		return true;
 	}
 private:
-	bool loadEdge(const char *name, const char *dataDir, KEdgeDocument *result) {
+	bool loadEdge(const std::string &name, const std::string &dataDir, KEdgeDocument *result) {
 		// edge からパック情報を作成する
-		if (KStringUtils::isEmpty(name)) {
+		if (name.empty()) {
 			KLog::printError("Filename cannot be empty");
 			return false;
 		}
-		KPath nameInDataDir = KPath(dataDir).join(name);
-		if (!K::pathExists(nameInDataDir.u8())) {
-			KLog::printError("File does not exist: %s", nameInDataDir.u8());
+		std::string nameInDataDir = K::pathJoin(dataDir, name);
+		if (!K::pathExists(nameInDataDir)) {
+			KLog::printError("File does not exist: %s", nameInDataDir.c_str());
 			return false;
 		}
-		KInputStream file = KInputStream::fromFileName(nameInDataDir.u8());
+		KInputStream file = KInputStream::fromFileName(nameInDataDir);
 		if (!file.isOpen()) {
-			KLog::printError("Failed to open file: %s", nameInDataDir.u8());
+			KLog::printError("Failed to open file: %s", nameInDataDir.c_str());
 			return false;
 		}
-		if (!KGameEdgeBuilder::loadFromStream(result, file, nameInDataDir.u8())) {
-			KLog::printError("Failed load edge document: %s", nameInDataDir.u8());
+		if (!KGameEdgeBuilder::loadFromStream(result, file, nameInDataDir)) {
+			KLog::printError("Failed load edge document: %s", nameInDataDir.c_str());
 			return false;
 		}
 		return true;
