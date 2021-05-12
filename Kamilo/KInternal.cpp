@@ -1978,6 +1978,40 @@ void Test_internal_path() {
 		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
 	}
 	{
+		std::string s;
+		s="abc";    K::strReplace(s, "a", "");   K__Verify(s=="bc");
+		s="abcabc"; K::strReplace(s, "a", "");   K__Verify(s=="bcbc");
+		s="abcabc"; K::strReplace(s, "a", "ax"); K__Verify(s=="axbcaxbc");
+		s="abc";    K::strReplace(s, "", "x");   K__Verify(s=="abc");
+		s="abc";    K::strReplace(s, "", "");    K__Verify(s=="abc");
+
+		s="   aaabbb "; K::strTrim(s); K__Verify(s=="aaabbb");
+		s="aaabbb ";    K::strTrim(s); K__Verify(s=="aaabbb");
+		s="   aaabbb";  K::strTrim(s); K__Verify(s=="aaabbb");
+		s="aaabbb";     K::strTrim(s); K__Verify(s=="aaabbb");
+		s="";           K::strTrim(s); K__Verify(s=="");
+
+		K__Verify(K::strStartsWith("abc", "ab") == true);
+		K__Verify(K::strStartsWith("", "abc") == false);
+		K__Verify(K::strStartsWith("abc", "") == true);
+		K__Verify(K::strStartsWith("", "") == true);
+		K__Verify(K::strStartsWith(" abc", "ab") == false);
+		K__Verify(K::strStartsWith("abc", "abcd") == false);
+
+		K__Verify(K::strEndsWith("abc", "bc") == true);
+		K__Verify(K::strEndsWith("", "abc") == false);
+		K__Verify(K::strEndsWith("abc", "") == true);
+		K__Verify(K::strEndsWith("", "") == true);
+		K__Verify(K::strEndsWith("abc ", "bc") == false);
+		K__Verify(K::strEndsWith("abc", "xabc") == false);
+
+		K__Verify(K::strFind("aaa x", "x") == 4);
+		K__Verify(K::strFind("aaa x", "a") == 0);
+		K__Verify(K::strFind("aaa x", "aaa") == 0);
+		K__Verify(K::strFind("aaa x", " ") == 3);
+		K__Verify(K::strFind("aa", "aaaa") == -1);
+	}
+	{
 		auto tok = K::strSplit("aaa=bbb=ccc", "=", 0);
 		K__Verify(tok.size() == 3);
 		K__Verify(tok[0] == "aaa");
