@@ -551,7 +551,7 @@ private:
 		// IDを指定して選択
 		{
 			// 現在選択されているエンティティ名またはID
-			KPath curr = get_selected_node_name();
+			std::string curr = get_selected_node_name();
 			char text[256] = {0};
 			strcpy(text, curr.c_str());
 			if (ImGui::InputText("##find", text, sizeof(text))) {
@@ -1672,7 +1672,7 @@ void KDebugGui::K_DebugGui_NodeCamera(KNode *node, KNode *camera, KDebugTree *tr
 		return;
 	}
 
-	KPath path = camera->getNameInTree();
+	std::string path = camera->getNameInTree().u8();
 	ImGui::Text("Camera: %s (#%p)", path.c_str(), camera->getId());
 
 	if (ImGui::BeginPopupContextItem(__FUNCTION__)) {
@@ -1695,7 +1695,7 @@ void KDebugGui::K_DebugGui_NodeNameId(KNode *node) {
 	ImGui::Text("Name: %s", name);
 	ImGui::Text("Type: %s", typeid(*node).name());
 	if (ImGui::IsItemHovered()) {
-		KPath path = node->getNameInTree();
+		std::string path = node->getNameInTree().u8();
 		ImGui::SetTooltip("%s", path.c_str());
 	}
 }
@@ -2601,14 +2601,14 @@ void KDebugTree::remove_selections() {
 		}
 	}
 }
-KPath KDebugTree::get_selected_node_name() const {
-	KPath ret;
+std::string KDebugTree::get_selected_node_name() const {
+	std::string ret;
 	EID e = m_selected_entities.empty() ? 0 : m_selected_entities[0];
 	KNode *node = KNodeTree::findNodeById(e);
 	if (node) {
-		ret = node->getNameInTree();
+		ret = node->getNameInTree().u8();
 		if (ret.empty()) {
-			ret = KPath::fromFormat("#%p", e);
+			ret = K::str_sprintf("#%p", e);
 		}
 	}
 	return ret;
