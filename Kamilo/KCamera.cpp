@@ -374,7 +374,7 @@ bool KCamera::isWorldAabbInFrustum(const KVec3 &aabb_min, const KVec3 &aabb_max)
 
 
 /// ファイル名として安全な文字列にする（簡易版）
-static void K__escape_filename(char *name) {
+static void K__EscapeFilename(std::string &name) {
 	for (size_t i=0; name[i]; i++) {
 		if (isalnum(name[i])) continue;
 		if (strchr(" ._()[]{}<>#$%&=~^@+-", name[i])) continue;
@@ -419,10 +419,9 @@ void KCamera::on_inspector() {
 		KDebugGui::K_DebugGui_Image(m_Data.render_target, 256, 256);
 		if (1) {
 			// テクスチャ画像を png でエクスポートする
-			char filename[KPathUtils::MAX_SIZE] = {0};
-			sprintf_s(filename, "__export__%s.png", getNode()->getName());
-			K__escape_filename(filename);
-			KDebugGui::K_DebugGui_ImageExportButton("Export", m_Data.render_target, filename, false);
+			std::string filename = K::str_sprintf("__export__%s.png", getNode()->getName());
+			K__EscapeFilename(filename);
+			KDebugGui::K_DebugGui_ImageExportButton("Export", m_Data.render_target, filename.c_str(), false);
 		}
 	}
 }

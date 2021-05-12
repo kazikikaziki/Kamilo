@@ -102,6 +102,9 @@ public:
 	static FILE * fileOpen(const std::string &path_u8, const std::string &mode_u8);
 	static bool fileGetSize(const std::string &path_u8, int *out_size); ///< ファイルのバイト数を得る
 	static bool fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma); ///< ファイルのタイムスタンプを得る
+	static time_t fileGetTimeStamp_Creation(const std::string &path_u8) { time_t cma[3]; fileGetTimeStamp(path_u8, cma); return cma[0]; }
+	static time_t fileGetTimeStamp_Modify(const std::string &path_u8)   { time_t cma[3]; fileGetTimeStamp(path_u8, cma); return cma[1]; }
+	static time_t fileGetTimeStamp_Access(const std::string &path_u8)   { time_t cma[3]; fileGetTimeStamp(path_u8, cma); return cma[2]; }
 	static bool fileCopy(const std::string &src_u8, const std::string &dst_u8, bool overwrite); ///< ファイルをコピーする
 	static bool fileMakeDir(const std::string &dir_u8); ///< ディレクトリを作成する
 	static bool fileRemove(const std::string &path_u8); ///< ファイルを削除する

@@ -909,10 +909,8 @@ void Test_font_printInfo(const char *output_dir, const char *filename) {
 		}
 		msg_u8 += "\n";
 
-		char outname[KPathUtils::MAX_SIZE] = {0};
-		strcpy_s(outname, sizeof(outname), output_dir);
-		KPathUtils::K_PathPushLast(outname, sizeof(outname), KPathUtils::K_PathGetLast(filename));
-		KPathUtils::K_PathPushExt(outname, sizeof(outname), ".txt");
+		std::string outname = K::pathJoin(output_dir, K::pathGetLast(filename));
+		outname = K::pathRenameExtension(outname, ".txt");
 
 		KOutputStream output = KOutputStream::fromFileName(outname);
 		output.write(msg_u8.data(), msg_u8.size());

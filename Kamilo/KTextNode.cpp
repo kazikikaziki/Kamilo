@@ -1200,10 +1200,7 @@ void Test_textbox1(const char *output_dir) {
 	KImage img = box.exportImage(nullptr);
 	std::string png = img.saveToMemory();
 
-	char path[KPathUtils::MAX_SIZE] = {0};
-	strcpy_s(path, sizeof(path), output_dir);
-	KPathUtils::K_PathPushLast(path, sizeof(path), "Test_textbox1.png");
-	
+	std::string path = K::pathJoin(output_dir, "Test_textbox1.png");
 	KOutputStream output = KOutputStream::fromFileName(path);
 	output.write(png.data(), png.size());
 }
@@ -1380,10 +1377,7 @@ void Test_textbox2(const char *output_dir) {
 	KImage img = box.exportImage(nullptr);
 	std::string png = img.saveToMemory();
 
-	char path[KPathUtils::MAX_SIZE] = {0};
-	strcpy_s(path, sizeof(path), output_dir);
-	KPathUtils::K_PathPushLast(path, sizeof(path), "Test_textbox2.png");
-	
+	std::string path = K::pathJoin(output_dir, "Test_textbox2.png");
 	KOutputStream output = KOutputStream::fromFileName(path);
 	output.write(png.data(), png.size());
 }

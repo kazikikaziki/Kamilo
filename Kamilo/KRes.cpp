@@ -3920,7 +3920,7 @@ private:
 			KLog::printError("Data file does not exist: %s", nameInData.u8());
 			return -1;
 		}
-		time_t timestampInData = KPathUtils::K_PathGetTimeStamp_Modify(nameInData.u8());
+		time_t timestampInData = K::fileGetTimeStamp_Modify(nameInData.u8());
 
 		// 前回バンクを更新したときに利用したデータファイルのタイムスタンプ
 		KPath nameInBank = KPath(bankDir).join(name);

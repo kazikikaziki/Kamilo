@@ -8,7 +8,7 @@ class KExcelFile;
 class KInputStream;
 
 /// 行と列で定義されるデータテーブルを扱う。
-/// 単純な「名前＝値」の形式のテーブルで良ければ KNamedValues または KOrderedParameters を使う
+/// 単純な「名前＝値」の形式のテーブルで良ければ KNamedValues を使う
 class KTable {
 public:
 	KTable();
