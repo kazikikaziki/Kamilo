@@ -1027,7 +1027,7 @@ struct Pred {
 	}
 };
 std::string KPlatformFonts::getFontDirectory() {
-	wchar_t dir[KPath::SIZE];
+	wchar_t dir[MAX_PATH];
 	SHGetFolderPathW(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, dir);
 	std::string s = K::strWideToUtf8(dir);
 	return K::pathNormalize(s);

@@ -119,8 +119,8 @@ public:
 	void setGizmoColor(const KColor &color);
 
 	int m_Bitmask; /// 判定対象のグループ番号目のビットを立てたマスク整数を指定する。つまり現在の時点では 32 グループまで対応可能である
-	KPath m_Name; /// グループ名（内部管理のための名前
-	KPath m_NameForInspector; /// グループ名（デバッガに表示する時のグループ名
+	std::string m_Name; /// グループ名（内部管理のための名前
+	std::string m_NameForInspector; /// グループ名（デバッガに表示する時のグループ名
 	KColor m_GizmoColor; /// デバッグモードで衝突判定を描画する時の色
 	bool m_GizmoVisible;
 };

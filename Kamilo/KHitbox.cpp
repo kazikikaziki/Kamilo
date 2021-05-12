@@ -293,8 +293,8 @@ public:
 		for (size_t i=0; i<m_Groups.size(); i++) {
 			KHitboxGroup *group = &m_Groups[i];
 			ImGui::Separator();
-			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d] %s", i, group->m_NameForInspector.u8())) {
-				ImGui::Text("Name: %s", group->m_Name.u8());
+			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d] %s", i, group->m_NameForInspector.c_str())) {
+				ImGui::Text("Name: %s", group->m_Name.c_str());
 				ImGui::Checkbox("Gizmo visible", &group->m_GizmoVisible);
 				ImGui::ColorEdit4("Gizmo color", reinterpret_cast<float*>(&group->m_GizmoColor));
 				ImGui::TreePop();
@@ -308,8 +308,8 @@ public:
 			KHitPair *pair = &m_HitPairs[i];
 			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
 			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d]", i)) {
-				KPath name1 = pair->m_Object1.node->getNameInTree();
-				KPath name2 = pair->m_Object2.node->getNameInTree();
+				std::string name1 = pair->m_Object1.node->getNameInTree().u8();
+				std::string name2 = pair->m_Object2.node->getNameInTree().u8();
 				ImGui::Text("Node1   : %s", name1.c_str());
 				ImGui::Text("Node2   : %s", name2.c_str());
 				if (pair->m_TimestampEnter == pair->m_TimestampLastUpdate) {
@@ -362,9 +362,9 @@ public:
 	#ifndef NO_IMGUI
 		ImGui::Separator();
 		ImGui::PushID(hitbox);
-		KPath typestr = getGroupOfHitbox(hitbox)->m_NameForInspector;
+		std::string typestr = getGroupOfHitbox(hitbox)->m_NameForInspector;
 		ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Once);
-		if (ImGui::TreeNode(typestr.u8())) {
+		if (ImGui::TreeNode(typestr.c_str())) {
 			hitbox->on_node_inspector();
 			if (m_HitPairs.size() == 0) {
 				ImGui::Text("Hits with: (No hit)");
@@ -374,14 +374,14 @@ public:
 				for (size_t i=0; i<m_HitPairs.size(); i++) {
 					const KHitPair *hitpair = &m_HitPairs[i];
 					if (hitpair->m_Object1.hitbox == hitbox) {
-						const KPath &label = getGroupOfHitbox(hitpair->m_Object2.hitbox)->m_NameForInspector;
+						const std::string &label = getGroupOfHitbox(hitpair->m_Object2.hitbox)->m_NameForInspector;
 						const KNode *node = hitpair->m_Object2.node;
-						ImGui::BulletText("%s.%s", node->getName(), label.u8());
+						ImGui::BulletText("%s.%s", node->getName(), label.c_str());
 					}
 					if (hitpair->m_Object2.hitbox == hitbox) {
-						const KPath &label = getGroupOfHitbox(hitpair->m_Object1.hitbox)->m_NameForInspector;
+						const std::string &label = getGroupOfHitbox(hitpair->m_Object1.hitbox)->m_NameForInspector;
 						const KNode *node = hitpair->m_Object1.node;
-						ImGui::BulletText("%s.%s", node->getName(), label.u8());
+						ImGui::BulletText("%s.%s", node->getName(), label.c_str());
 					}
 				}
 				ImGui::Unindent();
