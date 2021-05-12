@@ -1089,9 +1089,8 @@ private:
 		KImGui::KImGui_PopTextColor();
 
 		if (bodynode->m_Desc._ground_node) {
-			char name[KPathUtils::MAX_SIZE] = {0};
-			bodynode->m_Desc._ground_node->getNameInTree(name, sizeof(name));
-			ImGui::Text("Ground: %s", name);
+			KPath name = bodynode->m_Desc._ground_node->getNameInTree();
+			ImGui::Text("Ground: %s", name.c_str());
 		} else {
 			ImGui::Text("Ground: %s", "(null)");
 		}

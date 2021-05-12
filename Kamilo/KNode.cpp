@@ -508,13 +508,15 @@ bool KNode::hasName(const KName &name) const {
 	return m_NodeData.name == name.c_str();
 #endif
 }
-void KNode::getNameInTree(char *out, int maxsize) const {
+KPath KNode::getNameInTree() const {
+	KPath parent_path;
+
 	// 親のフルパスを得る
 	if (getParent()) {
-		getParent()->getNameInTree(out, maxsize);
+		parent_path = getParent()->getNameInTree();
 	}
 	// 末尾に自分の名前を追加する
-	KPathUtils::K_PathPushLast(out, maxsize, getName());
+	return parent_path.join(m_NodeData.name);
 }
 EID KNode::getId() const {
 	return m_NodeData.uuid;
@@ -1252,12 +1254,6 @@ int KNode::getPriority() const {
 }
 int KNode::getPriorityInTree() const {
 	return get_group_in_tree(Category_PRIORITY);
-}
-
-KPath KNode::getNameInTree() const {
-	char tmp[KPath::SIZE] = {0};
-	getNameInTree(tmp, sizeof(tmp));
-	return tmp;
 }
 #pragma endregion // Helper
 

@@ -551,9 +551,9 @@ private:
 		// IDを指定して選択
 		{
 			// 現在選択されているエンティティ名またはID
+			KPath curr = get_selected_node_name();
 			char text[256] = {0};
-			get_selected_node_name(text, sizeof(text));
-
+			strcpy(text, curr.c_str());
 			if (ImGui::InputText("##find", text, sizeof(text))) {
 				KNode *node = nullptr;
 				if (text[0] == '#') {
@@ -1670,9 +1670,8 @@ void KDebugGui::K_DebugGui_NodeCamera(KNode *node, KNode *camera, KDebugTree *tr
 		return;
 	}
 
-	char path[256] = {0};
-	camera->getNameInTree(path, sizeof(path));
-	ImGui::Text("Camera: %s (#%p)", path, camera->getId());
+	KPath path = camera->getNameInTree();
+	ImGui::Text("Camera: %s (#%p)", path.c_str(), camera->getId());
 
 	if (ImGui::BeginPopupContextItem(__FUNCTION__)) {
 		char s[256] = {0};
@@ -1694,9 +1693,8 @@ void KDebugGui::K_DebugGui_NodeNameId(KNode *node) {
 	ImGui::Text("Name: %s", name);
 	ImGui::Text("Type: %s", typeid(*node).name());
 	if (ImGui::IsItemHovered()) {
-		char path[256] = {0};
-		node->getNameInTree(path, sizeof(path));
-		ImGui::SetTooltip("%s", path);
+		KPath path = node->getNameInTree();
+		ImGui::SetTooltip("%s", path.c_str());
 	}
 }
 void KDebugGui::K_DebugGui_NodeTag(KNode *node) {
@@ -2601,16 +2599,17 @@ void KDebugTree::remove_selections() {
 		}
 	}
 }
-bool KDebugTree::get_selected_node_name(char *out, int maxsize) const {
-	K_assert(out && maxsize>0);
+KPath KDebugTree::get_selected_node_name() const {
+	KPath ret;
 	EID e = m_selected_entities.empty() ? 0 : m_selected_entities[0];
 	KNode *node = KNodeTree::findNodeById(e);
-	if (node == nullptr) return false;
-	node->getNameInTree(out, maxsize);
-	if (KStringUtils::isEmpty(out)) {
-		sprintf_s(out, maxsize, "#%p", e);
+	if (node) {
+		ret = node->getNameInTree();
+		if (ret.empty()) {
+			ret = KPath::fromFormat("#%p", e);
+		}
 	}
-	return true;
+	return ret;
 }
 KNode * KDebugTree::get_mouse_hovered() const {
 	return KNodeTree::findNodeById(m_highlighted);

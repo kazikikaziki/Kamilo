@@ -1956,23 +1956,7 @@ void KPath::getNativeAnsiString(char *out, size_t maxsize) const {
 	strcpy_s(out, maxsize, s.c_str());
 }
 KPath KPath::directory() const {
-#if 1
-	char tmp[SIZE] = {0};
-	KPathUtils::K_PathPopLast(tmp, SIZE, m_path);
-	return KPath(tmp);
-#else
-	char tmp[SIZE] = {0};
-	kkpath_strcpy(tmp, sizeof(tmp), m_path);
-	char *delim = strrchr(tmp, K__PATH_SLASH);
-	if (delim) {
-		// パス区切りが見つかった。それよりも前の部分を返す
-		*delim = '\0';
-		return KPath(tmp);
-	} else {
-		// パス区切り無し。ディレクトリ部は存在しないので空のパスを返す
-		return KPath::Empty;
-	}
-#endif
+	return K::pathGetParent(m_path);
 }
 bool KPath::hasDirectory() const {
 	// パス区切りがあればディレクトリ名を含んでいるものとする

@@ -308,12 +308,10 @@ public:
 			KHitPair *pair = &m_HitPairs[i];
 			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
 			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d]", i)) {
-				char name1[KPathUtils::MAX_SIZE] = {0};
-				char name2[KPathUtils::MAX_SIZE] = {0};
-				pair->m_Object1.node->getNameInTree(name1, sizeof(name1));
-				pair->m_Object2.node->getNameInTree(name2, sizeof(name2));
-				ImGui::Text("Node1   : %s", name1);
-				ImGui::Text("Node2   : %s", name2);
+				KPath name1 = pair->m_Object1.node->getNameInTree();
+				KPath name2 = pair->m_Object2.node->getNameInTree();
+				ImGui::Text("Node1   : %s", name1.c_str());
+				ImGui::Text("Node2   : %s", name2.c_str());
 				if (pair->m_TimestampEnter == pair->m_TimestampLastUpdate) {
 					ImGui::Text("State     : %s", "Enter");
 				} else if (pair->m_TimestampExit == pair->m_TimestampLastUpdate) {

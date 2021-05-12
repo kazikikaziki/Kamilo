@@ -179,7 +179,7 @@ public:
 	void move_prev_sibling();
 	void move_next_sibling();
 	void remove_selections();
-	bool get_selected_node_name(char *out, int maxsize) const;
+	KPath get_selected_node_name() const;
 	KNode * get_mouse_hovered() const;
 
 	virtual void on_select(KNode *node) = 0;

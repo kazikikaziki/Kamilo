@@ -145,7 +145,7 @@ public:
 	const char * getName() const;
 	void setName(const KName &name);
 	bool hasName(const KName &name) const;
-	void getNameInTree(char *out, int maxsize) const;
+	KPath getNameInTree() const;
 	EID getId() const;
 
 	#pragma region Tree
@@ -309,7 +309,6 @@ public:
 	void setPriority(int value);
 	int getPriority() const;
 	int getPriorityInTree() const;
-	KPath getNameInTree() const;
 #endif
 public:
 	void _RegisterForDelete(std::vector<KNode*> &list, bool all);
