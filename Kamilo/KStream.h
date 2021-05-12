@@ -57,7 +57,7 @@ private:
 
 class KOutputStream {
 public:
-	static KOutputStream fromFileName(const std::string &filename);
+	static KOutputStream fromFileName(const std::string &filename, const char *mode="wb");
 	static KOutputStream fromMemory(std::string *dest);
 
 	class Impl {

@@ -299,9 +299,9 @@ std::string KInputStream::readBin(int readsize) {
 
 
 #pragma region KOutputStream
-KOutputStream KOutputStream::fromFileName(const std::string &filename) {
+KOutputStream KOutputStream::fromFileName(const std::string &filename, const char *mode) {
 	Impl *impl = nullptr;
-	FILE *fp = K::fileOpen(filename, "wb");
+	FILE *fp = K::fileOpen(filename, mode);
 	if (fp) {
 		impl = new CFileWriteImpl(fp, filename);
 	}
