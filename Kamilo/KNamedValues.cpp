@@ -268,7 +268,7 @@ void KNamedValues::setFloatArray(const std::string &name, const float *values, i
 }
 int KNamedValues::getFloatArray(const std::string &name, float *outValues, int maxout) const {
 	const char *s = getString(name);
-	KToken tok(s, ", ");
+	auto tok = K::strSplit(s, ", ");
 	if (outValues) {
 		int idx = 0;
 		while (idx<(int)tok.size() && idx<maxout) {

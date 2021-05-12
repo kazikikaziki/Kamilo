@@ -1104,11 +1104,12 @@ public:
 	// これは "myTexture.tex" のテクスチャを 100 という方式に従って変更した画像という意味
 	virtual int getTextureModifier(const KPath &modname) const override {
 		// & を境にして左右２個のトークンに分ける
-		KToken token(modname.u8(), "&", true, 2);
+		auto tok = K::strSplit(modname.u8(), "&", 2);
 
 		// トークン[1] が modifier 番号を示している
-		if (token.isInt(1)) {
-			return token.toInt(1);
+		int val = 0;
+		if (K::strToInt(tok[1], &val)) {
+			return val;
 		}
 		return 0;
 	}
@@ -3573,11 +3574,11 @@ bool KGameEdgeBuilder::parseLabel(const KPath &label, KGameEdgeLayerLabel *out) 
 	//   cmds = "blend=add@se=none"
 
 	// 区切り文字 @ で分割
-	KToken tok(label.u8(), "@");
+	auto tok = K::strSplit(label.u8(), "@");
 
 	// 最初の部分が # で始まっているならレイヤー名が指定されている
-	if (tok.get(0)[0] == '#') {
-		out->name = KPath(tok.get(0) + 1); // "#" の次の文字から
+	if (tok[0][0] == '#') {
+		out->name = tok[0].substr(1); // "#" の次の文字から
 	}
 
 	// 右部分
@@ -3591,7 +3592,7 @@ bool KGameEdgeBuilder::parseLabel(const KPath &label, KGameEdgeLayerLabel *out) 
 			out->numcmds = KGameEdgeLayerLabel::MAXCMDS;
 		}
 		for (int i=1; i<out->numcmds; i++) {
-			out->cmd[i] = tok.get(i);
+			out->cmd[i] = tok[i];
 		}
 	}
 	return true;
@@ -3776,16 +3777,18 @@ private:
 		KGameEdgeBuilder::parseLabel(layer->m_label_u8, &label);
 		for (int i=0; i<label.numcmds; i++) {
 			// = を境にして左右の文字列を得る
-			KToken token(label.cmd[i].u8(), "=", true, 2);
-			const char *key = token.get(0, "");
-			const char *val = token.get(1, "");
-			if (strcmp(key, "blend") == 0) {
-				KBlend tmp = KVideoUtils::strToBlend(val, KBlend_INVALID);
-				if (tmp == KBlend_INVALID) {
-					KLog::printError(u8"E_EDGE_BLEND: ブレンド指定方法が正しくありません: '%s'", label.cmd[i].u8());
-					break;
+			auto tok = K::strSplit(label.cmd[i].u8(), "=", 2);
+			if (tok.size() == 2) {
+				const std::string &key = tok[0];
+				const std::string &val = tok[1];
+				if (key.compare("blend") == 0) {
+					KBlend tmp = KVideoUtils::strToBlend(val.c_str(), KBlend_INVALID);
+					if (tmp == KBlend_INVALID) {
+						KLog::printError(u8"E_EDGE_BLEND: ブレンド指定方法が正しくありません: '%s'", label.cmd[i].u8());
+						break;
+					}
+					return tmp;
 				}
-				return tmp;
 			}
 		}
 		return KBlend_INVALID;

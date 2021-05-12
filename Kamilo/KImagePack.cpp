@@ -315,13 +315,14 @@ public:
 
 				// 空白区切りでセル番号が列挙してある
 				const char *text = xImg->getText(""); // ascii 文字だけだとわかりきっているので、文字列コード考慮しない
-				KToken tok(text);
+				auto tok = K::strSplit(text, " ");
 				K__Assert((int)tok.size() == numcells); // セル番号はセルと同じ個数だけあるはず
 				item.cells.resize(numcells);
 
 				// セル番号を得る
 				for (int i=0; i<numcells; i++) {
-					int idx = tok.toInt(i);
+					int idx = 0;
+					K::strToInt(tok[i], &idx);
 					item.cells[i] = idx;
 				}
 
