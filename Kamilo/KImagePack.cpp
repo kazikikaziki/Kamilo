@@ -199,6 +199,12 @@ public:
 				return false;
 			}
 		}
+
+		// デバッグ情報（使用セル数）
+		if (0) {
+			KOutputStream info = KOutputStream::fromFileName("___cells.txt", "ab");
+			info.writeString(K::str_sprintf("%s, %d\n", imagefile.c_str(), m_CellCount));
+		}
 		return true;
 	}
 };
