@@ -640,20 +640,20 @@ public:
 		return (int)KMath::signf(m_axis_z); // returns -1, 0, 1
 	}
 
-	virtual void setInputTrigger(const char *button) {
-		if (KStringUtils::isEmpty(button)) return;
+	virtual void setInputTrigger(const std::string &button) {
+		if (button.empty()) return;
 		m_buttons[button] = m_tirgger_timeout;
 	}
-	virtual void setInputBool(const char *button, bool pressed) {
-		if (KStringUtils::isEmpty(button)) return;
+	virtual void setInputBool(const std::string &button, bool pressed) {
+		if (button.empty()) return;
 		if (pressed) {
 			m_buttons[button] = -1;
 		} else {
 			m_buttons.erase(button);
 		}
 	}
-	virtual bool getInputBool(const char *button) {
-		if (KStringUtils::isEmpty(button)) return false;
+	virtual bool getInputBool(const std::string &button) {
+		if (button.empty()) return false;
 		return m_buttons.find(button) != m_buttons.end();
 	}
 
@@ -661,8 +661,8 @@ public:
 	/// トリガーをリセットしたくない場合は peekInputTrigger を使う。
 	/// また、即座にリセットするのではなく特定の時点までトリガーのリセットを
 	/// 先延ばしにしたい場合は beginReadTrigger() / endReadTrigger() を使う
-	virtual bool getInputTrigger(const char *button) {
-		if (KStringUtils::isEmpty(button)) return false;
+	virtual bool getInputTrigger(const std::string &button) {
+		if (button.empty()) return false;
 		auto it = m_buttons.find(button);
 		if (it != m_buttons.end()) {
 			if (m_readtrigger > 0) {

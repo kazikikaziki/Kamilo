@@ -4401,27 +4401,27 @@ public:
 					}
 					if (xElm->hasTag("Layer")) {
 						// <Layer> ノードが指定されている
-						KPath spriePath;
+						std::string spriePath;
 						if (!nosprite) {
 							{
-								const char *sprite_name = xElm->getAttrString("sprite");
-								if (KStringUtils::isEmpty(sprite_name)) {
+								std::string sprite_name = xElm->getAttrString("sprite", "");
+								if (sprite_name.empty()) {
 									KLog::printWarning(u8"E_FILELOADER_CLIPNODE: <Layer> に sprite 属性が指定されていません: %s(%d)",
 										xml_name, xElm->getLineNumber()
 									);
 								} else {
-									spriePath = KGamePath::evalPath(sprite_name ? sprite_name : "", xml_name, ".sprite");
+									spriePath = KGamePath::evalPath(sprite_name, xml_name, ".sprite").u8();
 								}
 							}
 							if (KBank::getSpriteBank()->findSprite(spriePath, false) == nullptr) {
 								KLog::printWarning(
 									u8"E_FILELOADER_CLIPNODE: 未登録のスプライト %s が指定されています。"
 									u8"<Texture> または <EdgeSprites> ノードを書き忘れていませんか？: %s(%d",
-									spriePath.u8(), xml_name, xElm->getLineNumber()
+									spriePath.c_str(), xml_name, xElm->getLineNumber()
 								);
 							}
 						}
-						builder.setSprite(pageindex, layerindex, spriePath.u8());
+						builder.setSprite(pageindex, layerindex, spriePath.c_str());
 						builder.setLabel(pageindex, layerindex, xElm->getAttrString("label"));
 						builder.setCommand(pageindex, layerindex, xElm->getAttrString("command"));
 						layerindex++;
@@ -4434,13 +4434,13 @@ public:
 					KPath spriePath;
 					if (!nosprite) {
 						{
-							const char *sprite_name = xPage->getAttrString("sprite");
-							if (KStringUtils::isEmpty(sprite_name)) {
+							std::string sprite_name = xPage->getAttrString("sprite", "");
+							if (sprite_name.empty()) {
 								KLog::printWarning(u8"E_FILELOADER_CLIPNODE: <Layer> に sprite 属性が指定されていません: %s(%d)",
 									xml_name, xPage->getLineNumber()
 								);
 							} else {
-								spriePath = KGamePath::evalPath(sprite_name ? sprite_name : "", xml_name, ".sprite");
+								spriePath = KGamePath::evalPath(sprite_name, xml_name, ".sprite");
 							}
 						}
 						if (KBank::getSpriteBank()->findSprite(spriePath, false) == nullptr) {
