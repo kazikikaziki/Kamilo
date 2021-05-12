@@ -396,9 +396,9 @@ private:
 	KTEXID on_new_texture(int w, int h) {
 		KTEXID ret = nullptr;
 		if (mTexBank) {
-			KPath texname = KPath::fromFormat("__font%04d", m_numtex);
+			std::string texname = K::str_sprintf("__font%04d", m_numtex);
 			m_numtex++;
-			ret = mTexBank->addTextureFromSize(texname.u8(), w, h);
+			ret = mTexBank->addTextureFromSize(texname, w, h);
 		}
 		return ret;
 	}
@@ -1023,13 +1023,14 @@ void Test_font(const char *dir) {
 // フォントをファミリー名でソートする
 struct Pred {
 	bool operator()(const KPlatformFonts::INFO &a, const KPlatformFonts::INFO &b) const {
-		return K::str_stricmp(a.family.u8(), b.family.u8()) < 0;
+		return K::str_stricmp(a.family.c_str(), b.family.c_str()) < 0;
 	}
 };
-KPath KPlatformFonts::getFontDirectory() {
+std::string KPlatformFonts::getFontDirectory() {
 	wchar_t dir[KPath::SIZE];
 	SHGetFolderPathW(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, dir);
-	return KPath(dir);
+	std::string s = K::strWideToUtf8(dir);
+	return K::pathNormalize(s);
 }
 int KPlatformFonts::size() const {
 	return m_list.size();
@@ -1041,11 +1042,11 @@ void KPlatformFonts::scan() {
 	m_list.clear();
 
 	// フォントフォルダ内のファイルを列挙
-	KPath font_dir = getFontDirectory();
-	std::vector<std::string> files = K::fileGetListInDir(font_dir.u8());
+	std::string font_dir = getFontDirectory();
+	std::vector<std::string> files = K::fileGetListInDir(font_dir);
 	for (auto it=files.begin(); it!=files.end(); ++it) {
-		KPath filename = font_dir.join(*it);
-		KInputStream file = KInputStream::fromFileName(filename.u8());
+		std::string filename = K::pathJoin(font_dir, *it);
+		KInputStream file = KInputStream::fromFileName(filename);
 		std::string bin = file.readBin();
 		int numfonts = KFont::getFontCollectionCount(bin.data(), bin.size());
 		for (int i=0; i<numfonts; i++) {
@@ -1098,9 +1099,13 @@ void Test_fontscan(const KPath &output_dir) {
 	for (int i=0; i<fonts.size(); i++) {
 		auto it = fonts[i];
 		if (it.tt_flags == KFont::STYLE_NONE) {
+			std::string fami_mb = K::strUtf8ToAnsi(it.family, "");
+			std::string file_mb = K::strUtf8ToAnsi(it.filename, "");
+			K::strReplace(fami_mb, "\\", "");
+			K::strReplace(file_mb, "\\", "");
 			msg_u8 += K::str_sprintf("%s : %s[%d]\n",
-				it.family.toAnsiString('\\', "").c_str(),
-				it.filename.toAnsiString('\\', "").c_str(),
+				fami_mb.c_str(),
+				file_mb.c_str(),
 				it.ttc_index
 			);
 		}

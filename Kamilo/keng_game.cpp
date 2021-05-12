@@ -26,8 +26,8 @@ namespace Kamilo {
 
 
 
-KPath KEngine::passImageName(int index) {
-	return KPath::fromFormat("(EngineRenderPass%d)", index);
+std::string KEngine::passImageName(int index) {
+	return K::str_sprintf("(EngineRenderPass%d)", index);
 }
 
 
@@ -308,7 +308,7 @@ public:
 		for (auto it=cameras.begin(); it!=cameras.end(); ++it) {
 			KNode *camera = *it;
 			if (camera == nullptr) continue;
-			KPath texname = KPath::fromFormat("_ViewTexture_%s.tex", camera->getName()); // カメラ固有のレンダーターゲット名
+			std::string texname = K::str_sprintf("_ViewTexture_%s.tex", camera->getName()); // カメラ固有のレンダーターゲット名
 			KTEXID rentex = KBank::getTextureBank()->addRenderTexture(texname, game_w, game_h, KTextureBank::F_OVERWRITE_SIZE_NOT_MATCHED|KTextureBank::F_PROTECT);
 			KCamera::of(camera)->setRenderTarget(rentex);
 		}

@@ -251,8 +251,8 @@ private:
 class KPlatformFonts {
 public:
 	struct INFO {
-		KPath family;          ///< フォントファミリー名（"ＭＳ ゴシック" "Arial"）
-		KPath filename;        ///< フォントファイル名（"arial.ttf")
+		std::string family;          ///< フォントファミリー名（"ＭＳ ゴシック" "Arial"）
+		std::string filename;        ///< フォントファイル名（"arial.ttf")
 		KFont::TrueTypeFlags tt_flags; ///< スタイルフラグ
 		int ttc_index;        ///< フォントファイルが複数のフォントを含んでいる場合、そのインデックス
 
@@ -261,7 +261,7 @@ public:
 			ttc_index = 0;
 		}
 	};
-	static KPath getFontDirectory();
+	static std::string getFontDirectory();
 	void scan();
 	int size() const;
 	const INFO & operator[](int index) const;
@@ -274,7 +274,7 @@ namespace Test {
 void Test_font(const char *dir);
 void Test_font_ex(const char *font_filename, float fontsize, const char *output_image_filename);
 void Test_font_printInfo(const char *output_dir, const char *fontpath);
-void Test_fontscan(const KPath &output_dir);
+void Test_fontscan(const std::string &output_dir);
 }
 
 } // namespace

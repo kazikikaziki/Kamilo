@@ -363,7 +363,7 @@ public:
 
 	static bool create(const KEngineDef *def);
 	static void destroy();
-	static KPath passImageName(int index); ///< 描画パスごとのレンダーテクスチャ名を得る。実際のテクスチャは KBank::getTextureBank()->findTexture で取得できる
+	static std::string passImageName(int index); ///< 描画パスごとのレンダーテクスチャ名を得る。実際のテクスチャは KBank::getTextureBank()->findTexture で取得できる
 	static void removeInvalidatedIds(); ///< 無効化マークがつけられたノードを実際に削除する
 	static void removeAllIds(); ///< 無効化マークの有無に関係なく、現在有効な全てのノードを削除する
 

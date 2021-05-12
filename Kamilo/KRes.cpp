@@ -942,8 +942,8 @@ bool KFontRes::loadFromStream(KInputStream &input, int ttc_index) {
 }
 bool KFontRes::loadFromSystemFontDirectory(const char *filename, int ttc_index) {
 	release();
-	KPath sysfont = KPlatformFonts::getFontDirectory().join(filename);
-	KFont font = KFont::createFromFileName(sysfont.u8(), ttc_index);
+	std::string sysfont = K::pathJoin(KPlatformFonts::getFontDirectory(), filename);
+	KFont font = KFont::createFromFileName(sysfont.c_str(), ttc_index);
 	return loadFromFont(font);
 }
 #pragma endregion // KFontRes
@@ -2605,8 +2605,8 @@ public:
 	}
 	virtual bool addFontFromInstalledFonts(const char *alias, const char *filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
-		KPath sysfont = KPlatformFonts::getFontDirectory().join(filename);
-		KFont font = KFont::createFromFileName(sysfont.u8(), ttc_index);
+		std::string sysfont = K::pathJoin(KPlatformFonts::getFontDirectory(), filename);
+		KFont font = KFont::createFromFileName(sysfont.c_str(), ttc_index);
 		if (font.isOpen()) {
 			if (addFont(alias, font)) {
 				if (out_font) {
@@ -2653,11 +2653,11 @@ public:
 		// フォントが全くロードされていない。
 		// システムのデフォルトフォントを取得しておく
 		if (!m_system_default_font.isOpen()) {
-			KPath name = KPlatformFonts::getFontDirectory().join("arial.ttf");
-			m_system_default_font = KFont::createFromFileName(name.u8());
+			std::string name = K::pathJoin(KPlatformFonts::getFontDirectory(), "arial.ttf");
+			m_system_default_font = KFont::createFromFileName(name.c_str());
 			if (!m_system_default_font.isOpen()) {
 				// システムフォントのロードにすら失敗した
-				KLog::printError("E_FONT: Failed to load default font: %s", name.u8());
+				KLog::printError("E_FONT: Failed to load default font: %s", name.c_str());
 			}
 		}
 		return m_system_default_font;
