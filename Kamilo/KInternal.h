@@ -170,7 +170,7 @@ public:
 	static bool strEndsWith(const char *s, const char *sub);
 	static bool strEndsWith(const std::string &s, const std::string &sub);
 	static void strTrim(std::string &s);
-	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, bool condense_delims=true, bool _trim=true, int maxcount=0, std::string *p_rest=nullptr);
+	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, int maxcount=0, bool condense_delims=true, bool _trim=true);
 	static std::vector<std::string> strSplitLines(const std::string &s, bool skip_empty_lines=true, bool _trim=true);
 	static bool strToFloat(const std::string &s, float *val);
 	static bool strToFloat(const char *s, float *val);

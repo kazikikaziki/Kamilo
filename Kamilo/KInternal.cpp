@@ -1024,8 +1024,8 @@ std::string K::pathGetFull(const std::string &s) {
 /// base から path への相対パスを得る
 std::string K::pathGetRelative(const std::string &path, const std::string &base) {
 	// パス区切り文字で区切る
-	auto tok_path = strSplit(path, "/\\", true, true, 0, nullptr);
-	auto tok_base = strSplit(base, "/\\", true, true, 0, nullptr);
+	auto tok_path = strSplit(path, "/\\", 0, true, true);
+	auto tok_base = strSplit(base, "/\\", 0, true, true);
 	int numtok_path = tok_path.size();
 	int numtok_base = tok_base.size();
 
@@ -1130,7 +1130,7 @@ bool K::pathGlob(const std::string &path, const std::string &glob) {
 	return pathGlob(path.c_str(), glob.c_str());
 }
 std::vector<std::string> K::pathSplit(const std::string &s) {
-	return strSplit(s, "\\/", true, false, 0, nullptr);
+	return strSplit(s, "\\/", 0, true, false);
 }
 bool K::pathIsRelative(const std::string &path) {
 	std::wstring wpath = K__Utf8ToWidePath(path);
@@ -1313,67 +1313,64 @@ void K::strTrim(std::string &s) {
 //		カンマと改行で区切る場合 ",\r\n"
 //		空白で区切る場合 " "
 //		空白とタブで区切る場合 " \t"
+// maxcount 分割後の最大要素数。0だと上限なし。1だと分割しない＝元の文字列そのまま。2以上を指定した場合は先頭から順番に分割しき、残った文字列は最後の要素に入る
+//      "aaa=bbb=ccc" を '=' で分割すると以下のようになる
+//      maxcount=0 ==> returns: {"aaa", "bbb", "ccc"}
+//      maxcount=1 ==> returns: {"aaa=bbb=ccc"}
+//      maxcount=2 ==> returns: {"aaa", "bbb=ccc"}
+//      maxcount=3 ==> returns: {"aaa", "bbb", "ccc"}
 // condense_delims 分割文字が連続している場合、それをまとめて一つの分割文字とするか
 //		例えばカンマ区切り文字列の場合 "aaa,,bbb" を "aaa" "" "bbb" の３要素に分割したいなら condense_delims を false にする。
 //		改行区切り文字列で "aaa\n\nbbbb" を "aaa" "bbb" の２要素に分割したいなら連続する \n をまとめて扱いたいので condense_delims を true にする
 // tirm 分割したときに前後の空白文字を取り除くか
 //		"aaa   , bbb" を分割したとき "aaa   " と " bbb" のようにしたいなら _trim=false にする。"aaa" と "bbb" にしたいなら _trim=true にする
-// maxcount 分割後の最大要素数。0だと上限なし。1だと分割しない＝元の文字列そのまま。2以上を指定した場合は、先頭から順番に分割していく。残った文字列は rest に入る
-//      "aaa=bbb=ccc" を '=' で分割すると以下のようになる
-//      maxcount=0 ==> returns: {"aaa", "bbb", "ccc"} rest: ""
-//      maxcount=1 ==> returns: {"aaa"}               rest: "bbb=ccc"
-//      maxcount=2 ==> returns: {"aaa", "bbb"}        rest: "ccc"
-//      maxcount=3 ==> returns: {"aaa", "bbb", "ccc"} rest: ""
-std::vector<std::string> K::strSplit(const std::string &str, const std::string &delims, bool condense_delims, bool _trim, int maxcount, std::string *p_rest) {
+std::vector<std::string> K::strSplit(const std::string &str, const std::string &delims, int maxcount, bool condense_delims, bool _trim) {
 	std::vector<std::string> result;
 	int s = 0; // 開始インデックス
 	int i = 0;
 	int len = str.size();
-	while (i < len) {
-		if (delims.find(str[i]) != std::string::npos) {
-			// 分割文字が見つかった or 末尾に達した
-			// [トークンを登録する]
-			// デリミタ圧縮が有効 (condense_delims) ならばトークン長さをチェック (s < p) し、
-			// 長さが 0 ならデリミタが連続しているのでトークン追加しない。
-			// デリミタ圧縮無効ならば長さチェックしない（長さが 0 であっても有効なトークンとして追加する）
-			if (!condense_delims || s<i) {
-				std::string sv = str.substr(s, i-s);
-				if (_trim) {
-					strTrim(sv);
+	if (maxcount != 1) {
+		while (i < len) {
+			if (delims.find(str[i]) != std::string::npos) {
+				// 分割文字が見つかった or 末尾に達した
+				// [トークンを登録する]
+				// デリミタ圧縮が有効 (condense_delims) ならばトークン長さをチェック (s < p) し、
+				// 長さが 0 ならデリミタが連続しているのでトークン追加しない。
+				// デリミタ圧縮無効ならば長さチェックしない（長さが 0 であっても有効なトークンとして追加する）
+				if (!condense_delims || s<i) {
+					std::string sv = str.substr(s, i-s);
+					if (_trim) {
+						strTrim(sv);
+					}
+					result.push_back(sv);
+				} 
+				// デリミタをスキップして次トークンの先頭に移動する
+				// condense_delims がセットされているならば連続するデリミタを1つの塊として扱う
+				size_t span = 1;
+				if (condense_delims) {
+					span = strspn(str.c_str()+i, delims.c_str());
 				}
-				result.push_back(sv);
-			} 
-			// デリミタをスキップして次トークンの先頭に移動する
-			// condense_delims がセットされているならば連続するデリミタを1つの塊として扱う
-			size_t span = 1;
-			if (condense_delims) {
-				span = strspn(str.c_str()+i, delims.c_str());
+				i += span;
+				s = i;
+				// 最大トークン数-1に達したら終了する
+				if (maxcount > 0 && result.size() == maxcount-1) {
+					break;
+				}
+			} else {
+				i++;
 			}
-			i += span;
-			s = i;
-			// 最大トークン数に達したら終了する
-			if (maxcount > 0 && result.size() == maxcount) {
-				break;
-			}
-		} else {
-			i++;
 		}
 	}
-
-	// 末尾トークンがまだ残っているなら、それを登録
+	// 分割されずに残った文字列を追加
 	if (s < len) {
 		// s が終端文字に達していない。
 		// 入力文字列がまだ残っている
 		std::string rest = str.substr(s, len - s);
-		if (maxcount <= 0 || (int)result.size() < maxcount) { // 最後のトークンを追加
+		if (maxcount <= 0 || (int)result.size() <= maxcount-1) { // 最後のトークンを追加
 			if (_trim) {
 				strTrim(rest);
 			}
-			if (p_rest) *p_rest = ""; // 余りなし
 			result.push_back(rest);
-		
-		} else {
-			if (p_rest) *p_rest = rest; // 最後の文字列を余り文字列としてセット
 		}
 	}
 	return result;
@@ -1981,11 +1978,78 @@ void Test_internal_path() {
 		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
 	}
 	{
-		auto tok = K::strSplit("aaa/bbb ccc/ddd", "/", true, false, 0, nullptr);
+		auto tok = K::strSplit("aaa=bbb=ccc", "=", 0);
+		K__Verify(tok.size() == 3);
+		K__Verify(tok[0] == "aaa");
+		K__Verify(tok[1] == "bbb");
+		K__Verify(tok[2] == "ccc");
+	}
+	{
+		auto tok = K::strSplit("aaa=bbb=ccc", "=", 1);
+		K__Verify(tok.size() == 1);
+		K__Verify(tok[0] == "aaa=bbb=ccc");
+	}
+	{
+		auto tok = K::strSplit("aaa=bbb=ccc", "=", 2);
+		K__Verify(tok.size() == 2);
+		K__Verify(tok[0] == "aaa");
+		K__Verify(tok[1] == "bbb=ccc");
+	}
+	{
+		auto tok = K::strSplit("aaa=bbb=ccc", "=", 3);
+		K__Verify(tok.size() == 3);
+		K__Verify(tok[0] == "aaa");
+		K__Verify(tok[1] == "bbb");
+		K__Verify(tok[2] == "ccc");
+	}
+	{
+		auto tok = K::strSplit("aaa/bbb ccc/ddd", "/", 0);
 		K__Verify(tok.size() == 3);
 		K__Verify(tok[0] == "aaa");
 		K__Verify(tok[1] == "bbb ccc");
 		K__Verify(tok[2] == "ddd");
+	}
+	{
+		auto tok = K::strSplit("aa,bb,cc,dd", "/", 3);
+		K__Verify(tok.size() == 1);
+		K__Verify(tok[0].compare("aa,bb,cc,dd") == 0);
+	}
+	{
+		auto tok = K::strSplit("aa,bb,cc,dd", ",", 3);
+		K__Verify(tok.size() == 3);
+		K__Verify(tok[0].compare("aa") == 0);
+		K__Verify(tok[1].compare("bb") == 0);
+		K__Verify(tok[2].compare("cc,dd") == 0);
+	}
+	{
+		auto tok = K::strSplit("aa,,bb,,cc,,dd", ",", 3, true);
+		K__Verify(tok.size() == 3);
+		K__Verify(tok[0].compare("aa") == 0);
+		K__Verify(tok[1].compare("bb") == 0);
+		K__Verify(tok[2].compare("cc,,dd") == 0);
+	}
+	{
+		auto tok = K::strSplit("aa,,bb,,cc,,dd", ",", 5, false);
+		K__Verify(tok.size() == 5);
+		K__Verify(tok[0].compare("aa") == 0);
+		K__Verify(tok[1].compare(""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
+		K__Verify(tok[2].compare("bb") == 0);
+		K__Verify(tok[3].compare(""  ) == 0);
+		K__Verify(tok[4].compare("cc,,dd") == 0);
+	}
+	{
+		{ std::string s="abc"; K::strReplace(s, 1, 0, "xx");   K__Verify(s == "axxbc");   }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "xx");   K__Verify(s == "axx");     }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "xxyy"); K__Verify(s == "axxyy") ;  }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "");     K__Verify(s == "a");       }
+		K__Verify(K::strStartsWith("abc", ""));
+		K__Verify(K::strStartsWith("abc", "a"));
+		K__Verify(K::strStartsWith("abc", "ab"));
+		K__Verify(K::strStartsWith("abc", "abc"));
+		K__Verify(K::strEndsWith("abc", "abc"));
+		K__Verify(K::strEndsWith("abc", "bc"));
+		K__Verify(K::strEndsWith("abc", "c"));
+		K__Verify(K::strEndsWith("abc", ""));
 	}
 	if (0) {
 		std::string dir = K::sysGetCurrentDir();
