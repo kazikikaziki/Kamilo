@@ -5056,7 +5056,7 @@ public:
 		loadFromText(raw_text.c_str(), xml_name);
 	}
 	virtual void loadFromText(const char *raw_text, const char *xml_name) override {
-		std::string xml_pp_u8 = KConv::toUtf8(raw_text);
+		std::string xml_pp_u8 = K::strBinToUtf8(raw_text);
 		if (xml_pp_u8.empty()) {
 			KLog::printError(u8"E_FILELOADER_RES: ファイルには何も記述されていません: %s", xml_name);
 			return;

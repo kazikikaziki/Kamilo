@@ -559,12 +559,8 @@ KString KString::fromAnsi(const std::string &mb, const char *_locale) {
 	std::wstring ws = K::strAnsiToWide(mb, _locale);
 	return KString::fromWide(ws);
 }
-KString KString::fromBin(const void *data, size_t size) {
-	std::wstring ws = K::strBinToWide(data, size);
-	return KString::fromWide(ws);
-}
 KString KString::fromBin(const std::string &bin) {
-	std::wstring ws = K::strBinToWide(bin.data(), bin.size());
+	std::wstring ws = K::strBinToWide(bin);
 	return KString::fromWide(ws);
 }
 KString::KString() {

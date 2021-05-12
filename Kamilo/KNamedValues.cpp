@@ -154,7 +154,7 @@ bool KNamedValues::loadFromFile(const char *filename) {
 	KInputStream file = KInputStream::fromFileName(filename);
 	if (file.isOpen()) {
 		std::string xml_bin = file.readBin();
-		std::string xml_u8 = KConv::toUtf8(xml_bin);
+		std::string xml_u8 = K::strBinToUtf8(xml_bin);
 		if (! xml_u8.empty()) {
 			success = loadFromString(xml_u8.c_str(), filename);
 		}

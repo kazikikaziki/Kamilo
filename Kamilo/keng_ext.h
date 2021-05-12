@@ -24,30 +24,6 @@
 
 namespace Kamilo {
 
-class KTextureBank;
-class KExcelFile;
-
-
-#pragma region String.h
-
-class KConv {
-public:
-	/// toWideTry と同じだが、変換結果を文字列として返す。
-	/// どの方法でも変換できなかった場合、入力データをそのまま std::wstring に拡張したものを返す
-	/// (data が char 配列であるとみなして、それぞれの要素を wchar_t に置き換えたもの）
-	static std::wstring toWide(const void *data, int size);
-	static std::wstring toWide(const std::string &data);
-	static std::string  toUtf8(const void *data, int size);
-	static std::string  toUtf8(const std::string &data);
-};
-
-
-#pragma endregion String.h
-
-
-
-
-
 
 #pragma region File.h
 
@@ -55,9 +31,6 @@ public:
 /// 実行中の環境におけるファイル操作
 class KFiles {
 public:
-	/// ファイルの最終更新日時を得る
-	static time_t getLastModificationTime(const KPath &filename);
-
 	/// dir 直下にあるファイルおよびディレクトリの名前リストを返す
 	///
 	/// 各ファイル名は dir からの相対パスの形式になっている

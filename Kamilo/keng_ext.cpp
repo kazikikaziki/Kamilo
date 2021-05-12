@@ -51,53 +51,6 @@ namespace Kamilo {
 
 
 
-#pragma region KConv
-static const size_t UTF8_BOMSIZE = 3;
-static const char * UTF8_BOM = "\xEF\xBB\xBF";
-
-static void kkstr_Error(const char *msg, const void *data, int size) {
-	KLog::printError("STRING ENCODING FAILED:");
-}
-
-std::wstring KConv::toWide(const void *data, int size) {
-	// ワイド文字への変換を試みる
-	std::wstring out = K::strBinToWide(data, size);
-	if (out.size() > 0) {
-		return out;
-	}
-	kkstr_Error("E_CONV: toWide: Failed", data, size);
-
-	// 入力バイナリを wchar_t 配列に拡張したものを返す
-	if (data && size > 0) {
-		out.resize(size, L'\0');
-		for (int i=0; i<size; i++) {
-			out[i] = ((const char *)data)[i]; // char --> wchar_t
-		}
-	}
-	return out;
-}
-std::wstring KConv::toWide(const std::string &data) {
-	return toWide(data.data(), data.size());
-}
-std::string KConv::toUtf8(const void *data, int size) {
-	// ワイド文字への変換を試みる
-	std::wstring ws = K::strBinToWide(data, size);
-	if (ws.size() > 0) {
-		return K::strWideToUtf8(ws);
-	}
-	// 入力バイナリをそのまま返す
-	return std::string((const char*)data, size);
-}
-std::string KConv::toUtf8(const std::string &data) {
-	return toUtf8(data.data(), data.size());
-}
-#pragma endregion // KConv
-
-
-
-
-
-
 
 
 #pragma region File.cpp
@@ -138,16 +91,6 @@ static bool kk_GetTimeStamp(const KPath &filename, time_t *time_cma) {
 	return st.st_mtime;
 #endif
 }
-
-
-#pragma region KFiles
-time_t KFiles::getLastModificationTime(const KPath &filename) {
-	time_t time_cma[] = {0, 0, 0};
-	KPathUtils::K_PathGetTimeStamp(filename.u8(), time_cma);
-	return time_cma[1];
-}
-#pragma endregion KFiles
-
 
 
 

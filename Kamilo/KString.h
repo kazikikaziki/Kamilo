@@ -240,7 +240,6 @@ public:
 	static KString join(const KString *list, int size, const char *sep="");
 	static KString fromWide(const std::wstring &ws);
 	static KString fromAnsi(const std::string &mb, const char *_locale="");
-	static KString fromBin(const void *data, size_t size);
 	static KString fromBin(const std::string &bin);
 public:
 	KString();

@@ -195,8 +195,8 @@ public:
 	static std::string strUtf8ToAnsi(const std::string &u8, const char *_locale);
 	static int strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale);
 	static int strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _locale_t loc);
-	static std::wstring strBinToWide(const void *data, int size);
-
+	static std::wstring strBinToWide(const std::string &bin);
+	static std::string strBinToUtf8(const std::string &bin);
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }
 	#pragma endregion // string

@@ -1780,22 +1780,22 @@ int K::strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, co
 	return num_wchars; // 0=ERROR
 }
 
-std::wstring K::strBinToWide(const void *data, int size) {
+std::wstring K::strBinToWide(const std::string &bin) {
 	// エンコード不明の文字列からワイド文字列を得る
 	// あくまでも日本語前提なので、ここでは SJIS または UTF8 が使われていると仮定する
-	if (data == nullptr || size == 0) {
+	if (bin.empty()) {
 		return std::wstring();
 	}
 
 	// BOM で始まるデータなら UTF8 で確定させる
-	if (K::strStartsWithBom(data, size)) {
-		return K::strUtf8ToWide((const char *)data);
+	if (K::strStartsWithBom(bin)) {
+		return K::strUtf8ToWide(bin);
 	}
 
 	std::wstring ws;
 
 	// 現在のロケールにおけるマルチバイト文字列として変換
-	ws = K::strAnsiToWide((const char *)data, "");
+	ws = K::strAnsiToWide(bin, "");
 	if (ws.size() > 0) {
 		return ws;
 	}
@@ -1804,19 +1804,23 @@ std::wstring K::strBinToWide(const void *data, int size) {
 	// （非日本語環境でゲームを実行しているとき、SJIS保存されたファイルをロードしようとしている場合など）
 	// SJISをUTF8として解釈できる事が多いが、UTF8をSJISとして解釈できることは少ないため、
 	// 先にSJISへの変換を試みる。入力がUTF8の場合は大体失敗してくれるはず。
-	ws = K::strAnsiToWide((const char *)data, "JPN");
+	ws = K::strAnsiToWide(bin, "JPN");
 	if (ws.size() > 0) {
 		return ws;
 	}
 
 	// BOM なしの UTF8 であると仮定して変換
-	ws = K::strUtf8ToWide((const char *)data);
+	ws = K::strUtf8ToWide(bin);
 	if (ws.size() > 0) {
 		return ws;
 	}
 
 	// どの方法でも変換できなかった
 	return std::wstring();
+}
+std::string K::strBinToUtf8(const std::string &bin) {
+	std::wstring ws = strBinToWide(bin);
+	return strWideToUtf8(ws);
 }
 #pragma endregion // string
 
