@@ -1091,7 +1091,7 @@ void KPlatformFonts::scan() {
 
 namespace Test {
 
-void Test_fontscan(const KPath &output_dir) {
+void Test_fontscan(const std::string &output_dir) {
 	KPlatformFonts fonts;
 	fonts.scan();
 
@@ -1110,7 +1110,7 @@ void Test_fontscan(const KPath &output_dir) {
 			);
 		}
 	}
-	KOutputStream output = KOutputStream::fromFileName(output_dir.join("Test_fontscan.txt").u8());
+	KOutputStream output = KOutputStream::fromFileName(K::pathJoin(output_dir, "Test_fontscan.txt"));
 	output.write(msg_u8.data(), msg_u8.size());
 }
 } // Test
