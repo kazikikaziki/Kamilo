@@ -520,11 +520,11 @@ public:
 	virtual void guiClips() const = 0;
 	virtual bool guiClip(KClipRes *clip) const = 0;
 	virtual void clearClipResources() = 0;
-	virtual void removeClipResource(const char *name) = 0;
-	virtual void removeClipResourceByTag(const char *tag) = 0;
-	virtual void addClipResource(const char *name, KClipRes *clip) = 0;
-	virtual KClipRes * getClipResource(const char *name) const = 0;
-	virtual KClipRes * find_clip(const char *clipname) = 0;
+	virtual void removeClipResource(const  std::string &name) = 0;
+	virtual void removeClipResourceByTag(const  std::string &tag) = 0;
+	virtual void addClipResource(const  std::string &name, KClipRes *clip) = 0;
+	virtual KClipRes * getClipResource(const  std::string &name) const = 0;
+	virtual KClipRes * find_clip(const  std::string &clipname) = 0;
 	virtual KPathList getClipNames() const = 0;
 };
 

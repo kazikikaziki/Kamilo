@@ -12,7 +12,7 @@ int KNamedValues::_size() const {
 void KNamedValues::_clear() {
 	m_Items.clear();
 }
-void KNamedValues::_remove(const char *name) {
+void KNamedValues::_remove(const std::string &name) {
 	int index = find(name);
 	if (index >= 0) {
 		m_Items.erase(m_Items.begin() + index);
@@ -32,17 +32,17 @@ const char * KNamedValues::_getString(int index) const {
 		return nullptr;
 	}
 }
-void KNamedValues::_setString(const char *name, const char *value) {
-	if (name && name[0]) {
+void KNamedValues::_setString(const std::string &name, const std::string &value) {
+	if (!name.empty()) {
 		int index = find(name);
 		if (index >= 0) {
-			m_Items[index].second = value ? value : "";
+			m_Items[index].second = value;
 		} else {
 			m_Items.push_back(Pair(name, value));
 		}
 	}
 }
-int KNamedValues::_find(const char *name) const {
+int KNamedValues::_find(const std::string &name) const {
 	for (int i=0; i<m_Items.size(); i++) {
 		if (m_Items[i].first.compare(name) == 0) {
 			return i;
@@ -56,7 +56,7 @@ int KNamedValues::size() const {
 void KNamedValues::clear() {
 	_clear();
 }
-void KNamedValues::remove(const char *name) {
+void KNamedValues::remove(const std::string &name) {
 	_remove(name);
 }
 KNamedValues KNamedValues::clone() const {
@@ -64,7 +64,7 @@ KNamedValues KNamedValues::clone() const {
 	nv.append(*this);
 	return nv;
 }
-bool KNamedValues::loadFromString(const char *xml_u8, const char *filename) {
+bool KNamedValues::loadFromString(const std::string &xml_u8, const std::string &filename) {
 	clear();
 
 	bool result = false;
@@ -146,10 +146,10 @@ const char * KNamedValues::getName(int index) const {
 const char * KNamedValues::getString(int index) const {
 	return _getString(index);
 }
-void KNamedValues::setString(const char *name, const char *value) {
+void KNamedValues::setString(const std::string &name, const std::string &value) {
 	_setString(name, value);
 }
-bool KNamedValues::loadFromFile(const char *filename) {
+bool KNamedValues::loadFromFile(const std::string &filename) {
 	bool success = false;
 	KInputStream file = KInputStream::fromFileName(filename);
 	if (file.isOpen()) {
@@ -161,7 +161,7 @@ bool KNamedValues::loadFromFile(const char *filename) {
 	}
 	return success;
 }
-void KNamedValues::saveToFile(const char *filename, bool pack_in_attr) const {
+void KNamedValues::saveToFile(const std::string &filename, bool pack_in_attr) const {
 	KOutputStream file = KOutputStream::fromFileName(filename);
 	if (file.isOpen()) {
 		std::string xml_u8 = saveToString(pack_in_attr);
@@ -173,24 +173,24 @@ void KNamedValues::append(const KNamedValues &nv) {
 		setString(nv.getName(i), nv.getString(i));
 	}
 }
-int KNamedValues::find(const char *name) const {
+int KNamedValues::find(const std::string &name) const {
 	return _find(name);
 }
-bool KNamedValues::contains(const char *name) const {
+bool KNamedValues::contains(const std::string &name) const {
 	return find(name) >= 0;
 }
-const char * KNamedValues::getString(const char *name, const char *defaultValue) const {
+const char * KNamedValues::getString(const std::string &name, const std::string &defaultValue) const {
 	int index = find(name);
 	if (index >= 0) {
 		return getString(index);
 	} else {
-		return defaultValue;
+		return defaultValue.c_str();
 	}
 }
-void KNamedValues::setBool(const char *name, bool value) {
+void KNamedValues::setBool(const std::string &name, bool value) {
 	setString(name, value ? "1" : "0");
 }
-bool KNamedValues::queryBool(const char *name, bool *outValue) const {
+bool KNamedValues::queryBool(const std::string &name, bool *outValue) const {
 	const char *s = getString(name);
 	if (s) {
 		assert(strcmp(s, "on" ) != 0);
@@ -203,60 +203,60 @@ bool KNamedValues::queryBool(const char *name, bool *outValue) const {
 	}
 	return false;
 }
-bool KNamedValues::getBool(const char *name, bool defaultValue) const {
+bool KNamedValues::getBool(const std::string &name, bool defaultValue) const {
 	bool result = defaultValue;
 	queryBool(name, &result);
 	return result;
 }
-void KNamedValues::setInteger(const char *name, int value) {
+void KNamedValues::setInteger(const std::string &name, int value) {
 	char s[32] = {0};
 	sprintf_s(s, sizeof(s), "%d", value);
 	setString(name, s);
 }
-bool KNamedValues::queryInteger(const char *name, int *outValue) const {
+bool KNamedValues::queryInteger(const std::string &name, int *outValue) const {
 	const char *s = getString(name);
 	if (s && KStringUtils::toIntTry(s, outValue)) {
 		return true;
 	}
 	return false;
 }
-int KNamedValues::getInteger(const char *name, int defaultValue) const {
+int KNamedValues::getInteger(const std::string &name, int defaultValue) const {
 	int result = defaultValue;
 	queryInteger(name, &result);
 	return result;
 }
-void KNamedValues::setUInt(const char *name, unsigned int value) {
+void KNamedValues::setUInt(const std::string &name, unsigned int value) {
 	char s[32] = {0};
 	sprintf_s(s, sizeof(s), "%u", value);
 	setString(name, s);
 }
-bool KNamedValues::queryUInt(const char *name, unsigned int *outValue) const {
+bool KNamedValues::queryUInt(const std::string &name, unsigned int *outValue) const {
 	const char *s = getString(name);
 	return K::strToUInt32(s, outValue);
 }
-int KNamedValues::getUInt(const char *name, unsigned int defaultValue) const {
+int KNamedValues::getUInt(const std::string &name, unsigned int defaultValue) const {
 	unsigned int result = defaultValue;
 	queryUInt(name, &result);
 	return result;
 }
-void KNamedValues::setFloat(const char *name, float value) {
+void KNamedValues::setFloat(const std::string &name, float value) {
 	char s[32] = {0};
 	sprintf_s(s, sizeof(s), "%f", value);
 	setString(name, s);
 }
-bool KNamedValues::queryFloat(const char *name, float *outValue) const {
+bool KNamedValues::queryFloat(const std::string &name, float *outValue) const {
 	const char *s = getString(name);
 	if (s && KStringUtils::toFloatTry(s, outValue)) {
 		return true;
 	}
 	return false;
 }
-float KNamedValues::getFloat(const char *name, float defaultValue) const {
+float KNamedValues::getFloat(const std::string &name, float defaultValue) const {
 	float result = defaultValue;
 	queryFloat(name, &result);
 	return result;
 }
-void KNamedValues::setFloatArray(const char *name, const float *values, int count) {
+void KNamedValues::setFloatArray(const std::string &name, const float *values, int count) {
 	std::string s;
 	if (count >= 1) {
 		s = K::str_sprintf("%g", values[0]);
@@ -266,7 +266,7 @@ void KNamedValues::setFloatArray(const char *name, const float *values, int coun
 	}
 	setString(name, s.c_str());
 }
-int KNamedValues::getFloatArray(const char *name, float *outValues, int maxout) const {
+int KNamedValues::getFloatArray(const std::string &name, float *outValues, int maxout) const {
 	const char *s = getString(name);
 	KToken tok(s, ", ");
 	if (outValues) {
@@ -280,7 +280,7 @@ int KNamedValues::getFloatArray(const char *name, float *outValues, int maxout) 
 		return (int)tok.size();
 	}
 }
-void KNamedValues::setBinary(const char *name, const void *data, int size) {
+void KNamedValues::setBinary(const std::string &name, const void *data, int size) {
 	std::string s;
 	s = K::str_sprintf("%08x:", size);
 	for (int i=0; i<size; i++) {
@@ -288,7 +288,7 @@ void KNamedValues::setBinary(const char *name, const void *data, int size) {
 	}
 	setString(name, s.c_str());
 }
-int KNamedValues::getBinary(const char *name, void *out, int maxsize) const {
+int KNamedValues::getBinary(const std::string &name, void *out, int maxsize) const {
 	const char *s = getString(name);
 
 	// コロンよりも左側の文字列を得る。データのバイト数が16進数表記されている

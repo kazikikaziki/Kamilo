@@ -787,14 +787,10 @@ KString KString::pathPopLastDelim() const {
 	return view().pathPopLastDelim();
 }
 KString KString::pathJoin(const KString &last) const {
-	char tmp[KPathUtils::MAX_SIZE] = {0};
-	KPathUtils::K_PathPushLast(tmp, sizeof(tmp), mStr, last.mStr);
-	return tmp;
+	return K::pathJoin(mStr, last.mStr);
 }
 KString KString::pathNormalized() const {
-	char tmp[KPathUtils::MAX_SIZE] = {0};
-	KPathUtils::K_PathNormalize(tmp, sizeof(tmp), mStr);
-	return tmp;
+	return K::pathNormalize(mStr);
 }
 int KString::pathCommonSize(const KString &other) const {
 	return view().pathCommonSize(other.view());

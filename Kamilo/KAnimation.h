@@ -70,9 +70,9 @@ public:
 	bool seekMainClipToMark(int mark); ///< マーカーを指定して移動
 	int findPageByMark(int mark) const; ///< 指定したマーカーがついているページを返す
 	int getMainClipPage(int *out_pageframe=nullptr) const; ///< アニメクリップを再生中の場合、そのページ番号を返す
-	bool isMainClipPlaying(const char *name_or_alias, KPath *post_next_clip=nullptr, int *post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
-	bool setMainClipName(const char *name, bool keep=false); ///< クリップ名を指定してアニメをセットする
-	bool setMainClipAlias(const char *alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
+	bool isMainClipPlaying(const std::string &name_or_alias, KPath *post_next_clip=nullptr, int *post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
+	bool setMainClipName(const std::string &name, bool keep=false); ///< クリップ名を指定してアニメをセットする
+	bool setMainClipAlias(const std::string &alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
 	bool setMainClip(KClipRes *clip, bool keep=false); ///< クリップオブジェクトを指定してアニメをセットする
 	void setMainClipCallback(KPlaybackCallback *cb); ///< アニメの再生状態に応じてコールバックが呼ばれるようにする
 	void tickTracks();
@@ -80,12 +80,12 @@ public:
 	const char * getClipNameByAlias(const KPath &alias) const;
 	void setSpeedScale(float speed, bool current_clip_only=false); ///< アニメ速度の倍率を設定する
 	float getSpeedScale() const;
-	bool getCurrentParameterBool(const char *name) const; ///< アニメクリップの Parameters タグで指定された値を得る
-	int getCurrentParameterInt(const char *name, int def=0) const;
-	float getCurrentParameterFloat(const char *name, float def=0.0f) const;
-	const char * getCurrentParameter(const char *name) const;
-	bool queryCurrentParameterInt(const char *name, int *value) const;
-	void setCurrentParameter(const char *key, const char *value);
+	bool getCurrentParameterBool(const std::string &name) const; ///< アニメクリップの Parameters タグで指定された値を得る
+	int getCurrentParameterInt(const std::string &name, int def=0) const;
+	float getCurrentParameterFloat(const std::string &name, float def=0.0f) const;
+	const char * getCurrentParameter(const std::string &name) const;
+	bool queryCurrentParameterInt(const std::string &name, int *value) const;
+	void setCurrentParameter(const std::string &key, const std::string &value);
 	const KNamedValues * getCurrentUserParameters() const;
 	KNamedValues * getCurrentUserParametersEdit();
 	const KXmlElement * getCurrentDataXml() const;

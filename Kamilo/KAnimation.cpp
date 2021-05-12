@@ -531,10 +531,10 @@ int KAnimation::getMainClipPage(int *out_pageframe) const {
 	int page = clip->getPageByFrame(frame, out_pageframe);
 	return page;
 }
-bool KAnimation::isMainClipPlaying(const char *name_or_alias, KPath *post_next_clip, int *post_next_page) const {
+bool KAnimation::isMainClipPlaying(const std::string &name_or_alias, KPath *post_next_clip, int *post_next_page) const {
 	if (m_MainPlayback->m_IsPlaying) {
 		// メインアニメ再生中
-		if (KStringUtils::isEmpty(name_or_alias)) {
+		if (name_or_alias.empty()) {
 			return true;
 		}
 
@@ -567,13 +567,13 @@ bool KAnimation::isMainClipPlaying(const char *name_or_alias, KPath *post_next_c
 /// @param name アタッチするアニメクリップの名前
 /// @param keep 既に同じアニメが設定されている場合の挙動を決める。
 ///             true なら既存のアニメがそのまま進行する。false ならリスタートする
-bool KAnimation::setMainClipName(const char *name, bool keep) {
+bool KAnimation::setMainClipName(const std::string &name, bool keep) {
 	KClipRes *clip = KBank::getAnimationBank()->find_clip(name);
 	return setMainClip(clip, keep);
 }
-bool KAnimation::setMainClipAlias(const char *alias, bool keep) {
+bool KAnimation::setMainClipAlias(const std::string &alias, bool keep) {
 	// 空文字列が指定された場合はクリップを外す
-	if (KStringUtils::isEmpty(alias)) {
+	if (alias.empty()) {
 		return setMainClip(nullptr);
 	}
 	// エイリアスから元のクリップ名を得る
@@ -693,27 +693,27 @@ void KAnimation::setSpeedScale(float speed, bool current_clip_only) {
 float KAnimation::getSpeedScale() const {
 	return m_ClipSpeed;
 }
-bool KAnimation::getCurrentParameterBool(const char *name) const {
+bool KAnimation::getCurrentParameterBool(const std::string &name) const {
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->getBool(name) : false;
 }
-int KAnimation::getCurrentParameterInt(const char *name, int def) const {
+int KAnimation::getCurrentParameterInt(const std::string &name, int def) const {
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->getInteger(name, def) : def;
 }
-float KAnimation::getCurrentParameterFloat(const char *name, float def) const {
+float KAnimation::getCurrentParameterFloat(const std::string &name, float def) const {
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->getFloat(name, def) : def;
 }
-const char * KAnimation::getCurrentParameter(const char *name) const {
+const char * KAnimation::getCurrentParameter(const std::string &name) const {
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->getString(name) : nullptr;
 }
-bool KAnimation::queryCurrentParameterInt(const char *name, int *value) const {
+bool KAnimation::queryCurrentParameterInt(const std::string &name, int *value) const {
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->queryInteger(name, value) : false;
 }
-void KAnimation::setCurrentParameter(const char *key, const char *value) {
+void KAnimation::setCurrentParameter(const std::string &key, const std::string &value) {
 	auto nv = getCurrentUserParametersEdit();
 	if (nv) nv->setString(key, value);
 }

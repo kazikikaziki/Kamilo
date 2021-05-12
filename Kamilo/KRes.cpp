@@ -2376,7 +2376,7 @@ public:
 		}
 		m_mutex.unlock();
 	}
-	virtual void addClipResource(const char *name, KClipRes *clip) override {
+	virtual void addClipResource(const std::string &name, KClipRes *clip) override {
 		if (clip == nullptr) {
 			INVALID_OPERATION;
 			return;
@@ -2385,18 +2385,18 @@ public:
 		m_mutex.lock();
 		{
 			if (m_clips.find(name) != m_clips.end()) {
-				KLog::printInfo("W_CLIP_OVERWRITE: %s", name);
+				KLog::printInfo("W_CLIP_OVERWRITE: %s", name.c_str());
 				removeClipResource(name);
 			}
 			K_assert(m_clips.find(name) == m_clips.end());
 			clip->grab();
 			m_clips[name] = clip;
-			KLog::printVerbose("ADD_CLIP: %s", name);
+			KLog::printVerbose("ADD_CLIP: %s", name.c_str());
 		}
 		m_mutex.unlock();
 
 	}
-	virtual void removeClipResource(const char *name) override {
+	virtual void removeClipResource(const std::string &name) override {
 		m_mutex.lock();
 		{
 			auto it = m_clips.find(name);
@@ -2407,7 +2407,7 @@ public:
 		}
 		m_mutex.unlock();
 	}
-	virtual void removeClipResourceByTag(const char *_tag) override {
+	virtual void removeClipResourceByTag(const std::string &_tag) override {
 		KName tag = _tag;
 		m_mutex.lock();
 		{
@@ -2423,7 +2423,7 @@ public:
 		}
 		m_mutex.unlock();
 	}
-	virtual KClipRes * getClipResource(const char *name) const override {
+	virtual KClipRes * getClipResource(const std::string &name) const override {
 		KClipRes *ret;
 		m_mutex.lock();
 		{
@@ -2433,17 +2433,17 @@ public:
 		m_mutex.unlock();
 		return ret;
 	}
-	virtual KClipRes * find_clip(const char *clipname) override {
+	virtual KClipRes * find_clip(const std::string &clipname) override {
 		// 指定されたクリップを得る。
 		// クリップ名が指定されているのに見つからなかった場合はエラーログ出す
 		KClipRes *clip = getClipResource(clipname);
-		if (!KStringUtils::isEmpty(clipname) && clip == nullptr) {
+		if (!clipname.empty() && clip == nullptr) {
 			if (clip == nullptr) {
 				KLog::printError(
 					u8"E_CLIP: アニメ '%s' はロードされていません。"
 					u8"xres のロード忘れ, xres 内での定義忘れ, "
 					u8"KAnimationBank::addClipResource での登録忘れの可能性があります",
-					clipname
+					clipname.c_str()
 				);
 			}
 		}
