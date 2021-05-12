@@ -818,7 +818,7 @@ bool KClipRes::getNextPage(int page, int mark, std::string *p_new_clip, int *p_n
 	if (key->next_mark > 0) {
 		int idx = findPageByMark(key->next_mark);
 		if (idx >= 0) {
-			*p_new_clip = idx;
+			*p_new_page = idx;
 			return true;
 		}
 		KLog::printWarning("W_ANI: No any pages marked '%d'", idx); // マークが見つからない

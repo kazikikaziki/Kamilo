@@ -21,6 +21,12 @@ private:
 		wchar_t name_w[MAX_PATH];
 		HMODULE hModule;
 		HRSRC hRsrc;
+		ITEM() {
+			name_u8[0] = 0;
+			name_w[0] = 0;
+			hModule = nullptr;
+			hRsrc = nullptr;
+		}
 	};
 	void onEnum(HMODULE module, LPCWSTR type, LPWSTR name) {
 		// https://msdn.microsoft.com/ja-jp/library/windows/desktop/ms648038(v=vs.85).aspx
