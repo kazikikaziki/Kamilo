@@ -26,19 +26,6 @@ namespace Kamilo {
 
 
 #pragma region File.h
-
-
-/// 実行中の環境におけるファイル操作
-class KFiles {
-public:
-	/// dir 直下にあるファイルおよびディレクトリの名前リストを返す
-	///
-	/// 各ファイル名は dir からの相対パスの形式になっている
-	static KPathList scanFiles(const KPath &dir);
-};
-
-
-
 typedef uint16_t chunk_id_t;
 typedef uint32_t chunk_size_t;
 
@@ -206,49 +193,6 @@ private:
 
 
 #pragma endregion // File.h
-
-
-
-#pragma region Table.h
-
-
-
-
-
-
-
-
-
-class KOrderedParameters {
-public:
-	KOrderedParameters();
-	void clear();
-	int size() const;
-	bool contains(const KPath &key) const;
-	void add(const KPath &key, const KPath &val);
-	void add(const KPath &key, int val);
-	void add(const KPath &key, float val);
-	void add(const KOrderedParameters &other);
-	bool queryString(const KPath &key, KPath *val) const;
-	bool queryInteger(const KPath &key, int *val) const;
-	bool queryFloat(const KPath &key, float *val) const;
-	bool getParameter(int index, KPath *key, KPath *val) const;
-private:
-	struct Item {
-		KPath key;
-		KPath val;
-	};
-	void _add(const Item &item);
-	const Item * _get(const KPath &key) const;
-	const Item * _at(int index) const;
-private:
-	std::vector<Item> m_items;
-	std::unordered_map<KPath, int> m_key_index_map; // Key => Table index
-};
-
-
-#pragma endregion // Table.h
-
 
 
 #pragma region KClock
