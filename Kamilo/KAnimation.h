@@ -5,7 +5,6 @@
 
 #pragma once
 #include <unordered_map>
-#include "KString.h"
 #include "KRef.h"
 
 namespace Kamilo {

@@ -6,7 +6,6 @@
 #pragma once
 #include <memory> // std::shared_ptr
 #include <vector>
-#include "KString.h"
 #include "KVideo.h"
 
 

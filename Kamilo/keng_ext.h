@@ -16,7 +16,6 @@
 #include "KLua.h"
 #include "KDebug.h"
 #include "KStorage.h"
-#include "KString.h"
 #include "KStream.h"
 #include "KImGui.h"
 #include "KLog.h"

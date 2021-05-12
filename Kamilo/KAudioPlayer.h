@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "KString.h"
+#include <string>
 
 namespace Kamilo {
 

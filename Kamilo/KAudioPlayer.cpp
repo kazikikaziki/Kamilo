@@ -7,7 +7,6 @@
 #include "KNode.h"
 #include "KSound.h"
 #include "KStorage.h"
-#include "KString.h"
 #include "KThread.h"
 #include "keng_game.h"
 

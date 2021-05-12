@@ -1,7 +1,6 @@
 ﻿#include "KImagePack.h"
 //
 #include "KVec.h"
-#include "KString.h"
 #include "KStream.h"
 #include "KXml.h"
 #include "KInternal.h"

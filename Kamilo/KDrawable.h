@@ -7,7 +7,6 @@
 #include "KRef.h"
 #include "KMath.h"
 #include "KVideo.h"
-#include "KString.h"
 #include "keng_game.h"
 
 namespace Kamilo {
