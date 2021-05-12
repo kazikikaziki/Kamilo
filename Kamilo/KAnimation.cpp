@@ -576,9 +576,9 @@ bool KAnimation::setMainClipAlias(const std::string &alias, bool keep) {
 		return setMainClip(nullptr);
 	}
 	// エイリアスから元のクリップ名を得る
-	const std::string & name = m_AliasMap[alias];
+	const std::string &name = m_AliasMap[alias];
 	if (name.empty()) {
-		KLog::printWarning("Animation alias named '%s' does not exist", alias);
+		KLog::printWarning("Animation alias named '%s' does not exist", alias.c_str());
 		return setMainClip(nullptr);
 	}
 	// 新しいクリップを設定する

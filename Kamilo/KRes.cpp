@@ -3962,7 +3962,7 @@ private:
 						}
 					}
 				}
-				KLog::printInfo("Import: %s", name);
+				KLog::printInfo("Import: %s", name.c_str());
 				return true;
 			} else {
 				return false;
@@ -3986,7 +3986,7 @@ private:
 						}
 					}
 				}
-				KLog::printInfo("Import: %s", name);
+				KLog::printInfo("Import: %s", name.c_str());
 				return true;
 			} else {
 				KLog::printError("Failed to copy: %s ==> %s", nameInData.u8(), nameInBank.u8());

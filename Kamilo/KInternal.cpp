@@ -1596,7 +1596,7 @@ std::wstring K::strUtf8ToWide(const std::string &u8) {
 	int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, nullptr, 0);
 	if (len == 0) {
 		// 副作用防止のため K__Error などではなく K__RawPrintf を使う
-		K__RawPrintf("Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
+		K__RawPrintf("!!!! Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
 		return L"";
 	}
 	ws.resize(len + 1 + 32); // MultiByteToWideChar は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
