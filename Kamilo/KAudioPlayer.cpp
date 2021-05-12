@@ -49,21 +49,21 @@ public:
 	/// @param name 登録するサウンド名
 	/// @param data サウンドデータ
 	/// @param size サウンドデータバイト数
-	void poolSound(const KPath &name, const void *data, size_t size);
+	void poolSound(const std::string &name, const void *data, size_t size);
 	/// サウンドファイルがロード済みかどうか。
 	/// このメソッドが true を返せば playPooledSound() で再生することができる
 	/// @param name サウンド名
 	/// @return ロード済みなら true
-	bool isPooled(const KPath &name);
+	bool isPooled(const std::string &name);
 	/// ロード済みのサウンドファイルを削除する
 	/// @param name サウンド名
-	void deletePooledSound(const KPath &name);
+	void deletePooledSound(const std::string &name);
 	/// ロード済みオーディオクリップを再生し、サウンドIDを返す。
 	/// @note サウンドはあらかじめ poolSound() でロードしておくこと
 	/// @param name サウンド名
 	/// @param volume 初期音量。playPooledSound を呼んでから setVolume すると、最初の音出しまでに音量設定が間に合わない可能性がある
 	/// @return 再生に成功すれば、そのサウンド ID 。失敗したら NULL
-	KSOUNDID playPooledSound(const KPath &name, float volume);
+	KSOUNDID playPooledSound(const std::string &name, float volume);
 	/// オーディオクリップをストリーミング再生する
 	/// @param data              サウンドデータ
 	/// @param size              サウンドデータバイト数
@@ -96,7 +96,7 @@ public:
 
 private:
 	std::unordered_map<KSOUNDID, KSoundPlayer::Buf> m_Sounds;
-	std::unordered_map<KPath, KSoundPlayer::Buf> m_Pool;
+	std::unordered_map<std::string, KSoundPlayer::Buf> m_Pool;
 	int m_NewId;
 	std::recursive_mutex m_Mutex; // m_Sounds, m_Pool の操作に対するロック用
 	bool m_IsInit;
@@ -150,7 +150,7 @@ void CSoundImpl::shutdown() {
 /// @param name 登録するサウンド名
 /// @param data サウンドデータ
 /// @param size サウンドデータバイト数
-void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
+void CSoundImpl::poolSound(const std::string &name, const void *data, size_t size) {
 	if (isPooled(name)) {
 		return;
 	}
@@ -162,7 +162,7 @@ void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
 			m_Pool[name] = buf;
 			return;
 		}
-		K__Error("E_FAIL_PLAY_SOUND: %s", name.u8());
+		K__Error("E_FAIL_PLAY_SOUND: %s", name.c_str());
 		return;
 	}
 
@@ -174,17 +174,17 @@ void CSoundImpl::poolSound(const KPath &name, const void *data, size_t size) {
 			m_Pool[name] = buf;
 			return;
 		}
-		K__Error("E_FAIL_PLAY_SOUND: %s", name.u8());
+		K__Error("E_FAIL_PLAY_SOUND: %s", name.c_str());
 		return;
 	}
-	K__Error("E_FAIL_LOAD_SOUND: %s", name.u8());
+	K__Error("E_FAIL_LOAD_SOUND: %s", name.c_str());
 	return;
 }
 /// サウンドファイルがロード済みかどうか。
 /// このメソッドが true を返せば playPooledSound() で再生することができる
 /// @param name サウンド名
 /// @return ロード済みなら true
-bool CSoundImpl::isPooled(const KPath &name) {
+bool CSoundImpl::isPooled(const std::string &name) {
 	K__SCOPED_LOCK;
 	auto it = m_Pool.find(name);
 	if (it != m_Pool.end()) {
@@ -194,7 +194,7 @@ bool CSoundImpl::isPooled(const KPath &name) {
 }
 /// ロード済みのサウンドファイルを削除する
 /// @param name サウンド名
-void CSoundImpl::deletePooledSound(const KPath &name) {
+void CSoundImpl::deletePooledSound(const std::string &name) {
 	K__SCOPED_LOCK;
 	m_Pool.erase(name);
 }
@@ -203,7 +203,7 @@ void CSoundImpl::deletePooledSound(const KPath &name) {
 /// @param name サウンド名
 /// @param volume 初期音量。playPooledSound を呼んでから setVolume すると、最初の音出しまでに音量設定が間に合わない可能性がある
 /// @return 再生に成功すれば、そのサウンド ID 。失敗したら NULL
-KSOUNDID CSoundImpl::playPooledSound(const KPath &name, float volume) {
+KSOUNDID CSoundImpl::playPooledSound(const std::string &name, float volume) {
 	K__SCOPED_LOCK;
 	K__Assert(!name.empty());
 	auto it = m_Pool.find(name);
@@ -404,7 +404,7 @@ void CSoundImpl::updateThreadProc() {
 class CAudioPlayer: public KManager, public KInspectorCallback {
 public:
 	struct SSndItem {
-		KPath name;   // サウンド名
+		std::string name;   // サウンド名
 		float vol;    // このサウンド固有の音量（フェードなどに左右されない値）
 		int group_id; // サウンドの所属グループ
 		bool destroy_on_stop; // 停止したら自動的に削除する？
@@ -423,7 +423,7 @@ public:
 			solo = false;
 			mute = false;
 		}
-		KPath name; // グループ名
+		std::string name; // グループ名
 		KAudioFlags flags;
 		float master_volume; // グループ音量（オプション設定などで指定する音量）
 		float volume; // グループの一時的な音量（イベント中だけ音量を下げておくなど）
@@ -560,7 +560,7 @@ public:
 			for (size_t i=0; i<m_Groups.size(); i++) {
 				SSndGroup group = m_Groups[i];
 				ImGui::Separator();
-				if (ImGui::TreeNodeEx(KImGui::KImGui_ID(i), ImGuiTreeNodeFlags_Leaf, "%s", group.name.u8())) {
+				if (ImGui::TreeNodeEx(KImGui::KImGui_ID(i), ImGuiTreeNodeFlags_Leaf, "%s", group.name.c_str())) {
 					if (ImGui::SliderFloat("Master Vol.", &group.master_volume, 0.0f, 1.0f)) {
 						setGroupMasterVolume(i, group.master_volume);
 					}
@@ -587,7 +587,7 @@ public:
 				float len_sec = m_SndImpl.getLengthSeconds(sid);
 				
 				ImGui::Separator();
-				ImGui::Text("Name: %s", it->second.name.u8());
+				ImGui::Text("Name: %s", it->second.name.c_str());
 				ImGui::Text("Pos[sec]: %0.3f/%0.3f", pos_sec, len_sec);
 
 				ImGui::PushID(sid);
@@ -721,13 +721,14 @@ public:
 		// 音量 = [マスターボリューム] * [グループ単位でのマスターボリューム(OptoinなどでBGM, SEごとに設定された音量] * [一時的なグループボリューム（フェードや演出のために一時的に音量を下げるなど）]
 		return m_MasterVolume * group.master_volume * group.volume;
 	}
-	const KPath & getGroupName(int group_id) {
+	const std::string & getGroupName(int group_id) {
+		static const std::string s_empty = "";
 		if (0 <= group_id && group_id < (int)m_Groups.size()) {
 			return m_Groups[group_id].name;
 		}
-		return KPath::Empty;
+		return s_empty;
 	}
-	void setGroupName(int group_id, const KPath &name) {
+	void setGroupName(int group_id, const std::string &name) {
 		if (0 <= group_id && group_id < (int)m_Groups.size()) {
 			m_Groups[group_id].name = name;
 		}
@@ -756,21 +757,21 @@ public:
 			}
 		}
 	}
-	KSOUNDID playStreaming(const KPath &name, bool looping, int group_id) {
+	KSOUNDID playStreaming(const std::string &name, bool looping, int group_id) {
 		if (m_MasterMute) return 0;
 
-		std::string bin = m_Storage.loadBinary(name.u8());
+		std::string bin = m_Storage.loadBinary(name);
 		if (bin.empty()) {
-			K__Error("Failed to open asset file: %s", name.u8());
+			K__Error("Failed to open asset file: %s", name.c_str());
 			return 0;
 		}
 
 		KSOUNDID snd_id = m_SndImpl.playStreamingSound(bin.data(), bin.size(), 0.0f, looping);
 		if (snd_id == 0) {
-			K__Error("playStreaming: No sound named: %s", name.u8());
+			K__Error("playStreaming: No sound named: %s", name.c_str());
 			return 0;
 		}
-		KLog::printVerbose("BGM: %s", name.u8());
+		KLog::printVerbose("BGM: %s", name.c_str());
 		float group_vol = getActualGroupVolume(group_id);
 		SSndItem snd;
 		snd.name = name;
@@ -781,12 +782,12 @@ public:
 		m_Sounds[snd_id] = snd;
 		return snd_id;
 	}
-	KSOUNDID playOneShot(const KPath &name, int group_id) {
+	KSOUNDID playOneShot(const std::string &name, int group_id) {
 		if (m_MasterMute) return 0;
 		if (! m_SndImpl.isPooled(name)) {
-			std::string bin = m_Storage.loadBinary(name.u8());
+			std::string bin = m_Storage.loadBinary(name);
 			if (bin.empty()) {
-				K__Error("Failed to open file: %s", name.u8());
+				K__Error("Failed to open file: %s", name.c_str());
 				return 0;
 			}
 			m_SndImpl.poolSound(name, bin.data(), bin.size());
@@ -794,10 +795,10 @@ public:
 		float group_vol = getActualGroupVolume(group_id);
 		KSOUNDID snd_id = m_SndImpl.playPooledSound(name, group_vol);
 		if (snd_id == 0) {
-			K__Error("playOneShot: No sound named: %s", name.u8());
+			K__Error("playOneShot: No sound named: %s", name.c_str());
 			return 0;
 		}
-		KLog::printVerbose("SE: %s", name.u8());
+		KLog::printVerbose("SE: %s", name.c_str());
 		SSndItem snd;
 		snd.name = name;
 		snd.vol = 1.0f;
@@ -955,11 +956,11 @@ float KAudioPlayer::getActualGroupVolume(int group_id) {
 	K__Assert(g_AudioPlayer);
 	return g_AudioPlayer->getActualGroupVolume(group_id);
 }
-const KPath & KAudioPlayer::getGroupName(int group_id) {
+const std::string & KAudioPlayer::getGroupName(int group_id) {
 	K__Assert(g_AudioPlayer);
 	return g_AudioPlayer->getGroupName(group_id);
 }
-void KAudioPlayer::setGroupName(int group_id, const KPath &name) {
+void KAudioPlayer::setGroupName(int group_id, const std::string &name) {
 	K__Assert(g_AudioPlayer);
 	g_AudioPlayer->setGroupName(group_id, name);
 }
@@ -987,11 +988,11 @@ void KAudioPlayer::setMuted(bool value) {
 	K__Assert(g_AudioPlayer);
 	g_AudioPlayer->setMuted(value);
 }
-KSOUNDID KAudioPlayer::playStreaming(const KPath &sound, bool looping, int group_id) {
+KSOUNDID KAudioPlayer::playStreaming(const std::string &sound, bool looping, int group_id) {
 	K__Assert(g_AudioPlayer);
 	return g_AudioPlayer->playStreaming(sound, looping, group_id);
 }
-KSOUNDID KAudioPlayer::playOneShot(const KPath &sound, int group_id) {
+KSOUNDID KAudioPlayer::playOneShot(const std::string &sound, int group_id) {
 	K__Assert(g_AudioPlayer);
 	return g_AudioPlayer->playOneShot(sound, group_id);
 }

@@ -59,10 +59,10 @@ public:
 	static float getActualGroupVolume(int group_id);
 
 	/// サウンドグループ名を得る
-	static const KPath & getGroupName(int group_id);
+	static const std::string & getGroupName(int group_id);
 
 	/// サウンドグループ名を設定する。これはログやGUIで表示するためのもの
-	static void setGroupName(int group_id, const KPath &name);
+	static void setGroupName(int group_id, const std::string &name);
 
 	/// マスター音量
 	/// この設定は全てのグループと音に影響する
@@ -79,13 +79,13 @@ public:
 	/// sound サウンドファイル名
 	/// looping 連続再生
 	/// group_id このサウンドに割り当てるグループ番号
-	static KSOUNDID playStreaming(const KPath &sound, bool looping=true, int group_id=0);
+	static KSOUNDID playStreaming(const std::string &sound, bool looping=true, int group_id=0);
 
 	/// サウンドファイルをショット再生する。
 	/// サウンドに割り当てられた識別子を返す
 	/// sound サウンドファイル名
 	/// group_id このサウンドに割り当てるグループ番号
-	static KSOUNDID playOneShot(const KPath &sound, int group_id=0);
+	static KSOUNDID playOneShot(const std::string &sound, int group_id=0);
 	
 	static void stop(KSOUNDID id, int time=0);         ///< サウンドを停止する
 	static void stopAll(int fade=0);                   ///< 再生中のサウンドをすべて止める
