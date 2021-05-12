@@ -137,9 +137,9 @@ public:
 		}
 		return dest;
 	}
-	void getMetaString(std::string *_meta) const {
-		K__Assert(_meta);
-		std::string &meta = *_meta;
+	void getMetaString(std::string *p_meta) const {
+		K__Assert(p_meta);
+		std::string &meta = *p_meta;
 		char s[256];
 		sprintf_s(s, sizeof(s), "<pack cellsize='%d' cellspace='%d' numimages='%d'>\n", m_CellSize, m_CellSpace, m_Items.size());
 		meta = s;
@@ -168,12 +168,12 @@ public:
 		}
 		meta += "</pack>\n";
 	}
-	void setExtraString(const char *data) {
+	void setExtraString(const std::string &data) {
 		m_Extra = data;
 	}
-	bool saveToFileNames(const char *imagefile, const char *metafile) const {
+	bool saveToFileNames(const std::string &imagefile, const std::string &metafile) const {
 		// パック画像を保存
-		if (!KStringUtils::isEmpty(imagefile)) {
+		if (!imagefile.empty()) {
 			KImage teximg = getPackedImage();
 			std::string png = teximg.saveToMemory(1/*FASTEST*/);
 
@@ -181,13 +181,13 @@ public:
 			if (output.isOpen()) {
 				output.write(png.data(), png.size());
 			} else {
-				K__Error("Failed to write imagefile: %s", imagefile);
+				K__Error("Failed to write imagefile: %s", imagefile.c_str());
 				return false;
 			}
 		}
 
 		// パック情報を保存
-		if (!KStringUtils::isEmpty(metafile)) {
+		if (!metafile.empty()) {
 			std::string meta;
 			getMetaString(&meta);
 
@@ -195,7 +195,7 @@ public:
 			if (output.isOpen()) {
 				output.write(meta.data(), meta.size());
 			} else {
-				K__Error("Failed to write metafile: %s", metafile);
+				K__Error("Failed to write metafile: %s", metafile.c_str());
 				return false;
 			}
 		}
@@ -218,10 +218,10 @@ void KImgPackW::setCellSize(int size, int space) {
 void KImgPackW::addImage(const KImage &img, const KImgPackExtraData *extra) {
 	m_Impl->addImage(img, extra);
 }
-bool KImgPackW::saveToFileNames(const char *imagefile, const char *metafile) const {
+bool KImgPackW::saveToFileNames(const std::string &imagefile, const std::string &metafile) const {
 	return m_Impl->saveToFileNames(imagefile, metafile);
 }
-void KImgPackW::setExtraString(const char *data) {
+void KImgPackW::setExtraString(const std::string &data) {
 	m_Impl->setExtraString(data);
 }
 KImage KImgPackW::getPackedImage() const {
@@ -230,8 +230,8 @@ KImage KImgPackW::getPackedImage() const {
 bool KImgPackW::getBestSize(int *w, int *h) const {
 	return m_Impl->getBestSize(w, h);
 }
-void KImgPackW::getMetaString(std::string *info) const {
-	m_Impl->getMetaString(info);
+void KImgPackW::getMetaString(std::string *p_meta) const {
+	m_Impl->getMetaString(p_meta);
 }
 #pragma endregion // CImgPackW
 
@@ -264,10 +264,8 @@ public:
 		m_cellspace = 0;
 		m_extra.clear();
 	}
-	bool loadFromMetaString(const char *xml_u8) {
+	bool loadFromMetaString(const std::string &xml_u8) {
 		clear();
-
-		K__Assert(xml_u8);
 
 		KXmlElement *xml = KXmlElement::createFromString(xml_u8, __FUNCTION__);
 		if (xml == NULL) {
@@ -328,7 +326,7 @@ public:
 		xml->drop();
 		return true;
 	}
-	bool loadFromMetaFileName(const char *metafilename) {
+	bool loadFromMetaFileName(const std::string &metafilename) {
 		KInputStream file = KInputStream::fromFileName(metafilename);
 		std::string text = file.readBin();
 		if (text.empty()) {
@@ -479,8 +477,8 @@ public:
 		}
 		return m_tex.data();
 	}
-	const char * getExtraString() const {
-		return m_extra.c_str();
+	const std::string & getExtraString() const {
+		return m_extra;
 	}
 };
 #pragma endregion // CImgPackR
@@ -493,10 +491,10 @@ KImgPackR::KImgPackR() {
 bool KImgPackR::empty() const {
 	return m_Impl->getImageCount() == 0;
 }
-bool KImgPackR::loadFromMetaString(const char *xml_u8) {
+bool KImgPackR::loadFromMetaString(const std::string &xml_u8) {
 	return m_Impl->loadFromMetaString(xml_u8);
 }
-bool KImgPackR::loadFromMetaFileName(const char *metafilename) {
+bool KImgPackR::loadFromMetaFileName(const std::string &metafilename) {
 	return m_Impl->loadFromMetaFileName(metafilename);
 }
 int KImgPackR::getImageCount() const {
@@ -508,7 +506,7 @@ void KImgPackR::getImageSize(int index, int *w, int *h) const {
 void KImgPackR::getImageExtra(int index, KImgPackExtraData *extra) const {
 	m_Impl->getImageExtra(index, extra);
 }
-const char * KImgPackR::getExtraString() const {
+const std::string & KImgPackR::getExtraString() const {
 	return m_Impl->getExtraString();
 }
 KImage KImgPackR::getImage(const KImage &pack_img, int index) const {

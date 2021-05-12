@@ -411,14 +411,14 @@ void KLuaBank::setStorage(KStorage &storage) {
 void KLuaBank::setCallback(KLuaBankCallback *cb) {
 	m_cb = cb;
 }
-lua_State * KLuaBank::addEmptyScript(const char *name) {
-	KLog::printDebug("LUA_BANK: new script '%s'", name);
+lua_State * KLuaBank::addEmptyScript(const std::string &name) {
+	KLog::printDebug("LUA_BANK: new script '%s'", name.c_str());
 	lua_State *ls = luaL_newstate();
 	luaL_openlibs(ls);
 	m_mutex.lock();
 	{
 		if (m_items.find(name) != m_items.end()) {
-			KLog::printWarning("W_SCRIPT_OVERWRITE: Resource named '%s' already exists. The resource data will be overwriten by new one", name);
+			KLog::printWarning("W_SCRIPT_OVERWRITE: Resource named '%s' already exists. The resource data will be overwriten by new one", name.c_str());
 			this->remove(name);
 		}
 		K_assert(m_items[name] == nullptr);
@@ -427,7 +427,7 @@ lua_State * KLuaBank::addEmptyScript(const char *name) {
 	m_mutex.unlock();
 	return ls;
 }
-lua_State * KLuaBank::findScript(const char *name) const {
+lua_State * KLuaBank::findScript(const std::string &name) const {
 	lua_State *ret;
 	m_mutex.lock();
 	{
@@ -437,22 +437,22 @@ lua_State * KLuaBank::findScript(const char *name) const {
 	m_mutex.unlock();
 	return ret;
 }
-bool KLuaBank::addScript(const char *name, const char *code, size_t size) {
-	if (KStringUtils::isEmpty(name)) {
+bool KLuaBank::addScript(const std::string &name, const std::string &code) {
+	if (name.empty()) {
 		KLog::printError("LUA_BANK: Failed to addScript. Invalid name");
 		return false;
 	}
-	if (code == nullptr || code[0] == '\0' || size == 0) {
-		KLog::printError("LUA_BANK: Failed to addScript named '%s': Invaliad code or size", name);
+	if (code.empty()) {
+		KLog::printError("LUA_BANK: Failed to addScript named '%s': Invaliad code or size", name.c_str());
 		return false;
 	}
 
 	lua_State *ls = addEmptyScript(name);
 	K_assert(ls);
 	// ロードする
-	if (luaL_loadbuffer(ls, code, size, name) != LUA_OK) {
+	if (luaL_loadbuffer(ls, code.c_str(), code.size(), name.c_str()) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
-		KLog::printError("LUA_BANK: Failed to addScript named '%s': %s", name, msg);
+		KLog::printError("LUA_BANK: Failed to addScript named '%s': %s", name.c_str(), msg);
 		this->remove(name);
 		return false;
 	}
@@ -463,13 +463,13 @@ bool KLuaBank::addScript(const char *name, const char *code, size_t size) {
 	// 再外周のチャンクを実行し、グローバル変数名や関数名を解決する
 	if (lua_pcall(ls, 0, 0, 0) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
-		KLog::printError("LUA_BANK: Failed to addScript named '%s': %s", name, msg);
+		KLog::printError("LUA_BANK: Failed to addScript named '%s': %s", name.c_str(), msg);
 		this->remove(name);
 		return false;
 	}
 	return true;
 }
-lua_State * KLuaBank::queryScript(const char *name, bool reload) {
+lua_State * KLuaBank::queryScript(const std::string &name, bool reload) {
 	// 危険。makeThread ですでに派生スレッドを作っていた場合、
 	// ここで元ステートを削除してしまうと生成済みの派生スレッドが無効になってしまう。
 	#if 1
@@ -480,20 +480,20 @@ lua_State * KLuaBank::queryScript(const char *name, bool reload) {
 
 	lua_State *ls = findScript(name);
 	if (ls == nullptr) {
-		std::string bin = m_storage.loadBinary(name);
-		if (addScript(name, bin.data(), bin.size())) {
+		std::string bin = m_storage.loadBinary(name.c_str());
+		if (addScript(name, bin)) {
 			ls = findScript(name);
 		}
 	}
 	return ls;
 }
-lua_State * KLuaBank::makeThread(const char *name) {
+lua_State * KLuaBank::makeThread(const std::string &name) {
 	lua_State *ls = queryScript(name);
 	K_assert(ls);
 	return lua_newthread(ls);
 }
 
-bool KLuaBank::contains(const char *name) const {
+bool KLuaBank::contains(const std::string &name) const {
 	bool ret;
 	m_mutex.lock();
 	{
@@ -502,14 +502,14 @@ bool KLuaBank::contains(const char *name) const {
 	m_mutex.unlock();
 	return ret;
 }
-void KLuaBank::remove(const char *name) {
+void KLuaBank::remove(const std::string &name) {
 	m_mutex.lock();
 	{
 		auto it = m_items.find(name);
 		if (it != m_items.end()) {
 			lua_State *ls = it->second;
 			lua_close(ls);
-			KLog::printDebug("LUA_BANK: remove '%s'", name);
+			KLog::printDebug("LUA_BANK: remove '%s'", name.c_str());
 			m_items.erase(it);
 		}
 	}

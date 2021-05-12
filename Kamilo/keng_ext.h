@@ -254,7 +254,7 @@ private:
 
 class KLuaBankCallback {
 public:
-	virtual void on_luabank_load(lua_State *ls, const char *name) = 0;
+	virtual void on_luabank_load(lua_State *ls, const std::string &name) = 0;
 };
 
 class KLuaBank {
@@ -265,14 +265,14 @@ public:
 	void setStorage(KStorage &storage);
 	void setCallback(KLuaBankCallback *cb);
 
-	lua_State * addEmptyScript(const char *name);
-	lua_State * findScript(const char *name) const;
-	lua_State * queryScript(const char *name, bool reload=false);
-	lua_State * makeThread(const char *name);
-	bool contains(const char *name) const;
-	void remove(const char *name);
+	lua_State * addEmptyScript(const std::string &name);
+	lua_State * findScript(const std::string &name) const;
+	lua_State * queryScript(const std::string &name, bool reload=false);
+	lua_State * makeThread(const std::string &name);
+	bool contains(const std::string &name) const;
+	void remove(const std::string &name);
 	void clear();
-	bool addScript(const char *name, const char *code, size_t size);
+	bool addScript(const std::string &name, const std::string &code);
 
 private:
 	std::unordered_map<std::string, lua_State *> m_items;

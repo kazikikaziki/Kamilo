@@ -58,10 +58,10 @@ public:
 	/// パックを保存する
 	/// imagefile: 画像ファイル名（getPackedImageで得られた画像を書き込む）
 	/// metafile:  テキストファイル名（getMetaStringで得られたテキストを書き込む）
-	bool saveToFileNames(const char *imagefile, const char *metafile) const;
+	bool saveToFileNames(const std::string &imagefile, const std::string &metafile) const;
 
 	/// ユーザー定義の拡張データ文字列を追加する
-	void setExtraString(const char *data);
+	void setExtraString(const std::string &data);
 
 	/// パッキングされた画像を得る
 	KImage getPackedImage() const;
@@ -70,7 +70,7 @@ public:
 	bool getBestSize(int *w, int *h) const;
 
 	/// メタ情報テキストを得る
-	void getMetaString(std::string *info) const;
+	void getMetaString(std::string *p_meta) const;
 
 private:
 	std::shared_ptr<CImgPackWImpl> m_Impl;
@@ -89,10 +89,10 @@ public:
 	bool empty() const;
 
 	/// KImgPackW で出力したメタファイルの内容テキストを指定して KImgPackR を作成する
-	bool loadFromMetaString(const char *xml_u8);
+	bool loadFromMetaString(const std::string &xml_u8);
 
 	/// KImgPackW で出力したメタファイル名を指定して KImgPackR を作成する
-	bool loadFromMetaFileName(const char *metafilename);
+	bool loadFromMetaFileName(const std::string &metafilename);
 
 	/// 画像数を得る
 	int getImageCount() const;
@@ -105,7 +105,7 @@ public:
 
 	/// このパック画像に関連付けられたユーザー定義の文字列を得る。
 	/// これは CImgPack::setExtraString() で指定されたものと同じ
-	const char * getExtraString() const;
+	const std::string & getExtraString() const;
 
 	/// インデックスを指定して、その画像を得る
 	/// pack_img  パックされた画像。（KImgPackW::saveToFileNames で保存した画像）
