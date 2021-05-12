@@ -793,23 +793,24 @@ int KClipRes::getLayerCount(int page) const {
 	if (page >= (int)mKeys.size()) return 0;
 	return mKeys[page].num_layers;
 }
-bool KClipRes::getNextPage(int page, int mark, KPath *new_clip, int *new_page) const {
+bool KClipRes::getNextPage(int page, int mark, std::string *p_new_clip, int *p_new_page) const {
 	K_assert(page >= 0);
-	K_assert(new_page);
+	K_assert(p_new_clip);
+	K_assert(p_new_page);
 
 	const SPRITE_KEY *key = getKey(page);
 	
 	// 行き先が負の値になっているならクリップ終了
 	if (key->next_mark < 0) {
-		*new_page = -1;
+		*p_new_page = -1;
 		return true;
 		
 	}
 
 	// 行き先クリップが指定されている場合は、クリップ終了
 	if (!key->next_clip.empty()) {
-		*new_page = 0;
-		*new_clip = key->next_clip;
+		*p_new_page = 0;
+		*p_new_clip = key->next_clip.u8();
 		return true;
 	}
 
@@ -817,7 +818,7 @@ bool KClipRes::getNextPage(int page, int mark, KPath *new_clip, int *new_page) c
 	if (key->next_mark > 0) {
 		int idx = findPageByMark(key->next_mark);
 		if (idx >= 0) {
-			*new_page = idx;
+			*p_new_clip = idx;
 			return true;
 		}
 		KLog::printWarning("W_ANI: No any pages marked '%d'", idx); // マークが見つからない

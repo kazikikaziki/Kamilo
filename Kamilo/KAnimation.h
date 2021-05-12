@@ -60,7 +60,7 @@ public:
 	KNode * getNode();
 	void clearMainClip();
 	const KClipRes * getMainClip() const; ///< アニメクリップを返す
-	KPath getMainClipName() const; ///< アニメクリップ名を返す
+	std::string getMainClipName() const; ///< アニメクリップ名を返す
 	void setMainClipSleep(int duration); ///< アニメを指定フレームの間だけ停止する
 	bool isMainClipSleep() const; ///< 一時停止中かどうか
 	void seekMainClipBegin(); ///< 先頭に移動
@@ -70,14 +70,14 @@ public:
 	bool seekMainClipToMark(int mark); ///< マーカーを指定して移動
 	int findPageByMark(int mark) const; ///< 指定したマーカーがついているページを返す
 	int getMainClipPage(int *out_pageframe=nullptr) const; ///< アニメクリップを再生中の場合、そのページ番号を返す
-	bool isMainClipPlaying(const std::string &name_or_alias, KPath *post_next_clip=nullptr, int *post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
+	bool isMainClipPlaying(const std::string &name_or_alias, std::string *p_post_next_clip=nullptr, int *p_post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
 	bool setMainClipName(const std::string &name, bool keep=false); ///< クリップ名を指定してアニメをセットする
 	bool setMainClipAlias(const std::string &alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
 	bool setMainClip(KClipRes *clip, bool keep=false); ///< クリップオブジェクトを指定してアニメをセットする
 	void setMainClipCallback(KPlaybackCallback *cb); ///< アニメの再生状態に応じてコールバックが呼ばれるようにする
 	void tickTracks();
-	void setAlias(const KPath &alias, const KPath &name);
-	const char * getClipNameByAlias(const KPath &alias) const;
+	void setAlias(const std::string &alias, const std::string &name);
+	std::string getClipNameByAlias(const std::string &alias) const;
 	void setSpeedScale(float speed, bool current_clip_only=false); ///< アニメ速度の倍率を設定する
 	float getSpeedScale() const;
 	bool getCurrentParameterBool(const std::string &name) const; ///< アニメクリップの Parameters タグで指定された値を得る
@@ -100,7 +100,7 @@ private:
 	CPlayback *m_MainPlayback; // クリップアニメの再生情報
 	float m_ClipSpeed;         // クリップアニメの再生速度 (1.0 で等倍）
 	bool m_AutoResetClipSpeed; // 現在のクリップアニメが外されたらアニメ速度を戻す
-	std::unordered_map<KPath, KPath> m_AliasMap; ///< [Alias, Clip]
+	std::unordered_map<std::string, std::string> m_AliasMap; ///< [Alias, Clip]
 };
 
 

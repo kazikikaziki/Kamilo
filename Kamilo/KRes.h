@@ -237,7 +237,7 @@ public:
 	int getPageByFrame(float frame, int *out_pageframe, int *out_pagedur=NULL) const; /// フレーム位置に対応したページ番号を返す
 	int getSpritesInPage(int page, int max_layers, KPath *layer_sprite_names) const; /// ページに含まれるスプライト名を配列で返す（レイヤーが複数枚ある場合はスプライトも複数存在するため）
 	int getLayerCount(int page) const;
-	bool getNextPage(int page, int mark, KPath *new_clip, int *new_page) const;
+	bool getNextPage(int page, int mark, std::string *p_new_clip, int *p_new_page) const;
 	void recalculateKeyTimes();
 
 	KPath mEdgeFile;

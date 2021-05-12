@@ -77,7 +77,7 @@ public:
 	KClipRes::Flags m_Flags;
 	KPlaybackCallback *m_CB;
 	KNode *m_Target;
-	KPath m_PostNextClip;
+	std::string m_PostNextClip;
 	int m_PostNextPage;
 
 
@@ -261,7 +261,7 @@ public:
 		// アニメクリップで定義されたページジャンプに従って、シーク先ページを再設定する
 		if (flags & PLAYBACKFLAG__CAN_PREDEF_SEEK) {
 			const KClipRes::SPRITE_KEY *key = m_Clip->getKey(old_page);
-			KPath jump_clip;
+			std::string jump_clip;
 			int jump_page = -1;
 			if (m_Clip->getNextPage(old_page, key->next_mark, &jump_clip, &jump_page)) {
 
@@ -470,11 +470,11 @@ void KAnimation::clearMainClip() {
 	m_MainPlayback->playbackClear(false);
 }
 const KClipRes * KAnimation::getMainClip() const {
-	const KPath &name = getMainClipName();
-	return KBank::getAnimationBank()->getClipResource(name.u8());
+	std::string name = getMainClipName();
+	return KBank::getAnimationBank()->getClipResource(name);
 }
-KPath KAnimation::getMainClipName() const {
-	if (m_MainPlayback->m_Clip == nullptr) return KPath::Empty;
+std::string KAnimation::getMainClipName() const {
+	if (m_MainPlayback->m_Clip == nullptr) return "";
 	return m_MainPlayback->m_Clip->getName();
 }
 /// アニメを指定フレームの間だけ停止する。
@@ -531,35 +531,34 @@ int KAnimation::getMainClipPage(int *out_pageframe) const {
 	int page = clip->getPageByFrame(frame, out_pageframe);
 	return page;
 }
-bool KAnimation::isMainClipPlaying(const std::string &name_or_alias, KPath *post_next_clip, int *post_next_page) const {
+bool KAnimation::isMainClipPlaying(const std::string &name_or_alias, std::string *p_post_next_clip, int *p_post_next_page) const {
 	if (m_MainPlayback->m_IsPlaying) {
 		// メインアニメ再生中
 		if (name_or_alias.empty()) {
 			return true;
 		}
 
-		const KPath &playing_clip_name = m_MainPlayback->m_Clip->getName();
+		const std::string &playing_clip_name = m_MainPlayback->m_Clip->getName();
 
 		// 名前が指定されている場合は、再生中のクリップ名も確認する
 		K_assert(m_MainPlayback->m_Clip);
 		auto it = m_AliasMap.find(name_or_alias);
 		if (it != m_AliasMap.end()) {
 			// name_or_alias はエイリアス名で指定されている
-			const KPath &clipname = it->second;
+			const std::string &clipname = it->second;
 			if (playing_clip_name.compare(clipname) == 0) {
 				return true;
 			}
 
 		} else {
 			// name_or_alias はクリップ名で指定されている
-			const KPath &clipname = name_or_alias;
-			if (playing_clip_name.compare(clipname) == 0) {
+			if (playing_clip_name.compare(name_or_alias) == 0) {
 				return true;
 			}
 		}
 	} else {
-		if (post_next_clip) *post_next_clip = m_MainPlayback->m_PostNextClip;
-		if (post_next_page) *post_next_page = m_MainPlayback->m_PostNextPage;
+		if (p_post_next_clip) *p_post_next_clip = m_MainPlayback->m_PostNextClip;
+		if (p_post_next_page) *p_post_next_page = m_MainPlayback->m_PostNextPage;
 	}
 	return false;
 }
@@ -577,13 +576,13 @@ bool KAnimation::setMainClipAlias(const std::string &alias, bool keep) {
 		return setMainClip(nullptr);
 	}
 	// エイリアスから元のクリップ名を得る
-	KPath name = m_AliasMap[alias];
+	const std::string & name = m_AliasMap[alias];
 	if (name.empty()) {
 		KLog::printWarning("Animation alias named '%s' does not exist", alias);
 		return setMainClip(nullptr);
 	}
 	// 新しいクリップを設定する
-	KClipRes *clip = KBank::getAnimationBank()->find_clip(name.u8());
+	KClipRes *clip = KBank::getAnimationBank()->find_clip(name);
 	return setMainClip(clip, keep);
 }
 bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
@@ -671,15 +670,15 @@ void KAnimation::tickTracks() {
 		}
 	}
 }
-void KAnimation::setAlias(const KPath &alias, const KPath &name) {
+void KAnimation::setAlias(const std::string &alias, const std::string &name) {
 	m_AliasMap[alias] = name;
 }
-const char * KAnimation::getClipNameByAlias(const KPath &alias) const {
+std::string KAnimation::getClipNameByAlias(const std::string &alias) const {
 	auto it = m_AliasMap.find(alias);
 	if (it != m_AliasMap.end()) {
-		return it->second.u8();
+		return it->second;
 	}
-	return nullptr;
+	return "";
 }
 /// アニメ速度の倍率を設定する。
 /// speed; アニメ速度倍率。標準値は 1.0
@@ -819,8 +818,8 @@ void KAnimation::updateInspector() {
 	KImGui::KImGui_PopTextColor();
 
 	{
-		KPath name = m_MainPlayback->m_Clip ? m_MainPlayback->m_Clip->getName() : KPath::Empty;
-		if (ImGui::TreeNode("Clip: %s", name.u8())) {
+		std::string name = m_MainPlayback->m_Clip ? m_MainPlayback->m_Clip->getName() : "";
+		if (ImGui::TreeNode("Clip: %s", name.c_str())) {
 			updateClipGui();
 			ImGui::TreePop();
 		}
@@ -839,7 +838,7 @@ void KAnimation::updateInspector() {
 	ImGui::Separator();
 	if (ImGui::TreeNode("Alias Map")) {
 		for (auto it=m_AliasMap.cbegin(); it!=m_AliasMap.cend(); ++it) {
-			ImGui::Text("%s: %s", it->first.u8(), it->second.u8());
+			ImGui::Text("%s: %s", it->first.c_str(), it->second.c_str());
 		}
 		ImGui::TreePop();
 	}
