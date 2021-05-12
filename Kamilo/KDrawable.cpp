@@ -527,7 +527,7 @@ KDrawable::KDrawable() {
 	m_group_rentex_pivot = KVec3();
 	m_group_rentex_autosize = true;
 	m_group_enabled = false;
-	m_group_rentex_name = KPath::fromFormat("_group_%d.tex", ++s_index);
+	m_group_rentex_name = K::str_sprintf("_group_%d.tex", ++s_index);
 	m_adj_snap = MO_VIDEO_ENABLE_HALF_PIXEL;
 	m_adj_half = MO_VIDEO_ENABLE_HALF_PIXEL;
 	m_node = nullptr;
@@ -663,7 +663,7 @@ void KDrawable::updateGroupRenderTextureAndMesh() {
 	KTexture *target_tex = KVideo::findTexture(KBank::getTextureBank()->findTextureRaw(m_group_rentex_name, false));
 	if (target_tex && !target_tex->isRenderTarget()) {
 		// レンダーテクスチャではない
-		KLog::printError("'%s' is not a render texture", m_group_rentex_name.u8());
+		KLog::printError("'%s' is not a render texture", m_group_rentex_name.c_str());
 		return;
 	}
 	if (target_tex == nullptr) {
@@ -742,7 +742,7 @@ void KDrawable::updateInspector() {
 				getGroupingImageSize(&ren_w, &ren_h, &piv);
 
 				KTexture *gtex = KVideo::findTexture(getGroupRenderTexture());
-				ImGui::Text("Group Tex: %s", m_group_rentex_name.u8());
+				ImGui::Text("Group Tex: %s", m_group_rentex_name.c_str());
 				if (gtex) {
 					int tex_w = gtex->getWidth();
 					int tex_h = gtex->getHeight();

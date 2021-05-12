@@ -125,10 +125,10 @@ public:
 	const KVec3 & getRenderOffset() const {
 		return m_offset;
 	}
-	const KPath & getGroupRenderTextureName() const {
+	const std::string & getGroupRenderTextureName() const {
 		return m_group_rentex_name;
 	}
-	void setGroupRenderTextureName(const KPath &name) {
+	void setGroupRenderTextureName(const std::string &name) {
 		m_group_rentex_name = name;
 	}
 	/// このレンダラーにだけ適用させる変形行列。
@@ -168,7 +168,7 @@ protected:
 
 	KTEXID m_tmp_group_rentex;
 
-	KPath m_group_rentex_name;
+	std::string m_group_rentex_name;
 	KMaterial m_group_material;
 	KMatrix4 m_group_matrix;
 	KVec3 m_group_rentex_pivot;
