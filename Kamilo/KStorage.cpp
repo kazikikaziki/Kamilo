@@ -216,13 +216,13 @@ public:
 	}
 
 	// 大小文字だけが異なる同名ファイルがあった時に警告する
-	void check_filename_case(const KPath &name) {
+	void check_filename_case(const std::string &name) {
 		if (m_PacReader.getIndexByName(name, false, false) < 0) {
 			int i = m_PacReader.getIndexByName(name, true, false);
 			if (i >= 0) {
-				KPath s = m_PacReader.getName(i);
+				std::string s = m_PacReader.getName(i);
 				K__Print(
-					u8"W_PAC_FILEANME_CASE: ファイル名 '%s' の代わりに '%s' が存在します。大小文字を間違えていませんか？", name.u8(), s.u8());
+					u8"W_PAC_FILEANME_CASE: ファイル名 '%s' の代わりに '%s' が存在します。大小文字を間違えていませんか？", name.c_str(), s.c_str());
 			}
 		}
 	}
@@ -248,7 +248,7 @@ public:
 		return m_PacReader.getCount();
 	}
 	virtual const char * getFileName(int index) override {
-		m_TmpString = m_PacReader.getName(index).u8();
+		m_TmpString = m_PacReader.getName(index);
 		return m_TmpString.c_str();
 	}
 };
@@ -389,7 +389,7 @@ public:
 	}
 	KInputStream getInputStream(const std::string &filename, bool should_exists) {
 		// 絶対パスで指定されている場合は普通のファイルとして開く
-		if (!KPath(filename).isRelative()) {
+		if (!K::pathIsRelative(filename)) {
 			KInputStream file = KInputStream::fromFileName(filename);
 			return file;
 		}

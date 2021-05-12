@@ -22,29 +22,28 @@ public:
 		m_Output = output;
 		return m_Output.isOpen();
 	}
-	virtual bool addEntryFromFileName(const KPath &entry_name, const KPath &filename) {
-		KInputStream file = KInputStream::fromFileName(filename.u8());
+	virtual bool addEntryFromFileName(const std::string &entry_name, const std::string &filename) {
+		KInputStream file = KInputStream::fromFileName(filename);
 		if (!file.isOpen()) {
-			K__Error(u8"E_PAC_WRITE: ファイル '%s' をロードできないため pac ファイルに追加しませんでした", filename.u8());
+			K__Error(u8"E_PAC_WRITE: ファイル '%s' をロードできないため pac ファイルに追加しませんでした", filename.c_str());
 			return false;
 		}
 		std::string bin = file.readBin();
 		return addEntryFromMemory(entry_name, bin.data(), bin.size());
 	}
-	bool addEntryFromMemory(const KPath &entry_name, const void *data, size_t size) {
+	bool addEntryFromMemory(const std::string &entry_name, const void *data, size_t size) {
 		
 		// エントリー名を書き込む。固定長で、XORスクランブルをかけておく
 		{
-			const char *u8 = entry_name.u8();
-			if (strlen(u8) >= PAC_MAX_LABEL_LEN) {
-				K__Error(u8"ラベル名 '%s' が長すぎます", u8);
+			if (entry_name.size() >= PAC_MAX_LABEL_LEN) {
+				K__Error(u8"ラベル名 '%s' が長すぎます", entry_name.c_str());
 				return false;
 			}
 			char label[PAC_MAX_LABEL_LEN];
 			memset(label, 0, PAC_MAX_LABEL_LEN);
-			strcpy_s(label, sizeof(label), entry_name.u8());
+			strcpy_s(label, sizeof(label), entry_name.c_str());
 			// '\0' 以降の文字は完全に無視される部分なのでダミーの乱数を入れておく
-			for (int i=strlen(u8)+1; i<PAC_MAX_LABEL_LEN; i++) {
+			for (int i=entry_name.size()+1; i<PAC_MAX_LABEL_LEN; i++) {
 				label[i] = rand() & 0xFF;
 			}
 			for (uint8_t i=0; i<PAC_MAX_LABEL_LEN; i++) {
@@ -76,7 +75,7 @@ public:
 KPacFileWriter::KPacFileWriter() {
 	m_Impl = nullptr;
 }
-KPacFileWriter KPacFileWriter::fromFileName(const char *filename) {
+KPacFileWriter KPacFileWriter::fromFileName(const std::string &filename) {
 	KOutputStream output = KOutputStream::fromFileName(filename);
 	return fromStream(output);
 }
@@ -95,13 +94,13 @@ KPacFileWriter KPacFileWriter::fromStream(KOutputStream &output) {
 bool KPacFileWriter::isOpen() {
 	return m_Impl != nullptr;
 }
-bool KPacFileWriter::addEntryFromFileName(const KPath &entry_name, const KPath &filename) {
+bool KPacFileWriter::addEntryFromFileName(const std::string &entry_name, const std::string &filename) {
 	if (m_Impl) {
 		return m_Impl->addEntryFromFileName(entry_name, filename);
 	}
 	return false;
 }
-bool KPacFileWriter::addEntryFromMemory(const KPath &entry_name, const void *data, size_t size) {
+bool KPacFileWriter::addEntryFromMemory(const std::string &entry_name, const void *data, size_t size) {
 	if (m_Impl) {
 		return m_Impl->addEntryFromMemory(entry_name, data, size);
 	}
@@ -131,7 +130,7 @@ public:
 		m_Mutex.unlock();
 		return ret;
 	}
-	int getIndexByName(const KPath &entry_name, bool ignore_case, bool ignore_path) {
+	int getIndexByName(const std::string &entry_name, bool ignore_case, bool ignore_path) {
 		int ret = 0;
 		m_Mutex.lock();
 		{
@@ -140,8 +139,8 @@ public:
 		m_Mutex.unlock();
 		return ret;
 	}
-	KPath getName(int index) {
-		KPath ret;
+	std::string getName(int index) {
+		std::string ret;
 		m_Mutex.lock();
 		{
 			ret = getName_unsafe(index);
@@ -167,7 +166,7 @@ public:
 	void seekFirst_unsafe() {
 		m_Input.seek(0);
 	}
-	bool seekNext_unsafe(KPath *name) {
+	bool seekNext_unsafe(std::string *p_name) {
 		if (m_Input.tell() >= m_Input.size()) {
 			return false;
 		}
@@ -180,17 +179,17 @@ public:
 		m_Input.read(nullptr, len); // Data
 		return true;
 	}
-	bool readFile_unsafe(KPath *name, std::string *data) {
+	bool readFile_unsafe(std::string *p_name, std::string *p_data) {
 		if (m_Input.tell() >= m_Input.size()) {
 			return false;
 		}
-		if (name) {
+		if (p_name) {
 			char s[PAC_MAX_LABEL_LEN];
 			m_Input.read(s, PAC_MAX_LABEL_LEN);
 			for (uint8_t i=0; i<PAC_MAX_LABEL_LEN; i++) {
 				s[i] = s[i] ^ i;
 			}
-			*name = KPath::fromUtf8(s);
+			*p_name = s;
 		} else {
 			m_Input.read(nullptr, PAC_MAX_LABEL_LEN);
 		}
@@ -216,17 +215,17 @@ public:
 		uint32_t flags = m_Input.readUint32();
 
 		// Read data
-		if (data) {
+		if (p_data) {
 			if (datasize_orig > 0) {
 				std::string zdata = m_Input.readBin(datasize_inpac);
-				*data = KZlib::uncompress_zlib(zdata, datasize_orig);
-				if (data->size() != datasize_orig) {
+				*p_data = KZlib::uncompress_zlib(zdata, datasize_orig);
+				if (p_data->size() != datasize_orig) {
 					K__Error("E_PAC_DATA_SIZE_NOT_MATCHED");
-					data->clear();
+					p_data->clear();
 					return false;
 				}
 			} else {
-				*data = std::string();
+				*p_data = "";
 			}
 		} else {
 			m_Input.read(nullptr, datasize_inpac);
@@ -241,22 +240,22 @@ public:
 		}
 		return num;
 	}
-	int getIndexByName_unsafe(const KPath &entry_name, bool ignore_case, bool ignore_path) {
+	int getIndexByName_unsafe(const std::string &entry_name, bool ignore_case, bool ignore_path) {
 		seekFirst_unsafe();
 		int idx = 0;
-		KPath name;
+		std::string name;
 		while (readFile_unsafe(&name, nullptr)) {
-			if (name.compare(entry_name, ignore_case, ignore_path) == 0) {
+			if (K::pathCompare(name, entry_name, ignore_case, ignore_path) == 0) {
 				return idx;
 			}
 #ifdef _DEBUG
-			if (name.compare(entry_name, true, false) == 0) { // ignore case で一致した
-				if (name.compare(entry_name, false, false) != 0) { // case sensitive で不一致になった
+			if (K::pathCompare(name, entry_name, true, false) == 0) { // ignore case で一致した
+				if (K::pathCompare(name, entry_name, false, false) != 0) { // case sensitive で不一致になった
 					K__Print(
 						u8"W_PAC_CASE_NAME: PACファイル内をファイル名 '%s' で検索中に、"
 						u8"大小文字だけが異なるファイル '%s' を発見しました。"
 						u8"これは意図した動作ですか？予期せぬ不具合の原因になるため、ファイル名の変更を強く推奨します",
-						entry_name.u8(), name.u8()
+						entry_name.c_str(), name.c_str()
 					);
 				}
 			}
@@ -265,18 +264,18 @@ public:
 		}
 		return -1;
 	}
-	KPath getName_unsafe(int index) {
+	std::string getName_unsafe(int index) {
 		seekFirst_unsafe();
 		for (int i=1; i<index; i++) {
 			if (!seekNext_unsafe(nullptr)) {
-				return KPath::Empty;
+				return "";
 			}
 		}
-		KPath name;
+		std::string name;
 		if (readFile_unsafe(&name, nullptr)) {
 			return name;
 		}
-		return KPath::Empty;
+		return "";
 	}
 	std::string getData_unsafe(int index) {
 		seekFirst_unsafe();
@@ -296,7 +295,7 @@ public:
 KPacFileReader::KPacFileReader() {
 	m_Impl = nullptr;
 }
-KPacFileReader KPacFileReader::fromFileName(const char *filename) {
+KPacFileReader KPacFileReader::fromFileName(const std::string &filename) {
 	KInputStream input = KInputStream::fromFileName(filename);
 	return fromStream(input);
 }
@@ -321,13 +320,13 @@ int KPacFileReader::getCount() {
 	}
 	return 0;
 }
-int KPacFileReader::getIndexByName(const KPath &entry_name, bool ignore_case, bool ignore_path) {
+int KPacFileReader::getIndexByName(const std::string &entry_name, bool ignore_case, bool ignore_path) {
 	if (m_Impl) {
 		return m_Impl->getIndexByName(entry_name, ignore_case, ignore_path);
 	}
 	return 0;
 }
-KPath KPacFileReader::getName(int index) {
+std::string KPacFileReader::getName(int index) {
 	if (m_Impl) {
 		return m_Impl->getName(index);
 	}

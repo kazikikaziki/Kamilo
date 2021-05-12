@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <memory>
-#include "KString.h"
+#include <string>
 
 namespace Kamilo {
 
@@ -12,13 +12,13 @@ class CPacReaderImpl; // internal
 /// ゲーム用のアーカイブファイル
 class KPacFileWriter {
 public:
-	static KPacFileWriter fromFileName(const char *filename);
+	static KPacFileWriter fromFileName(const std::string &filename);
 	static KPacFileWriter fromStream(KOutputStream &output);
 
 	KPacFileWriter();
 	bool isOpen();
-	bool addEntryFromFileName(const KPath &entry_name, const KPath &filename);
-	bool addEntryFromMemory(const KPath &entry_name, const void *data, size_t size);
+	bool addEntryFromFileName(const std::string &entry_name, const std::string &filename);
+	bool addEntryFromMemory(const std::string &entry_name, const void *data, size_t size);
 private:
 	std::shared_ptr<CPacWriterImpl> m_Impl;
 };
@@ -26,14 +26,14 @@ private:
 /// ゲーム用アーカイブファイル
 class KPacFileReader {
 public:
-	static KPacFileReader fromFileName(const char *filename);
+	static KPacFileReader fromFileName(const std::string &filename);
 	static KPacFileReader fromStream(KInputStream &input);
 
 	KPacFileReader();
 	bool isOpen();
 	int getCount();
-	int getIndexByName(const KPath &entry_name, bool ignore_case, bool ignore_path);
-	KPath getName(int index);
+	int getIndexByName(const std::string &entry_name, bool ignore_case, bool ignore_path);
+	std::string getName(int index);
 	std::string getData(int index);
 private:
 	std::shared_ptr<CPacReaderImpl> m_Impl;
