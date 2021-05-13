@@ -1108,7 +1108,7 @@ public:
 
 		// トークン[1] が modifier 番号を示している
 		int val = 0;
-		if (K::strToInt(tok[1], &val)) {
+		if (tok.size()>=2 && K::strToInt(tok[1], &val)) {
 			return val;
 		}
 		return 0;
