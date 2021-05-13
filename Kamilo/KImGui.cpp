@@ -25,14 +25,14 @@ void KImGui_HSpace(int size) {
 void KImGui_VSpace(int size) {
 	ImGui::Dummy(ImVec2(1.0f, (float)size));
 }
-bool KImGui_Combo(const char *label, int *current_item, const KPathList &items, int height_in_items) {
+bool KImGui_Combo(const std::string &label, int *current_item, const std::vector<std::string> &items, int height_in_items) {
 	std::vector<const char *> items_u8_ptr(items.size());
 	for (size_t i=0; i<items.size(); i++) {
-		items_u8_ptr[i] = items[i].u8();
+		items_u8_ptr[i] = items[i].c_str();
 	}
-	return ImGui::Combo(label, current_item, items_u8_ptr.data(), items_u8_ptr.size(), height_in_items);
+	return ImGui::Combo(label.c_str(), current_item, items_u8_ptr.data(), items_u8_ptr.size(), height_in_items);
 }
-bool KImGui_Combo(const char *label, const KPathList &pathlist, const KPath &selected, int *out_selected_index) {
+bool KImGui_Combo(const std::string &label, const std::vector<std::string> &pathlist, const std::string &selected, int *out_selected_index) {
 	if (pathlist.empty()) return false;
 	int sel = -1;
 	for (size_t i=0; i<pathlist.size(); i++) {
@@ -110,7 +110,7 @@ void KImGui_Image(KTEXID texid, ImgParams *_p) {
 		KImGui_SetFilterLinear();
 	}
 }
-void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &filename, bool alphamask) {
+void KImGui_ImageExportButton(const char *label, KTEXID texid, const std::string &filename, bool alphamask) {
 	// テクスチャ画像を png でエクスポートする
 	if (ImGui::Button(label)) {
 		KTexture *tex = KVideo::findTexture(texid);
@@ -118,18 +118,17 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const KPath &file
 		if (!img.empty()) {
 			std::string png = img.saveToMemory();
 			
-			KOutputStream output = KOutputStream::fromFileName(filename.u8());
+			KOutputStream output = KOutputStream::fromFileName(filename);
 			output.write(png.data(), png.size());
 
-			K__Print("Export texture image %s", filename.u8());
+			K__Print("Export texture image %s", filename.c_str());
 		}
 	}
-	if (K::pathExists(filename.u8())) {
+	if (K::pathExists(filename)) {
 		ImGui::SameLine();
-		char s[256];
-		sprintf_s(s, sizeof(s), "Open: %s", filename.u8());
-		if (ImGui::Button(s)) {
-			K::fileShellOpen(filename.u8());
+		std::string s = K::str_sprintf("Open: %s", filename.c_str());
+		if (ImGui::Button(s.c_str())) {
+			K::fileShellOpen(filename);
 		}
 	}
 }
@@ -797,8 +796,7 @@ ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_p
 ///    デバッグモードでシーンを切り替えたり、リロードを実行したりしても、
 ///    フォントデータだけは最初にロードしたものをずっと使い続ける。
 ///
-ImFont * KImGui_AddFontFromFileTTF(const char *filename_u8, int ttc_index, float size_pixels) {
-	assert(filename_u8 >= 0);
+ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels) {
 	assert(ttc_index >= 0);
 	assert(size_pixels > 0);
 
@@ -812,7 +810,7 @@ ImFont * KImGui_AddFontFromFileTTF(const char *filename_u8, int ttc_index, float
 
 	// フォント追加
 	const ImWchar *kanji = KImGui__GetKanjiTable();
-	return ImGui::GetIO().Fonts->AddFontFromFileTTF(filename_u8, size_pixels, &conf, kanji);
+	return ImGui::GetIO().Fonts->AddFontFromFileTTF(filename_u8.c_str(), size_pixels, &conf, kanji);
 }
 
 /// Dear ImGui と Window, DirectX を連携させる。

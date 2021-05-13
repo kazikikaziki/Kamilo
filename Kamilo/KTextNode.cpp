@@ -1548,16 +1548,16 @@ void KTextDrawable::onDrawable_inspector() {
 		}
 	}
 	{
-		KPathList list = KBank::getFontBank()->getFontNames();
+		std::vector<std::string> list = KBank::getFontBank()->getFontNames();
 		if (list.size() > 0) {
 			int sel = -1;
 			for (size_t i=0; i<list.size(); i++) {
-				if (KBank::getFontBank()->getFont(list[i].u8()) == m_tb_font) {
+				if (KBank::getFontBank()->getFont(list[i]) == m_tb_font) {
 					sel = i;
 				}
 			}
 			if (KImGui::KImGui_Combo("Font", &sel, list)) {
-				m_tb_font = KBank::getFontBank()->getFont(list[sel].u8());
+				m_tb_font = KBank::getFontBank()->getFont(list[sel]);
 				updateTextMesh();
 			}
 		}

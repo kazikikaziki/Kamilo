@@ -7,7 +7,6 @@
 #include "imgui/imgui.h"
 
 #include "KVideo.h"
-#include "KString.h"
 
 namespace Kamilo {
 
@@ -47,12 +46,12 @@ namespace KImGui {
 	const ImVec4 KImGui_COLOR_ERROR  (1.0f, 0.5f, 0.5f, 1.0f); // エラー色
 
 	bool KImGui_ButtonRepeat(const char *label, ImVec2 size=ImVec2(0, 0));
-	bool KImGui_Combo(const char *label, int *current_item, const KPathList &items, int height_in_items=-1);
-	bool KImGui_Combo(const char *label, const KPathList &pathlist, const KPath &selected, int *out_selected_index);
+	bool KImGui_Combo(const std::string &label, int *current_item, const std::vector<std::string> &items, int height_in_items=-1);
+	bool KImGui_Combo(const std::string &label, const std::vector<std::string> &pathlist, const std::string &selected, int *out_selected_index);
 	int  KImGui_FontCount();
 	void KImGui_Image(KTEXID tex, ImgParams *p);
 	void KImGui_Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0 = ImVec2(0,0), const ImVec2& uv1 = ImVec2(1,1), const ImVec4& tint_col = ImVec4(1,1,1,1), const ImVec4& border_col = ImVec4(0,0,0,0));
-	void KImGui_ImageExportButton(const char *label, KTEXID tex, const KPath &filename, bool alphamask);
+	void KImGui_ImageExportButton(const char *label, KTEXID tex, const std::string &filename, bool alphamask);
 	void KImGui_HSpace(int size);
 	void KImGui_PushFont(int index);// index: an index of ImFont in ImGui::GetIO().Fonts->Fonts
 	void KImGui_PopFont();
@@ -67,7 +66,7 @@ namespace KImGui {
 	void KImGui_BeginRender();
 	void KImGui_EndRender();
 	ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_pixels);
-	ImFont * KImGui_AddFontFromFileTTF(const char *filename_u8, int ttc_index, float size_pixels);
+	ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels);
 	void KImGui_SetFilterPoint(); // ImGui::Image のフィルターを POINT に変更
 	void KImGui_SetFilterLinear(); // ImGui::Image のフィルターを LINEAR に変更
 	void KImGui_PushTextColor(const ImVec4 &col);

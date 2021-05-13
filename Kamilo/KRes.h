@@ -341,8 +341,8 @@ public:
 	virtual KPath getTextureName(KTEXID tex) const = 0;
 
 	virtual int getTextureCount() = 0;
-	virtual KPathList getTextureNameList() = 0;
-	virtual KPathList getRenderTextureNameList() = 0;
+	virtual std::vector<std::string> getTextureNameList() = 0;
+	virtual std::vector<std::string> getRenderTextureNameList() = 0;
 
 	virtual void clearTextures(bool remove_protected_textures=false) = 0;
 	virtual void removeTexture(const KPath &name) = 0;
@@ -424,7 +424,7 @@ class KShaderBank {
 public:
 	virtual ~KShaderBank() {}
 	virtual KPath getShaderName(KSHADERID shader) const = 0;
-	virtual KPathList getShaderNameList() const = 0;
+	virtual std::vector<std::string> getShaderNameList() const = 0;
 	virtual void addShader(const KPath &name, KShaderAuto shader) = 0;
 
 	/// HLSL で定義されたシェーダーを追加する
@@ -510,7 +510,7 @@ public:
 	virtual KFont getDefaultFont() const = 0;
 
 	/// ロード済みの内部フォント一覧を得る
-	virtual const KPathList & getFontNames() const = 0;
+	virtual const std::vector<std::string> & getFontNames() const = 0;
 
 	/// フォントが見つからなかった場合に使う代替フォントを指定する。
 	/// このフォントは既に addFont で追加済みでなければならない。

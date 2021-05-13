@@ -968,27 +968,27 @@ public:
 	virtual int getTextureCount() override { 
 		return (int)m_items.size();
 	}
-	virtual KPathList getTextureNameList() override {
-		KPathList names;
+	virtual std::vector<std::string> getTextureNameList() override {
+		std::vector<std::string> names;
 		m_mutex.lock();
 		{
 			names.reserve(m_items.size());
 			for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
-				names.push_back(it->first);
+				names.push_back(it->first.u8());
 			}
 			std::sort(names.begin(), names.end());
 		}
 		m_mutex.unlock();
 		return names;
 	}
-	virtual KPathList getRenderTextureNameList() override {
-		KPathList names;
+	virtual std::vector<std::string> getRenderTextureNameList() override {
+		std::vector<std::string> names;
 		m_mutex.lock();
 		{
 			for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
 				KAutoRef<KTextureRes> texres = it->second;
 				if (texres->mIsRenderTex) {
-					names.push_back(texres->mName);
+					names.push_back(texres->mName.u8());
 				}
 			}
 			std::sort(names.begin(), names.end());
@@ -1418,13 +1418,15 @@ public:
 		}
 		if (1) {
 			// テクスチャ画像を png でエクスポートする
-			KPath filename = KPath::fromFormat("__export__%s.png", KGamePath::escapeFileName(texname).u8());
-			KImGui::KImGui_ImageExportButton("Export", texid, filename.getFullPath(), false);
+			std::string filename = K::str_sprintf("__export__%s.png", KGamePath::escapeFileName(texname).u8());
+			std::string fullname = K::pathGetFull(filename);
+			KImGui::KImGui_ImageExportButton("Export", texid, fullname.c_str(), false);
 		}
 		if (1) {
 			// テクスチャ画像のアルファマスクを png でエクスポートする
-			KPath filename = KPath::fromFormat("__export__%s_a.png", KGamePath::escapeFileName(texname).u8());
-			KImGui::KImGui_ImageExportButton("Export Alpha", texid, filename.getFullPath(), true);
+			std::string filename = K::str_sprintf("__export__%s_a.png", KGamePath::escapeFileName(texname).u8());
+			std::string fullname = K::pathGetFull(filename);
+			KImGui::KImGui_ImageExportButton("Export Alpha", texid, fullname.c_str(), true);
 		}
 		ImGui::PopID();
 	}
@@ -1474,17 +1476,16 @@ public:
 			static char s_filter[256] = {0};
 			ImGui::InputText("Filter", s_filter, sizeof(s_filter));
 
-			KPathList allnames = getTextureNameList();
+			std::vector<std::string> allnames = getTextureNameList();
 
 			// 名前リスト
-			KPathList names;
+			std::vector<std::string> names;
 			names.reserve(allnames.size());
 			if (s_filter[0]) {
 				// フィルターあり。
 				// 部分一致したものだけリストに入れる
 				for (auto it=allnames.cbegin(); it!=allnames.cend(); ++it) {
-					const char *s = it->u8();
-					if (K::strFind(it->u8(), s_filter) >= 0) {
+					if (K::strFind(*it, s_filter) >= 0) {
 						names.push_back(*it);
 					}
 				}
@@ -1533,11 +1534,11 @@ public:
 	}
 	virtual bool guiTextureSelector(const char *label, const KPath &selected, KPath *new_selected) override {
 		// ソート済みのアイテム名リストを得る
-		KPathList names = getTextureNameList();
+		std::vector<std::string> names = getTextureNameList();
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 		//
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected, &sel_index)) {
+		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -1549,11 +1550,11 @@ public:
 	}
 	virtual bool guiRenderTextureSelector(const char *label, const KPath &selected, KPath *new_selected) override {
 		// ソート済みのアイテム名リストを得る
-		KPathList names = getRenderTextureNameList();
+		std::vector<std::string> names = getRenderTextureNameList();
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 		//
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected, &sel_index)) {
+		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -2161,12 +2162,12 @@ public:
 		m_mutex.unlock();
 		return name;
 	}
-	virtual KPathList getShaderNameList() const override {
-		KPathList names;
+	virtual std::vector<std::string> getShaderNameList() const override {
+		std::vector<std::string> names;
 		{
 			names.reserve(m_items.size());
 			for (auto it=m_items.cbegin(); it!=m_items.cend(); ++it) {
-				names.push_back(it->first);
+				names.push_back(it->first.u8());
 			}
 			std::sort(names.begin(), names.end());
 		}
@@ -2344,11 +2345,11 @@ public:
 	virtual bool guiShaderSelector(const char *label, const KPath &selected, KPath *new_selected) override {
 		#ifndef NO_IMGUI
 		// ソート済みのアイテム名リストを得る
-		KPathList names = getShaderNameList();
+		std::vector<std::string> names = getShaderNameList();
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected, &sel_index)) {
+		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -2539,7 +2540,7 @@ public:
 
 #pragma region CFontBankImpl
 class CFontBankImpl: public KFontBank {
-	mutable std::unordered_map<KPath, KFont> m_fonts;
+	mutable std::unordered_map<std::string, KFont> m_fonts;
 
 	// デフォルトフォント。
 	// フォントが全くロードされていない時でも利用可能なフォント。
@@ -2549,8 +2550,8 @@ class CFontBankImpl: public KFontBank {
 	// フォールバックフォント。
 	// 指定されたフォントが見つからない場合に使う代替フォント名。
 	// （フォント名は getFont で指定されたもの）
-	KPath m_fallback_name;
-	KPathList m_fontnames;
+	std::string m_fallback_name;
+	std::vector<std::string> m_fontnames;
 public:
 	CFontBankImpl() {
 	}
@@ -2635,7 +2636,7 @@ public:
 			}
 		}
 	}
-	virtual const KPathList & getFontNames() const override {
+	virtual const std::vector<std::string> & getFontNames() const override {
 		return m_fontnames;
 	}
 	virtual KFont getDefaultFont() const override {
@@ -2877,10 +2878,10 @@ private:
 			if (ImGui::Button("Clear")) {
 				m_shaderbank.clearShaders();
 			}
-			KPathList names = m_shaderbank.getShaderNameList();
+			std::vector<std::string> names = m_shaderbank.getShaderNameList();
 			for (auto it=names.cbegin(); it!=names.cend(); ++it) {
-				const KPath &name = *it;
-				if (ImGui::TreeNode(name.u8())) {
+				const std::string &name = *it;
+				if (ImGui::TreeNode(name.c_str())) {
 					KSHADERID shader = m_shaderbank.findShader(name, false);
 					gui_shader_info(shader);
 					ImGui::TreePop();
