@@ -1514,6 +1514,13 @@ int K::str_stricmp(const char *s, const char *t) {
 	return strcasecmp(s, t);
 	#endif
 }
+int K::str_stricmp(const std::string &s, const std::string &t) {
+	#ifdef _WIN32
+	return _stricmp(s.c_str(), t.c_str());
+	#else
+	return strcasecmp(s.c_str(), t.c_str());
+	#endif
+}
 std::string K::str_vsprintf(const char *fmt, va_list args) {
 	// 長さ取得
 	int len = 0;

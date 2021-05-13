@@ -955,7 +955,7 @@ bool KFontRes::loadFromSystemFontDirectory(const char *filename, int ttc_index) 
 #pragma region CTextureBankImpl
 #define NAME_SEPARATOR  '&'
 class CTextureBankImpl: public KTextureBank {
-	std::unordered_map<KPath, KAutoRef<KTextureRes>> m_items;
+	std::unordered_map<std::string, KAutoRef<KTextureRes>> m_items;
 	mutable std::recursive_mutex m_mutex;
 public:
 	CTextureBankImpl() {
@@ -974,7 +974,7 @@ public:
 		{
 			names.reserve(m_items.size());
 			for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
-				names.push_back(it->first.u8());
+				names.push_back(it->first);
 			}
 			std::sort(names.begin(), names.end());
 		}
@@ -1025,7 +1025,7 @@ public:
 	}
 	virtual void removeTexture(const KPath &name) override {
 		m_mutex.lock();
-		auto it = m_items.find(name);
+		auto it = m_items.find(name.u8());
 		if (it != m_items.end()) {
 			it->second->release();
 			m_items.erase(it);
@@ -1034,7 +1034,7 @@ public:
 	}
 	virtual bool hasTexture(const KPath &name) const override {
 		m_mutex.lock();
-		bool ret = m_items.find(name) != m_items.end();
+		bool ret = m_items.find(name.u8()) != m_items.end();
 		m_mutex.unlock();
 		return ret;
 	}
@@ -1067,7 +1067,7 @@ public:
 		}
 		KTEXID ret = nullptr;
 		m_mutex.lock();
-		auto it = m_items.find(name);
+		auto it = m_items.find(name.u8());
 		if (it != m_items.end()) {
 			ret = it->second->mTexId;
 		} else if (should_exist) {
@@ -1076,11 +1076,11 @@ public:
 			// それで見つかった場合、名前の指定を間違えている可能性がある
 			KPath probably;
 			for (auto it2=m_items.begin(); it2!=m_items.end(); it2++) {
-				if (it2->first.endsWithPath(name)) {
+				if (K::pathEndsWith(it2->first, name.u8())) {
 					probably = it2->first;
 					break;
 				}
-				if (_stricmp(it2->first.u8(), name.u8())==0) {
+				if (K::str_stricmp(it2->first, name.u8())==0) {
 					probably = it2->first;
 					break;
 				}
@@ -1114,10 +1114,10 @@ public:
 		return 0;
 	}
 	virtual void clearTextureModifierCaches() override {
-		KPathList texnames;
+		std::vector<std::string> texnames;
 		m_mutex.lock();
 		for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
-			const KPath &name = it->first;
+			const std::string &name = it->first;
 			if (getTextureModifier(name)) {
 				texnames.push_back(name); // 削除対象
 			}
@@ -1129,10 +1129,10 @@ public:
 		}
 	}
 	virtual void clearTextureModifierCaches(int modifier_start, int count) override {
-		KPathList texnames;
+		std::vector<std::string> texnames;
 		m_mutex.lock();
 		for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
-			const KPath &name = it->first;
+			const std::string &name = it->first;
 			int mod = getTextureModifier(name);
 			if (getTextureModifier(name)) {
 				if (modifier_start <= mod && mod < modifier_start + count) {
@@ -1192,7 +1192,7 @@ public:
 			m_mutex.lock();
 			{
 				// 同名のテクスチャが存在する場合には無条件で上書きする
-				if (m_items.find(name) != m_items.end()) {
+				if (m_items.find(name.u8()) != m_items.end()) {
 					KLog::printWarning("W_TEXTURE_OVERWRITE: Texture named '%s' already exists. The texture is overritten by new one", name.u8());
 					removeTexture(name);
 				}
@@ -1203,7 +1203,7 @@ public:
 					(flags & F_PROTECT)!=0
 				);
 				texres->setName(name);
-				m_items[name] = texres;
+				m_items[name.u8()] = texres;
 			}
 			m_mutex.unlock();
 			return texres->mTexId;
@@ -1213,7 +1213,7 @@ public:
 			KTEXID tex = nullptr;
 
 			m_mutex.lock();
-			auto it = m_items.find(name);
+			auto it = m_items.find(name.u8());
 			if (it==m_items.end() || it->second->mTexId==nullptr) {
 				//
 				// 同名のテクスチャはまだ存在しない
@@ -1226,7 +1226,7 @@ public:
 					(flags & F_PROTECT)!=0
 				);
 				texres->setName(name);
-				m_items[name] = texres;
+				m_items[name.u8()] = texres;
 				tex = texres->mTexId;
 
 			} else {
@@ -1248,7 +1248,7 @@ public:
 							(flags & F_PROTECT)!=0
 						);
 						texres->setName(name);
-						m_items[name] = texres;
+						m_items[name.u8()] = texres;
 						tex = texres->mTexId;
 					
 					} else {
@@ -1273,7 +1273,7 @@ public:
 							(flags & F_PROTECT)!=0
 						);
 						texres->setName(name);
-						m_items[name] = texres;
+						m_items[name.u8()] = texres;
 						tex = texres->mTexId;
 
 					} else {
@@ -1303,7 +1303,7 @@ public:
 		}
 		KTEXID tex = nullptr;
 		m_mutex.lock();
-		auto it = m_items.find(name);
+		auto it = m_items.find(name.u8());
 		if (it!=m_items.end() && it->second->mTexId!=nullptr) {
 			KAutoRef<KTextureRes> &texres = it->second;
 			if (texres->mIsRenderTex) {
@@ -1321,7 +1321,7 @@ public:
 			texres.make();
 			texres->loadEmptyTexture(w, h);
 			texres->setName(name);
-			m_items[name] = texres;
+			m_items[name.u8()] = texres;
 			tex = texres->mTexId;
 		}
 		m_mutex.unlock();

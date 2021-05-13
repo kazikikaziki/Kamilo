@@ -181,6 +181,7 @@ public:
 	static bool strToUInt32(const char *s, uint32_t *val);
 	static bool strToUInt64(const char *s, uint64_t *val);
 	static int str_stricmp(const char *s, const char *t); ///< _stricmp, strcasecmp
+	static int str_stricmp(const std::string &s, const std::string &t);
 	static char * str_strptime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale); ///< strptime の代替関数
 	static std::string str_vsprintf(const char *fmt, va_list args);
 	static std::string str_sprintf(const char *fmt, ...);
