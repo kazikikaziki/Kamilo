@@ -206,16 +206,21 @@ int KLogFile::findSeparatorByIndex(const char *text, size_t size, int index) {
 KLogConsole::KLogConsole() {
 	m_Stdout = nullptr;
 }
-bool KLogConsole::open() {
+bool KLogConsole::open(bool no_taskbar) {
 	close();
 	#ifndef _CONSOLE
 	AllocConsole();
-	if (0) {
+	if (no_taskbar) {
 		// コンソールウィンドウがタスクバーに出ないようにする
 		std::string title = K::str_sprintf("%s (#%d)", K::sysGetCurrentExecName().c_str(), K::sysGetCurrentProcessId());
 		SetConsoleTitleA(title.c_str()); // プロセスIDを含めたユニークなタイトルを用意して設定する
-		Sleep(20); // 確実に更新されるまで待つ
-		HWND hWnd = FindWindowA(NULL, title.c_str()); // タイトルをもとにしてコンソールウィンドウを探す
+		int timeout = 60;
+		uint32_t msec = K::clockMsec32();
+		HWND hWnd = NULL;
+		while (hWnd == NULL && K::clockMsec32() < msec + timeout) {
+			hWnd = FindWindowA(NULL, title.c_str()); // タイトルをもとにしてコンソールウィンドウを探す
+			Sleep(10);
+		}
 		SetWindowLongA(hWnd, GWL_EXSTYLE, WS_EX_TOOLWINDOW); // ツールウィンドウ用のウィンドウスタイルを適用する
 	}
 	freopen_s(&m_Stdout, "CON", "w", stdout);
@@ -631,12 +636,12 @@ public:
 		m_Callback = cb;
 		threadUnlock();
 	}
-	void setConsoleEnabled(bool enabled) {
+	void setConsoleEnabled(bool enabled, bool no_taskbar) {
 		threadLock();
 		if (enabled) {
 			// コンソールへの出力を有効にする
 			// 順番に注意：有効にしてからログを出す
-			m_Console.open();
+			m_Console.open(no_taskbar);
 			K__RawPrintf("[Log] console on");
 		} else {
 			// コンソールへの出力を停止する。
@@ -792,8 +797,8 @@ void KLog::setOutputDebugger(bool value) {
 void KLog::setOutputFileName(const char *filename_u8) {
 	g_Log.setFileName(filename_u8);
 }
-void KLog::setOutputConsole(bool value) {
-	g_Log.setConsoleEnabled(value);
+void KLog::setOutputConsole(bool value, bool no_taskbar) {
+	g_Log.setConsoleEnabled(value, no_taskbar);
 }
 /// テキストを出力する。
 /// ユーザーによるコールバックを通さず、既定の出力先に直接書き込む。

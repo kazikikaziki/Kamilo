@@ -1297,7 +1297,7 @@ private:
 			{
 				bool b = KLog::getState(KLog::STATE_HAS_OUTPUT_CONSOLE) != 0;
 				if (ImGui::Checkbox(u8"コンソール", &b)) {
-					KLog::setOutputConsole(b);
+					KLog::setOutputConsole(b, true);
 				}
 			}
 			ImGui::TreePop();

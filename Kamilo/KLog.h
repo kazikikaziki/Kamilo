@@ -97,7 +97,7 @@ public:
 	static void setOutputFileName(const char *filename_u8);
 
 	/// コンソールウィンドウへの出力を設定する
-	static void setOutputConsole(bool value);
+	static void setOutputConsole(bool value, bool no_taskbar=false);
 
 	/// ログメッセージを出力する。
 	/// type には属性を表す文字を指定する。'E'rror, 'W'arning, 'I'nfo, 'D'ebug, 'V'erbose 無属性は '\0'
@@ -251,7 +251,7 @@ public:
 	};
 
 	KLogConsole();
-	bool open();
+	bool open(bool no_taskbar);
 	bool isOpen();
 	void close();
 	void writeLine(const char *u8);
