@@ -3578,7 +3578,7 @@ bool KGameEdgeBuilder::parseLabel(const KPath &label, KGameEdgeLayerLabel *out) 
 	auto tok = K::strSplit(label.u8(), "@");
 
 	// 最初の部分が # で始まっているならレイヤー名が指定されている
-	if (tok[0][0] == '#') {
+	if (tok.size() > 0 && K::strStartsWith(tok[0], "#")) {
 		out->name = tok[0].substr(1); // "#" の次の文字から
 	}
 
