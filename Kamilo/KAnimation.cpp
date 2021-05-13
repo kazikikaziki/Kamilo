@@ -583,6 +583,9 @@ bool KAnimation::setMainClipAlias(const std::string &alias, bool keep) {
 	}
 	// 新しいクリップを設定する
 	KClipRes *clip = KBank::getAnimationBank()->find_clip(name);
+	if (clip == nullptr) {
+		KLog::printWarning("No animation named '%s' (alias '%s')", name.c_str(), alias.c_str());
+	}
 	return setMainClip(clip, keep);
 }
 bool KAnimation::setMainClip(KClipRes *clip, bool keep) {
