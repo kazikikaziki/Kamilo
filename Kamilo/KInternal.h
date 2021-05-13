@@ -150,6 +150,8 @@ public:
 	static bool pathGlob(const char *path, const char *glob);
 	static bool pathGlob(const std::string &path, const std::string &glob); ///< path が glob パターンと一致しているかどうか調べる
 	static std::vector<std::string> pathSplit(const std::string &s);
+	static bool pathStartsWith(const std::string &path, const std::string &sub);
+	static bool pathEndsWith(const std::string &path, const std::string &sub);
 	#pragma endregion // path
 
 	#pragma region string

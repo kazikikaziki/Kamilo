@@ -1132,6 +1132,30 @@ bool K::pathGlob(const std::string &path, const std::string &glob) {
 std::vector<std::string> K::pathSplit(const std::string &s) {
 	return strSplit(s, "\\/", 0, true, false);
 }
+
+bool K::pathStartsWith(const std::string &path, const std::string &sub) {
+	if (sub.empty()) return true; // strStartsWith と同じ挙動。空文字列εは全ての文字列先頭にマッチする
+	size_t pathlen = path.size();
+	size_t sublen = sub.size();
+	if (sub.back() == K__PATH_SLASH) sublen--; // sublen が "/" で終わっている場合はそのひとつ前までを比較
+	if (pathlen < sublen) return false;
+	char c = path[sublen];
+	if (c != '\0' && c != K__PATH_SLASH) return false; // パス区切り単位でないとダメ
+	if (strncmp(path.c_str(), sub.c_str(), sublen) != 0) return false;
+	return true;
+}
+bool K::pathEndsWith(const std::string &path, const std::string &sub) {
+	if (sub.empty()) return true; // String::endsWith と同じ挙動。空文字列εは全ての文字列末尾にマッチする
+	size_t pathlen = path.size();
+	size_t sublen = sub.size();
+	if (pathlen < sublen) return false;
+	int idx = (int)(pathlen - sublen);
+	if (idx > 0 && path[idx-1] != K__PATH_SLASH) return false; // パス区切り単位でないとダメ
+	if (strcmp(path.c_str() + idx, sub.c_str()) != 0) return false;
+	return true;
+}
+
+
 bool K::pathIsRelative(const std::string &path) {
 	std::wstring wpath = K__Utf8ToWidePath(path);
 	return PathIsRelativeW(wpath.c_str());
@@ -1935,6 +1959,17 @@ void Test_internal_path() {
 		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
 		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
 		K__Verify(K::pathGetExt("bbb/aaa")             == "");
+
+		K__Verify(K::pathStartsWith("aaa/bbb", "aa") == false);
+		K__Verify(K::pathStartsWith("aaa/bbb", "aaa") == true);
+		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/") == true);
+		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/bbb") == true);
+		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/b") == false);
+		K__Verify(K::pathStartsWith("aaa/bbb", "") == true);
+		K__Verify(K::pathEndsWith("aaa/bbb", "bbb") == true);
+		K__Verify(K::pathEndsWith("aaa/bbb", "/bbb") == false);
+		K__Verify(K::pathEndsWith("aaa/bbb", "bb") == false);
+		K__Verify(K::pathEndsWith("aaa/bbb", "") == true);
 	}
 	{
 		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
