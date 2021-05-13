@@ -12,7 +12,7 @@
 
 
 // ログの書き出し用スレッドを使う
-#define USE_LOG_THREAD 0
+#define USE_LOG_THREAD 1
 
 
 #if USE_LOG_THREAD
