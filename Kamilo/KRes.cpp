@@ -1074,7 +1074,7 @@ public:
 			// もしかして:
 			// 大小文字を区別しない、フォルダ名部分を無視して比較してみる。
 			// それで見つかった場合、名前の指定を間違えている可能性がある
-			KPath probably;
+			std::string probably;
 			for (auto it2=m_items.begin(); it2!=m_items.end(); it2++) {
 				if (K::pathEndsWith(it2->first, name.u8())) {
 					probably = it2->first;
@@ -1088,7 +1088,7 @@ public:
 			if (probably.empty()) {
 				KLog::printError(u8"E_TEX: テクスチャ '%s' はロードされていません. xres のロード忘れ、 xres 内での定義忘れ、KTextureBank::addTexture での登録忘れの可能性があります", name.u8());
 			} else {
-				KLog::printError(u8"E_TEX: テクスチャ '%s' はロードされていません。もしかして: '%s'", name.u8(), probably.u8());
+				KLog::printError(u8"E_TEX: テクスチャ '%s' はロードされていません。もしかして: '%s'", name.u8(), probably.c_str());
 			}
 		}
 		m_mutex.unlock();
@@ -1514,7 +1514,7 @@ public:
 			} else {
 				// リスト表示
 				for (auto it=names.cbegin(); it!=names.cend(); ++it) {
-					KPath name = *it;
+					const std::string &name = *it;
 					guiTextureHeader(name, s_realsize, s_rentex, s_tex2d);
 				}
 			}
@@ -1523,7 +1523,7 @@ public:
 	#endif // !NO_IMGUI
 	}
 	virtual bool guiTextureSelector(const char *label, KTEXID *p_texture) override {
-		KPath cur_path = (p_texture && *p_texture) ? getTextureName(*p_texture) : KPath::Empty;
+		std::string cur_path = (p_texture && *p_texture) ? getTextureName(*p_texture).u8() : "";
 		KPath new_path;
 		if (guiTextureSelector(label, cur_path, &new_path)) {
 			K_assert(p_texture);
@@ -1570,7 +1570,7 @@ public:
 
 #pragma region CSpriteBankImpl
 class CSpriteBankImpl: public KSpriteBank {
-	std::unordered_map<KPath, KSpriteAuto> m_items;
+	std::unordered_map<std::string, KSpriteAuto> m_items;
 	mutable std::recursive_mutex m_mutex;
 	KTextureBank *m_texbank;
 public:
@@ -1590,7 +1590,7 @@ public:
 	virtual void removeSprite(const KPath &name) override {
 		m_mutex.lock();
 		{
-			auto it = m_items.find(name);
+			auto it = m_items.find(name.u8());
 			if (it != m_items.end()) {
 				m_items.erase(it);
 			}
@@ -1606,7 +1606,7 @@ public:
 	}
 	virtual bool hasSprite(const KPath &name) const override {
 		m_mutex.lock();
-		bool ret = m_items.find(name) != m_items.end();
+		bool ret = m_items.find(name.u8()) != m_items.end();
 		m_mutex.unlock();
 		return ret;
 	}
@@ -1628,12 +1628,12 @@ public:
 			ImGui::InputText("Filter", s_filter, sizeof(s_filter));
 
 			// ソート済みスプライト名一覧
-			KPathList names;
+			std::vector<std::string> names;
 			names.reserve(m_items.size());
 			if (s_filter[0]) {
 				// フィルターあり
 				for (auto it=m_items.cbegin(); it!=m_items.cend(); ++it) {
-					if (it->first.toUtf8().find(s_filter, 0) != std::string::npos) {
+					if (it->first.find(s_filter, 0) != std::string::npos) {
 						names.push_back(it->first);
 					}
 				}
@@ -1960,7 +1960,7 @@ public:
 	virtual KSpriteAuto findSprite(const KPath &name, bool should_exist) override {
 		KSpriteAuto sp = nullptr;
 		m_mutex.lock();
-		auto it = m_items.find(name);
+		auto it = m_items.find(name.u8());
 		if (it != m_items.end()) {
 			sp = it->second;
 			K_assert(sp != nullptr);
@@ -1970,7 +1970,7 @@ public:
 			// ディレクトリ名を忘れているかどうかチェックする
 			KPath probably;
 			for (auto it2=m_items.begin(); it2!=m_items.end(); it2++) {
-				if (it2->first.endsWithPath(name)) {
+				if (K::pathEndsWith(it2->first, name.u8())) {
 					probably = it2->first;
 					break;
 				}
@@ -2028,13 +2028,13 @@ public:
 
 		m_mutex.lock();
 		{
-			m_items[name] = sp;
+			m_items[name.u8()] = sp;
 			K__Verbose("ADD_SPRITE: %s", name.u8());
 		}
 		m_mutex.unlock();
 
 		if (update_mesh) {
-			KSpriteAuto item = m_items[name];
+			KSpriteAuto item = m_items[name.u8()];
 			if (item->mMesh.getVertexCount() == 0) {
 				K_assert(m_texbank);
 				updateSpriteMesh(item, m_texbank);
