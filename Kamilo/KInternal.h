@@ -174,12 +174,14 @@ public:
 	static void strTrim(std::string &s);
 	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, int maxcount=0, bool condense_delims=true, bool _trim=true);
 	static std::vector<std::string> strSplitLines(const std::string &s, bool skip_empty_lines=true, bool _trim=true);
-	static bool strToFloat(const std::string &s, float *val);
-	static bool strToFloat(const char *s, float *val);
-	static bool strToInt(const std::string &s, int *val);
-	static bool strToInt(const char *s, int *val);
-	static bool strToUInt32(const char *s, uint32_t *val);
-	static bool strToUInt64(const char *s, uint64_t *val);
+	static bool strToFloat(const std::string &s, float *p_val);
+	static bool strToFloat(const char *s, float *p_val);
+	static bool strToInt(const std::string &s, int *p_val);
+	static bool strToInt(const char *s, int *p_val);
+	static bool strToUInt32(const std::string &s, uint32_t *p_val);
+	static bool strToUInt32(const char *s, uint32_t *p_val);
+	static bool strToUInt64(const std::string &s, uint64_t *p_val);
+	static bool strToUInt64(const char *s, uint64_t *p_val);
 	static int str_stricmp(const char *s, const char *t); ///< _stricmp, strcasecmp
 	static int str_stricmp(const std::string &s, const std::string &t);
 	static char * str_strptime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale); ///< strptime の代替関数

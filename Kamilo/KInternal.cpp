@@ -1441,43 +1441,49 @@ std::vector<std::string> K::strSplitLines(const std::string &str, bool skip_empt
 	return result;
 }
 
-bool K::strToFloat(const std::string &s, float *val) {
-	return strToFloat(s.c_str(), val);
+bool K::strToFloat(const std::string &s, float *p_val) {
+	return strToFloat(s.c_str(), p_val);
 }
-bool K::strToFloat(const char *s, float *val) {
+bool K::strToFloat(const char *s, float *p_val) {
 	if (s == nullptr) return false;
 	char *err = 0;
 	float result = strtof(s, &err);
 	if (err == s || *err) return false;
-	if (val) *val = result;
+	if (p_val) *p_val = result;
 	return true;
 }
-bool K::strToInt(const std::string &s, int *val) {
-	return strToInt(s.c_str(), val);
+bool K::strToInt(const std::string &s, int *p_val) {
+	return strToInt(s.c_str(), p_val);
 }
-bool K::strToInt(const char *s, int *val) {
+bool K::strToInt(const char *s, int *p_val) {
 	if (s == nullptr) return false;
 	char *err = 0;
 	int result = strtol(s, &err, 0);
 	if (err == s || *err) return false;
-	if (val) *val = result;
+	if (p_val) *p_val = result;
 	return true;
 }
-bool K::strToUInt32(const char *s, uint32_t *val) {
+bool K::strToUInt32(const char *s, uint32_t *p_val) {
 	if (s == nullptr) return false;
 	char *err = 0;
 	uint32_t result = strtoul(s, &err, 0);
 	if (err == s || *err) return false;
-	if (val) *val = result;
+	if (p_val) *p_val = result;
 	return true;
 }
-bool K::strToUInt64(const char *s, uint64_t *val) {
+bool K::strToUInt32(const std::string &s, uint32_t *p_val) {
+	return strToUInt32(s.c_str(), p_val);
+}
+bool K::strToUInt64(const char *s, uint64_t *p_val) {
 	if (s == nullptr) return false;
 	char *err = 0;
 	uint64_t result = _strtoui64(s, &err, 0);
 	if (err == s || *err) return false;
-	if (val) *val = result;
+	if (p_val) *p_val = result;
 	return true;
+}
+bool K::strToUInt64(const std::string &s, uint64_t *p_val) {
+	return strToUInt64(s.c_str(), p_val);
 }
 
 /// strptime の代替関数
