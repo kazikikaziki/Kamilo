@@ -3857,10 +3857,10 @@ public:
 			return false;
 		}
 
-		KPath xmlBankName = KPath(bankDir).join(BANK_INFO_FILENAME);
+		std::string xmlBankName = K::pathJoin(bankDir, BANK_INFO_FILENAME);
 
 		// 管理データを得る。ロードできなければ作成する
-		KXmlElement *xDoc = getXmlBankDoc(xmlBankName.u8());
+		KXmlElement *xDoc = getXmlBankDoc(xmlBankName);
 		KXmlElement *xBank = xDoc->getChild(0);
 
 		// 生データフォルダ内のファイルをインポートする
@@ -3879,7 +3879,7 @@ public:
 
 		// 管理データを保存する
 		if (xDoc) {
-			KOutputStream file = KOutputStream::fromFileName(xmlBankName.u8());
+			KOutputStream file = KOutputStream::fromFileName(xmlBankName);
 			xDoc->writeDoc(file);
 		}
 		K_Drop(xDoc);
@@ -3943,18 +3943,18 @@ private:
 		return -1;
 	}
 	bool onUpdateFile(const std::string &name, const std::string &bankDir, const std::string &dataDir) {
-		if (K::pathCompareExt(name, ".edg") == 0) {
+		if (K::pathHasExtension(name, ".edg")) {
 			CEdgeImporter imp;
-			if (imp.importFile(name.c_str(), bankDir.c_str(), dataDir.c_str(), mFlags)) {
+			if (imp.importFile(name, bankDir, dataDir, mFlags)) {
 #if 1
 				// .edg自体もコピーする
-				KPath nameInData = KPath(dataDir).join(name);
-				KPath nameInBank = KPath(bankDir).join(name);
-				K::fileCopy(nameInData.u8(), nameInBank.u8(), true);
+				std::string nameInData = K::pathJoin(dataDir, name);
+				std::string nameInBank = K::pathJoin(bankDir, name);
+				K::fileCopy(nameInData, nameInBank, true);
 #endif
 				if (EXPORT_CONTENTS_DEBUG_DATA) {
 					KEdgeDocument doc;
-					if (doc.loadFromFileName(nameInData.u8())) {
+					if (doc.loadFromFileName(nameInData)) {
 						for (int p=0; p<doc.getPageCount(); p++) {
 							const KEdgePage *page = doc.getPage(p);
 							for (int l=0; l<page->getLayerCount(); l++) {
@@ -3973,13 +3973,13 @@ private:
 			}
 		}
 		{
-			KPath nameInData = KPath(dataDir).join(name);
-			KPath nameInBank = KPath(bankDir).join(name);
-			if (K::fileCopy(nameInData.u8(), nameInBank.u8(), true)) {
+			std::string nameInData = K::pathJoin(dataDir, name);
+			std::string nameInBank = K::pathJoin(bankDir, name);
+			if (K::fileCopy(nameInData, nameInBank, true)) {
 				if (EXPORT_CONTENTS_DEBUG_DATA) {
-					if (KPath(name).hasExtension(".png")) {
-						KPath path = KPath(dataDir).join(name);
-						KInputStream r = KInputStream::fromFileName(path.u8());
+					if (K::pathHasExtension(name, ".png")) {
+						std::string path = K::pathJoin(dataDir, name);
+						KInputStream r = KInputStream::fromFileName(path);
 						if (r.isOpen()) {
 							uint8_t buf[32];
 							r.read(buf, sizeof(buf));
@@ -3993,12 +3993,12 @@ private:
 				KLog::printInfo("Import: %s", name.c_str());
 				return true;
 			} else {
-				KLog::printError("Failed to copy: %s ==> %s", nameInData.u8(), nameInBank.u8());
+				KLog::printError("Failed to copy: %s ==> %s", nameInData.c_str(), nameInBank.c_str());
 				return false;
 			}
 		}
 	}
-	KXmlElement * getXmlBankDoc(const char *xmlNameInBank) {
+	KXmlElement * getXmlBankDoc(const std::string &xmlNameInBank) {
 		KXmlElement *xDoc = nullptr;
 		if (K::pathExists(xmlNameInBank)) {
 			xDoc = KXmlElement::createFromFileName(xmlNameInBank);

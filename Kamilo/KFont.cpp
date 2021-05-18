@@ -524,7 +524,7 @@ bool KFont::loadFromStream(KInputStream &input, int ttc_index) {
 	m_Impl = std::shared_ptr<Impl>(impl);
 	return true;
 }
-bool KFont::loadFromFileName(const char *filename, int ttc_index) {
+bool KFont::loadFromFileName(const std::string &filename, int ttc_index) {
 	KInputStream input = KInputStream::fromFileName(filename);
 	return loadFromStream(input, ttc_index);
 }
@@ -859,7 +859,7 @@ KFont KFont::createFromStream(KInputStream &input, int ttc_index) {
 	font.loadFromStream(input, ttc_index);
 	return font;
 }
-KFont KFont::createFromFileName(const char *filename, int ttc_index) {
+KFont KFont::createFromFileName(const std::string &filename, int ttc_index) {
 	KFont font;
 	font.loadFromFileName(filename, ttc_index);
 	return font;
@@ -886,7 +886,7 @@ static std::string _Test_getname(const KFont &font, KFont::NameId nid) {
 	}
 	return "";
 }
-void Test_font_printInfo(const char *output_dir, const char *filename) {
+void Test_font_printInfo(const std::string &output_dir, const std::string &filename) {
 	std::string msg_u8;
 	std::string bin;
 	{
@@ -900,7 +900,7 @@ void Test_font_printInfo(const char *output_dir, const char *filename) {
 	if (numfonts > 0) {
 		for (int i=0; i<numfonts; i++) {
 			KFont font = KFont::createFromMemory(bin.data(), bin.size(), i);
-			msg_u8 += K::str_sprintf("%s [%d]\n", filename, i);
+			msg_u8 += K::str_sprintf("%s [%d]\n", filename.c_str(), i);
 			msg_u8 += "\tFamily   : " + _Test_getname(font, KFont::NID_FAMILY   ) + "\n";
 			msg_u8 += "\tCopyRight: " + _Test_getname(font, KFont::NID_COPYRIGHT) + "\n";
 			msg_u8 += "\tVersion  : " + _Test_getname(font, KFont::NID_VERSION  ) + "\n";
@@ -916,7 +916,7 @@ void Test_font_printInfo(const char *output_dir, const char *filename) {
 		output.write(msg_u8.data(), msg_u8.size());
 	}
 }
-void Test_font_ex(const char *font_filename, float fontsize, const char *output_image_filename) {
+void Test_font_ex(const std::string &font_filename, float fontsize, const std::string &output_image_filename) {
 	const KColor32 BG   = KColor(0.0f, 0.3f, 0.0f, 1.0f);
 	const KColor32 LINE = KColor(0.0f, 0.2f, 0.0f, 1.0f);
 
@@ -999,7 +999,7 @@ void Test_font_ex(const char *font_filename, float fontsize, const char *output_
 		output.write(png.data(), png.size());
 	}
 }
-void Test_font(const char *dir) {
+void Test_font(const std::string &dir) {
 #ifdef _WIN32
 	Test_font_printInfo(dir, ""); // 存在しないファイルでも落ちない
 	Test_font_printInfo(dir, "c:\\windows\\fonts\\msgothic.ttc");

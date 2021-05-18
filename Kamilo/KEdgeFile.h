@@ -127,9 +127,9 @@ public:
 	void clear();
 
 	bool loadFromStream(KInputStream &file);
-	bool loadFromFileName(const char *filename);
+	bool loadFromFileName(const std::string &filename);
 	void saveToStream(KOutputStream &file);
-	void saveToFileName(const char *filename);
+	void saveToFileName(const std::string &filename);
 
 	void autoComplete();
 	KEdgePage * addPage();
@@ -196,7 +196,7 @@ public:
 class KEdgePalReader: public KChunkedFileReader {
 public:
 	bool loadFromStream(KInputStream &file);
-	bool loadFromFileName(const char *filename);
+	bool loadFromFileName(const std::string &filename);
 	bool loadFromMemory(const void *data, size_t size);
 
 	std::string exportXml(); // UTF8

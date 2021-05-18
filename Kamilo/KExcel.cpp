@@ -647,7 +647,7 @@ void KExcelFile::clear() {
 std::string KExcelFile::getFileName() const {
 	return m_Impl->getFileName();
 }
-bool KExcelFile::loadFromStream(KInputStream &file, const char *xlsx_name) {
+bool KExcelFile::loadFromStream(KInputStream &file, const std::string &xlsx_name) {
 	return m_Impl->loadFromFile(file, xlsx_name);
 }
 bool KExcelFile::loadFromFileName(const std::string &name) {
@@ -819,7 +819,7 @@ namespace Test {
 
 void Test_excel(const std::string &filename) {
 	KExcelFile ef;
-	ef.loadFromFileName(filename.c_str());
+	ef.loadFromFileName(filename);
 	std::string xml = ef.exportXmlString();
 	KOutputStream os = KOutputStream::fromFileName(filename + ".txt");
 	os.writeString(xml);

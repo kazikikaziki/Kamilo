@@ -37,7 +37,7 @@ public:
 	std::string getFileName() const;
 
 	/// .XLSX ファイルをロードする
-	bool loadFromStream(KInputStream &file, const char *xlsx_name);
+	bool loadFromStream(KInputStream &file, const std::string &xlsx_name);
 	bool loadFromFileName(const std::string &name);
 	bool loadFromMemory(const void *bin, size_t size, const std::string &name);
 

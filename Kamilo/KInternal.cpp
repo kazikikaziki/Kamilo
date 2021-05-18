@@ -978,6 +978,10 @@ int K::pathCompareExt(const std::string &path1, const std::string &path2, bool i
 	const char *s2 = e2.c_str();
 	return ignore_case ? str_stricmp(s1, s2) : strcmp(s1, s2);
 }
+bool K::pathHasExtension(const std::string &path, const std::string &ext) {
+	return pathCompareExt(path, ext) == 0;
+}
+
 // 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 std::string K::pathNormalize(const std::string &path, char old_delim, char new_delim) {
 	K__Assert(isprint(old_delim));

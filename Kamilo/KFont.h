@@ -98,7 +98,7 @@ public:
 	static int getFontCollectionCount(const void *data, int size);
 
 	static KFont createFromStream(KInputStream &input, int ttc_index=0);
-	static KFont createFromFileName(const char *filename, int ttc_index=0);
+	static KFont createFromFileName(const std::string &filename, int ttc_index=0);
 	static KFont createFromMemory(const void *data, int size, int ttc_index=0);
 
 public:
@@ -181,7 +181,7 @@ public:
 	/// フォントファイル名を指定してフォントをロードする
 	/// @param filename  フォントファイル名
 	/// @param ttc_index ロードするフォントのインデックス
-	bool loadFromFileName(const char *filename, int ttc_index=0);
+	bool loadFromFileName(const std::string &filename, int ttc_index=0);
 
 	/// フォントファイルのバイナリを指定してフォントをロードする
 	/// @param data      フォントファイルのバイナリデータ
@@ -271,9 +271,9 @@ private:
 };
 
 namespace Test {
-void Test_font(const char *dir);
-void Test_font_ex(const char *font_filename, float fontsize, const char *output_image_filename);
-void Test_font_printInfo(const char *output_dir, const char *fontpath);
+void Test_font(const std::string &dir);
+void Test_font_ex(const std::string &font_filename, float fontsize, const std::string &output_image_filename);
+void Test_font_printInfo(const std::string &output_dir, const std::string &fontpath);
 void Test_fontscan(const std::string &output_dir);
 }
 

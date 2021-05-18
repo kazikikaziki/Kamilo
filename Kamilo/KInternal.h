@@ -143,6 +143,7 @@ public:
 	static std::string pathAppendLastDelim(const std::string &path); ///< パスの末尾が / で終わるようにする
 	static std::string pathGetParent(const std::string &path); ///< 末尾のサブパスを取り除く
 	static std::string pathGetLast(const std::string &path); ///< 末尾のサブパスを得る
+	static bool pathHasExtension(const std::string &path, const std::string &ext);
 	static bool pathHasDelim(const std::string &path); ///< パス区切り文字を含んでいる場合は true
 	static std::string pathRenameExtension(const std::string &path, const std::string &ext);
 	static std::string pathGetExt(const std::string &path); ///< パスの拡張子部分を返す (ドットを含む)
