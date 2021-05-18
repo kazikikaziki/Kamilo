@@ -276,13 +276,13 @@ float KMath::triangle_wave(int t, int cycle) {
 #pragma region KGeom
 static float _SQ(float x) { return x * x; }
 
-float KGeom::K_GeomPointIsRight2D(float px, float py, float ox, float oy, float tx, float ty) {
-	// XY平面上で (ox, oy) から (tx, ty) を見ている時に点(px, py) が視線の左右どちらにあるか
+float KGeom::K_GeomPointIsRight2D(float px, float py, float ax, float ay, float bx, float by) {
+	// XY平面上で (ax, ay) から (bx, by) を見ている時に点(px, py) が視線の左右どちらにあるか
 	// 右なら正の値、左なら負の値、視線上にあるなら 0 を返す
-	float Ax = tx - ox;
-	float Ay = ty - oy;
-	float Bx = px - ox;
-	float By = py - oy;
+	float Ax = bx - ax;
+	float Ay = by - ay;
+	float Bx = px - ax;
+	float By = py - ay;
 	return Ax * By  - Ay * Bx;
 }
 
