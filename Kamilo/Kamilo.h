@@ -35,6 +35,7 @@
 #include "KHitbox.h"
 #include "KImage.h"
 #include "KImagePack.h"
+#include "KImGui.h"
 #include "KInputMap.h"
 #include "KInspector.h"
 #include "KInternal.h"

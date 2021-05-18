@@ -4,6 +4,7 @@
 /// http://opensource.org/licenses/mit-license.php
 
 #pragma once
+#include <mutex>
 #include "KEdgeFile.h"
 #include "KFont.h"
 #include "KImagePack.h"
