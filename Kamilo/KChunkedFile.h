@@ -153,4 +153,10 @@ private:
 	std::stack<uint32_t> m_stack;
 };
 
+
+namespace Test {
+void Test_chunk();
+}
+
+
 } // namespace

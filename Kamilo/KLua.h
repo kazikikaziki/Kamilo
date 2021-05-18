@@ -111,4 +111,8 @@ struct KLuappDef {
 bool KLuapp_file(const char *srcfile_u8, const char *dstfile_u8, const char *name_u8, const KLuappDef *defines, int numdef);
 bool KLuapp_text(std::string *dst, const char *src_u8, const char *name_u8, const KLuappDef *defines, int numdef);
 
+namespace Test {
+void Test_luapp();
+}
+
 } // namespace

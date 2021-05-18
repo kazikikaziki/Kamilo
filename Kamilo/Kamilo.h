@@ -9,6 +9,7 @@
 
 #include "CApp.h"
 #include "COutline.h"
+#include "CController.h"
 
 #include "KAction.h"
 #include "KAnimation.h"
