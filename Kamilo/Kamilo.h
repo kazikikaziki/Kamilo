@@ -32,6 +32,7 @@
 #include "KExcel.h"
 #include "KFile.h"
 #include "KFont.h"
+#include "KGizmoAct.h"
 #include "KHitbox.h"
 #include "KImage.h"
 #include "KImagePack.h"
