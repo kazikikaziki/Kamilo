@@ -1861,14 +1861,8 @@ std::string K::strBinToUtf8(const std::string &bin) {
 
 
 
-
-
-
-
-#define K__LCID_ENGLISH 0x0409 // 米国英語
-
 bool K__Win32GetErrorString(long hr, char *buf, int size) {
-	return FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K__LCID_ENGLISH, buf, size, nullptr) > 0;
+	return FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, size, nullptr) > 0;
 }
 std::string K__Win32GetErrorStringStd(long hr) {
 	char buf[1024] = {0};

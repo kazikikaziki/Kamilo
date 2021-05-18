@@ -32,6 +32,16 @@
 namespace Kamilo {
 
 
+#pragma region K_LCID
+/// LCID
+/// "https://docs.microsoft.com/ja-jp/previous-versions/windows/scripting/cc392381(v=msdn.10)"
+const int K_LCID_ENGLISH  = 0x0409; // 米国英語
+const int K_LCID_JAPANESE = 0x0411; // 日本語
+typedef int K_LCID;
+#pragma endregion // K_LCID
+
+
+
 void K__Break();
 void K__Exit();
 bool K__IsDebuggerPresent();

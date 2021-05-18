@@ -7,6 +7,7 @@
 #include <memory> // std::shared_ptr
 #include <vector>
 #include "KVideo.h"
+#include "KInternal.h"
 
 
 namespace Kamilo {
