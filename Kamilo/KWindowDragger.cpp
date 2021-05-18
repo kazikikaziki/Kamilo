@@ -1,5 +1,6 @@
 ﻿#include "KWindowDragger.h"
 //
+#include "KImGui.h"
 #include "KInternal.h"
 #include "keng_game.h"
 #include "KSig.h"

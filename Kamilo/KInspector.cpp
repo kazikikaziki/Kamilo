@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "KAction.h"
 #include "KScreen.h"
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KCamera.h"
 #include "KHitbox.h"

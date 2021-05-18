@@ -1,6 +1,7 @@
 ﻿#include "KSnapshotter.h"
 //
 #include "keng_game.h"
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KSig.h"
 #include "KKeyboard.h"

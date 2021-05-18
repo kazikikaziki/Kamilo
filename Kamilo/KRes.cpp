@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "keng_game.h"
 #include "KFile.h"
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KInspector.h"
 #include "KFont.h"
@@ -4704,11 +4705,11 @@ public:
 						}
 						if (page_params.has_pivot_x) {
 							it->def->mPivot.x = page_params.getPivotXInPixels(it->def->mAtlasW);
-							assert(it->def->mPivotInPixels);
+							K__Assert(it->def->mPivotInPixels);
 						}
 						if (page_params.has_pivot_y) {
 							it->def->mPivot.y = page_params.getPivotYInPixels(it->def->mAtlasH);
-							assert(it->def->mPivotInPixels);
+							K__Assert(it->def->mPivotInPixels);
 						}
 					}
 				}

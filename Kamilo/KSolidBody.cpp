@@ -1,5 +1,6 @@
 ﻿#include "KSolidBody.h"
 //
+#include "KImGui.h"
 #include "KInspector.h"
 #include "KInternal.h"
 #include "KDrawable.h"
@@ -55,8 +56,8 @@ static float _GetGizmoBlinkingAlpha(KNode *knode) {
 #endif
 }
 static bool _PassBodyFilter(KSolidBody *bodynode1, KSolidBody *bodynode2) {
-	assert(bodynode1);
-	assert(bodynode2);
+	K__Assert(bodynode1);
+	K__Assert(bodynode2);
 	const KCollider *co1 = bodynode1->getShape();
 	const KCollider *co2 = bodynode2->getShape();
 	// https://www.iforce2d.net/b2dtut/collision-filtering
@@ -324,7 +325,7 @@ static void _GUI_ColliderAABB(KCollider *coll) {
 // Returns N: 2^N == group_bit
 static int _GetGroupBitPosition(uint32_t group_bit) {
 	if (group_bit == 0) {
-		KLog::printError("E_SETGROUPNAME: group_bit cannot be zero");
+		K__Error("E_SETGROUPNAME: group_bit cannot be zero");
 		return -1;
 	}
 
@@ -338,7 +339,7 @@ static int _GetGroupBitPosition(uint32_t group_bit) {
 	// この時点で i にはビットシフト数が入っている
 	// group_bit は 0x0001 になっているはず。それ以外だった場合、ほかにも 1 になっているビットを含んでいる
 	if (group_bit != 1) {
-		KLog::printError("E_SETGROUPNAME: invalid group_bit: 0x%08x (contains multiple 1)", group_bit);
+		K__Error("E_SETGROUPNAME: invalid group_bit: 0x%08x (contains multiple 1)", group_bit);
 		return -1;
 	}
 
@@ -2021,7 +2022,7 @@ void KStaticSolidBody::setShapeWall(float x0, float z0, float x1, float z1) {
 	KVec3 normal(normal_x, 0.0f, normal_z);
 	KVec3 norNormal;
 	if (!normal.getNormalizedSafe(&norNormal)) {
-		KLog::printError("E_NORMALIZE_ZERO_VECTOR: %s", __FUNCTION__);
+		K__Error("E_NORMALIZE_ZERO_VECTOR: %s", __FUNCTION__);
 		return;
 	}
 

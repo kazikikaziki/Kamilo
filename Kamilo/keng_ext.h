@@ -17,14 +17,3 @@
 #include "KDebug.h"
 #include "KStorage.h"
 #include "KStream.h"
-#include "KImGui.h"
-#include "KLog.h"
-#include "KXml.h"
-
-namespace Kamilo {
-
-
-
-} // namespace
-
-

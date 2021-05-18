@@ -7,6 +7,7 @@
 #include "KCamera.h"
 #include "KDrawable.h"
 #include "KHitbox.h"
+#include "KImGui.h"
 #include "KInspector.h"
 #include "KInternal.h"
 #include "KJoystick.h"

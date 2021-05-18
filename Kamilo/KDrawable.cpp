@@ -3,6 +3,7 @@
 #include <algorithm> // std::stable_sort
 #include "KAction.h"
 #include "KCamera.h"
+#include "KImGui.h"
 #include "KRes.h"
 #include "KInspector.h"
 #include "KInternal.h"

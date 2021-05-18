@@ -1,5 +1,5 @@
 ﻿#include "KCrc32.h"
-#include <assert.h>
+#include "KInternal.h"
 
 namespace Kamilo {
 
@@ -60,10 +60,10 @@ uint32_t KCrc32::fromString(const char *str) {
 namespace Test {
 
 void Test_crc32() {
-	assert(KCrc32::fromString("Hello World") == 1243066710);
-	assert(KCrc32::fromString("Hello WOrld") == 3928301160);
-	assert(KCrc32::fromString("") == 0);
-	assert(KCrc32::fromString(" ") == 3916222277);
+	K__Assert(KCrc32::fromString("Hello World") == 1243066710);
+	K__Assert(KCrc32::fromString("Hello WOrld") == 3928301160);
+	K__Assert(KCrc32::fromString("") == 0);
+	K__Assert(KCrc32::fromString(" ") == 3916222277);
 }
 
 } // Test

@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <stdarg.h> // va_list
-#include <assert.h>
 
 #ifndef __nodiscard__
 #	define __nodiscard__  [[nodiscard]]

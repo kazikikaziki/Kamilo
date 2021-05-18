@@ -2,6 +2,7 @@
 //
 #include <unordered_map>
 #include <mutex>
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KMath.h"
 #include "KNode.h"
@@ -770,7 +771,7 @@ public:
 			K__Error("playStreaming: No sound named: %s", name.c_str());
 			return 0;
 		}
-		KLog::printVerbose("BGM: %s", name.c_str());
+		K__Verbose("BGM: %s", name.c_str());
 		float group_vol = getActualGroupVolume(group_id);
 		SSndItem snd;
 		snd.name = name;
@@ -797,7 +798,7 @@ public:
 			K__Error("playOneShot: No sound named: %s", name.c_str());
 			return 0;
 		}
-		KLog::printVerbose("SE: %s", name.c_str());
+		K__Verbose("SE: %s", name.c_str());
 		SSndItem snd;
 		snd.name = name;
 		snd.vol = 1.0f;

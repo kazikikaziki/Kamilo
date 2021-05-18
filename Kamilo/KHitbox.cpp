@@ -1,6 +1,7 @@
 ﻿#include "KHitbox.h"
 //
 #include "KCamera.h"
+#include "KImGui.h"
 #include "KInspector.h"
 #include "KInternal.h"
 #include "KSig.h"

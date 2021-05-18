@@ -45,7 +45,7 @@ KNode::KNode() {
 KNode::~KNode() {
 	// 既にノードツリーからは切り離されているはず
 	K__Assert(m_NodeData.tree == nullptr);
-	m_NodeData.name; // ここの assert でひっかかったら、この名前を確認
+	m_NodeData.name; // ↑の assert でひっかかったら、この名前を確認
 
 	on_node_end();
 	if (m_ActionCurr || m_ActionNext) {

@@ -8,6 +8,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KKeyboard.h"
 #include "KLocalTIme.h"

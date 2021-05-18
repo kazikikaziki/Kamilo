@@ -1,4 +1,6 @@
 ﻿#include "KSpriteDrawable.h"
+
+#include "KImGui.h"
 #include "keng_game.h"
 
 namespace Kamilo {

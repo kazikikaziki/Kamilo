@@ -1,6 +1,5 @@
 ﻿#include "KMatrix.h"
 
-#include <assert.h>
 #include <memory.h>
 #include <math.h>
 #include <float.h>
@@ -15,33 +14,33 @@ namespace Kamilo {
 #pragma region Matrix
 #define MATELM(mat, row, col)  ((mat)[(row)*4 + (col)]) // mat[row*4 + col]
 float K_Matrix4Get(const float *mat, int row, int col) {
-	assert(mat);
-	assert(0 <= row && row < 4);
-	assert(0 <= col && col < 4);
+	K__Assert(mat);
+	K__Assert(0 <= row && row < 4);
+	K__Assert(0 <= col && col < 4);
 	return MATELM(mat, row, col);
 }
 void K_Matrix4Set(float *mout, int row, int col, float value) {
-	assert(mout);
-	assert(0 <= row && row < 4);
-	assert(0 <= col && col < 4);
+	K__Assert(mout);
+	K__Assert(0 <= row && row < 4);
+	K__Assert(0 <= col && col < 4);
 	MATELM(mout, row, col) = value;
 }
 void K_Matrix4SetRow(float *mout, int row, float a, float b, float c, float d) {
-	assert(mout);
-	assert(0 <= row && row < 4);
+	K__Assert(mout);
+	K__Assert(0 <= row && row < 4);
 	MATELM(mout, row, 0) = a;
 	MATELM(mout, row, 1) = b;
 	MATELM(mout, row, 2) = c;
 	MATELM(mout, row, 3) = d;
 }
 void K_Matrix4Copy(float *mout, const float *m) {
-	assert(mout);
-	assert(m);
+	K__Assert(mout);
+	K__Assert(m);
 	memcpy(mout, m, sizeof(float) * 16);
 }
 bool K_Matrix4Equals(const float *ma, const float *mb, float maxerr) {
-	assert(ma);
-	assert(mb);
+	K__Assert(ma);
+	K__Assert(mb);
 	// いくら厳密な比較でも memcmp での比較はダメ。
 	// -0.0f と 0.0f が区別されてしまう
 	// if (tolerance == 0.0f) {
@@ -56,8 +55,8 @@ bool K_Matrix4Equals(const float *ma, const float *mb, float maxerr) {
 	return true;
 }
 float K_Matrix4RowDotCol(const float *ma, int ma_row, const float *mb, int mb_col) {
-	assert(ma);
-	assert(mb);
+	K__Assert(ma);
+	K__Assert(mb);
 	// A と B の row 行 col 列ベクトル同士の内積
 	return (
 		MATELM(ma, ma_row, 0) * MATELM(mb, 0, mb_col) +
@@ -73,30 +72,30 @@ void K_Matrix4Identity(float *mout) {
 		0, 0, 1, 0,
 		0, 0, 0, 1,
 	};
-	assert(mout);
+	K__Assert(mout);
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4Add(float *mout, const float *ma, const float *mb) {
-	assert(mout);
-	assert(ma);
-	assert(mb);
+	K__Assert(mout);
+	K__Assert(ma);
+	K__Assert(mb);
 	for (int i=0; i<16; i++) {
 		mout[i] = ma[i] + mb[i];
 	}
 }
 void K_Matrix4Sub(float *mout, const float *ma, const float *mb) {
-	assert(mout);
-	assert(ma);
-	assert(mb);
+	K__Assert(mout);
+	K__Assert(ma);
+	K__Assert(mb);
 	for (int i=0; i<16; i++) {
 		mout[i] = ma[i] - mb[i];
 	}
 }
 static void K__matrix4_mul_simd(float *mout, const float *ma, const float *mb) {
 #ifdef K_USE_SIMD
-	assert(mout);
-	assert(ma);
-	assert(mb);
+	K__Assert(mout);
+	K__Assert(ma);
+	K__Assert(mb);
 
 	// 4x4行列同士の掛算を高速化してみる
 	// https://qiita.com/blue-7/items/6b607e1af48bc25ecb35
@@ -196,18 +195,18 @@ void K_Matrix4Mul(float *mout, const float *ma, const float *mb) {
 #endif
 }
 void K_Matrix4MulVec4(float *vout4, const float *ma, const float *v4) {
-	assert(vout4);
-	assert(ma);
-	assert(v4);
+	K__Assert(vout4);
+	K__Assert(ma);
+	K__Assert(v4);
 	vout4[0] = MATELM(ma,0,0)*v4[0] + MATELM(ma,1,0)*v4[1] + MATELM(ma,2,0)*v4[2] + MATELM(ma,3,0)*v4[3];
 	vout4[1] = MATELM(ma,0,1)*v4[0] + MATELM(ma,1,1)*v4[1] + MATELM(ma,2,1)*v4[2] + MATELM(ma,3,1)*v4[3];
 	vout4[2] = MATELM(ma,0,2)*v4[0] + MATELM(ma,1,2)*v4[1] + MATELM(ma,2,2)*v4[2] + MATELM(ma,3,2)*v4[3];
 	vout4[3] = MATELM(ma,0,3)*v4[0] + MATELM(ma,1,3)*v4[1] + MATELM(ma,2,3)*v4[2] + MATELM(ma,3,3)*v4[3];
 }
 void K_Matrix4MulVec3(float *vout3, const float *m, const float *v3) {
-	assert(vout3);
-	assert(m);
-	assert(v3);
+	K__Assert(vout3);
+	K__Assert(m);
+	K__Assert(v3);
 	float A[4] = {v3[0], v3[1], v3[2], 1.0f}; // A = {x, y, z, 1}
 	float B[4];
 	K_Matrix4MulVec4(B, m, A); // B = m * A
@@ -216,8 +215,8 @@ void K_Matrix4MulVec3(float *vout3, const float *m, const float *v3) {
 	vout3[2] = B[2] / B[3]; // out.z = B.z / B.w
 }
 void K_Matrix4ToVec3(float *vout3, const float *m) {
-	assert(vout3);
-	assert(m);
+	K__Assert(vout3);
+	K__Assert(m);
 	float x = MATELM(m, 3, 0);
 	float y = MATELM(m, 3, 1);
 	float z = MATELM(m, 3, 2);
@@ -231,10 +230,10 @@ void K_matrix4_make_sub3x3(float *mout4x4, const float *a, int exclude_row, int 
 	// 小行列を作成する
 	// 4x4 から指定された行と列を削除し、4x4単位行列の左上の 3x3 の領域に縮める
 	// （out4x4 自体は 4x4 行列であることに注意）
-	assert(mout4x4);
-	assert(a);
-	assert(0 <= exclude_row && exclude_row < 4);
-	assert(0 <= exclude_col && exclude_col < 4);
+	K__Assert(mout4x4);
+	K__Assert(a);
+	K__Assert(0 <= exclude_row && exclude_row < 4);
+	K__Assert(0 <= exclude_col && exclude_col < 4);
 	int srcrow[3], srccol[3];
 	for (int i=0; i<3; i++) {
 		srcrow[i] = (i >= exclude_row) ? i+1 : i; // srcrow[小行列の行番号] = 元行列の行番号
@@ -254,9 +253,9 @@ void K_matrix4_make_sub3x3(float *mout4x4, const float *a, int exclude_row, int 
 }
 float K_matrix4_determinant_sub3x3(const float *m, int exclude_row, int exclude_col) {
 	// exclude_row と exclude_col を除いた残りの 3x3 行列（小行列）の行列式を求める
-	assert(m);
-	assert(0 <= exclude_row && exclude_row < 4);
-	assert(0 <= exclude_col && exclude_col < 4);
+	K__Assert(m);
+	K__Assert(0 <= exclude_row && exclude_row < 4);
+	K__Assert(0 <= exclude_col && exclude_col < 4);
 
 	// 4x4 行列の左上 3x3 の領域に小行列を作成する
 	float sub[16];
@@ -273,7 +272,7 @@ float K_matrix4_determinant_sub3x3(const float *m, int exclude_row, int exclude_
 	);
 }
 float K_Matrix4Determinant(const float *m) {
-	assert(m);
+	K__Assert(m);
 	return (
 		+ MATELM(m, 0, 0) * K_matrix4_determinant_sub3x3(m, 0, 0)
 		- MATELM(m, 1, 0) * K_matrix4_determinant_sub3x3(m, 1, 0)
@@ -305,8 +304,8 @@ bool K_Matrix4Inverse(float *mout, const float *m) {
 	return false;
 }
 void K_Matrix4Transpose(float *mout, const float *m) {
-	assert(mout);
-	assert(m);
+	K__Assert(mout);
+	K__Assert(m);
 	K_Matrix4SetRow(mout, 0, MATELM(m,0,0), MATELM(m,1,0), MATELM(m,2,0), MATELM(m,3,0));
 	K_Matrix4SetRow(mout, 1, MATELM(m,0,1), MATELM(m,1,1), MATELM(m,2,1), MATELM(m,3,1));
 	K_Matrix4SetRow(mout, 2, MATELM(m,0,2), MATELM(m,1,2), MATELM(m,2,2), MATELM(m,3,2));
@@ -319,7 +318,7 @@ void K_Matrix4FromTranslate(float *mout, float x, float y, float z) {
 		0, 0, 1, 0,
 		x, y, z, 1,
 	};
-	assert(mout);
+	K__Assert(mout);
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromScale(float *mout, float x, float y, float z) {
@@ -329,13 +328,13 @@ void K_Matrix4FromScale(float *mout, float x, float y, float z) {
 		0, 0, z, 0,
 		0, 0, 0, 1,
 	};
-	assert(mout);
+	K__Assert(mout);
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromRotation(float *mout, const float *quat) {
 	// http://stackoverflow.com/questions/1556260/convert-quaternion-rotation-to-rotation-matrix
-	assert(mout);
-	assert(quat);
+	K__Assert(mout);
+	K__Assert(quat);
 	float x = quat[0];
 	float y = quat[1];
 	float z = quat[2];
@@ -349,8 +348,8 @@ void K_Matrix4FromRotation(float *mout, const float *quat) {
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromSkewX(float *mout, float deg) {
-	assert(mout);
-	assert(-90 < deg && deg < 90);
+	K__Assert(mout);
+	K__Assert(-90 < deg && deg < 90);
 	float t = tanf(K::degToRad(deg));
 	float tmp[] = {
 		1, 0, 0, 0,
@@ -361,8 +360,8 @@ void K_Matrix4FromSkewX(float *mout, float deg) {
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromSkewY(float *mout, float deg) {
-	assert(mout);
-	assert(-90 < deg && deg < 90);
+	K__Assert(mout);
+	K__Assert(-90 < deg && deg < 90);
 	float t = tanf(K::degToRad(deg));
 	float tmp[] = {
 		1, t, 0, 0,
@@ -373,10 +372,10 @@ void K_Matrix4FromSkewY(float *mout, float deg) {
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromOrtho(float *mout, float w, float h, float znear, float zfar) {
-	assert(mout);
-	assert(w > 0);
-	assert(h > 0);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(w > 0);
+	K__Assert(h > 0);
+	K__Assert(znear < zfar);
 	// 平行投影行列（左手系）
 	// http://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
 	// http://msdn.microsoft.com/ja-jp/library/cc372881.aspx
@@ -393,9 +392,9 @@ void K_Matrix4FromOrtho(float *mout, float w, float h, float znear, float zfar) 
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromOrthoRect(float *mout, float left, float right, float bottom, float top, float znear, float zfar) {
-	assert(left < right);
-	assert(bottom < top);
-	assert(znear < zfar);
+	K__Assert(left < right);
+	K__Assert(bottom < top);
+	K__Assert(znear < zfar);
 	// 平行投影行列（左手系）
 	// http://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
 	// http://msdn.microsoft.com/ja-jp/library/cc372882.aspx
@@ -414,10 +413,10 @@ void K_Matrix4FromOrthoRect(float *mout, float left, float right, float bottom, 
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromOrthoCabinet(float *mout, float w, float h, float znear, float zfar, float dxdz, float dydz) {
-	assert(mout);
-	assert(w > 0);
-	assert(h > 0);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(w > 0);
+	K__Assert(h > 0);
+	K__Assert(znear < zfar);
 	// Cabinet projection
 	// http://en.wikipedia.org/wiki/Oblique_projection
 	// 遠クリップ面の設定に関係なく、画面上で一定の傾きにする為のスケーリング定数
@@ -439,10 +438,10 @@ void K_Matrix4FromOrthoCabinet(float *mout, float w, float h, float znear, float
 	K_Matrix4Mul(mout, ortho, shear);
 }
 void K_Matrix4FromFrustum(float *mout, float width, float height, float znear, float zfar) {
-	assert(mout);
-	assert(width > 0);
-	assert(height > 0);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(width > 0);
+	K__Assert(height > 0);
+	K__Assert(znear < zfar);
 	// 透視投影行列（左手系）
 	// http://gunload.web.fc2.com/opengl/glfrustum.html
 	// http://msdn.microsoft.com/ja-jp/library/cc372887.aspx
@@ -459,30 +458,30 @@ void K_Matrix4FromFrustum(float *mout, float width, float height, float znear, f
 	K_Matrix4Copy(mout, tmp);
 }
 void K_Matrix4FromFrustumFovX(float *mout, float fovx_deg, float aspect_w_div_h, float znear, float zfar) {
-	assert(mout);
-	assert(0 < fovx_deg && fovx_deg < 180);
-	assert(aspect_w_div_h > 0);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(0 < fovx_deg && fovx_deg < 180);
+	K__Assert(aspect_w_div_h > 0);
+	K__Assert(znear < zfar);
 	float fov_rad = K::degToRad(fovx_deg);
 	float w = 2 * znear * tanf(fov_rad / 2); // 左右の視野角から近クリップ面の幅を得る
 	float h = w / aspect_w_div_h;
 	K_Matrix4FromFrustum(mout, w, h, znear, zfar);
 }
 void K_Matrix4FromFrustumFovY(float *mout, float fovy_deg, float aspect_h_div_w, float znear, float zfar) {
-	assert(mout);
-	assert(0 < fovy_deg && fovy_deg < 180);
-	assert(aspect_h_div_w > 0);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(0 < fovy_deg && fovy_deg < 180);
+	K__Assert(aspect_h_div_w > 0);
+	K__Assert(znear < zfar);
 	float fov_rad = K::degToRad(fovy_deg);
 	float h = 2 * znear * tanf(fov_rad / 2); // 上下の視野角から近クリップ面での高さを得る
 	float w = h / aspect_h_div_w;
 	K_Matrix4FromFrustum(mout, w, h, znear, zfar);
 }
 void K_Matrix4FromFrustumRect(float *mout, float left, float right, float bottom, float top, float znear, float zfar) {
-	assert(mout);
-	assert(left < right);
-	assert(bottom < top);
-	assert(znear < zfar);
+	K__Assert(mout);
+	K__Assert(left < right);
+	K__Assert(bottom < top);
+	K__Assert(znear < zfar);
 	// 透視投影行列（左手系）
 	// http://gunload.web.fc2.com/opengl/glfrustum.html
 	// http://msdn.microsoft.com/ja-jp/library/cc372889.aspx
@@ -599,7 +598,7 @@ KMatrix4::KMatrix4(const KMatrix4 &a) {
 	memcpy(m, a.m, sizeof(float)*16);
 }
 KMatrix4::KMatrix4(const float *values) {
-	assert(values);
+	K__Assert(values);
 	memcpy(m, values, sizeof(float)*16);
 }
 KMatrix4::KMatrix4(

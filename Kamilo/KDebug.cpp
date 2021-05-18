@@ -1,13 +1,7 @@
 ﻿#include "KDebug.h"
 
-#include <Windows.h> // MessageBoxW, OutputDebugStringA, OutputDebugStringW
-#include <varargs.h> // va_list, va_start, va_end
-#include <assert.h>
 #include "KInternal.h"
-#include "KThread.h"
 #include "KLog.h"
-
-
 
 
 

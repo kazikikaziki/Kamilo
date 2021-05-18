@@ -1,4 +1,6 @@
 ﻿#include "KCollisionShape.h"
+#include "KImGui.h"
+#include "KInternal.h"
 #include "keng_game.h" // KNode
 
 namespace Kamilo {
@@ -221,7 +223,7 @@ public:
 		ImGui::DragFloat("Radius", &m_radius, 1.0f, 0.0f, 1000.0f);
 	}
 	virtual void set_radius(float value) {
-		assert(value >= 0);
+		K__Assert(value >= 0);
 		m_radius = value;
 	}
 	virtual float get_radius() const {
@@ -281,9 +283,9 @@ public:
 		ImGui::DragFloat3("HalfSize", m_halfsize.floats());
 	}
 	virtual void set_halfsize(const KVec3 &value) {
-		assert(value.x >= 0);
-		assert(value.y >= 0);
-		assert(value.z >= 0);
+		K__Assert(value.x >= 0);
+		K__Assert(value.y >= 0);
+		K__Assert(value.z >= 0);
 		m_halfsize = value;
 	}
 	virtual const KVec3 & get_halfsize() const {
@@ -404,12 +406,12 @@ public:
 		}
 	}
 	virtual void set_halfheight(float value) {
-		assert(value >= 0);
+		K__Assert(value >= 0);
 		m_halfheight = value;
 		adj();
 	}
 	virtual void set_radius(float value) {
-		assert(value >= 0);
+		K__Assert(value >= 0);
 		m_radius = value;
 		adj();
 	}
@@ -531,12 +533,12 @@ public:
 		}
 	}
 	virtual void set_halfheight(float value) {
-		assert(value >= 0);
+		K__Assert(value >= 0);
 		m_halfheight = value;
 		adj();
 	}
 	virtual void set_radius(float value) {
-		assert(value >= 0);
+		K__Assert(value >= 0);
 		m_radius = value;
 		adj();
 	}
@@ -664,7 +666,7 @@ public:
 
 		// 平面と AABB のX+側の面との交線を得る
 		if (KGeom::K_GeomIntersectPlane(m_offset, m_normal, aabb_min, KVec3(1, 0, 0), &dir, &pos)) {
-			assert(KGeom::K_GEOM_ALMOST_ZERO(dir.x)); // AABB の X+　側平面との交線なのだから、直線の X 方向成分は 0 になっていないとおかしい
+			K__Assert(KGeom::K_GEOM_ALMOST_ZERO(dir.x)); // AABB の X+　側平面との交線なのだから、直線の X 方向成分は 0 になっていないとおかしい
 			if (fabsf(dir.z) < fabsf(dir.y)) {
 			//	minp.y = aabb_min.y;
 			//	maxp.y = aabb_max.y;
@@ -685,7 +687,7 @@ public:
 
 		// 平面と AABB のY+側の面との交線を得る
 		if (KGeom::K_GeomIntersectPlane(m_offset, m_normal, aabb_min, KVec3(0, 1, 0), &dir, &pos)) {
-			assert(KGeom::K_GEOM_ALMOST_ZERO(dir.y)); // AABB の Y+　側平面との交線なのだから、直線の Y 方向成分は 0 になっていないとおかしい
+			K__Assert(KGeom::K_GEOM_ALMOST_ZERO(dir.y)); // AABB の Y+　側平面との交線なのだから、直線の Y 方向成分は 0 になっていないとおかしい
 			if (fabsf(dir.z) < fabsf(dir.x)) {
 			//	minp.x = aabb_min.x;
 			//	maxp.x = aabb_max.x;

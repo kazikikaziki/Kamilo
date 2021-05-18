@@ -1,5 +1,6 @@
 ﻿#include "KShadow.h"
 //
+#include "KImGui.h"
 #include "KInternal.h"
 #include "KMeshDrawable.h"
 #include "KRes.h"

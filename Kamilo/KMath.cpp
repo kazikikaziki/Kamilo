@@ -22,7 +22,6 @@
 	#include "stb_perlin.h"
 #endif
 
-#include <assert.h>
 #include "KInternal.h"
 
 
@@ -31,7 +30,7 @@ namespace Kamilo {
 void K__math_error(const char *func) {
 	if (K__IsDebuggerPresent()) {
 		K__Break();
-		assert(0);
+		K__Assert(0);
 		K__Error("K__math_error at %s", func);
 	} else {
 		K__Error("K__math_error at %s", func);
@@ -1662,7 +1661,7 @@ bool KAabb::rayTest(const KRay &ray, KRayDesc *out_near, KRayDesc *out_far) cons
 		// [レイの発射点 > aabbmax] なら max 側に当たっている。
 		// [aabbmin <= レイの発射点 <= aabbmax] のパターンは既に「交差なし」として除外されている筈なので考慮しない
 		// ※hit_near には 0, 1, 2 のいずれかが入っていて、それぞれ X,Y,Z に対応する
-		assert(0 <= hit_near && hit_near < 3);
+		K__Assert(0 <= hit_near && hit_near < 3);
 		if (pos[hit_near] < aabbmin[hit_near]) {
 			out_near->normal = NORMALS[hit_near * 2 + 0]; // min 側
 		} else {
@@ -1678,7 +1677,7 @@ bool KAabb::rayTest(const KRay &ray, KRayDesc *out_near, KRayDesc *out_far) cons
 		// [レイの発射点 > aabbmax] なら max 側に当たっている。
 		// [aabbmin <= レイの発射点 <= aabbmax] のパターンは既に「交差なし」として除外されている筈なので考慮しない
 		// ※hit_far には 0, 1, 2 のいずれかが入っていて、それぞれ X,Y,Z に対応する
-		assert(0 <= hit_far && hit_far < 3);
+		K__Assert(0 <= hit_far && hit_far < 3);
 		if (pos[hit_far] < aabbmin[hit_far]) {
 			out_far->normal = NORMALS[hit_far * 2 + 0]; // min 側
 		} else {

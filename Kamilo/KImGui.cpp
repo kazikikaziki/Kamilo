@@ -760,9 +760,9 @@ static IDirect3DStateBlock9 *g_d3d9_block = NULL;
 /// @param size_pixels ピクセル単位でのフォントサイズ
 /// @note 新しいフォントは ImGui::GetIO().Fonts->Fonts 配列の末尾に追加される
 ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_pixels) {
-	assert(data);
-	assert(size > 0);
-	assert(size_pixels > 0);
+	K__Assert(data);
+	K__Assert(size > 0);
+	K__Assert(size_pixels > 0);
 
 	// フォントデータを ImGUI 側で確保したバッファにコピーする。
 	// フォントデータの解放は ImGUI 側に任せるため、ローカルなポインタを渡してはいけない
@@ -797,8 +797,8 @@ ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_p
 ///    フォントデータだけは最初にロードしたものをずっと使い続ける。
 ///
 ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels) {
-	assert(ttc_index >= 0);
-	assert(size_pixels > 0);
+	K__Assert(ttc_index >= 0);
+	K__Assert(size_pixels > 0);
 
 	ImFontConfig conf;
 	conf.FontNo = ttc_index;
@@ -916,7 +916,7 @@ long KImGui_WndProc(void *hWnd, uint32_t msg, uintptr_t wp, uintptr_t lp) {
 /// 新しい描画フレームを開始する。
 /// ImGui::Text() などの関数は KImGui_BeginRender() と KImGui_EndRender() の間で呼ぶこと。
 void KImGui_BeginRender() {
-	assert(ImGui::GetCurrentContext());
+	K__Assert(ImGui::GetCurrentContext());
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -924,7 +924,7 @@ void KImGui_BeginRender() {
 
 /// Dear ImGui の描画を終了し、画面を更新する。
 void KImGui_EndRender() {
-	assert(ImGui::GetCurrentContext());
+	K__Assert(ImGui::GetCurrentContext());
 	ImGui::EndFrame();
 
 	if (g_d3d9_block && g_d3d9_dev) {
@@ -939,12 +939,12 @@ void KImGui_EndRender() {
 }
 
 static void KImGui__SetPointFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-	assert(g_d3d9_dev);
+	K__Assert(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 }
 static void KImGui__SetLinearFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-	assert(g_d3d9_dev);
+	K__Assert(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 }

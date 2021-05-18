@@ -1,6 +1,7 @@
 ﻿#include "KScreen.h"
 
 #include <algorithm>
+#include "KImGui.h"
 #include "KInspector.h"
 #include "KRes.h"
 #include "KCamera.h"

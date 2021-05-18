@@ -1,4 +1,5 @@
 ﻿#include "KNamedValues.h"
+//
 #include "KInternal.h"
 
 namespace Kamilo {
@@ -193,8 +194,8 @@ void KNamedValues::setBool(const std::string &name, bool value) {
 bool KNamedValues::queryBool(const std::string &name, bool *outValue) const {
 	const char *s = getString(name);
 	if (s) {
-		assert(strcmp(s, "on" ) != 0);
-		assert(strcmp(s, "off" ) != 0);
+		K__Assert(strcmp(s, "on" ) != 0);
+		K__Assert(strcmp(s, "off" ) != 0);
 		int val = 0;
 		if (K::strToInt(s, &val)) {
 			if (outValue) *outValue = val != 0;
