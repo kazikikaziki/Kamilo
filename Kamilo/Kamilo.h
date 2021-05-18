@@ -17,6 +17,7 @@
 #include "KAutoHideCursor.h"
 #include "KCamera.h"
 #include "KClipboard.h"
+#include "KClock.h"
 #include "KCollisionShape.h"
 #include "KCrashReport.h"
 #include "KCrc32.h"

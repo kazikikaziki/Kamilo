@@ -446,10 +446,8 @@ private:
 		if (USING_DRAWLIST) {
 			// 描画リスト使う
 			m_DrawList.clear();
-			KClock clock;
 			int i = 0;
 			for (auto it=input.begin(); it!=input.end(); ++it) {
-				clock.reset();
 				KNode *node = *it;
 				if (node->getRenderAtomic()) {
 					// 不可分描画
@@ -467,9 +465,7 @@ private:
 		
 		} else {
 			// 描画リスト使わない
-			KClock clock;
 			for (auto it=input.begin(); it!=input.end(); ++it) {
-				clock.reset();
 				KNode *node = *it;
 				renderSingleNode(node, projection, transform, camera, &m_DrawList);
 			}
