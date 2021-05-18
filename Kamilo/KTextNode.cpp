@@ -714,11 +714,11 @@ void KTextParser::addStyle(int id, const wchar_t *start) {
 	addStyle(id, start, L"\n");
 }
 void KTextParser::addStyle(int id, const wchar_t *start, const wchar_t *end) {
-	K_assert(id > 0); // id == 0 はデフォルト書式を表す。開始、終端文字は登録できない
-	K_assert(start && start[0]); // 空文字列は登録できない
-	K_assert(end && end[0]); // 空文字列は登録できない
-	K_assert(wcslen(start) < STYLE::MAXTOKENLEN);
-	K_assert(wcslen(end) < STYLE::MAXTOKENLEN);
+	K__Assert(id > 0); // id == 0 はデフォルト書式を表す。開始、終端文字は登録できない
+	K__Assert(start && start[0]); // 空文字列は登録できない
+	K__Assert(end && end[0]); // 空文字列は登録できない
+	K__Assert(wcslen(start) < STYLE::MAXTOKENLEN);
+	K__Assert(wcslen(end) < STYLE::MAXTOKENLEN);
 
 	STYLE fmt;
 	fmt.id = id;
@@ -748,7 +748,7 @@ static int K__CompareStringW(const wchar_t *ws1, const wchar_t *ws2, int compare
 }
 
 const KTextParser::STYLE * KTextParser::isStart(const wchar_t *text) const {
-	K_assert(text);
+	K__Assert(text);
 	// 書式範囲の開始記号に一致するか調べる
 	// 複数の記号が該当する場合は最も長いものを返す
 	const STYLE *style = nullptr;
@@ -768,7 +768,7 @@ const KTextParser::STYLE * KTextParser::isStart(const wchar_t *text) const {
 	return style;
 }
 const KTextParser::STYLE * KTextParser::isEnd(const wchar_t *text) const {
-	K_assert(text);
+	K__Assert(text);
 
 	// 現在の書式の終了記号に一致するか調べる
 	if (stack_.empty()) {
@@ -777,7 +777,7 @@ const KTextParser::STYLE * KTextParser::isEnd(const wchar_t *text) const {
 
 	// 現在の書式（スタックトップにある書式）
 	const STYLE *current_style = stack_.back().style;
-	K_assert(current_style);
+	K__Assert(current_style);
 	
 	// 現在の書式の終端記号にマッチすれば OK
 	const wchar_t *end = current_style->end_token;
@@ -794,9 +794,9 @@ const KTextParser::STYLE * KTextParser::isEnd(const wchar_t *text) const {
 	return nullptr;
 }
 void KTextParser::startStyle(const STYLE *style, const wchar_t *pos) {
-	K_assert(style);
-	K_assert(pos);
-	K_assert(box_);
+	K__Assert(style);
+	K__Assert(pos);
+	K__Assert(box_);
 
 	onStartStyle(box_, style->id);
 
@@ -805,9 +805,9 @@ void KTextParser::startStyle(const STYLE *style, const wchar_t *pos) {
 	stack_.push_back(mark);
 }
 void KTextParser::endStyle(const STYLE *style, const wchar_t *pos) {
-	K_assert(style);
-	K_assert(pos);
-	K_assert(box_);
+	K__Assert(style);
+	K__Assert(pos);
+	K__Assert(box_);
 
 	MARK mark = stack_.back();
 	stack_.pop_back();
@@ -840,7 +840,7 @@ void KTextParser::endStyle(const STYLE *style, const wchar_t *pos) {
 	}
 }
 void KTextParser::parse(KTextBox *textbox, const wchar_t *text) {
-	K_assert(text);
+	K__Assert(text);
 	box_ = textbox;
 
 	onBeginParse(box_);
@@ -1031,8 +1031,8 @@ void KTextLayout::setSize(int w, int h) {
 	m_textarea_h = m_talkbox_h - m_margin_top - m_margin_bottom;
 }
 void KTextLayout::setText2(const wchar_t *source_text) {
-	K_assert(m_textbox);
-	K_assert(m_default_style.fontsize >= 1);
+	K__Assert(m_textbox);
+	K__Assert(m_default_style.fontsize >= 1);
 
 	m_source_text = source_text;
 
@@ -1051,8 +1051,8 @@ void KTextLayout::layout(bool auto_adjust) {
 	}
 }
 void KTextLayout::layout_raw() {
-	K_assert(m_textbox);
-	K_assert(m_parser);
+	K__Assert(m_textbox);
+	K__Assert(m_parser);
 	m_has_adjusted = false;
 	m_textbox->clear();
 
@@ -1608,7 +1608,7 @@ void KTextDrawable::setText(const char *text_u8) {
 	setText(ws.c_str());
 }
 void KTextDrawable::setText(const wchar_t *text) {
-	K_assert(text);
+	K__Assert(text);
 	m_text = text;
 	m_should_update_mesh = true;
 }
@@ -1617,7 +1617,7 @@ void KTextDrawable::setFont(KFont &font) {
 	m_should_update_mesh = true;
 }
 void KTextDrawable::setFont(const char *alias) {
-	K_assert(alias);
+	K__Assert(alias);
 	KFont font = KBank::getFontBank()->getFont(alias, false);
 	if (!font.isOpen()) {
 		KLog::printError("E_FONT: NO FONT ALIASED '%s", alias);

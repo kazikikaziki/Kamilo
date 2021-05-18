@@ -156,8 +156,8 @@ public:
 		return -1;
 	}
 	void addScene(KSCENEID id, KScene *scene) {
-		K_assert(id >= 0);
-		K_assert(id < SCENE_ID_LIMIT);
+		K__Assert(id >= 0);
+		K__Assert(id < SCENE_ID_LIMIT);
 		if (getScene(id)) {
 			KLog::printWarning("W_SCENE_OVERWRITE: KScene with the same id '%d' already exists. The scene will be overwritten by new one.", id);
 			if (m_curr_scene.scene == getScene(id)) {

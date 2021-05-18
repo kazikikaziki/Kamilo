@@ -251,7 +251,7 @@ void KMeshDrawable::onDrawable_draw(KNode *node, const RenderArgs *opt, KDrawLis
 
 			// マテリアル
 			KMaterial *p_mat = getGroupingMaterial();
-			K_assert(p_mat);
+			K__Assert(p_mat);
 			KMaterial mat = *p_mat; // COPY
 			mat.texture = group_tex;
 

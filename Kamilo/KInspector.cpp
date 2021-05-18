@@ -246,9 +246,9 @@ public:
 			"  # # # # # # # "
 			"                "
 		};
-		K_assert(strlen(dat) == ICON_BMP_W * ICON_BMP_H);
-		K_assert(ICON_BMP_W <= ICON_TEX_W);
-		K_assert(ICON_BMP_H <= ICON_TEX_H);
+		K__Assert(strlen(dat) == ICON_BMP_W * ICON_BMP_H);
+		K__Assert(ICON_BMP_W <= ICON_TEX_W);
+		K__Assert(ICON_BMP_H <= ICON_TEX_H);
 		std::unordered_map<char, KColor32> map;
 		if (1) {
 			// Blue
@@ -460,7 +460,7 @@ private:
 
 	// ツリーノードの Enabled, Paused, Visibled ボタン
 	virtual void on_gui_node_buttons(KNode *node) {
-		K_assert(node);
+		K__Assert(node);
 
 		{
 			bool val = node->getEnable();
@@ -866,7 +866,7 @@ public:
 		std::sort(m_visible_list.begin(), m_visible_list.end(), CPred(*this));
 
 		// インスペクターで最初に表示されるシステム
-		K_assert(m_visible_list.size() > 0);
+		K__Assert(m_visible_list.size() > 0);
 		KInspectorCallback *top_item = m_visible_list[0];
 
 		// ソートキー
@@ -1113,8 +1113,8 @@ private:
 		m_subsystem_inspector.updatePanel();
 	}
 	bool get_world_view_size(int *w, int *h, KTEXID game_texid) const {
-		K_assert(w);
-		K_assert(h);
+		K__Assert(w);
+		K__Assert(h);
 		if (! m_visibled) return false;
 
 		KTexture *game_tex = KVideo::findTexture(game_texid);
@@ -1512,8 +1512,8 @@ bool KDebugGui::K_DebugGui_InputBlend(const char *label, KBlend *blend) {
 		"Max",    // KBlend_MAX
 		nullptr,     // (sentinel)
 	};
-	K_assert(blend);
-	K_assert(s_table[KBlend_ENUM_MAX] == nullptr);
+	K__Assert(blend);
+	K__Assert(s_table[KBlend_ENUM_MAX] == nullptr);
 	int val = *blend;
 	if (ImGui::Combo(label, &val, s_table, KBlend_ENUM_MAX)) {
 		*blend = (KBlend)val;
@@ -1527,8 +1527,8 @@ bool KDebugGui::K_DebugGui_InputFilter(const char *label, KFilter *filter) {
 		"Linear", // KFilter_LINEAR
 		nullptr,     // (sentinel)
 	};
-	K_assert(filter);
-	K_assert(s_table[KFilter_ENUM_MAX] == nullptr);
+	K__Assert(filter);
+	K__Assert(s_table[KFilter_ENUM_MAX] == nullptr);
 	int val = *filter;
 	if (ImGui::Combo(label, &val, s_table, KFilter_ENUM_MAX)) {
 		*filter = (KFilter)val;
@@ -2503,7 +2503,7 @@ void KDebugTree::update_gui() {
 
 	// ルート要素ごとに、そのツリーをGUIに追加していく
 	KNode *root = KNodeTree::getRoot();
-	K_assert(root);
+	K__Assert(root);
 	int num_roots = root->getChildCount();
 	for (int i=0; i<num_roots; i++) {
 		KNode *node = root->getChild(i);

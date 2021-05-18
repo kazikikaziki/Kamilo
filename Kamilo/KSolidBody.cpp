@@ -21,7 +21,7 @@ typedef std::vector<KSolidBody *> KBodyList;
 #pragma region Functions
 static bool _IsDebugInfoVisible(KNode *target, KNode *camera) {
 	if (target == nullptr) return false;
-	K_assert(camera);
+	K__Assert(camera);
 	if (! target->getEnableInTree()) return false;
 	if (! target->getVisibleInTree()) return false;
 
@@ -406,7 +406,7 @@ public:
 
 	#pragma region KManager
 	virtual void on_manager_end() override {
-		K_assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
+		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
 	}
 	virtual bool on_manager_isattached(KNode *node) override {
 		return getBody(node) != nullptr;
@@ -1154,7 +1154,7 @@ private:
 		}
 	}
 	void draw_staticbody_gizmo_each(KGizmo *gizmo, KSolidBody *cNode, const KMatrix4 &transform) const {
-		K_assert(cNode);
+		K__Assert(cNode);
 		if (cNode==nullptr || cNode->getNode()==nullptr) return;
 		const float line_alpha = _GetGizmoBlinkingAlpha(cNode->getNode());
 		KColor color(0.0f, 1.0f, 1.0f, line_alpha);
@@ -1348,7 +1348,7 @@ private:
 		// バウンドするための最低Ｙ速度を上回っている場合だけバウンド考慮する
 		float min_bounce = dyBody->m_Desc.get_bounce_min_speed();
 		float gravity = dyBody->m_Desc.get_gravity();
-		K_assert(min_bounce > 0);
+		K__Assert(min_bounce > 0);
 		// dySpeed.y ではなく実際の速度でバウンドするかどうかを決める。
 		// 重力下では常に下向きの加速度がかかっているため、dySpeed.y は重力加速度が影響した速度になってしまっている
 		// 見た目は静止していても下向きの速度が加算され続けるため、dySpeed.y では正しく判断できない
@@ -1383,8 +1383,8 @@ private:
 		}
 	}
 	void draw_dynamicbody_gizmo_each_unsafe(KGizmo *gizmo, KSolidBody *dyNode, const KMatrix4 &transform) {
-		K_assert(gizmo);
-		K_assert(dyNode);
+		K__Assert(gizmo);
+		K__Assert(dyNode);
 
 		KMatrix4 matrix;
 		dyNode->getNode()->getLocal2WorldMatrix(&matrix);
@@ -1445,7 +1445,7 @@ private:
 		}
 	}
 	void simple_move(KSolidBody *dyNode) {
-		K_assert(dyNode);
+		K__Assert(dyNode);
 
 		if (dyNode->getNode()->getPauseInTree()) {
 			return;
@@ -2149,46 +2149,46 @@ void Test_collision() {
 #ifdef _DEBUG
 	KVec3 c, s;
 
-	K_assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 100, 10, 0), KVec3(5, 5, 0), &c, &s));
-	K_assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(-100, 10, 0), KVec3(5, 5, 0), &c, &s));
-	K_assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10, 100, 0), KVec3(5, 5, 0), &c, &s));
-	K_assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10,-100, 0), KVec3(5, 5, 0), &c, &s));
+	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 100, 10, 0), KVec3(5, 5, 0), &c, &s));
+	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(-100, 10, 0), KVec3(5, 5, 0), &c, &s));
+	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10, 100, 0), KVec3(5, 5, 0), &c, &s));
+	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10,-100, 0), KVec3(5, 5, 0), &c, &s));
 
 	// 片方が片方を完全に内包している
-	K_assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 10), KVec3(0, 0, 0), KVec3(20, 20, 20), &c, &s));
-	K_assert(c == KVec3(0, 0, 0));
-	K_assert(s == KVec3(10, 10, 10));
+	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 10), KVec3(0, 0, 0), KVec3(20, 20, 20), &c, &s));
+	K__Assert(c == KVec3(0, 0, 0));
+	K__Assert(s == KVec3(10, 10, 10));
 
 	// めり込み深さ0の場合、つまり接しているだけの場合は衝突とみなす。
-	K_assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(5, 5, 0), &c, &s));
-	K_assert(c == KVec3(10, 10, 0));
-	K_assert(s == KVec3( 0,  0, 0));
+	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(5, 5, 0), &c, &s));
+	K__Assert(c == KVec3(10, 10, 0));
+	K__Assert(s == KVec3( 0,  0, 0));
 
-	K_assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(9, 9, 0), &c, &s));
-	K_assert(c == KVec3(8, 8, 0));
-	K_assert(s == KVec3(2, 2, 0));
+	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(9, 9, 0), &c, &s));
+	K__Assert(c == KVec3(8, 8, 0));
+	K__Assert(s == KVec3(2, 2, 0));
 	
-	K_assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 0, 100, 100, 0), -hypotf(50, 50))); // 点P(0, 0) と、A(0, 100) B(100, 0) を通る直線の距離。A から B を見た時、点Pは右側にあるので正の距離を返す
-	K_assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 100, 0, 0, 100),  hypotf(50, 50))); // 点P(0, 0) と、A(100, 0) B(0, 100) を通る直線の距離。A から B を見た時、点Pは左側にあるので負の距離を返す
+	K__Assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 0, 100, 100, 0), -hypotf(50, 50))); // 点P(0, 0) と、A(0, 100) B(100, 0) を通る直線の距離。A から B を見た時、点Pは右側にあるので正の距離を返す
+	K__Assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 100, 0, 0, 100),  hypotf(50, 50))); // 点P(0, 0) と、A(100, 0) B(0, 100) を通る直線の距離。A から B を見た時、点Pは左側にあるので負の距離を返す
 
 	// 円(0, 0, R=80) と点(50, 50) の衝突と解決。
 	// 衝突解決には、円を左下に向かって 80-hypotf(50, 50) だけ移動させる
 	float adj_x, adj_y;
-	K_assert(KCollisionMath::collisionCircleWithPoint2D(0,0,80,  50,50,  1.0f, &adj_x, &adj_y));
-	K_assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(50, 50)));
-	K_assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
+	K__Assert(KCollisionMath::collisionCircleWithPoint2D(0,0,80,  50,50,  1.0f, &adj_x, &adj_y));
+	K__Assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(50, 50)));
+	K__Assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
 
 	// 円(0, 0, R=80) と直線点 (90, 0)-(0, 90) の衝突と解決。
 	// 衝突解決には、円を左下に向かって 80-hypotf(90, 90)/2 だけ移動させる（直線の向きに対して右側にはじく）
-	K_assert(KCollisionMath::collisionCircleWithLine2D(0,0,80,  90,0,  0,90,  1.0f, &adj_x, &adj_y));
-	K_assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(90, 90)/2));
-	K_assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
+	K__Assert(KCollisionMath::collisionCircleWithLine2D(0,0,80,  90,0,  0,90,  1.0f, &adj_x, &adj_y));
+	K__Assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(90, 90)/2));
+	K__Assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
 
 	// 円１(0, 0, R=50) と円２(90, 0, R=50) の衝突と解決。
 	// 衝突解決には円１を左側に 10 だけ移動させる
-	K_assert(KCollisionMath::collisionCircleWithCircle2D(0,0,50,  90,0,50,  1.0f, &adj_x, &adj_y));
-	K_assert(KMath::equals(adj_x, -10));
-	K_assert(KMath::equals(adj_y,  0));
+	K__Assert(KCollisionMath::collisionCircleWithCircle2D(0,0,50,  90,0,50,  1.0f, &adj_x, &adj_y));
+	K__Assert(KMath::equals(adj_x, -10));
+	K__Assert(KMath::equals(adj_y,  0));
 #endif // _DEBUG
 }
 } // Test

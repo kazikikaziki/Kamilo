@@ -4,10 +4,12 @@
 /// http://opensource.org/licenses/mit-license.php
 
 #pragma once
+#include "KEdgeFile.h"
 #include "KFont.h"
 #include "KImagePack.h"
-#include "KEdgeFile.h"
+#include "KLua.h"
 #include "KNamedValues.h"
+#include "KStorage.h"
 #include "KString.h"
 
 
@@ -16,7 +18,6 @@ namespace Kamilo {
 class KEngine;
 class KFont;
 class KNode;
-class KStorage;
 
 class KResource: public virtual KRef {
 public:

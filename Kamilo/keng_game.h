@@ -4,6 +4,7 @@
 /// http://opensource.org/licenses/mit-license.php
 
 #pragma once
+#include <assert.h>
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
@@ -269,7 +270,7 @@ public:
 		m_Node = nullptr;
 	}
 	virtual ~KComp() {
-		K_assert(m_Node == nullptr); // 正しく解放されていれば、すでにノードからは切り離されているはず
+		assert(m_Node == nullptr); // 正しく解放されていれば、すでにノードからは切り離されているはず
 	}
 	KNode * getNode() {
 		return m_Node;
@@ -293,7 +294,7 @@ public:
 		KEngine::addManager(this);
 	}
 	virtual ~KManagerTmpl() {
-		K_assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
+		assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
 	}
 	virtual void on_manager_detach(KNode *node) override {
 		delComp(node);
@@ -306,8 +307,8 @@ public:
 	virtual void onCompRemoving(KNode *node, TComp *comp) {}
 
 	void addComp(KNode *node, TComp *comp) {
-		K_assert(node);
-		K_assert(comp);
+		assert(node);
+		assert(comp);
 		delComp(node);
 		m_Nodes[node] = comp;
 		comp->_setNode(node);

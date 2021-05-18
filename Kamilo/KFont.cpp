@@ -607,7 +607,7 @@ inline uint8_t kk_uint8_add(uint8_t a, uint8_t b) {
 /// 文字画像 (Alpha8) を右に1ドット太らせる
 static KImage Glyph_bold(const KImage *raw) {
 	if (raw==nullptr || raw->empty()) return KImage();
-	K_assert(raw->getFormat() == KColorFormat_INDEX8);
+	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
 	int sw = raw->getWidth();
 	int dw = sw + BOLD_INFLATE;
 	int h = raw->getHeight();
@@ -644,7 +644,7 @@ static KImage Glyph_bold(const KImage *raw) {
 /// 文字画像 (Alpha8) を上下左右に1ドット太らせる
 static KImage Glyph_inflate(const KImage *raw) {
 	if (raw==nullptr || raw->empty()) return KImage();
-	K_assert(raw->getFormat() == KColorFormat_INDEX8);
+	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
 	int w = raw->getWidth();
 	int h = raw->getHeight();
 	KImage img = KImage::createFromPixels(w+2, h+2, KColorFormat_INDEX8, nullptr);
@@ -682,8 +682,8 @@ static KImage Glyph_sub(const KImage *raw, int px, int py, const KImage *raw2) {
 	if (raw==nullptr || raw->empty())  return KImage();
 	if (raw2==nullptr || raw2->empty()) return *raw;
 
-	K_assert(raw->getFormat() == KColorFormat_INDEX8);
-	K_assert(raw2->getFormat()== KColorFormat_INDEX8);
+	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
+	K__Assert(raw2->getFormat()== KColorFormat_INDEX8);
 
 	// rawをコピー
 	KImage img = raw->clone();
@@ -769,8 +769,8 @@ float KFont::getKerningAdvanve(wchar_t chr1, wchar_t chr2, float fontsize) const
 }
 KGlyph KFont::getGlyph(wchar_t chr, float fontsize, KFont::Style style, bool with_alpha) const {
 	if (m_Impl == nullptr) return KGlyph();
-	K_assert(chr);
-	K_assert(fontsize > 0);
+	K__Assert(chr);
+	K__Assert(fontsize > 0);
 
 	KGlyph glyph;
 	

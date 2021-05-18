@@ -283,7 +283,7 @@ private:
 	void nodes_filter_by_frustum(KNodeArray &output, const KNodeArray &input, KNode *camera) {
 		for (auto it=input.begin(); it!=input.end(); ++it) {
 			KNode *node = *it;
-			K_assert(node);
+			K__Assert(node);
 
 			if (!node->getViewCullingInTree()) {
 				// カメラ範囲によるカリング無効。常に描画する
@@ -309,7 +309,7 @@ private:
 		if (cb) {
 			for (auto it=input.begin(); it!=input.end(); ++it) {
 				KNode *node = *it;
-				K_assert(node);
+				K__Assert(node);
 
 				bool skip = false;
 				cb->on_entityfilter_check(node, &skip);
@@ -404,8 +404,8 @@ private:
 
 	// ノードツリーを描画する
 	void renderNodeTree(KNode *node, const KMatrix4 &projection, const KMatrix4 &transform, KNode *camera, KDrawList *drawlist) {
-		K_assert(node);
-		K_assert(camera);
+		K__Assert(node);
+		K__Assert(camera);
 
 		// 子要素
 		int camera_layer = camera->getLayerInTree();
@@ -544,7 +544,7 @@ void KDrawable::_setNode(KNode *node) {
 }
 void KDrawable::on_node_render_aabb(KVec3 *aabb_min, KVec3 *aabb_max) {
 	KNode *self = getNode();
-	K_assert(self);
+	K__Assert(self);
 
 	// AABB
 	KVec3 lmin, lmax;
@@ -605,8 +605,8 @@ void KDrawable::onDrawable_willDraw(const KNode *camera) {
 void KDrawable::setGroupingImageSize(int w, int h, const KVec3 &pivot) {
 	if (w > 0 && h > 0) {
 		// レンダーターゲットのサイズが奇数になっていると、ドットバイドットでの描画が歪む
-		K_assert(w % 2 == 0);
-		K_assert(h % 2 == 0);
+		K__Assert(w % 2 == 0);
+		K__Assert(h % 2 == 0);
 		m_group_rentex_w = w;
 		m_group_rentex_h = h;
 		m_group_rentex_pivot = pivot;
@@ -668,7 +668,7 @@ void KDrawable::updateGroupRenderTextureAndMesh() {
 		target_tex = KVideo::findTexture(KBank::getTextureBank()->addRenderTexture(m_group_rentex_name, ren_w, ren_h));
 
 	} else if (target_tex->getWidth() != ren_w || target_tex->getHeight() != ren_h) {
-		K_assert(target_tex->isRenderTarget());
+		K__Assert(target_tex->isRenderTarget());
 		// サイズが違う
 		// 一度削除して再生成する
 		KBank::getTextureBank()->removeTexture(m_group_rentex_name);

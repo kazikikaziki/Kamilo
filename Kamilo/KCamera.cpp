@@ -441,7 +441,7 @@ public:
 		delCamera(node);
 	}
 	virtual void on_manager_end() override {
-		K_assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
+		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
 	}
 	virtual bool on_manager_isattached(KNode *node) override {
 		return m_Nodes.find(node) != m_Nodes.end();
