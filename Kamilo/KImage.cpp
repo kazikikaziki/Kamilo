@@ -429,7 +429,7 @@ KImage KImage::clone() const {
 	get_info(&w, &h, &fmt);
 	return KImage::createFromPixels(w, h, fmt, getData());
 }
-KImage KImage::cloneRect(int x, int y, int w, int h) {
+KImage KImage::cloneRect(int x, int y, int w, int h) const {
 	return KImage::createFromImageRect(*this, x, y, w, h);
 }
 std::string KImage::saveToMemory(int png_compress_level) const {

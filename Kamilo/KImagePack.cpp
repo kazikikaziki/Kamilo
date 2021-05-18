@@ -1,5 +1,6 @@
 ﻿#include "KImagePack.h"
 //
+#include "KCrc32.h"
 #include "KVec.h"
 #include "KStream.h"
 #include "KXml.h"
@@ -27,15 +28,18 @@ class CImgPackWImpl {
 public:
 	std::string m_Extra;
 	std::vector<KImgPackItem> m_Items;
+	std::unordered_map<uint32_t, int> m_Hash; // <hash, cellindex>
 	int m_CellSize;
 	int m_CellSpace;
 	int m_CellCount;
+	bool m_ExcludeDupCells;
 
-	explicit CImgPackWImpl(int cellsize) {
+	CImgPackWImpl(int cellsize, bool exclude_dup_cells) {
 		m_Items.clear();
 		m_CellSize = cellsize;
 		m_CellSpace = 0;
 		m_CellCount = 0;
+		m_ExcludeDupCells = exclude_dup_cells;
 	}
 	void setCellSize(int cellsize, int cellspace) {
 		m_Items.clear();
@@ -47,6 +51,8 @@ public:
 		return m_Items.empty();
 	}
 	void addImage(const KImage &img, const KImgPackExtraData *extra) {
+		int reduce_cells = 0;
+
 		KImgPackItem item;
 		item.img = img;
 		item.xcells = 0;
@@ -54,13 +60,30 @@ public:
 		item.pack_offset = m_CellCount;
 		if (extra) item.extra = *extra;
 		KImageUtils::scanOpaqueCells(img, m_CellSize, &item.cells, &item.xcells, &item.ycells);
+		if (m_ExcludeDupCells) {
+			// 重複確認。テスト用。重複除外をONにした場合、まだ復元できない！！！！！！！！！！！！！！！！！！！！！！
+			for (int i=item.cells.size()-1; i>=0; i--) {
+				int idx = item.cells[i];
+				int x = m_CellSize * (idx % item.xcells);
+				int y = m_CellSize * (idx / item.ycells);
+				KImage sub = img.cloneRect(x, y, m_CellSize, m_CellSize);
+				uint32_t hash = KCrc32::fromData(sub.getData(), sub.getDataSize());
+				if (m_Hash.find(hash) != m_Hash.end()) {
+					// 同一画像のセルが存在する
+					item.cells.erase(item.cells.begin() + i);
+					reduce_cells++;
+				} else {
+					m_Hash[hash] = i;
+				}
+			}
+		}
 		m_Items.push_back(item);
 		m_CellCount += item.cells.size();
 	}
 	bool getBestSize(int *w, int *h) const {
 		K__Assert(w && h);
 		const int BIGNUM = 1000000;
-		int max_width = 1024 * 4;
+		int max_width = 1024 * 8;
 		int best_w = 0;
 		int best_h = 0;
 		int best_loss = BIGNUM;
@@ -211,8 +234,8 @@ public:
 
 
 #pragma region KImgPackW
-KImgPackW::KImgPackW(int cellsize) {
-	m_Impl = std::shared_ptr<CImgPackWImpl>(new CImgPackWImpl(cellsize));
+KImgPackW::KImgPackW(int cellsize, bool exclude_dup_cells) {
+	m_Impl = std::shared_ptr<CImgPackWImpl>(new CImgPackWImpl(cellsize, exclude_dup_cells));
 }
 bool KImgPackW::empty() const {
 	return m_Impl->empty();

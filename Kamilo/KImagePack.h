@@ -44,7 +44,7 @@ class CImgPackWImpl; // internal
 /// パック画像を作成する
 class KImgPackW {
 public:
-	KImgPackW(int cellsize=16);
+	KImgPackW(int cellsize=16, bool exclude_dup_cells=false);
 
 	bool empty() const;
 
