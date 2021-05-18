@@ -16,6 +16,7 @@
 #include "KAudioPlayer.h"
 #include "KAutoHideCursor.h"
 #include "KCamera.h"
+#include "KChunkedFile.h"
 #include "KClipboard.h"
 #include "KClock.h"
 #include "KCollisionShape.h"

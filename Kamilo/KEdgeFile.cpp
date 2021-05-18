@@ -1,4 +1,6 @@
 ﻿#include "KEdgeFile.h"
+
+#include "KChunkedFile.h"
 #include "KZlib.h"
 #include "KInternal.h"
 
@@ -23,7 +25,7 @@ static KImage _MakeImage(int width, int height, int bitdepth) {
 	if (bitdepth == 8) {
 		return KImage::createFromPixels(width, height, KColorFormat_INDEX8, NULL);
 	}
-	K_assert(0);
+	K__Assert(0);
 	return KImage();
 }
 
@@ -212,7 +214,7 @@ KEdgeDocument::KEdgeDocument() {
 }
 KEdgeDocument::KEdgeDocument(const KEdgeDocument *source, bool copy_pages) {
 	bool copy_palettes = true;
-	K_assert(source);
+	K__Assert(source);
 	m_compression_flag = source->m_compression_flag;
 	m_bit_depth = source->m_bit_depth;
 	{
@@ -250,7 +252,7 @@ KEdgeDocument::KEdgeDocument(const KEdgeDocument *source, bool copy_pages) {
 		}
 	}
 	if (copy_palettes) {
-		K_assert(m_palettes.empty());
+		K__Assert(m_palettes.empty());
 		for (size_t i=0; i<source->m_palettes.size(); i++) {
 			KEdgePalette *p = source->m_palettes[i];
 			m_palettes.push_back(new KEdgePalette(p));
@@ -512,7 +514,7 @@ KImage KEdgeDocument::exportSurfaceRaw(int pageindex, int layerindex, int transp
 	return output;
 }
 static KImage kk_ImageFromRGB24(int w, int h, const uint8_t *pixels, const uint8_t *transparent_color_BGR) {
-	if (w <= 0 || h <= 0 || pixels == NULL) { KLog::printError("invalid argument"); return KImage(); }
+	if (w <= 0 || h <= 0 || pixels == NULL) { K__Error("invalid argument"); return KImage(); }
 	KEdgeBin buf(w * h * 4, '\0');
 	uint8_t *buf_p = (uint8_t*)&buf[0];
 	const uint8_t *t = transparent_color_BGR;
@@ -534,9 +536,9 @@ static KImage kk_ImageFromRGB24(int w, int h, const uint8_t *pixels, const uint8
 }
 
 static KImage kk_ImageFromIndexed(int w, int h, const uint8_t *indexed_format_pixels, const uint8_t *palette_colors_BGR, int transparent_color_index) {
-	if (w <= 0 || h <= 0) { KLog::printError("invalid argument"); return KImage(); }
-	K_assert(indexed_format_pixels);
-	K_assert(palette_colors_BGR);
+	if (w <= 0 || h <= 0) { K__Error("invalid argument"); return KImage(); }
+	K__Assert(indexed_format_pixels);
+	K__Assert(palette_colors_BGR);
 	const int dstPitch = w * 4;
 	KEdgeBin buf(w * h * 4, '\0');
 	uint8_t *buf_p = (uint8_t*)&buf[0];
@@ -598,23 +600,23 @@ KImage KEdgeDocument::exportSurface(int pageindex, int layerindex, int palettein
 /// @param off_b  （略）
 /// @param off_a  （略）
 static KImage kk_ImageFromChannels(const KImage *src_r, const KImage *src_g, const KImage *src_b, const KImage *src_a, int off_r, int off_g, int off_b, int off_a) {
-	K_assert(src_r);
-	K_assert(src_g);
-	K_assert(src_b);
-	K_assert(src_a);
-	if(off_r < 0 || 4 <= off_r) { KLog::printError("Invalid offset bytes for R channel"); return KImage(); }
-	if(off_g < 0 || 4 <= off_g) { KLog::printError("Invalid offset bytes for G channel"); return KImage(); }
-	if(off_b < 0 || 4 <= off_b) { KLog::printError("Invalid offset bytes for B channel"); return KImage(); }
-	if(off_a < 0 || 4 <= off_a) { KLog::printError("Invalid offset bytes for A channel"); return KImage(); }
+	K__Assert(src_r);
+	K__Assert(src_g);
+	K__Assert(src_b);
+	K__Assert(src_a);
+	if(off_r < 0 || 4 <= off_r) { K__Error("Invalid offset bytes for R channel"); return KImage(); }
+	if(off_g < 0 || 4 <= off_g) { K__Error("Invalid offset bytes for G channel"); return KImage(); }
+	if(off_b < 0 || 4 <= off_b) { K__Error("Invalid offset bytes for B channel"); return KImage(); }
+	if(off_a < 0 || 4 <= off_a) { K__Error("Invalid offset bytes for A channel"); return KImage(); }
 	// すべてのサーフェスでサイズが一致することを確認
 	const int w = src_r->getWidth();
 	const int h = src_r->getHeight();
-	if (w <= 0 || h <= 0) { KLog::printError("Invalid image size"); return KImage(); }
+	if (w <= 0 || h <= 0) { K__Error("Invalid image size"); return KImage(); }
 	const bool size_r_ok = (src_r->getWidth()==w && src_r->getHeight()==h);
 	const bool size_g_ok = (src_g->getWidth()==w && src_g->getHeight()==h);
 	const bool size_b_ok = (src_b->getWidth()==w && src_b->getHeight()==h);
 	const bool size_a_ok = (src_a->getWidth()==w && src_a->getHeight()==h);
-	if (!size_r_ok || !size_g_ok || !size_b_ok || !size_a_ok) { KLog::printError("Source images have different sizes"); return KImage(); }
+	if (!size_r_ok || !size_g_ok || !size_b_ok || !size_a_ok) { K__Error("Source images have different sizes"); return KImage(); }
 	// 準備
 	KImage out = KImage::createFromPixels(w, h, KColorFormat_RGBA32, NULL);
 	// RGBAそれぞれのチャンネルを合成する
@@ -623,7 +625,7 @@ static KImage kk_ImageFromChannels(const KImage *src_r, const KImage *src_g, con
 	const uint8_t *src_p_b = src_b->getData();
 	const uint8_t *src_p_a = src_a->getData();
 	uint8_t *dstP = out.lockData();
-	K_assert(dstP);
+	K__Assert(dstP);
 	for (int y=0; y<h; y++) {
 		for (int x=0; x<w; x++) {
 			const int i = (w * y + x) * 4;
@@ -686,23 +688,23 @@ int KEdgeDocument::findColorIndex(int paletteindex, uint8_t r, uint8_t g, uint8_
 /// 書き込みに成功すれば true を返す
 bool KEdgeDocument::writeImageToLayer(int pageindex, int layerindex, int paletteindex, const KImage *image) {
 	if (image == NULL) {
-		KLog::printError("E_INVALID_ARGUMENT");
+		K__Error("E_INVALID_ARGUMENT");
 		return false;
 	}
 	if (image->getBytesPerPixel() != 3) {
-		KLog::printError("E_EDGE_INVALID_BYTES_PER_PIXEL: %d", image->getBytesPerPixel());
+		K__Error("E_EDGE_INVALID_BYTES_PER_PIXEL: %d", image->getBytesPerPixel());
 		return false;
 	}
 
 	KEdgePage *page = getPage(pageindex);
 	if (page == NULL) {
-		KLog::printError("E_EDGE_INVALID_PAGE_INDEX: PAGE=%d/%d", pageindex, getPageCount());
+		K__Error("E_EDGE_INVALID_PAGE_INDEX: PAGE=%d/%d", pageindex, getPageCount());
 		return false;
 	}
 
 	KEdgeLayer *layer = page->getLayer(layerindex);
 	if (layer == NULL) {
-		KLog::printError("E_EDGE_INVALID_LAYER_INDEX: PAGE=%d, LAYER=%d/%d", pageindex, layerindex, page->getLayerCount());
+		K__Error("E_EDGE_INVALID_LAYER_INDEX: PAGE=%d, LAYER=%d/%d", pageindex, layerindex, page->getLayerCount());
 		return false;
 	}
 
@@ -759,7 +761,7 @@ bool KEdgeDocument::writeImageToLayer(int pageindex, int layerindex, int palette
 		return true;
 	}
 
-	KLog::printError("E_EDGE_INVALID_BIT_DEPTH: DEPTH=%d, PAGE=%d, LAYER=%d", m_bit_depth, pageindex, layerindex);
+	K__Error("E_EDGE_INVALID_BIT_DEPTH: DEPTH=%d, PAGE=%d, LAYER=%d", m_bit_depth, pageindex, layerindex);
 	return false;
 }
 #pragma endregion // KEdgeDocument
@@ -819,18 +821,18 @@ bool KEdgePalReader::loadFromStream(KInputStream &file) {
 	}
 	// 展開後のデータサイズ
 	uint32_t uzsize = file.readUint32();
-	K_assert(uzsize > 0);
+	K__Assert(uzsize > 0);
 
 	// 圧縮データ
 	int zsize = file.size() - file.tell();
 	KEdgeBin zbin = file.readBin(zsize);
-	K_assert(zsize > 0);
-	K_assert(! zbin.empty());
+	K__Assert(zsize > 0);
+	K__Assert(! zbin.empty());
 
 	// 展開
 	KEdgeBin bin = KZlib::uncompress_zlib(zbin.data(), zsize, uzsize);
-	K_assert(! bin.empty());
-	K_assert(bin.size() == uzsize);
+	K__Assert(! bin.empty());
+	K__Assert(bin.size() == uzsize);
 
 	KChunkedFileReader::init(bin.data(), bin.size());
 
@@ -883,7 +885,7 @@ int KEdgeRawReader::read(KEdgeDocument *e, KInputStream &file) {
 }
 
 KEdgeBin KEdgeRawReader::unzip(KInputStream &file, uint16_t *zflag) {
-	K_verify(zflag);
+	K__Verify(zflag);
 
 	// 識別子
 	{
@@ -899,18 +901,18 @@ KEdgeBin KEdgeRawReader::unzip(KInputStream &file, uint16_t *zflag) {
 	// 展開後のデータサイズ
 	uint32_t uzsize;
 	file.read(&uzsize, 4);
-	K_assert(uzsize > 0);
+	K__Assert(uzsize > 0);
 
 	// 圧縮データ
 	int zsize = file.size() - file.tell();
 	KEdgeBin zbin = file.readBin(zsize);
-	K_assert(zsize > 0);
-	K_assert(! zbin.empty());
+	K__Assert(zsize > 0);
+	K__Assert(! zbin.empty());
 
 	// 展開
 	KEdgeBin uzbin = KZlib::uncompress_zlib(zbin, uzsize);
-	K_assert(! uzbin.empty());
-	K_assert(uzbin.size() == uzsize);
+	K__Assert(! uzbin.empty());
+	K__Assert(uzbin.size() == uzsize);
 
 	return uzbin;
 }
@@ -928,7 +930,7 @@ void KEdgeRawReader::scanLayer(KEdgeDocument *e, KEdgePage *page, KEdgeLayer *la
 	{
 		layer->m_image_rgb24 = _MakeImage(page->m_width, page->m_height, e->m_bit_depth);
 		uint8_t *p = layer->m_image_rgb24.lockData();
-		K_assert(p);
+		K__Assert(p);
 		uint32_t len = page->m_width * page->m_height * e->m_bit_depth / 8;
 		readChunk(0x03ee, len, p); // 8bit palette or 24bit BGR
 		layer->m_image_rgb24.unlockData();
@@ -1106,9 +1108,9 @@ void KEdgeRawWriter::write(KEdgeDocument *e, KOutputStream &file) {
 	writeCompressedEdge(file);
 }
 void KEdgeRawWriter::writeLayer(KEdgePage *page, int layerindex, int bitdepth) {
-	K_assert(page);
+	K__Assert(page);
 	KEdgeLayer *layer = page->getLayer(layerindex);
-	K_assert(layer);
+	K__Assert(layer);
 
 	std::string label_mb = K::strUtf8ToAnsi(layer->m_label_u8, EDGE2_STRING_ENCODING);
 	writeChunkN(0x03e8, label_mb.c_str());
@@ -1122,7 +1124,7 @@ void KEdgeRawWriter::writeLayer(KEdgePage *page, int layerindex, int bitdepth) {
 		uint32_t pixels_size = page->m_width * page->m_height * bitdepth/8;
 		uint8_t * pixels_ptr = layer->m_image_rgb24.lockData();
 		if (pixels_ptr) {
-			K_assert(pixels_size == (uint32_t)layer->m_image_rgb24.getDataSize());
+			K__Assert(pixels_size == (uint32_t)layer->m_image_rgb24.getDataSize());
 			writeChunkN(0x03ee, pixels_size, pixels_ptr);
 			layer->m_image_rgb24.unlockData();
 		} else {
@@ -1140,11 +1142,11 @@ void KEdgeRawWriter::writeLayer(KEdgePage *page, int layerindex, int bitdepth) {
 }
 
 void KEdgeRawWriter::writePage(KEdgeDocument *e, int pageindex) {
-	K_assert(e);
+	K__Assert(e);
 	KEdgePage *page = e->getPage(pageindex);
-	K_assert(page);
-	K_assert(page->m_width > 0);
-	K_assert(page->m_height > 0);
+	K__Assert(page);
+	K__Assert(page->m_width > 0);
+	K__Assert(page->m_height > 0);
 
 	std::string label_mb = K::strUtf8ToAnsi(page->m_label_u8, EDGE2_STRING_ENCODING);
 	writeChunkN(0x03e8, label_mb.c_str());
@@ -1164,7 +1166,7 @@ void KEdgeRawWriter::writePage(KEdgeDocument *e, int pageindex) {
 	writeChunk2(0x07d2, numLayers);
 
 	// Layers
-	K_assert(numLayers > 0);
+	K__Assert(numLayers > 0);
 	for (uint16_t i=0; i<numLayers; i++) {
 		openChunk(0x07d3);
 		writeLayer(page, i, e->m_bit_depth);
@@ -1181,8 +1183,8 @@ void KEdgeRawWriter::writePage(KEdgeDocument *e, int pageindex) {
 }
 
 void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
-	K_assert(e);
-	K_assert(e->m_bit_depth==8 || e->m_bit_depth==24);
+	K__Assert(e);
+	K__Assert(e->m_bit_depth==8 || e->m_bit_depth==24);
 
 	writeChunk1(0x03e8, e->m_bit_depth);
 	writeChunk1(0x03e9, e->m_data_a);
@@ -1211,7 +1213,7 @@ void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
 	writeChunk1(0x07d2, e->m_data_g);
 
 	// Pages
-	K_assert(numPages > 0);
+	K__Assert(numPages > 0);
 	for (uint16_t i=0; i<numPages; i++) {
 		openChunk(0x07d3);
 		writePage(e, i);
@@ -1226,7 +1228,7 @@ void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
 	writeChunk4(0x0bba, e->m_data_j);
 
 	// Palettes
-	K_assert(numPalettes > 0);
+	K__Assert(numPalettes > 0);
 	for (uint16_t i=0; i<numPalettes; i++) {
 		openChunk(0x0bbb);
 		const KEdgePalette *pal = e->m_palettes[i];
@@ -1276,7 +1278,7 @@ void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
 
 void KEdgeRawWriter::writeCompressedEdge(KOutputStream &file) const {
 	if (!file.isOpen()) {
-		K_verify(NULL);
+		K__ERROR();
 		return;
 	}
 	// 圧縮前のサイズ
@@ -1296,7 +1298,7 @@ void KEdgeRawWriter::writeCompressedEdge(KOutputStream &file) const {
 
 void KEdgeRawWriter::writeUncompressedEdge(KEdgeDocument *e) {
 	if (e == NULL) {
-		K_verify(NULL);
+		K__ERROR();
 		return;
 	}
 	// 初期化
@@ -1361,7 +1363,7 @@ void KEdgeWriter::addPage(const KImage *img, int delay) {
 	}
 }
 void KEdgeWriter::saveToStream(KOutputStream &file) {
-	K_assert(m_doc);
+	K__Assert(m_doc);
 	m_doc->saveToStream(file);
 }
 #pragma endregion // KEdgeWriter

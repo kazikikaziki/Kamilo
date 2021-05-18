@@ -2,8 +2,8 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
+#include "KChunkedFile.h"
 #include "KImage.h"
-#include "keng_ext.h"
 
 namespace Kamilo {
 
