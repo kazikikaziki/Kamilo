@@ -54,6 +54,7 @@
 #include "KRand.h"
 #include "KRef.h"
 #include "KRes.h"
+#include "KScene.h"
 #include "KScreen.h"
 #include "KShadow.h"
 #include "KSig.h"
