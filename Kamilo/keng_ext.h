@@ -186,37 +186,6 @@ private:
 
 
 
-class KLuaBankCallback {
-public:
-	virtual void on_luabank_load(lua_State *ls, const std::string &name) = 0;
-};
-
-class KLuaBank {
-public:
-	KLuaBank();
-	~KLuaBank();
-
-	void setStorage(KStorage &storage);
-	void setCallback(KLuaBankCallback *cb);
-
-	lua_State * addEmptyScript(const std::string &name);
-	lua_State * findScript(const std::string &name) const;
-	lua_State * queryScript(const std::string &name, bool reload=false);
-	lua_State * makeThread(const std::string &name);
-	bool contains(const std::string &name) const;
-	void remove(const std::string &name);
-	void clear();
-	bool addScript(const std::string &name, const std::string &code);
-
-private:
-	std::unordered_map<std::string, lua_State *> m_items;
-	mutable std::recursive_mutex m_mutex;
-	KLuaBankCallback *m_cb;
-	KStorage m_storage;
-};
-
-
-
 #pragma region Math.h
 
 
