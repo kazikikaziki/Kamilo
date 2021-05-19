@@ -391,8 +391,8 @@ public:
 	static float K_GeomDistancePointToAabb(const KVec3 &p, const KVec3 &aabb_min, const KVec3 &aabb_max);
 
 	/// XY平面上で (ax, ay) から (bx, by) を見ている時に点(px, py) が視線の左右どちらにあるか
-	/// 右なら正の値、左なら負の値、視線上にあるなら 0 を返す
-	static float K_GeomPointIsRight2D(float px, float py, float ax, float ay, float bx, float by);
+	/// 左なら正の値、右なら負の値、視線上にあるなら 0 を返す
+	static float K_GeomPointIsLeft2D(float px, float py, float ax, float ay, float bx, float by);
 
 	/// 三角形 abc の法線ベクトルを得る（時計回りの並びを表とする）
 	/// 点または線分に縮退している場合は法線を定義できず false を返す。成功すれば out_cw_normalized_normal に正規化された法線をセットする
@@ -630,6 +630,7 @@ struct KCapsule {
 namespace Test {
 void Test_num();
 void Test_bezier();
+void Test_geom();
 }
 
 

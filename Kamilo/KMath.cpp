@@ -275,9 +275,9 @@ float KMath::triangle_wave(int t, int cycle) {
 #pragma region KGeom
 static float _SQ(float x) { return x * x; }
 
-float KGeom::K_GeomPointIsRight2D(float px, float py, float ax, float ay, float bx, float by) {
+float KGeom::K_GeomPointIsLeft2D(float px, float py, float ax, float ay, float bx, float by) {
 	// XY平面上で (ax, ay) から (bx, by) を見ている時に点(px, py) が視線の左右どちらにあるか
-	// 右なら正の値、左なら負の値、視線上にあるなら 0 を返す
+	// 左なら正の値、右なら負の値、視線上にあるなら 0 を返す
 	float Ax = bx - ax;
 	float Ay = by - ay;
 	float Bx = px - ax;
@@ -295,37 +295,39 @@ bool KGeom::K_GeomTriangleNormal(const KVec3 &a, const KVec3 &b, const KVec3 &c,
 }
 bool KGeom::K_GeomPointInTriangle(const KVec3 &p, const KVec3 &a, const KVec3 &b, const KVec3 &c) {
 	// 点 p が三角形 abc 内にあるか判定する
-	KVec3 ab = b - a;
-	KVec3 bp = p - b;
+	KVec3 v1 = (b-a).cross(p-a); // 点 a から b と p を見る
+	KVec3 v2 = (c-b).cross(p-b); // 点 b から c と p を見る
+	KVec3 v3 = (a-c).cross(p-c); // 点 c から a と p を見る
 
-	KVec3 bc = c - b;
-	KVec3 cp = p - c;
+	if (!v1.isZero()) v1 = v1.getNormalized();
+	if (!v2.isZero()) v2 = v2.getNormalized();
+	if (!v3.isZero()) v3 = v3.getNormalized();
 
-	KVec3 ca = a - c;
-	KVec3 ap = p - a;
-
-	KVec3 v1, v2, v3;
-
-	KVec3 ab_x_bp = ab.cross(bp);
-	KVec3 bc_x_cp = bc.cross(cp);
-	KVec3 ca_x_ap = ca.cross(ap);
-
-	bool on_edge = false;
-	if (!ab_x_bp.getNormalizedSafe(&v1)) on_edge = true;
-	if (!bc_x_cp.getNormalizedSafe(&v2)) on_edge = true;
-	if (!ca_x_ap.getNormalizedSafe(&v3)) on_edge = true;
-	if (on_edge) {
-		// p が abc の辺に重なっている場合は三角形内部とみなす
-		// ※連続する三角形から成る図形について判定したいときに、境界線の部分を図形内部として判定できるように
-		return true;
-	}
-
-	// この三つの外積ベクトル v1 v2 v3 の向きがそろっていればよい。
-	// 向きが同じかどうかを内積で調べる
+	// 外積同士の向きが一致しているかどうか確かめるため、外積同士の内積をとる
 	float dot12 = v1.dot(v2);
 	float dot13 = v1.dot(v3);
+	float dot23 = v2.dot(v3);
 
-	return (dot12 > 0 && dot13 > 0); // 両方とも正の値（同一方向）ならOK
+	// 3個の内積値の正負の組み合わせで点がどの場所にあるかを判定する。
+	// 
+	// これには必ず３個の値すべてを調べる必要がある。
+	// 点が確実に三角形内部にある場合はどれか2組だけ調べればよいが、
+	// 点が辺に重なる場合や頂点に重なる場合は外積が 0 になるため、残り2点で判定する必要がある。
+	// 以下に正負の組み合わせを示す
+	//
+	// + + + = 3個の正           = 点 p は abc の内部にある
+	// + + 0 = 2個の正と1個のゼロ = 点 p は辺のどれかに重なる
+	// + 0 0 = 1個の正と2個のゼロ = 点 p は頂点のどれかに重なる
+	// 0 0 0 = 3個のゼロ         = 点 p および三角形が1点に縮退している
+	// 0 0 - = 2個のゼロと1個の負 = 点 p は abc の外部にあり、辺の延長線上にある
+	// それ以外                  = 点 p は abc の外部にあり、どの辺の延長線上にもない
+	// 
+	// 以上のことから、負の値を全く含まない場合に三角形内部にあると判定する
+
+	if (dot12>=0 && dot13>=0 && dot23>=0) {
+		return true;
+	}
+	return false;
 }
 KVec3 KGeom::K_GeomPerpendicularToLineVector(const KVec3 &p, const KVec3 &a, const KVec3 &b) {
 	// 点 p から直線 ab におろした垂線のベクトル
@@ -635,11 +637,7 @@ bool KCollisionMath::isAabbIntersected(const KVec3 &pos1, const KVec3 &halfsize1
 	return true;
 }
 float KCollisionMath::getPointInLeft2D(float px, float py, float ax, float ay, float bx, float by) {
-	float ab_x = bx - ax;
-	float ab_y = by - ay;
-	float ap_x = px - ax;
-	float ap_y = py - ay;
-	return ab_x * ap_y - ab_y * ap_x;
+	return KGeom::K_GeomPointIsLeft2D(px, py, ax, ay, bx, by);
 }
 float KCollisionMath::getSignedDistanceOfLinePoint2D(float px, float py, float ax, float ay, float bx, float by) {
 	float ab_x = bx - ax;
@@ -2095,6 +2093,24 @@ void Test_bezier() {
 	}
 	#undef RND
 }
+
+void Test_geom() {
+	// 三角形の内部
+	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(50, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+
+	// 三角形の辺に重なる場合も内部とみなす
+	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+
+	// 三角形の頂点に重なる場合も内部とみなす
+	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+
+	// 三角形の外部
+	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(200, 0, 200), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
+
+	// 三角形の外部（三角形の辺の延長線上にぴったり重なっている場合。外積をとるとゼロになってしまうので判定に注意が必要）
+	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(-250, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
+}
+
 } // Test
 
 
