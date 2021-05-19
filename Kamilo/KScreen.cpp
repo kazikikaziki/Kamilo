@@ -553,13 +553,6 @@ private:
 		// パス[0]はデフォルトで表示される画面なので、これに対して追加の描画を行う
 		KTexture *target = KVideo::findTexture(m_pass_tex[0]);
 
-		// デバッグ情報
-		if (m_show_debug) {
-			CRenderFilter filter;
-			filter.m_selections_only = false;
-			render_debug(m_tmp_cameralist, start, &filter, target ? target->getId() : nullptr);
-		}
-
 		// 強調オブジェクトの輪郭（インスペクター用）
 		if (KInspector::isInstalled()) {
 			if (KInspector::isVisible() && KInspector::isHighlightSelectionsEnabled()) {
@@ -599,7 +592,15 @@ private:
 				KVideo::popRenderTarget();
 			}
 		}
-		// デバッグ情報
+
+		// ノードごとのデバッグ情報
+		if (m_show_debug) {
+			CRenderFilter filter;
+			filter.m_selections_only = false;
+			render_debug(m_tmp_cameralist, start, &filter, target ? target->getId() : nullptr);
+		}
+
+		// マネージャごとのデバッグ情報
 		if (m_show_debug2 && m_mgr_call_renderdebug.size() > 0) {
 			KVideo::pushRenderTarget(target->getId());
 			CRenderFilter filter;

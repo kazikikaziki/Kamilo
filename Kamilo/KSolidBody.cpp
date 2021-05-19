@@ -24,12 +24,14 @@ static bool _IsDebugInfoVisible(KNode *target, KNode *camera) {
 	K__Assert(camera);
 	if (! target->getEnableInTree()) return false;
 	if (! target->getVisibleInTree()) return false;
-
+	/*
 	if (KInspector::isInstalled()) {
 		if (KInspector::isEntityVisible(target)) {
 			return false;
 		}
 	}
+	*/
+
 	// 対応するカメラ
 	KNode *cameraOfTarget = KCamera::findCameraFor(target);
 	if (cameraOfTarget == nullptr) {
