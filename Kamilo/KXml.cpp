@@ -250,7 +250,7 @@ KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const 
 	if (_LoadTinyXml(xmlTextU8, filename, tiDoc, &tiErrMsg)) {
 		return CXNode::createFromTinyXml(&tiDoc);
 	}
-	K__Error("Failed to read xml: %s: %s", filename, tiErrMsg.c_str());
+	K__Error("Failed to read xml: %s: %s", filename.c_str(), tiErrMsg.c_str());
 	return nullptr;
 }
 
