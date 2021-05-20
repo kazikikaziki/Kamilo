@@ -95,6 +95,7 @@ public:
 			_sleep_time = 0;
 			_mask_bits  = 0xFFFFFFFF;
 			_is_static = true;
+			_slip_slower_than = 0;
 			knode = nullptr;
 		}
 		// 前フレームでの速度から算出した、実際の加速度
@@ -171,6 +172,7 @@ public:
 		KVec3 _velocity;
 		float _altitude; // 高度。形状の底面から地面までの距離（地面存在せず高度が定義できない場合は altitude=0, has_altitude=false になる）
 		bool _has_altitude; // altitude に有効な値が入っているなら true になる。 地面が全く存在しない場合は false になる
+		float _slip_slower_than; // ゆっくり移動していれば衝突しても横にそれるが、この速度以上の場合は横にそれずに（進行方向が変化しないで）その場で停止する
 		KNode *_ground_node;
 		KNodeArray _hits_with; // 他の Body との接触
 		int _sleep_time;

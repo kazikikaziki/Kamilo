@@ -1604,15 +1604,34 @@ private:
 			if (num_hits > 0) {
 				// 衝突した。めりこみ解消位置に移動する
 
+				// ゆっくり移動しているときはスリップするが、高速で衝突したら逸れずにその場で止まる
+				bool allow_slip = true; // デフォルトでは常に衝突スリップ可能
+				if (dyNode->m_Desc._slip_slower_than > 0) {
+					const KVec3 &vel = dyNode->m_Desc.get_velocity();
+					if (dyNode->m_Desc._slip_slower_than <= vel.getLength()) {
+						// 現在の速度が dyNode->m_Desc._slip_slower_than 以上になった。衝突してもスリップせずにその場で停止する
+						allow_slip = false;
+					}
+				}
+
 				// 衝突壁が１個だけの場合、裏側からの衝突は無視してよい
 				if (num_hits == 1) {
 					float dot = dyNode->m_Desc.get_velocity().dot(hitlist[0].normal);
 					if (dot > 0) {
 						// 移動方向と法線向きが同じ
 					} else {
-						KVec3 pos = dyNode->getNode()->getPosition();
-						pos += hitlist[0].delta;
-						dyNode->getNode()->setPosition(pos);
+						if (allow_slip) {
+							KVec3 pos = dyNode->getNode()->getPosition();
+							pos += hitlist[0].delta;
+							dyNode->getNode()->setPosition(pos);
+						} else {
+							// スリップなし。進行方向を変更しないように、その場で停止する。
+							// 座標は古い位置のままになる
+							KVec3 pos = dyNode->getNode()->getPosition();
+							KVec3 vel = dyNode->m_Desc.get_velocity();
+							pos -= vel;
+							dyNode->getNode()->setPosition(pos);
+						}
 					}
 				} else {
 					// 複数の壁とヒットしている。
@@ -1628,13 +1647,22 @@ private:
 					// 〇は常にBCと衝突し押し返されることにより左に移動しているが、
 					// 〇の速度設定は AB よりも垂直に近くなっており、ABの法線と〇の速度が同じ向きになってしまうためABはそのまますり抜けてしまう
 
-					KVec3 pos = dyNode->getNode()->getPosition();
-					for (int i=0; i<num_hits; i++) {
-						const HIT &hit = hitlist[i];
-					//	float dot = dyNodee->vel.speed.dot(hit.normal);
-						pos += hit.delta;
+					if (allow_slip) {
+						KVec3 pos = dyNode->getNode()->getPosition();
+						for (int i=0; i<num_hits; i++) {
+							const HIT &hit = hitlist[i];
+						//	float dot = dyNodee->vel.speed.dot(hit.normal);
+							pos += hit.delta;
+						}
+						dyNode->getNode()->setPosition(pos);
+					} else {
+						// スリップなし。進行方向を変更しないように、その場で停止する。
+						// 座標は古い位置のままになる
+						KVec3 pos = dyNode->getNode()->getPosition();
+						KVec3 vel = dyNode->m_Desc.get_velocity();
+						pos -= vel;
+						dyNode->getNode()->setPosition(pos);
 					}
-					dyNode->getNode()->setPosition(pos);
 				}
 			}
 
