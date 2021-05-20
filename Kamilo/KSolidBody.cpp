@@ -1620,18 +1620,16 @@ private:
 					if (dot > 0) {
 						// 移動方向と法線向きが同じ
 					} else {
-						if (allow_slip) {
-							KVec3 pos = dyNode->getNode()->getPosition();
-							pos += hitlist[0].delta;
-							dyNode->getNode()->setPosition(pos);
-						} else {
-							// スリップなし。進行方向を変更しないように、その場で停止する。
-							// 座標は古い位置のままになる
-							KVec3 pos = dyNode->getNode()->getPosition();
+						KVec3 pos = dyNode->getNode()->getPosition();
+						KVec3 newpos = pos + hitlist[0].delta; // スリップ込みの新座標
+						if (!allow_slip) {
+							// スリップなしの場合はXYを移動前の位置に戻す
+							// ※Yはスリップしたままで良い、そうしないと壁にぶつかったときに落下してくれない）
 							KVec3 vel = dyNode->m_Desc.get_velocity();
-							pos -= vel;
-							dyNode->getNode()->setPosition(pos);
+							newpos.x = pos.x - vel.x; // 速度適用前の位置. newpos ではなく pos から引くことに注意
+							newpos.z = pos.z - vel.z;
 						}
+						dyNode->getNode()->setPosition(newpos);
 					}
 				} else {
 					// 複数の壁とヒットしている。
@@ -1646,23 +1644,22 @@ private:
 					// という地形があり、〇の速度がABよりも（BCに対して）垂直に近い速度（決して垂直ではない）設定されていて、〇本体をBCにこすりつけながら左に移動しているとする。
 					// 〇は常にBCと衝突し押し返されることにより左に移動しているが、
 					// 〇の速度設定は AB よりも垂直に近くなっており、ABの法線と〇の速度が同じ向きになってしまうためABはそのまますり抜けてしまう
+					KVec3 pos = dyNode->getNode()->getPosition();
+					KVec3 newpos = pos;
 
-					if (allow_slip) {
-						KVec3 pos = dyNode->getNode()->getPosition();
-						for (int i=0; i<num_hits; i++) {
-							const HIT &hit = hitlist[i];
-						//	float dot = dyNodee->vel.speed.dot(hit.normal);
-							pos += hit.delta;
-						}
-						dyNode->getNode()->setPosition(pos);
-					} else {
-						// スリップなし。進行方向を変更しないように、その場で停止する。
-						// 座標は古い位置のままになる
-						KVec3 pos = dyNode->getNode()->getPosition();
-						KVec3 vel = dyNode->m_Desc.get_velocity();
-						pos -= vel;
-						dyNode->getNode()->setPosition(pos);
+					// まずスリップありの新座標を得る
+					for (int i=0; i<num_hits; i++) {
+						const HIT &hit = hitlist[i];
+						newpos += hit.delta;
 					}
+					if (!allow_slip) {
+						// スリップなしの場合はXYを移動前の位置に戻す
+						// ※Yはスリップしたままで良い、そうしないと壁にぶつかったときに落下してくれない）
+						KVec3 vel = dyNode->m_Desc.get_velocity();
+						newpos.x = pos.x - vel.x; // 速度適用前の位置. newpos ではなく pos から引くことに注意
+						newpos.z = pos.z - vel.z;
+					}
+					dyNode->getNode()->setPosition(newpos);
 				}
 			}
 
