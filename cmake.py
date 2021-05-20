@@ -22,9 +22,9 @@ import shutil
 def call(cmd):
 	subprocess.check_call(cmd, shell=True)
 
-# cmake 用の作業フォルダをいったん削除しておく
-#if os.path.isdir("__cmake/CMakeFiles"):
-#	shutil.rmtree("__cmake/CMakeFiles")
+# cmake 用の作業フォルダをいったん削除しておく（ビルドテストの時にキャッシュを使わせないため）
+if os.path.isdir("__cmake"):
+	shutil.rmtree("__cmake")
 
 # cmake 用の作業フォルダを作成
 if not os.path.isdir("__cmake"):
@@ -37,11 +37,11 @@ try:
 	# cmake ファイルを作成。CMakeLists.txt のあるフォルダ（現在のひとつ上のフォルダ）を指定する
 	call("cmake .. -G\"Visual Studio 16 2019\" -AWin32") # 32ビット版を作成する
 
-	# cmake ビルド(exeファイルの作成)
-#	call("cmake -DCMAKE_BUILD_TYPE=Debug .")
-#	call("cmake --build .")
-	
-#	call("cmake -DCMAKE_BUILD_TYPE=Release .")
-#	call("cmake --build .")
+	# ついでに exe のビルドテストもする
+	call("cmake --build .")
 except:
 	pass
+	
+# 終了
+input(u"[エンターキーで終了]")
+
