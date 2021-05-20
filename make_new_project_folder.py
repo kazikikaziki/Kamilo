@@ -20,30 +20,34 @@ def copy_file(proj, name):
 	shutil.copyfile(name, os.path.join(proj, name))
 
 def make_project(proj):
+
+	# 引数チェック
 	assert(type(proj) is str)
 	if (proj == "") or ("/" in proj) or ("\\" in proj):
 		print(u"#### Invalid project name! ####")
 		return
-		
+
+
+	# 上書き禁止
 	if os.path.exists(proj):
 		print(u"ファイルまたはディレクトリが既に存在します: " + proj)
 		return
 
+
 	# プロジェクト用のフォルダを作成
 	print("mkrdir: " + proj)
 	os.mkdir(proj)
-	
-	# Game フォルダをコピー
-	copy_dir(proj, "Game")
 
-	# Kamilo フォルダをコピー
+
+	# フォルダをコピー
+	copy_dir(proj, "Game")
 	copy_dir(proj, "Kamilo")
 
-	# WinMain.cpp をコピー
-	copy_file(proj, "WinMain.cpp")
 
-	# cmake.py をコピー
+	# ファイルをコピー
+	copy_file(proj, "WinMain.cpp")
 	copy_file(proj, "cmake.py")
+
 
 	# CMakeList の中身を書き換えてコピー
 	if True:
@@ -55,7 +59,8 @@ def make_project(proj):
 		with codecs.open(os.path.join(proj, "CMakeLists.txt"), "w", "utf8") as f:
 			f.write(s)
 	
-	print("Done!!")
+	# おしまい
+	print("OK")
 
 def main():
 	try:
