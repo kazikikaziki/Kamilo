@@ -1,42 +1,59 @@
 ﻿# coding: utf-8
+
+#
+# Kamilo を使った新規プロジェクトを作成するための Python スクリプト。
+# 指定されたプロジェクト名を使ってサブフォルダを作り、その中に必要なファイルをコピーする
+#
+
 import os
 import shutil
 import codecs
 
-def make_project(name):
-	assert(type(name) is str)
-	if (name == "") or ("/" in name) or ("\\" in name):
+# ディレクトリ <name> を <proj>/<name> にコピーする
+def copy_dir(proj, name):
+	print("copy:", name)
+	shutil.copytree(name, os.path.join(proj, name))
+
+# ファイル <name> を <proj>/<name> にコピーする
+def copy_file(proj, name):
+	print("copy:", name)
+	shutil.copyfile(name, os.path.join(proj, name))
+
+def make_project(proj):
+	assert(type(proj) is str)
+	if (proj == "") or ("/" in proj) or ("\\" in proj):
 		print(u"#### Invalid project name! ####")
 		return
 		
-	if os.path.exists(name):
-		print(u"ファイルまたはディレクトリが既に存在します: " + name)
+	if os.path.exists(proj):
+		print(u"ファイルまたはディレクトリが既に存在します: " + proj)
 		return
 
 	# プロジェクト用のフォルダを作成
-	print("mkrdir: " + name)
-	os.mkdir(name)
+	print("mkrdir: " + proj)
+	os.mkdir(proj)
 	
 	# Game フォルダをコピー
-	print("copy: Game")
-	shutil.copytree("Game", name + u"\\Game")
-	
+	copy_dir(proj, "Game")
+
 	# Kamilo フォルダをコピー
-	print("copy: Kamilo")
-	shutil.copytree("Kamilo", name + u"\\Kamilo")
-	
+	copy_dir(proj, "Kamilo")
+
 	# WinMain.cpp をコピー
-	print("copy: WinMain.cpp")
-	shutil.copyfile("WinMain.cpp", name + u"\\WinMain.cpp")
+	copy_file(proj, "WinMain.cpp")
+
+	# cmake.py をコピー
+	copy_file(proj, "cmake.py")
 
 	# CMakeList の中身を書き換えてコピー
-	print("copy: CMakeLists.txt")
-	s = ""
-	with codecs.open("CMakeLists.txt", "r", "utf8") as f:
-		s = f.read()
-	s = s.replace("MySampleProject", name) # プロジェクト名部分を置換
-	with codecs.open(name + u"\\CMakeLists.txt", "w", "utf8") as f:
-		f.write(s)
+	if True:
+		print("copy:", "CMakeLists.txt")
+		s = ""
+		with codecs.open("CMakeLists.txt", "r", "utf8") as f:
+			s = f.read()
+		s = s.replace("MySampleProject", proj) # プロジェクト名部分を置換
+		with codecs.open(os.path.join(proj, "CMakeLists.txt"), "w", "utf8") as f:
+			f.write(s)
 	
 	print("Done!!")
 
