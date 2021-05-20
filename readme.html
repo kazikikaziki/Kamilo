@@ -1,0 +1,246 @@
+﻿<html lang="ja">
+<head>
+	<meta content="text/html; charset=sjis" http-equiv="content-type">
+	<title>Kamilo Boot Strap</title>
+	<style type="text/css">
+		body {
+			font-family: Tahoma,Arial,sans-serif;
+			margin: 16px auto;
+			padding: 0px 24px 16px 24px;
+		}
+		hr {
+			padding: 0;
+			border: none;
+			border-top: medium double #444444;
+			text-align: center;
+		}
+		.w {
+			padding: 0;
+			border: none;
+			border-top: 1px solid #888888;
+			text-align: center;
+		}
+		table {
+			border: solid 1px;
+			border-collapse: collapse;
+		}
+		td {
+			border: solid 1px;
+			border-collapse: collapse;
+		}
+		i {
+			color: #666666;
+		}
+		a {
+		#	font-family: courier,Arial,sans-serif;
+			font-weight: bold;
+		}
+		.warning {
+			font-weight: bold;
+			color: #ff4444;
+		}
+	</style>
+</head>
+
+
+
+
+
+
+<body>
+<h1>Kamilo Boot Strap</h1>
+
+
+
+
+
+
+<hr>
+<h2>同梱ファイルの説明</h2>
+
+<blockquote>
+	<br>
+	<!------------------------------------------------------------->
+	<h3>Kamilo本体</h3>
+
+	<p>
+	<a href="Kamilo/" target="_blank">Kamilo/</a><br>
+	Kamilo のソースコード本体
+	</p>
+
+
+	<p>
+	<a href="Kamilo/__html/" target="_blank">Kamilo/__html/</a><br>
+	Doxygen で生成したドキュメント。
+	<blockquote>
+	※このフォルダが存在しなかったり中身が空っぽの場合は<b>自分でドキュメントを生成する</b>必要があります。<br>
+	生成方法については後述の「<a href="#1000">ドキュメントを生成する</a>」を参照してください。<br>
+	生成が成功すれば <a href="Kamilo/__html/index.html" target="_blank">Kamilo/__html/index.html</a> から各 API の説明やチュートリアルを見ることができます。
+	</blockquote>
+
+
+	<p>
+	<a href="Kamilo/Kamilo.h" target="_blank">Kamilo/Kamilo.h</a><br>
+	インクルードするべきファイル
+	</p>
+
+
+	<p>
+	<a href="Kamilo/CMakeLists.txt" target="_blank">Kamilo/CMakeLists.txt</a><br>
+	CMake 設定ファイル(→<a href="https://cmake.org">cmake.org</a>)<br>
+	</p>
+
+
+	<p>
+	<a href="Kamilo/doxygen.txt" target="_blank">Kamilo/doxygen.txt</a><br>
+	Doxygen 設定ファイル<br>
+	Doxwizard でこのファイルを開いて実行するとライブラリドキュメントが生成される
+	(→<a href="https://www.doxygen.nl">www.doxygen.nl</a>)
+	</p>
+
+
+
+	<br>
+	<br>
+	<br>
+	<!------------------------------------------------------------->
+	<hr class="w">
+	<h3>雛形プロジェクトの作成用</h3>
+	<p>
+	<a href="make_new_project_folder.py" target="_blank">make_new_project_folder.py</a><br>
+	プロジェクトの雛型を作成するための Python スクリプト(→<a href="https://www.python.org">www.python.org</a>)<br>
+	実行するとプロジェクト名を求めてくる<br>
+	適当な名前を指定すると、その名前で雛形用のフォルダを作成して必要なファイルをコピーする
+	</p>
+
+
+
+	<br>
+	<br>
+	<br>
+	<!------------------------------------------------------------->
+	<hr class="w">
+	<h3>雛形プロジェクトに含めるファイル</h3>
+	
+	<p>
+	<a href="Game/" target="_blank">Game/</a><br>
+	アプリのソースを入れるフォルダ
+	</p>
+
+	<p>
+	<a href="cmake.py " target="_blank">cmake.py </a><br>
+	アプリ用の sln を作成するための Python スクリプト<br>
+	</p>
+
+	<p>
+	<a href="CMakeLists.txt" target="_blank">CMakeLists.txt</a><br>
+	アプリ用の sln を作成するための CMake 設定ファイル
+	</p>
+
+	<p>
+	<a href="WinMain.cpp" target="_blank">WinMain.cpp</a><br>
+	アプリのエントリーポイント
+	</p>
+</blockquote>
+
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+<!--------------------------------------------------------------->
+<hr>
+<h2><a name="1000"/>ドキュメントを生成する</a></h2>
+<blockquote>
+
+	<p>
+	Kamilo のヘルプはソースコード内のコメントに Doxygen 形式で書いてあります。<br>
+	ソースコードを直接読んでもよいのですが、より見やすい形式で読みたい場合は
+	ドキュメント生成ツール Doxygen を使ってください。<a href="http://marupeke296.com/DOXY_No1_Introduction.html" target="_blank">Doxygenの導入</a>
+	</p>
+
+
+
+	<ul>
+		<li><p>
+			Doxygen をダウンロードしてインストールする<br>
+			<a href="http://www.doxygen.jp/install.html" target="_blank">http://www.doxygen.jp/install.html</a><br>
+		</p></li>
+		
+		<li><p>
+			Doxywizerd を実行する
+		</p></li>
+
+		<li><p>
+			<b>Step 1: Specify the working directory from ...</b><br>
+			と書いてある部分の <b>[Select]</b> をクリックするか、
+			[File|Open] メニューを選んで <a href="doxygen.txt" target="_blank">doxygen.txt</a> を開く<br>
+		</li>
+
+		<li><p>
+			<b>Step 2: Configure doxygen using the ...</b><br>
+			と書いてある部分の下に [Wizard][Expert][Run] というタブが並んでいるので、 <br>
+			<b>[Run]</b> タブを選んで <b>[Run doxygen]</b> をクリックすると構築が始まる。<br>
+			しばらくたつと終了し、"__html" フォルダのなかに大量の html ファイルができているはず<br>
+		</p></li>
+		
+		<li><p>生成物を確認する<br>
+			<b>[Show HTML output]</b> をクリックするかエクスプローラーで <a href="__html/index.html" target="_blank">__html/index.html</a> を開き、<br>
+			キュメントができていることを確認する<br>
+		</p></li>
+	</ul>
+
+</blockquote>
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+<!--------------------------------------------------------------->
+<hr>
+<h2><a name="2000"/>License</a></h2>
+<blockquote>
+	Copyright (c) 2020-2021 Heliodor<br>
+	This software is released under the MIT License.<br>
+	<a href="http://opensource.org/licenses/mit-license.php">http://opensource.org/licenses/mit-license.php</a>
+</blockquote>
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+<!--------------------------------------------------------------->
+<hr>
+<h2><a name="3000"/>Contact</a></h2>
+<blockquote>
+	Heliodor<br>
+	<a href="http://helio-dor.net">http://helio-dor.net</a><br>
+	<br>
+	Ci-en<br>
+	<a href="https://ci-en.dlsite.com/creator/59">https://ci-en.dlsite.com/creator/59</a><br>
+	<br>
+	Twitter<br>
+	<a href="https://twitter.com/helio_dor">https://twitter.com/helio_dor</a><br>
+</blockquote>
+
+
+
+</body>
+
+</html>
+
