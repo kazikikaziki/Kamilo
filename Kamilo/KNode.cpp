@@ -1755,6 +1755,8 @@ static void KNodeTree_on_node_marked_as_remove(CNodeTreeImpl *tree, KNode *node)
 
 static CNodeTreeImpl *g_NodeTree = nullptr;
 
+
+#pragma region KNodeTree
 void KNodeTree::install() {
 	K__Assert(g_NodeTree == nullptr);
 	g_NodeTree = new CNodeTreeImpl();
@@ -1864,6 +1866,9 @@ void KNodeTree::_on_node_removing(KNode *node) {
 	K__Assert(g_NodeTree);
 	g_NodeTree->_on_node_removing(node);
 }
+#pragma endregion // KNodeTree
+
+
 
 
 
