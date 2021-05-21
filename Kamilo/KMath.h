@@ -249,6 +249,8 @@ public:
 	/// 全体の長さを返す
 	float getWholeLength() const;
 
+	const KVec3 * getPointArray() const;
+
 	int getPointCount() const;
 
 	/// 区間数を返す

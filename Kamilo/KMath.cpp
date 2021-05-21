@@ -1091,6 +1091,9 @@ KVec3 KCubicBezier::getPoint(int serial_index) const {
 	int idx = serial_index % 4;
 	return getPoint(seg, idx);
 }
+const KVec3 * KCubicBezier::getPointArray() const {
+	return points_.data();
+}
 int KCubicBezier::getPointCount() const {
 	return points_.size();
 }
