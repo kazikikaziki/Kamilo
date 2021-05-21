@@ -95,7 +95,9 @@ public:
 			_sleep_time = 0;
 			_mask_bits  = 0xFFFFFFFF;
 			_is_static = true;
-			_slip_slower_than = 0;
+			_slip_control = false;
+			_slip_limit_speed = 0;
+			_slip_limit_degrees = 0;
 			knode = nullptr;
 		}
 		// 前フレームでの速度から算出した、実際の加速度
@@ -172,7 +174,10 @@ public:
 		KVec3 _velocity;
 		float _altitude; // 高度。形状の底面から地面までの距離（地面存在せず高度が定義できない場合は altitude=0, has_altitude=false になる）
 		bool _has_altitude; // altitude に有効な値が入っているなら true になる。 地面が全く存在しない場合は false になる
-		float _slip_slower_than; // ゆっくり移動していれば衝突しても横にそれるが、この速度以上の場合は横にそれずに（進行方向が変化しないで）その場で停止する
+
+		bool _slip_control; // 進行方向と軸がずれている法線面に衝突したときに滑る処理 (slip) を制御するか？
+		float _slip_limit_speed; // 衝突時の速度によるスリップの有無。この速度未満だったら滑り、以上だったら滑らずに停止する（_slip_control が true の場合のみ）
+		float _slip_limit_degrees; // 衝突時の角度によるスリップの有無。速度と衝突面法線がこの角度未満だったら正面衝突とみなし、滑らずに停止する（_slip_control が true の場合のみ）
 		KNode *_ground_node;
 		KNodeArray _hits_with; // 他の Body との接触
 		int _sleep_time;

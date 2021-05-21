@@ -1606,9 +1606,9 @@ private:
 
 				// ゆっくり移動しているときはスリップするが、高速で衝突したら逸れずにその場で止まる
 				bool allow_slip = true; // デフォルトでは常に衝突スリップ可能
-				if (dyNode->m_Desc._slip_slower_than > 0) {
+				if (dyNode->m_Desc._slip_control) {
 					const KVec3 &vel = dyNode->m_Desc.get_velocity();
-					if (dyNode->m_Desc._slip_slower_than <= vel.getLength()) {
+					if (dyNode->m_Desc._slip_limit_speed <= vel.getLength()) {
 						// 現在の速度が dyNode->m_Desc._slip_slower_than 以上になった。衝突してもスリップせずにその場で停止する
 						allow_slip = false;
 					}
@@ -1616,18 +1616,36 @@ private:
 
 				// 衝突壁が１個だけの場合、裏側からの衝突は無視してよい
 				if (num_hits == 1) {
-					float dot = dyNode->m_Desc.get_velocity().dot(hitlist[0].normal);
+					KVec3 vel = dyNode->m_Desc.get_velocity();
+					float dot = vel.dot(hitlist[0].normal); // 速度と壁の法線向きの一致度
 					if (dot > 0) {
-						// 移動方向と法線向きが同じ
+						// 移動方向と法線向きが同じ。
+						// 壁から離れる方向に移動しているので、この衝突を無視する
+
 					} else {
+						// 衝突後の座標を計算
 						KVec3 pos = dyNode->getNode()->getPosition();
 						KVec3 newpos = pos + hitlist[0].delta; // スリップ込みの新座標
 						if (!allow_slip) {
-							// スリップなしの場合はXYを移動前の位置に戻す
+							// スリップなし
+							// 進行方向と補正方向が30度(cos>=0.5)以上開いている場合はXYを移動前の位置に戻す
 							// ※Yはスリップしたままで良い、そうしないと壁にぶつかったときに落下してくれない）
-							KVec3 vel = dyNode->m_Desc.get_velocity();
-							newpos.x = pos.x - vel.x; // 速度適用前の位置. newpos ではなく pos から引くことに注意
-							newpos.z = pos.z - vel.z;
+							KVec3 prevpos = pos - vel; // 位置更新前の座標
+
+							// 衝突前速度、衝突後速度を正規化したもの（高低差を無視するので y を 0 にしておく）
+							KVec3 nor_vel_xz = KVec3(vel.x, 0.0f, vel.z).getNormalized(); // 正規化速度
+							KVec3 nor_adj_xz = KVec3(newpos.x - prevpos.x, 0.0f, newpos.z - prevpos.z).getNormalized(); // 衝突後の速度（移動前と補正後移動先の差）
+
+							// 衝突前速度、衝突後速度の一致度を調べる
+							float dot_adj = nor_vel_xz.dot(nor_adj_xz);
+
+							// 閾値角度。衝突前、衝突後の角度がこれ未満だったら正面衝突とみなし、スリップせずに停止する
+							float thr_deg = dyNode->m_Desc._slip_limit_degrees;
+							float thr_val = cosf(KMath::degToRad(thr_deg));
+							if (dot_adj < thr_val) {
+								newpos.x = pos.x - vel.x; // 速度適用前の位置. newpos ではなく pos から引くことに注意
+								newpos.z = pos.z - vel.z;
+							}
 						}
 						dyNode->getNode()->setPosition(newpos);
 					}

@@ -572,7 +572,7 @@ float KVec3::getLengthSq() const {
 KVec3 KVec3::getNormalized() const {
 	KVec3 out;
 	if (!K_vec3_normalize(out.floats(), floats())) {
-		VEC_ERROR();
+	//	VEC_ERROR();
 		return KVec3();
 	}
 	return out;
