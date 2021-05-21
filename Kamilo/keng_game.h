@@ -272,13 +272,77 @@ public:
 	virtual ~KComp() {
 		assert(m_Node == nullptr); // 正しく解放されていれば、すでにノードからは切り離されているはず
 	}
+	virtual void on_comp_attach() {}
+	virtual void on_comp_detach() {}
 	KNode * getNode() {
 		return m_Node;
 	}
 	void _setNode(KNode *node) {
 		// CComp は KNode によって保持される可能性がある。
 		// 循環ロック防止のために KNode の参照カウンタは変更しないでおく
-		m_Node = node;
+		if (node) {
+			// アタッチしようとしている
+			m_Node = node;
+			on_comp_attach();
+		} else {
+			// デタッチしようとしている
+			on_comp_detach();
+			m_Node = node;
+		}
+	}
+};
+
+
+// TComp は CComp の継承であること!!!
+template <class TComp> class KCompNodes {
+public:
+	std::unordered_map<KNode*, TComp*> m_Nodes;
+
+	KCompNodes() {
+	}
+	virtual ~KCompNodes() {
+		assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
+		clear();
+	}
+	void clear() {
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
+			TComp *comp = it->second;
+			comp->_setNode(nullptr);
+			comp->drop();
+			KNode *node = it->first;
+			node->drop();
+		}
+		m_Nodes.clear();
+	}
+	void attach(KNode *node, TComp *comp) {
+		assert(node);
+		assert(comp);
+		detach(node);
+		m_Nodes[node] = comp;
+		node->grab();
+		comp->_setNode(node);
+		comp->grab();
+	}
+	void detach(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			TComp *comp = it->second;
+			comp->_setNode(nullptr);
+			comp->drop();
+			node->drop();
+			m_Nodes.erase(it);
+		}
+	}
+	bool contains(KNode *node) const {
+		auto it = m_Nodes.find(node);
+		return it != m_Nodes.end();
+	}
+	TComp * get(KNode *node) {
+		auto it = m_Nodes.find(node);
+		if (it != m_Nodes.end()) {
+			return it->second;
+		}
+		return nullptr;
 	}
 };
 
