@@ -10,25 +10,23 @@
 namespace Kamilo {
 
 static KShadow::GlobalSettings g_GlobalShadowSettings;
+static KCompNodes<KShadow> g_ShadowCompNodes;
 
-class CShadowMgr: public KManagerTmpl<KShadow>, public KInspectorCallback {
+
+
+class CShadowMgr: public KManager, public KInspectorCallback {
 public:
 	CShadowMgr() {
+		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this);
 	}
-	virtual void onCompAdded(KNode *node, KShadow *comp) override {
-		comp->_EnterAction();
-	}
-	virtual void onCompRemoving(KNode *node, KShadow *comp) override {
-		comp->_ExitAction();
-	}
 	virtual void on_manager_appframe() override {
-		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
+		for (auto it=g_ShadowCompNodes.m_Nodes.begin(); it!=g_ShadowCompNodes.m_Nodes.end(); ++it) {
 			it->second->_StepSystemAction();
 		}
 	}
 	virtual void on_manager_nodeinspector(KNode *node) override {
-		KShadow *comp = getComp(node);
+		KShadow *comp = g_ShadowCompNodes.get(node);
 		comp->_Inspector();
 	}
 
@@ -105,11 +103,11 @@ void KShadow::uninstall() {
 }
 void KShadow::attach(KNode *node) {
 	KShadow *co = new KShadow();
-	g_ShadowMgr->addComp(node, co);
+	g_ShadowCompNodes.attach(node, co);
 	co->drop();
 }
 KShadow * KShadow::of(KNode *node) {
-	return g_ShadowMgr->getComp(node);
+	return g_ShadowCompNodes.get(node);
 }
 
 
@@ -124,8 +122,8 @@ KShadow::KShadow() {
 	m_item.enabled = true;
 	m_item.delay = 2; // 最初のフレームでは、まだ影の描画に必要な情報が取得できていないので、念のために数フレーム経過してから表示するようにする
 }
-void KShadow::_EnterAction() {
-	KNode *self = getSelf();
+void KShadow::on_comp_attach() {
+	KNode *self = getNode();
 
 	self->setTransformInherit(false);
 	self->setSpecularInherit(false); // スペキュラは継承しない
@@ -144,7 +142,7 @@ void KShadow::_EnterAction() {
 	KMeshDrawable::of(self)->getSubMesh(0)->material.blend = g_GlobalShadowSettings.blend;
 	m_item.shadow_tex_name = KPath::fromFormat("__shadowtex_%x", self->getId());
 }
-void KShadow::_ExitAction() {
+void KShadow::on_comp_detach() {
 	// 影専用のテクスチャを消す
 	KBank::getTextureBank()->removeTexture(m_item.shadow_tex_name);
 }
@@ -155,7 +153,7 @@ void KShadow::update() {
 	const KVec3 identity_scale(1, 1, 1);
 	const KVec3 zero_scale(0, 0, 0);
 
-	KNode *self = getSelf();
+	KNode *self = getNode();
 
 	// スプライト影が設定されている場合、親キャラクターの描画を
 	// グループ化しておく必要がある。
@@ -319,14 +317,14 @@ void KShadow::setUseSprite(bool value) {
 	m_item.use_sprite = value;
 }
 void KShadow::setMatrix(const KMatrix4 &matrix) {
-	KNode *self = getSelf();
+	KNode *self = getNode();
 	KDrawable *renderer = KDrawable::of(self);
 	if (renderer) {
 		renderer->setLocalTransform(matrix);
 	}
 }
 bool KShadow::getAltitude(float *alt) {
-	KNode *self = getSelf();
+	KNode *self = getNode();
 	KNode *owner = self->getParent();
 	KVec3 wpos = owner->getWorldPosition();
 
@@ -359,7 +357,7 @@ bool KShadow::getAltitude(float *alt) {
 }
 bool KShadow::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
 	K__Assert(out_pos);
-	KNode *self = getSelf();
+	KNode *self = getNode();
 	KNode *owner = self->getParent();
 	if (owner == nullptr) return false;
 	if (item.scale <= 0) return false;

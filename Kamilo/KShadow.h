@@ -97,9 +97,8 @@ public:
 	void setScaleByHeight(bool value, float maxheight=0);
 	bool getAltitude(float *altitude);
 
-	KNode * getSelf() { return getNode(); }
-	void _EnterAction();
-	void _ExitAction();
+	virtual void on_comp_attach() override;
+	virtual void on_comp_detach() override;
 	void _StepSystemAction();
 	void _Inspector();
 	void update();

@@ -4,22 +4,18 @@
 
 namespace Kamilo {
 
-static KManagerTmpl<KGizmoAct> *g_GizmoMgr = nullptr;
+static KCompNodes<KGizmoAct> g_GizmoCompNodes;
 
 
 #pragma region KGizmoAct
 void KGizmoAct::install() {
-	K__Assert(g_GizmoMgr == nullptr);
-	g_GizmoMgr = new KManagerTmpl<KGizmoAct>();
+	g_GizmoCompNodes.clear();
 }
 void KGizmoAct::uninstall() {
-	if (g_GizmoMgr) {
-		g_GizmoMgr->drop();
-		g_GizmoMgr = nullptr;
-	}
+	g_GizmoCompNodes.clear();
 }
 KGizmoAct * KGizmoAct::of(KNode *node) {
-	return g_GizmoMgr->getComp(node);
+	return g_GizmoCompNodes.get(node);
 }
 void KGizmoAct::attach(KNode *node) {
 	KGizmoAct *giz = new KGizmoAct();
@@ -28,7 +24,7 @@ void KGizmoAct::attach(KNode *node) {
 		gizmo->setParent(node);
 		gizmo->setName("$gizmo");
 		KMeshDrawable::attach(gizmo);
-		g_GizmoMgr->addComp(node, giz);
+		g_GizmoCompNodes.attach(node, giz);
 		gizmo->drop();
 	}
 	giz->drop();
