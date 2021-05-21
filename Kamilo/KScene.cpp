@@ -178,6 +178,9 @@ public:
 		if (scene) {
 			KLog::printInfo("KSceneManager::setNextScene: %s", typeid(*scene).name());
 		}
+		if (id && scene==nullptr) {
+			KLog::printInfo("E_NO_SCENE_ID: (KSCENEID)%s", id);
+		}
 		m_next_scene.scene = scene;
 		m_next_scene.id = id;
 		m_next_scene.params.clear();
