@@ -622,9 +622,8 @@ bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool over
 	}
 	if (!CopyFileW(wsrc.c_str(), wdst.c_str(), !overwrite)) {
 		// エラー原因の確認用
-		char err[256] = {0};
-		K__Win32GetErrorString(GetLastError(), err, sizeof(err));
-		K__Error("Faield to CopyFile(): %s", err);
+		std::string err = win32GetErrorString(GetLastError());
+		K__Error("Faield to CopyFile(): %s", err.c_str());
 		return false;
 	}
 	return true;
@@ -645,9 +644,8 @@ bool K::fileMakeDir(const std::string &dir_u8) {
 	if (CreateDirectoryW(wdir.c_str(), nullptr)) {
 		return true;
 	}
-	char err[256] = {0};
-	K__Win32GetErrorString(GetLastError(), err, sizeof(err));
-	K__Error("Faield to CreateDirectory(): %s", err);
+	std::string err = win32GetErrorString(GetLastError());
+	K__Error("Faield to CreateDirectory(): %s", err.c_str());
 	return false;
 }
 
@@ -1861,19 +1859,18 @@ std::string K::strBinToUtf8(const std::string &bin) {
 	std::wstring ws = strBinToWide(bin);
 	return strWideToUtf8(ws);
 }
+
+std::string K::win32GetErrorString(long hr) {
+	char buf[1024] = {0};
+	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
+	return buf;
+}
+
+
 #pragma endregion // string
 
 
 
-
-bool K__Win32GetErrorString(long hr, char *buf, int size) {
-	return FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, size, nullptr) > 0;
-}
-std::string K__Win32GetErrorStringStd(long hr) {
-	char buf[1024] = {0};
-	K__Win32GetErrorString(hr, buf, sizeof(buf));
-	return buf;
-}
 
 
 

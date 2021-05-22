@@ -660,7 +660,7 @@ public:
 		m_d3ddev = dev;
 		HRESULT hr = m_d3ddev->GetDeviceCaps(&m_caps);
 		if (FAILED(hr)) {
-			std::string msg = K__Win32GetErrorStringStd(hr);
+			std::string msg = K::win32GetErrorString(hr);
 			K__Print(msg.c_str());
 		}
 		D3DSURFACE_DESC desc;
@@ -679,7 +679,7 @@ public:
 				if (1) { // デバイスロスト時にレンダーターゲット内容が失われないようにする
 					HRESULT hr = m_d3ddev->CreateTexture(w, h, 1, 0, desc.Format, D3DPOOL_SYSTEMMEM, &m_backup_tex, nullptr);
 					if (FAILED(hr)) {
-						std::string msg = K__Win32GetErrorStringStd(hr);
+						std::string msg = K::win32GetErrorString(hr);
 						K__Print(msg.c_str());
 					}
 				}

@@ -66,10 +66,6 @@ void K__SetPrintHook(void (*hook)(const char *u8));
 void K__SetWarningHook(void (*hook)(const char *u8));
 void K__SetErrorHook(void (*hook)(const char *u8));
 
-// HRESULT hr の値からメッセージを得る
-bool K__Win32GetErrorString(long hr, char *buf, int size);
-std::string K__Win32GetErrorStringStd(long hr);
-
 
 
 //----------------------------------------------------
@@ -218,6 +214,8 @@ public:
 	static std::string strBinToUtf8(const std::string &bin);
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }
+
+	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
 	#pragma endregion // string
 };
 
