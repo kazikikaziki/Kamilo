@@ -81,6 +81,8 @@ void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath);
 
 class K {
 public:
+	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
+
 	#pragma region clock
 	static uint64_t clockNano64(); ///< システム時刻をナノ秒単位で得る
 	static uint64_t clockMsec64(); ///< システム時刻をミリ秒単位で取得する
@@ -214,8 +216,6 @@ public:
 	static std::string strBinToUtf8(const std::string &bin);
 	static void strUtf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) { K__Utf8ToWidePath(out_wpath, num_wchars, path_u8); }
 	static void strWideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) { K__WideToUtf8Path(out_path_u8, num_bytes, wpath); }
-
-	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
 	#pragma endregion // string
 };
 

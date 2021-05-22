@@ -235,6 +235,17 @@ std::string K__WideToUtf8Path(const std::wstring &wpath) {
 }
 
 
+
+std::string K::win32GetErrorString(long hr) {
+	char buf[1024] = {0};
+	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
+	return buf;
+}
+
+
+
+
+
 #pragma region clock
 uint64_t K::clockNano64() {
 	#ifdef _WIN32
@@ -1859,14 +1870,6 @@ std::string K::strBinToUtf8(const std::string &bin) {
 	std::wstring ws = strBinToWide(bin);
 	return strWideToUtf8(ws);
 }
-
-std::string K::win32GetErrorString(long hr) {
-	char buf[1024] = {0};
-	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
-	return buf;
-}
-
-
 #pragma endregion // string
 
 
@@ -1928,19 +1931,6 @@ void K__Notify(const char *u8) {
 
 namespace Test {
 void Test_internal_path() {
-	
-	char p[256] = {"bbb"};
-	PathAppendA(p, "c:/aaa");
-
-	strcpy(p, "filename.exe");
-	PathRemoveFileSpecA(p);
-
-	strcpy(p, "filename.exe");
-	const char *ss = PathFindFileName(p);
-
-	strcpy(p, "");
-	PathRenameExtensionA(p, ".exe");
-
 	{
 		char s[256] = {0};
 		K__Verify(K::pathJoin("", "aaa")        == "aaa");
