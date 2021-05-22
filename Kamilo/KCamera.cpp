@@ -9,6 +9,100 @@
 namespace Kamilo {
 
 
+/// ファイル名として安全な文字列にする（簡易版）
+static void _EscapeFilename(std::string &name) {
+	for (size_t i=0; name[i]; i++) {
+		if (isalnum(name[i])) continue;
+		if (strchr(" ._()[]{}<>#$%&=~^@+-", name[i])) continue;
+		name[i] = '_'; //replace
+	}
+}
+
+
+
+
+
+class CCameraManager: public KManager {
+public:
+	KCompNodes<KCamera> m_Nodes;
+
+	CCameraManager() {
+		KEngine::addManager(this);
+	}
+
+	#pragma region KManager
+	virtual void on_manager_detach(KNode *node) override {
+		m_Nodes.detach(node);
+	}
+	virtual void on_manager_nodeinspector(KNode *node) override {
+		KCamera::of(node)->on_inspector();
+	}
+	#pragma endregion // KManager
+
+	KNode * findCameraFor(const KNode *target) {
+		if (target == nullptr) return nullptr;
+		int target_layer = target->getLayerInTree();
+
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it ) {
+			KNode *node = it->first;
+			if (node == nullptr) {
+				continue;
+			}
+			int camera_layer = node->getLayerInTree();
+			if (camera_layer != target_layer) {
+				continue;
+			}
+			if (node->getEnableInTree()) {
+				return node;
+			}
+		}
+		return nullptr;
+	}
+};
+
+
+
+static CCameraManager *g_CameraMgr = nullptr;
+
+
+#pragma region KCamera
+
+void KCamera::install() {
+	g_CameraMgr = new CCameraManager();
+}
+void KCamera::uninstall() {
+	if (g_CameraMgr) {
+		g_CameraMgr->drop();
+		g_CameraMgr = nullptr;
+	}
+}
+void KCamera::attach(KNode *node) {
+	K__Assert(g_CameraMgr);
+	if (node && !isAttached(node)) {
+		KCamera *co = new KCamera();
+		g_CameraMgr->m_Nodes.attach(node, co);
+		co->drop();
+	}
+}
+bool KCamera::isAttached(KNode *node) {
+	return of(node) != nullptr;
+}
+KCamera * KCamera::of(KNode *node) {
+	K__Assert(g_CameraMgr);
+	return g_CameraMgr->m_Nodes.get(node);
+}
+KNode * KCamera::findCameraFor(const KNode *node) {
+	K__Assert(g_CameraMgr);
+	return g_CameraMgr->findCameraFor(node);
+}
+int KCamera::getCameraNodes(KNodeArray &list) {
+	K__Assert(g_CameraMgr);
+	return g_CameraMgr->m_Nodes.exportArray(list);
+}
+
+
+
+
 KCamera::KCamera() {
 	int w, h;
 	KScreen::getGameSize(&w, &h); // ゲームの基本解像度で初期化する
@@ -17,12 +111,6 @@ KCamera::KCamera() {
 	m_Data.size_w = (float)w;
 	m_Data.size_h = (float)h;
 	update_projection_matrix();
-}
-void KCamera::_setNode(KNode *node) {
-	m_Node = node;
-}
-KNode * KCamera::getNode() {
-	return m_Node;
 }
 bool KCamera::getWorld2ViewMatrix(KMatrix4 *out_matrix) {
 	// カメラ姿勢の行列
@@ -109,7 +197,6 @@ bool KCamera::getWorld2ViewPoint(KVec3 *points, int num_points) {
 	return true;
 }
 
-
 // e のローカル座標系からスクリーンUVに変換するための行列。
 // シェーダーの mo__ScreenTexture とともに利用する
 KMatrix4 KCamera::getTargetLocal2ViewUVMatrix(KNode *target) {
@@ -128,12 +215,6 @@ KMatrix4 KCamera::getTargetLocal2ViewUVMatrix(KNode *target) {
 	// 一括変換行列
 	return this_local2world * camera_world2local * getProjectionMatrix() * view2tex_sc * view2tex_tr;
 }
-
-
-
-
-
-
 
 void KCamera::update_projection_matrix()  {
 	float w = m_Data.size_w / m_Data.zoom;
@@ -232,15 +313,12 @@ void KCamera::setProjectionOffset(const KVec3 &offset) {
 KVec3 KCamera::getProjectionOffset() const {
 	return m_Data.projection_offset;
 }
-
-
 void KCamera::setPass(int pass) {
 	m_Data.pass = pass;
 }
 int KCamera::getPass() const {
 	return m_Data.pass;
 }
-
 void KCamera::setZoom(float value) {
 	if (value > 0) {
 		m_Data.zoom = value;
@@ -372,18 +450,6 @@ bool KCamera::isWorldAabbInFrustum(const KVec3 &aabb_min, const KVec3 &aabb_max)
 	return false;
 }
 
-
-
-
-/// ファイル名として安全な文字列にする（簡易版）
-static void K__EscapeFilename(std::string &name) {
-	for (size_t i=0; name[i]; i++) {
-		if (isalnum(name[i])) continue;
-		if (strchr(" ._()[]{}<>#$%&=~^@+-", name[i])) continue;
-		name[i] = '_'; //replace
-	}
-}
-
 void KCamera::on_inspector() {
 	bool changed = false;
 	const char *proj_names[] = {
@@ -422,116 +488,14 @@ void KCamera::on_inspector() {
 		if (1) {
 			// テクスチャ画像を png でエクスポートする
 			std::string filename = K::str_sprintf("__export__%s.png", getNode()->getName());
-			K__EscapeFilename(filename);
+			_EscapeFilename(filename);
 			KDebugGui::K_DebugGui_ImageExportButton("Export", m_Data.render_target, filename.c_str(), false);
 		}
 	}
 }
 
-class CCameraManager: public KManager {
-public:
-	std::unordered_map<KNode*, KCamera *> m_Nodes;
+#pragma endregion // KCamera
 
-	CCameraManager() {
-		KEngine::addManager(this);
-	}
-
-	#pragma region KManager
-	virtual void on_manager_detach(KNode *node) override {
-		delCamera(node);
-	}
-	virtual void on_manager_end() override {
-		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
-	}
-	virtual bool on_manager_isattached(KNode *node) override {
-		return m_Nodes.find(node) != m_Nodes.end();
-	}
-	virtual void on_manager_nodeinspector(KNode *node) override {
-		KCamera::of(node)->on_inspector();
-	}
-	#pragma endregion // KManager
-
-	void addCamera(KNode *node) {
-		KCamera *camera = new KCamera();
-		camera->_setNode(node);
-		m_Nodes[node] = camera;
-	}
-	void delCamera(KNode *node) {
-		auto it = m_Nodes.find(node);
-		if (it != m_Nodes.end()) {
-			it->second->drop();
-			m_Nodes.erase(it);
-		}
-	}
-	KCamera * getCamera(KNode *node) {
-		auto it = m_Nodes.find(node);
-		if (it != m_Nodes.end()) {
-			return it->second;
-		}
-		return nullptr;
-	}
-
-	KNode * find_camera_for(const KNode *target) const {
-		if (target == nullptr) return nullptr;
-		int target_layer = target->getLayerInTree();
-
-		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it ) {
-			KNode *node = it->first;
-			if (node == nullptr) {
-				continue;
-			}
-			int camera_layer = node->getLayerInTree();
-			if (camera_layer != target_layer) {
-				continue;
-			}
-			if (node->getEnableInTree()) {
-				return node;
-			}
-		}
-		return nullptr;
-	}
-	int getCameraNodes(KNodeArray *list) const {
-		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it ) {
-			KNode *node = it->first;
-			list->push_back(node);
-		}
-		return m_Nodes.size();
-	}
-};
-static CCameraManager *g_Camera = nullptr;
-
-void KCamera::install() {
-	g_Camera = new CCameraManager();
-}
-void KCamera::uninstall() {
-	if (g_Camera) {
-		g_Camera->drop();
-		g_Camera = nullptr;
-	}
-}
-
-
-void KCamera::attach(KNode *node) {
-	K__Assert(g_Camera);
-	if (node && !isAttached(node)) {
-		g_Camera->addCamera(node);
-	}
-}
-bool KCamera::isAttached(KNode *node) {
-	return of(node) != nullptr;
-}
-KCamera * KCamera::of(KNode *node) {
-	K__Assert(g_Camera);
-	return g_Camera->getCamera(node);
-}
-KNode * KCamera::findCameraFor(const KNode *node) {
-	K__Assert(g_Camera);
-	return g_Camera->find_camera_for(node);
-}
-int KCamera::getCameraNodes(KNodeArray *list) {
-	K__Assert(g_Camera);
-	return g_Camera->getCameraNodes(list);
-}
 
 
 } // namespace

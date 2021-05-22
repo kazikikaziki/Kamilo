@@ -43,12 +43,13 @@ public:
 	static void install();
 	static void uninstall();
 	static void attach(KNode *node);
+	static bool isAttached(KNode *node);
 	static KShadow * of(KNode *node);
 	static GlobalSettings * globalSettings();
 public:
 	KShadow();
 
-	struct ITEM {
+	struct Data {
 		KVec3 offset;
 		EID shadow_e;
 		KPath shadow_tex_name;
@@ -62,7 +63,7 @@ public:
 		bool use_sprite;
 		int delay;
 
-		ITEM() {
+		Data() {
 			shadow_e = nullptr;
 			radius_x = 0;
 			radius_y = 0;
@@ -75,7 +76,7 @@ public:
 			delay = 0;
 		}
 	};
-	ITEM m_Data;
+	Data m_Data;
 	/// 地上での影の表示位置
 	void setOffset(const KVec3 &value);
 
@@ -102,7 +103,7 @@ public:
 	void _StepSystemAction();
 	void _Inspector();
 	void update();
-	bool compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt);
+	bool compute_shadow_transform(const Data &data, KVec3 *out_pos, KVec3 *out_scale, float *out_alt);
 
 };
 

@@ -22,7 +22,7 @@ public:
 
 
 
-class KCamera: public KRef {
+class KCamera: public KComp {
 public:
 	static void install();
 	static void uninstall();
@@ -31,7 +31,7 @@ public:
 	static KCamera * of(KNode *node);
 	static bool isAttached(KNode *node);
 	static KNode * findCameraFor(const KNode *node);
-	static int getCameraNodes(KNodeArray *list);
+	static int getCameraNodes(KNodeArray &list);
 
 public:
 	/// 描画順序のソート方法
@@ -50,8 +50,6 @@ public:
 
 	KCamera();
 	void on_inspector();
-	void _setNode(KNode *node);
-	KNode * getNode();
 
 	// 描画パス
 	// カメラは同一レイヤーに属しているノードを描画する
@@ -187,7 +185,6 @@ private:
 		bool offset_half_pixel_enabled;
 	};
 	Data m_Data;
-	KNode *m_Node;
 };
 
 } // namespace

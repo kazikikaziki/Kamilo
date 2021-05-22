@@ -506,7 +506,7 @@ private:
 	void render_game() {
 		// 描画する順番でカメラを得る
 		KNodeArray nodes;
-		KCamera::getCameraNodes(&nodes);
+		KCamera::getCameraNodes(nodes);
 
 		m_tmp_cameralist.clear();
 		m_tmp_cameralist.reserve(nodes.size());

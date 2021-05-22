@@ -306,7 +306,7 @@ public:
 		int game_w, game_h;
 		KScreen::getGameSize(&game_w, &game_h);
 		KNodeArray cameras;
-		KCamera::getCameraNodes(&cameras);
+		KCamera::getCameraNodes(cameras);
 		for (auto it=cameras.begin(); it!=cameras.end(); ++it) {
 			KNode *camera = *it;
 			if (camera == nullptr) continue;

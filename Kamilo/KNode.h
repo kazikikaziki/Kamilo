@@ -498,6 +498,9 @@ public:
 	iterator end() {
 		return m_Nodes.end();
 	}
+	int size() const {
+		return (int)m_Nodes.size();
+	}
 	void clear() {
 		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			TComp *comp = it->second;
@@ -537,6 +540,13 @@ public:
 			return it->second;
 		}
 		return nullptr;
+	}
+	int exportArray(std::vector<KNode*> &node_array) const {
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it ) {
+			KNode *node = it->first;
+			node_array.push_back(node);
+		}
+		return node_array.size();
 	}
 };
 

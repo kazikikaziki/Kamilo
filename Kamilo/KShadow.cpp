@@ -14,19 +14,22 @@ static KShadow::GlobalSettings g_GlobalShadowSettings;
 
 class CShadowMgr: public KManager, public KInspectorCallback {
 public:
-	KCompNodes<KShadow> m_CompNodes;
+	KCompNodes<KShadow> m_Nodes;
 
 	CShadowMgr() {
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this);
 	}
+	virtual void on_manager_detach(KNode *node) override {
+		m_Nodes.detach(node);
+	}
 	virtual void on_manager_appframe() override {
-		for (auto it=m_CompNodes.begin(); it!=m_CompNodes.end(); ++it) {
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			it->second->_StepSystemAction();
 		}
 	}
 	virtual void on_manager_nodeinspector(KNode *node) override {
-		KShadow *comp = m_CompNodes.get(node);
+		KShadow *comp = m_Nodes.get(node);
 		comp->_Inspector();
 	}
 
@@ -103,14 +106,20 @@ void KShadow::uninstall() {
 }
 void KShadow::attach(KNode *node) {
 	K__Assert(g_ShadowMgr);
-	KShadow *co = new KShadow();
-	g_ShadowMgr->m_CompNodes.attach(node, co);
-	co->drop();
+	if (node && !isAttached(node)) {
+		KShadow *co = new KShadow();
+		g_ShadowMgr->m_Nodes.attach(node, co);
+		co->drop();
+	}
+}
+bool KShadow::isAttached(KNode *node) {
+	return of(node) != nullptr;
 }
 KShadow * KShadow::of(KNode *node) {
 	K__Assert(g_ShadowMgr);
-	return g_ShadowMgr->m_CompNodes.get(node);
+	return g_ShadowMgr->m_Nodes.get(node);
 }
+
 
 
 
@@ -172,14 +181,13 @@ void KShadow::update() {
 	}
 
 	{
-		ITEM &item = m_Data;
 		KNode *owner_node = self->getParent();
 		KNode *shadow_node = self;
 		if (shadow_node == nullptr) return; // 何らかの理由で影ノードが外部から削除されている（例えばノードの子を一括削除してしまった場合など）
 
-		item.altitude = -1;
+		m_Data.altitude = -1;
 
-		if (!item.enabled) {
+		if (!m_Data.enabled) {
 			// 影無効
 			// visible = false とやりたいところだが、影の表示・非表示が外部から直接指定されている可能性もあるので、
 			// エンティティの visible や enabled はなるべく弄りたくない。サイズをゼロにしておく
@@ -189,7 +197,7 @@ void KShadow::update() {
 
 		// 影の位置と大きさを計算
 		KVec3 shadow_pos, shadow_scale;
-		if (!compute_shadow_transform(item, &shadow_pos, &shadow_scale, &item.altitude)) {
+		if (!compute_shadow_transform(m_Data, &shadow_pos, &shadow_scale, &m_Data.altitude)) {
 			// 影はどこにも映らない。
 			// visible = false とやりたいところだが、影の表示・非表示が外部から直接指定されている可能性もあるので、
 			// エンティティの visible や enabled はなるべく弄りたくない。サイズをゼロにしておく
@@ -197,7 +205,7 @@ void KShadow::update() {
 			return;
 		}
 
-		if (item.delay > 0) {
+		if (m_Data.delay > 0) {
 			// まだ生成されて間もない。
 			// スプライト影を描画するための情報が足りない（スプライト影は、全フレームでのキャラクタ描画結果を使う）
 			// とりあえずシンプル影を表示しておく
@@ -208,7 +216,7 @@ void KShadow::update() {
 			return;
 		}
 
-		if (item.use_sprite) {
+		if (m_Data.use_sprite) {
 			KDrawable *owner_renderer = KDrawable::of(owner_node);
 			KDrawable *shadow_renderer = KDrawable::of(shadow_node);
 
@@ -234,7 +242,7 @@ void KShadow::update() {
 			// そのため、必ず自前のテクスチャを用意して、キャラクターのスプライトをコピーしてから使う
 
 			// tex_w, tex_h は変化する可能性があるので、texid を一番最初に取得して使いまわすという事はできない
-			KTexture *shadow_tex = KVideo::findTexture(KBank::getTextureBank()->addRenderTexture(item.shadow_tex_name, tex_w, tex_h, KTextureBank::F_OVERWRITE_SIZE_NOT_MATCHED));
+			KTexture *shadow_tex = KVideo::findTexture(KBank::getTextureBank()->addRenderTexture(m_Data.shadow_tex_name, tex_w, tex_h, KTextureBank::F_OVERWRITE_SIZE_NOT_MATCHED));
 			KVideoUtils::blit(shadow_tex, owner_sprite_tex, nullptr);
 
 			KMeshDrawable *meshRenderer = KMeshDrawable::of(shadow_node);
@@ -357,14 +365,14 @@ bool KShadow::getAltitude(float *alt) {
 	// 地面がない。奈落。
 	return false;
 }
-bool KShadow::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
+bool KShadow::compute_shadow_transform(const Data &data, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
 	K__Assert(out_pos);
 	KNode *self = getNode();
 	KNode *owner = self->getParent();
 	if (owner == nullptr) return false;
-	if (item.scale <= 0) return false;
-	if (item.radius_x == 0) return false;
-	if (item.radius_y == 0) return false;
+	if (data.scale <= 0) return false;
+	if (data.radius_x == 0) return false;
+	if (data.radius_y == 0) return false;
 
 	// 高度を得る
 	float alt;
@@ -372,15 +380,15 @@ bool KShadow::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_sc
 		// 影サイズを設定
 		{
 			// 標準影サイズから各エンティティの標準サイズへのスケーリング
-			float lscale_x = item.scale * item.radius_x / SHADOW_BASIC_RADIUS;
-			float lscale_y = item.scale * item.radius_y / SHADOW_BASIC_RADIUS;
+			float lscale_x = data.scale * data.radius_x / SHADOW_BASIC_RADIUS;
+			float lscale_y = data.scale * data.radius_y / SHADOW_BASIC_RADIUS;
 			// 高度による自動スケーリング値
 			float hscale = 1.0f;
-			if (g_GlobalShadowSettings.scaleByAltitude && item.scale_by_height) {
+			if (g_GlobalShadowSettings.scaleByAltitude && data.scale_by_height) {
 
 				// 最大高度。
 				// ノードに設定されている値を使う。それが 0 なら規定値を使う
-				float maxheight = item.max_height;
+				float maxheight = data.max_height;
 				if (maxheight <= 0) {
 					maxheight = g_GlobalShadowSettings.maxAltitude;
 				}
@@ -403,7 +411,7 @@ bool KShadow::compute_shadow_transform(ITEM &item, KVec3 *out_pos, KVec3 *out_sc
 
 		// 影の位置
 		KVec3 owner_pos = owner->getWorldPosition();
-		KVec3 pos = owner_pos + item.offset;
+		KVec3 pos = owner_pos + data.offset;
 		pos.y += owner_body_bottom - alt; // alt はAABB底面から地面までの距離であることに注意
 		pos.y += 1; // 地面と完全に重なると描画順位が怪しくなるので、少しだけ浮かせる
 		pos.z += 1; // 親オブジェクトと完全に座標が一致した場合でも奥側に描画されるよう、少しだけ座標をずらす
