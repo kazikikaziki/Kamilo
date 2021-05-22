@@ -1219,6 +1219,7 @@ void Test_str() {
 
 
 #pragma region KPathUtils
+#if 0
 // 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 void KPathUtils::K_PathNormalizeEx(char *path_u8, char old_delim, char new_delim) {
 	K__Assert(path_u8);
@@ -1608,6 +1609,8 @@ void Test_path() {
 	}
 }
 } // Test
+
+#endif
 #pragma endregion // KPathUtils
 
 
@@ -1853,22 +1856,6 @@ bool KName::operator < (const std::string &name) const {
 
 
 
-
-#pragma region KPath func
-static void kkpath_strcpy(char *dst, size_t dstlen, const char *src) {
-	strcpy_s(dst, dstlen, src);
-}
-static void kkpath_strcat(char *dst, size_t dstlen, const char *src) {
-	strcat_s(dst, dstlen, src);
-}
-// 末尾の区切り文字を取り除き、適切な区切り文字に変換した文字列を得る
-static void kkpath_normalize(char *dest, const char *path, int maxlen, char olddelim, char newdelim) {
-	KPathUtils::K_PathNormalizeEx(dest, maxlen, path, olddelim, newdelim);
-}
-
-#pragma endregion // KPath func
-
-
 #pragma region KPath
 const KPath KPath::Empty = KPath();
 
@@ -1894,8 +1881,8 @@ KPath::KPath() {
 }
 KPath::KPath(const char *u8) {
 	if (u8 && u8[0]) {
-		u8 = K::strSkipBom(u8); // BOMをスキップ
-		kkpath_normalize(m_path, u8, KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
+		std::string s = K::pathNormalize(u8);
+		strcpy_s(m_path, sizeof(m_path), s.c_str());
 	} else {
 		m_path[0] = 0;
 	}
@@ -1903,7 +1890,8 @@ KPath::KPath(const char *u8) {
 }
 KPath::KPath(const std::string &u8) {
 	if (!u8.empty()) {
-		kkpath_normalize(m_path, u8.c_str(), KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
+		std::string s = K::pathNormalize(u8);
+		strcpy_s(m_path, sizeof(m_path), s.c_str());
 	} else {
 		m_path[0] = 0;
 	}
@@ -1911,8 +1899,9 @@ KPath::KPath(const std::string &u8) {
 }
 KPath::KPath(const wchar_t *ws) {
 	if (ws && ws[0]) {
-		std::string mb = K::strWideToUtf8(ws);
-		kkpath_normalize(m_path, mb.c_str(), KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
+		std::string s = K::strWideToUtf8(ws);
+		s = K::pathNormalize(s);
+		strcpy_s(m_path, sizeof(m_path), s.c_str());
 	} else {
 		m_path[0] = 0;
 	}
@@ -1920,8 +1909,9 @@ KPath::KPath(const wchar_t *ws) {
 }
 KPath::KPath(const std::wstring &ws) {
 	if (!ws.empty()) {
-		std::string mb = K::strWideToUtf8(ws);
-		kkpath_normalize(m_path, mb.c_str(), KPath::SIZE, NATIVE_DELIM, K__PATH_SLASH);
+		std::string s = K::strWideToUtf8(ws);
+		s = K::pathNormalize(s);
+		strcpy_s(m_path, sizeof(m_path), s.c_str());
 	} else {
 		m_path[0] = 0;
 	}
@@ -1987,23 +1977,10 @@ KPath KPath::joinString(const KPath &s) const {
 	return joinString(s.m_path);
 }
 KPath KPath::joinString(const char *s) const {
-#if 1
 	char tmp[SIZE] = {0};
 	strcpy_s(tmp, SIZE, m_path);
 	strcat_s(tmp, SIZE, s);
 	return KPath(tmp);
-#else
-	KPath ret;
-	size_t a = strlen(m_path);
-	size_t b = strlen(s);
-	if (a + b + 1 >= SIZE) {
-		TOO_LONG_PATH_ERROR();
-		return KPath::Empty;
-	}
-	kkpath_strcpy(ret.m_path, sizeof(ret.m_path), m_path);
-	kkpath_strcat(ret.m_path, sizeof(ret.m_path), s);
-	return ret;
-#endif
 }
 size_t KPath::split(KPathList *list) const {
 	if (list) list->clear();
@@ -2091,13 +2068,13 @@ KPath KPath::join(const KPath &more) const {
 		return *this;
 	}
 	char tmp[SIZE] = {'\0'};
-	kkpath_strcpy(tmp, sizeof(tmp), m_path);
+	strcpy_s(tmp, sizeof(tmp), m_path);
 
 	size_t n = strlen(m_path);
 	strncpy_s(tmp, SIZE, m_path, n);
 	tmp[n] = K__PATH_SLASH;
 	int offset = n + 1;
-	kkpath_strcpy(tmp + offset, sizeof(tmp) - offset, more.m_path);
+	strcpy_s(tmp + offset, sizeof(tmp) - offset, more.m_path);
 	return KPath(tmp);
 }
 KPath KPath::join(const KPathList &more) const {
@@ -2115,7 +2092,7 @@ KPath KPath::changeExtension(const KPath &ext) const {
 KPath KPath::changeExtension(const char *ext) const {
 	K__Assert(ext);
 	char tmp[SIZE];
-	kkpath_strcpy(tmp, sizeof(tmp), m_path);
+	strcpy_s(tmp, sizeof(tmp), m_path);
 	if (ext[0] == '\0') {
 		// ext が空文字列の場合は、単に拡張子を削除する
 		char *s = strrchr(tmp, '.');
@@ -2126,17 +2103,17 @@ KPath KPath::changeExtension(const char *ext) const {
 		char *s = strrchr(tmp, '.');
 		if (s) {
 			int offset = (int)(s - tmp);
-			kkpath_strcpy(s, sizeof(tmp) - offset, ext);
+			strcpy_s(s, sizeof(tmp) - offset, ext);
 		} else {
-			kkpath_strcat(tmp, sizeof(tmp), ext);
+			strcat_s(tmp, sizeof(tmp), ext);
 		}
 
 	} else {
 		// ext がドットで始まっていない場合
 		char *s = strrchr(tmp, '.');
 		if (s) *s = '\0';
-		kkpath_strcat(tmp, sizeof(tmp), ".");
-		kkpath_strcat(tmp, sizeof(tmp), ext);
+		strcat_s(tmp, sizeof(tmp), ".");
+		strcat_s(tmp, sizeof(tmp), ext);
 	}
 	return KPath(tmp);
 }
@@ -2239,14 +2216,14 @@ bool KPath::isRelative() const {
 }
 std::wstring KPath::toWideString(char sep) const {
 	char tmp[SIZE];
-	kkpath_strcpy(tmp, sizeof(tmp), m_path);
+	strcpy_s(tmp, sizeof(tmp), m_path);
 	K::strReplaceChar(tmp, K__PATH_SLASH, sep);
 	return K::strUtf8ToWide(tmp);
 }
 std::string KPath::toAnsiString(char sep, const char *_locale) const {
 	K__Assert(_locale);
 	char tmp[SIZE];
-	kkpath_strcpy(tmp, sizeof(tmp), m_path);
+	strcpy_s(tmp, sizeof(tmp), m_path);
 	K::strReplaceChar(tmp, K__PATH_SLASH, sep);
 	return K::strUtf8ToAnsi(tmp, _locale);
 }

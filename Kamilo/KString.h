@@ -76,6 +76,7 @@ public:
 
 
 #pragma region Path
+#if 0
 class KPathUtils {
 public:
 	static const int MAX_SIZE = 300;
@@ -148,6 +149,7 @@ public:
 	static time_t K_PathGetTimeStamp_Modify(const char *path_u8)   { time_t cma[3]; K_PathGetTimeStamp(path_u8, cma); return cma[1]; }
 	static time_t K_PathGetTimeStamp_Access(const char *path_u8)   { time_t cma[3]; K_PathGetTimeStamp(path_u8, cma); return cma[2]; }
 };
+#endif
 #pragma endregion // Path
 
 
@@ -660,7 +662,6 @@ struct KNumval {
 
 namespace Test {
 void Test_str();
-void Test_path();
 void Test_pathstring();
 void Test_numval();
 }

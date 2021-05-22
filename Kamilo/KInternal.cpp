@@ -805,8 +805,7 @@ uint32_t K::sysGetCurrentThreadId() {
 std::string K::sysGetCurrentDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetCurrentDirectoryW(MAX_PATH, wpath);
-	strReplaceChar(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
-	return strWideToUtf8(wpath);
+	return K__WideToUtf8Path(wpath);
 }
 
 /// chdir, SetCurrentDirectory の UTF8 版
@@ -995,6 +994,7 @@ bool K::pathHasExtension(const std::string &path, const std::string &ext) {
 std::string K::pathNormalize(const std::string &path, char old_delim, char new_delim) {
 	K__Assert(isprint(old_delim));
 	K__Assert(isprint(new_delim));
+	K__Assert(strStartsWithBom(path) == false); // BOMはあらかじめ取り除かれていること
 	std::string s = path;
 	strTrim(s); // 前後の空白を削除
 	strReplaceChar(s, old_delim, new_delim); // 区切り文字を置換
@@ -1027,8 +1027,7 @@ std::string K::pathGetFull(const std::string &s) {
 	std::wstring wpath = K__Utf8ToWidePath(s);
 	wchar_t wfull[MAX_PATH] = {0};
 	if (_wfullpath(wfull, wpath.c_str(), MAX_PATH)) {
-		strReplaceChar(wfull, K__PATH_BACKSLASH, K__PATH_SLASH);
-		return strWideToUtf8(wfull);
+		return K__WideToUtf8Path(wfull);
 	} else {
 		return s;
 	}
