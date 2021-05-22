@@ -71,14 +71,6 @@ void K__SetErrorHook(void (*hook)(const char *u8));
 //----------------------------------------------------
 // string
 //----------------------------------------------------
-
-
-// ansi ==> wide
-void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8);
-void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath);
-
-
-
 class K {
 public:
 	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る

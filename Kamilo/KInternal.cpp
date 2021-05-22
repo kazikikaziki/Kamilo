@@ -210,24 +210,13 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-
-void K__Utf8ToWidePath(wchar_t *out_wpath, int num_wchars, const char *path_u8) {
-	// windows形式のパスに変換する
-	K::strUtf8ToWide(out_wpath, num_wchars, path_u8, 0);
-	K::strReplaceChar(out_wpath, K__PATH_SLASHW, K__PATH_BACKSLASHW);
-}
-void K__WideToUtf8Path(char *out_path_u8, int num_bytes, const wchar_t *wpath) {
-	K::strWideToUtf8(out_path_u8, num_bytes, wpath);
-	K::strReplaceChar(out_path_u8, K__PATH_BACKSLASH, K__PATH_SLASH);
-}
-
-std::wstring K__Utf8ToWidePath(const std::string &path_u8) {
+static std::wstring _ToWin32PathW(const std::string &path_u8) {
 	// windows形式のパスに変換する
 	std::wstring ws = K::strUtf8ToWide(path_u8);
 	K::strReplaceChar(ws, K__PATH_SLASHW, K__PATH_BACKSLASHW);
 	return ws;
 }
-std::string K__WideToUtf8Path(const std::wstring &wpath) {
+static std::string _FromWin32PathW(const std::wstring &wpath) {
 	// windows形式のパスに変換する
 	std::string s = K::strWideToUtf8(wpath);
 	K::strReplaceChar(s, K__PATH_BACKSLASH, K__PATH_SLASH);
@@ -370,7 +359,7 @@ FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
 /// 指定されたファイルのバイト数を得る
 /// サイズを取得できない場合は false を返す
 bool K::fileGetSize(const std::string &path_u8, int *out_size) {
-	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	std::wstring wpath = _ToWin32PathW(path_u8);
 	//
 	HANDLE hFile = CreateFileW(wpath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (hFile != INVALID_HANDLE_VALUE) {
@@ -410,7 +399,7 @@ static time_t _FILETIME_to_timet(const FILETIME *ft) {
 ///		// cma[2] <-- access time
 /// @endcode
 bool K::fileGetTimeStamp(const std::string &path_u8, time_t *out_time_cma) {
-	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	std::wstring wpath = _ToWin32PathW(path_u8);
 	//
 	HANDLE hFile = CreateFileW(wpath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (hFile != INVALID_HANDLE_VALUE) {
@@ -626,8 +615,8 @@ static bool _FileRemoveNonDirFilesInDirectoryW(const wchar_t *wdir, bool subdir)
 /// @arg false コピー先に同名のファイルがある場合にはコピーをせず、false を返す
 /// @return 成功したかどうか
 bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool overwrite) {
-	std::wstring wsrc = K__Utf8ToWidePath(src_u8);
-	std::wstring wdst = K__Utf8ToWidePath(dst_u8);
+	std::wstring wsrc = _ToWin32PathW(src_u8);
+	std::wstring wdst = _ToWin32PathW(dst_u8);
 	if (!_FileConfirm(L"CopyFile", wsrc.c_str(), wdst.c_str())) {
 		return false;
 	}
@@ -645,7 +634,7 @@ bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool over
 /// 既にディレクトリが存在する場合は成功したとみなす。
 /// ディレクトリが既に存在するかどうかを確認するためには directoryExists() を使う
 bool K::fileMakeDir(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	if (PathIsDirectoryW(wdir.c_str())) {
 		return true; // already exists
 	}
@@ -667,7 +656,7 @@ bool K::fileMakeDir(const std::string &dir_u8) {
 /// それ以外の場合は false を返す
 /// @attention ディレクトリは削除できない
 bool K::fileRemove(const std::string &path_u8) {
-	std::wstring wpath = K__Utf8ToWidePath(path_u8);
+	std::wstring wpath = _ToWin32PathW(path_u8);
 	return _FileRemoveFileW(wpath.c_str());
 }
 
@@ -678,7 +667,7 @@ bool K::fileRemove(const std::string &path_u8) {
 /// それ以外の場合は false を返す
 /// @note 空でないディレクトリは削除できない
 bool K::fileRemoveEmptyDir(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	return _FileRemoveEmptyDirectoryW(wdir.c_str());
 }
 
@@ -689,7 +678,7 @@ bool K::fileRemoveEmptyDir(const std::string &dir_u8) {
 /// dir ディレクトリが初めから存在しなかった場合も削除に成功したものとして true を返す。
 /// それ以外の場合は false を返す
 bool K::fileRemoveEmptyDirTree(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	return _FileRemoveEmptyDirectoryTreeW(wdir.c_str());
 }
 
@@ -699,7 +688,7 @@ bool K::fileRemoveEmptyDirTree(const std::string &dir_u8) {
 /// 初めからファイルが存在しなかった場合は成功とみなす
 /// この関数が成功すれば dir 内にはディレクトリだけが残る
 bool K::fileRemoveFilesInDir(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	return _FileRemoveNonDirFilesInDirectoryW(wdir.c_str(), false);
 }
 
@@ -709,7 +698,7 @@ bool K::fileRemoveFilesInDir(const std::string &dir_u8) {
 /// 初めからファイルが存在しなかった場合は成功とみなす
 /// この関数が成功すれば dir 内にはディレクトリ構造だけが残る
 bool K::fileRemoveFilesInDirTree(const std::string &dir_u8) {
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	return _FileRemoveNonDirFilesInDirectoryW(wdir.c_str(), true);
 }
 
@@ -736,7 +725,7 @@ static void _FileGetList(const wchar_t *wdir, const wchar_t* wsub, bool recurse,
 				wchar_t tmp[MAX_PATH] = {0};
 				if (wsub[0]) PathAppendW(tmp, wsub);
 				PathAppendW(tmp, fdata.cFileName);
-				list.push_back(K__WideToUtf8Path(tmp));
+				list.push_back(_FromWin32PathW(tmp));
 				if (recurse && (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 					_FileGetList(wdir, tmp, true, list);
 				}
@@ -749,14 +738,14 @@ static void _FileGetList(const wchar_t *wdir, const wchar_t* wsub, bool recurse,
 // dir 直下のファイル名リストを得る
 std::vector<std::string> K::fileGetListInDir(const std::string &dir_u8) {
 	std::vector<std::string> list;
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	_FileGetList(wdir.c_str(), L"", false, list);
 	return list;
 }
 
 std::vector<std::string> K::fileGetListInDirTree(const std::string &dir_u8) {
 	std::vector<std::string> list;
-	std::wstring wdir = K__Utf8ToWidePath(dir_u8);
+	std::wstring wdir = _ToWin32PathW(dir_u8);
 	_FileGetList(wdir.c_str(), L"", true, list);
 	return list;
 }
@@ -805,7 +794,7 @@ uint32_t K::sysGetCurrentThreadId() {
 std::string K::sysGetCurrentDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetCurrentDirectoryW(MAX_PATH, wpath);
-	return K__WideToUtf8Path(wpath);
+	return _FromWin32PathW(wpath);
 }
 
 /// chdir, SetCurrentDirectory の UTF8 版
@@ -813,7 +802,7 @@ std::string K::sysGetCurrentDir() {
 /// カレントディレクトリ名を utf8 で得る
 /// @see https://linuxjm.osdn.jp/html/LDP_man-pages/man2/chdir.2.html
 bool K::sysSetCurrentDir(const std::string &dir) {
-	std::wstring wdir = K__Utf8ToWidePath(dir);
+	std::wstring wdir = _ToWin32PathW(dir);
 	if (::SetCurrentDirectoryW(wdir.c_str())) {
 		return true; // OK
 	} else {
@@ -1024,10 +1013,10 @@ int K::pathGetCommonSize(const std::string &path1, const std::string &path2) {
 }
 
 std::string K::pathGetFull(const std::string &s) {
-	std::wstring wpath = K__Utf8ToWidePath(s);
+	std::wstring wpath = _ToWin32PathW(s);
 	wchar_t wfull[MAX_PATH] = {0};
 	if (_wfullpath(wfull, wpath.c_str(), MAX_PATH)) {
-		return K__WideToUtf8Path(wfull);
+		return _FromWin32PathW(wfull);
 	} else {
 		return s;
 	}
@@ -1169,21 +1158,21 @@ bool K::pathEndsWith(const std::string &path, const std::string &sub) {
 
 
 bool K::pathIsRelative(const std::string &path) {
-	std::wstring wpath = K__Utf8ToWidePath(path);
+	std::wstring wpath = _ToWin32PathW(path);
 	return PathIsRelativeW(wpath.c_str());
 }
 bool K::pathIsDir(const std::string &path) {
 	// パスが実在し、かつディレクトリである
-	std::wstring wpath = K__Utf8ToWidePath(path);
+	std::wstring wpath = _ToWin32PathW(path);
 	return PathIsDirectoryW(wpath.c_str());
 }
 bool K::pathIsFile(const std::string &path) {
 	// パスが実在し、かつ非ディレクトリである
-	std::wstring wpath = K__Utf8ToWidePath(path);
+	std::wstring wpath = _ToWin32PathW(path);
 	return PathFileExistsW(wpath.c_str()) && !PathIsDirectoryW(wpath.c_str()); // パスが存在し、かつディレクトリでないならファイルであるとする
 }
 bool K::pathExists(const std::string &path) {
-	std::wstring wpath = K__Utf8ToWidePath(path);
+	std::wstring wpath = _ToWin32PathW(path);
 	return PathFileExistsW(wpath.c_str());
 }
 #pragma endregion // path
