@@ -482,14 +482,21 @@ private:
 
 // TComp は CComp の継承であること!!!
 template <class TComp> class KCompNodes {
-public:
 	std::unordered_map<KNode*, TComp*> m_Nodes;
+public:
+	typedef typename std::unordered_map<KNode*, TComp*>::iterator iterator;
 
 	KCompNodes() {
 	}
 	virtual ~KCompNodes() {
 	//	assert(m_Nodes.empty()); // 正しく解放されていれば、すでにノードは削除済みのはず
 		clear();
+	}
+	iterator begin() {
+		return m_Nodes.begin();
+	}
+	iterator end() {
+		return m_Nodes.end();
 	}
 	void clear() {
 		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {

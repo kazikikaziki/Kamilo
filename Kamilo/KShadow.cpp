@@ -10,23 +10,23 @@
 namespace Kamilo {
 
 static KShadow::GlobalSettings g_GlobalShadowSettings;
-static KCompNodes<KShadow> g_ShadowCompNodes;
-
 
 
 class CShadowMgr: public KManager, public KInspectorCallback {
 public:
+	KCompNodes<KShadow> m_CompNodes;
+
 	CShadowMgr() {
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this);
 	}
 	virtual void on_manager_appframe() override {
-		for (auto it=g_ShadowCompNodes.m_Nodes.begin(); it!=g_ShadowCompNodes.m_Nodes.end(); ++it) {
+		for (auto it=m_CompNodes.begin(); it!=m_CompNodes.end(); ++it) {
 			it->second->_StepSystemAction();
 		}
 	}
 	virtual void on_manager_nodeinspector(KNode *node) override {
-		KShadow *comp = g_ShadowCompNodes.get(node);
+		KShadow *comp = m_CompNodes.get(node);
 		comp->_Inspector();
 	}
 
@@ -102,25 +102,27 @@ void KShadow::uninstall() {
 	}
 }
 void KShadow::attach(KNode *node) {
+	K__Assert(g_ShadowMgr);
 	KShadow *co = new KShadow();
-	g_ShadowCompNodes.attach(node, co);
+	g_ShadowMgr->m_CompNodes.attach(node, co);
 	co->drop();
 }
 KShadow * KShadow::of(KNode *node) {
-	return g_ShadowCompNodes.get(node);
+	K__Assert(g_ShadowMgr);
+	return g_ShadowMgr->m_CompNodes.get(node);
 }
 
 
 
 KShadow::KShadow() {
-	m_item.radius_x = g_GlobalShadowSettings.defaultRadiusX;
-	m_item.radius_y = g_GlobalShadowSettings.defaultRadiusY;
-	m_item.scale = 1.0f;
-	m_item.scale_by_height = true;
-	m_item.max_height = 0;
-	m_item.use_sprite = false;
-	m_item.enabled = true;
-	m_item.delay = 2; // 最初のフレームでは、まだ影の描画に必要な情報が取得できていないので、念のために数フレーム経過してから表示するようにする
+	m_Data.radius_x = g_GlobalShadowSettings.defaultRadiusX;
+	m_Data.radius_y = g_GlobalShadowSettings.defaultRadiusY;
+	m_Data.scale = 1.0f;
+	m_Data.scale_by_height = true;
+	m_Data.max_height = 0;
+	m_Data.use_sprite = false;
+	m_Data.enabled = true;
+	m_Data.delay = 2; // 最初のフレームでは、まだ影の描画に必要な情報が取得できていないので、念のために数フレーム経過してから表示するようにする
 }
 void KShadow::on_comp_attach() {
 	KNode *self = getNode();
@@ -140,11 +142,11 @@ void KShadow::on_comp_attach() {
 	KMesh *mesh = KMeshDrawable::of(self)->getMesh();
 	_MakeCircleMesh(mesh, KVec2(SHADOW_BASIC_RADIUS, SHADOW_BASIC_RADIUS), g_GlobalShadowSettings.vertexCount, center_color, outer_color);
 	KMeshDrawable::of(self)->getSubMesh(0)->material.blend = g_GlobalShadowSettings.blend;
-	m_item.shadow_tex_name = KPath::fromFormat("__shadowtex_%x", self->getId());
+	m_Data.shadow_tex_name = KPath::fromFormat("__shadowtex_%x", self->getId());
 }
 void KShadow::on_comp_detach() {
 	// 影専用のテクスチャを消す
-	KBank::getTextureBank()->removeTexture(m_item.shadow_tex_name);
+	KBank::getTextureBank()->removeTexture(m_Data.shadow_tex_name);
 }
 void KShadow::_StepSystemAction() {
 	update();
@@ -159,18 +161,18 @@ void KShadow::update() {
 	// グループ化しておく必要がある。
 	// （グループ化するとキャラクタの描画が一旦レンダーテクスチャに対して行われるので、
 	// このレンダーテクスチャを利用して影を描画する）
-	if (m_item.use_sprite) {
+	if (m_Data.use_sprite) {
 		KDrawable *owner_renderer = KDrawable::of(self->getParent());
 		if (owner_renderer) owner_renderer->setGrouping(true);
 	}
 
 	// 遅延タイマーを更新
-	if (m_item.delay > 0) {
-		m_item.delay--;
+	if (m_Data.delay > 0) {
+		m_Data.delay--;
 	}
 
 	{
-		ITEM &item = m_item;
+		ITEM &item = m_Data;
 		KNode *owner_node = self->getParent();
 		KNode *shadow_node = self;
 		if (shadow_node == nullptr) return; // 何らかの理由で影ノードが外部から削除されている（例えばノードの子を一括削除してしまった場合など）
@@ -277,18 +279,18 @@ void KShadow::_Inspector() {
 
 	bool mod = false;
 
-	if (m_item.altitude >= 0) {
-		ImGui::Text("Altitude: %d", m_item.altitude);
+	if (m_Data.altitude >= 0) {
+		ImGui::Text("Altitude: %d", m_Data.altitude);
 	} else {
 		ImGui::Text("Altitude: (BOTTOMLESS)");
 	}
-	mod |= ImGui::DragFloat("RadiusX", &m_item.radius_x);
-	mod |= ImGui::DragFloat("RadiusY", &m_item.radius_y);
-	mod |= ImGui::DragFloat("Scale",   &m_item.scale);
-	mod |= ImGui::DragFloat3("Offset", (float*)&m_item.offset);
-	mod |= ImGui::Checkbox("Scale by height(True)", &m_item.scale_by_height);
-	if (ImGui::DragFloat("MaxHeight", &m_item.max_height)) {
-		m_item.max_height = KMath::max(m_item.max_height, 0.0f);
+	mod |= ImGui::DragFloat("RadiusX", &m_Data.radius_x);
+	mod |= ImGui::DragFloat("RadiusY", &m_Data.radius_y);
+	mod |= ImGui::DragFloat("Scale",   &m_Data.scale);
+	mod |= ImGui::DragFloat3("Offset", (float*)&m_Data.offset);
+	mod |= ImGui::Checkbox("Scale by height(True)", &m_Data.scale_by_height);
+	if (ImGui::DragFloat("MaxHeight", &m_Data.max_height)) {
+		m_Data.max_height = KMath::max(m_Data.max_height, 0.0f);
 		mod = true;
 	}
 	if (mod) {
@@ -296,25 +298,25 @@ void KShadow::_Inspector() {
 	}
 }
 void KShadow::setOffset(const KVec3 &value) {
-	m_item.offset = value;
+	m_Data.offset = value;
 }
 void KShadow::setRadius(float horz, float vert) {
-	m_item.radius_x = horz;
-	m_item.radius_y = vert;
+	m_Data.radius_x = horz;
+	m_Data.radius_y = vert;
 }
 void KShadow::getRadius(float *horz, float *vert) const {
-	if (horz) *horz = m_item.radius_x;
-	if (vert) *vert = m_item.radius_y;
+	if (horz) *horz = m_Data.radius_x;
+	if (vert) *vert = m_Data.radius_y;
 }
 void KShadow::setScaleFactor(float value) {
-	m_item.scale = value;
+	m_Data.scale = value;
 }
 void KShadow::setScaleByHeight(bool value, float maxheight) {
-	m_item.scale_by_height = value;
-	m_item.max_height = maxheight;
+	m_Data.scale_by_height = value;
+	m_Data.max_height = maxheight;
 }
 void KShadow::setUseSprite(bool value) {
-	m_item.use_sprite = value;
+	m_Data.use_sprite = value;
 }
 void KShadow::setMatrix(const KMatrix4 &matrix) {
 	KNode *self = getNode();

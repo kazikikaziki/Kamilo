@@ -75,7 +75,7 @@ public:
 			delay = 0;
 		}
 	};
-	ITEM m_item;
+	ITEM m_Data;
 	/// 地上での影の表示位置
 	void setOffset(const KVec3 &value);
 

@@ -5279,7 +5279,7 @@ KVideoBank * KBank::getVideoBank() {
 	return g_VideoBank;
 }
 KAnimationBank * KBank::getAnimationBank() {
-	return g_VideoBank->getAnimationBank();
+	return g_VideoBank ? g_VideoBank->getAnimationBank() : nullptr;
 }
 KTextureBank * KBank::getTextureBank() {
 	return g_VideoBank->getTextureBank();
