@@ -75,6 +75,15 @@ class K {
 public:
 	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
 
+	#pragma region sys
+	static uint32_t sysGetCurrentProcessId(); ///< 現在のプロセスIDを得る
+	static uint32_t sysGetCurrentThreadId(); ///< 現在のスレッドIDを得る
+	static std::string sysGetCurrentDir(); ///< カレントディレクトリを UTF8 で得る
+	static bool sysSetCurrentDir(const std::string &dir);
+	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名をフルパスで得る
+	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリをフルパスで得る
+	#pragma endregion // sys
+
 	#pragma region clock
 	static uint64_t clockNano64(); ///< システム時刻をナノ秒単位で得る
 	static uint64_t clockMsec64(); ///< システム時刻をミリ秒単位で取得する
@@ -117,15 +126,6 @@ public:
 	static std::string fileLoadString(const std::string &path_u8);
 	static void fileSaveString(const std::string &path_u8, const std::string &bin);
 	#pragma endregion // file
-
-	#pragma region sys
-	static uint32_t sysGetCurrentProcessId(); ///< 現在のプロセスIDを得る
-	static uint32_t sysGetCurrentThreadId(); ///< 現在のスレッドIDを得る
-	static std::string sysGetCurrentDir(); ///< カレントディレクトリを UTF8 で得る
-	static bool sysSetCurrentDir(const std::string &dir);
-	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名をフルパスで得る
-	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリをフルパスで得る
-	#pragma endregion // sys
 
 	#pragma region path
 	static std::string pathJoin(const std::string &path1, const std::string &path2);
