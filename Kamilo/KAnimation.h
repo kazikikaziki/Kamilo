@@ -82,7 +82,7 @@ public:
 	bool getCurrentParameterBool(const std::string &name) const; ///< アニメクリップの Parameters タグで指定された値を得る
 	int getCurrentParameterInt(const std::string &name, int def=0) const;
 	float getCurrentParameterFloat(const std::string &name, float def=0.0f) const;
-	const char * getCurrentParameter(const std::string &name) const;
+	const std::string & getCurrentParameter(const std::string &name) const;
 	bool queryCurrentParameterInt(const std::string &name, int *value) const;
 	void setCurrentParameter(const std::string &key, const std::string &value);
 	const KNamedValues * getCurrentUserParameters() const;

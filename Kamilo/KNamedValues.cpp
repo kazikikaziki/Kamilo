@@ -4,6 +4,8 @@
 
 namespace Kamilo {
 
+static const std::string s_Empty;
+
 #pragma region KNamedValues
 KNamedValues::KNamedValues() {
 }
@@ -19,18 +21,18 @@ void KNamedValues::_remove(const std::string &name) {
 		m_Items.erase(m_Items.begin() + index);
 	}
 }
-const char * KNamedValues::_getName(int index) const {
+const std::string & KNamedValues::_getName(int index) const {
 	if (0 <= index && index < (int)m_Items.size()) {
-		return m_Items[index].first.c_str();
+		return m_Items[index].first;
 	} else {
-		return nullptr;
+		return s_Empty;
 	}
 }
-const char * KNamedValues::_getString(int index) const {
+const std::string & KNamedValues::_getString(int index) const {
 	if (0 <= index && index < (int)m_Items.size()) {
-		return m_Items[index].second.c_str();
+		return m_Items[index].second;
 	} else {
-		return nullptr;
+		return s_Empty;
 	}
 }
 void KNamedValues::_setString(const std::string &name, const std::string &value) {
@@ -106,17 +108,17 @@ bool KNamedValues::loadFromXml(KXmlElement *elm, bool pack_in_attr) {
 void KNamedValues::saveToXml(KXmlElement *elm, bool pack_in_attr) const {
 	if (pack_in_attr) {
 		for (int i=0; i<size(); i++) {
-			const char *n = getName(i);
-			const char *v = getString(i);
+			const std::string &n = getName(i);
+			const std::string &v = getString(i);
 			elm->setAttrString(n, v);
 		}
 	} else {
 		for (int i=0; i<size(); i++) {
-			const char *n = getName(i);
-			const char *v = getString(i);
+			const std::string &n = getName(i);
+			const std::string &v = getString(i);
 			KXmlElement *xPair = elm->addChild("Pair");
 			xPair->setAttrString("name", n);
-			xPair->setText(v);
+			xPair->setText(v.c_str());
 		}
 	}
 }
@@ -125,26 +127,26 @@ std::string KNamedValues::saveToString(bool pack_in_attr) const {
 	if (pack_in_attr) {
 		s += "<KNamedValues\n";
 		for (int i=0; i<size(); i++) {
-			const char *n = getName(i);
-			const char *v = getString(i);
-			s += K::str_sprintf("\t%s = '%s'\n", n, v);
+			const std::string &n = getName(i);
+			const std::string &v = getString(i);
+			s += K::str_sprintf("\t%s = '%s'\n", n.c_str(), v.c_str());
 		}
 		s += "/>\n";
 	} else {
 		s += "<KNamedValues>\n";
 		for (int i=0; i<size(); i++) {
-			const char *n = getName(i);
-			const char *v = getString(i);
-			s += K::str_sprintf("  <Pair name='%s'>%s</Pair>\n", n, v);
+			const std::string &n = getName(i);
+			const std::string &v = getString(i);
+			s += K::str_sprintf("  <Pair name='%s'>%s</Pair>\n", n.c_str(), v.c_str());
 		}
 		s += "</KNamedValues>\n";
 	}
 	return s;
 }
-const char * KNamedValues::getName(int index) const {
+const std::string & KNamedValues::getName(int index) const {
 	return _getName(index);
 }
-const char * KNamedValues::getString(int index) const {
+const std::string & KNamedValues::getString(int index) const {
 	return _getString(index);
 }
 void KNamedValues::setString(const std::string &name, const std::string &value) {
@@ -180,22 +182,23 @@ int KNamedValues::find(const std::string &name) const {
 bool KNamedValues::contains(const std::string &name) const {
 	return find(name) >= 0;
 }
-const char * KNamedValues::getString(const std::string &name, const std::string &defaultValue) const {
+const std::string & KNamedValues::getString(const std::string &name) const {
+	return getString(name, s_Empty);
+}
+const std::string & KNamedValues::getString(const std::string &name, const std::string &defaultValue) const {
 	int index = find(name);
 	if (index >= 0) {
 		return getString(index);
 	} else {
-		return defaultValue.c_str();
+		return defaultValue;
 	}
 }
 void KNamedValues::setBool(const std::string &name, bool value) {
 	setString(name, value ? "1" : "0");
 }
 bool KNamedValues::queryBool(const std::string &name, bool *outValue) const {
-	const char *s = getString(name);
-	if (s) {
-		K__Assert(strcmp(s, "on" ) != 0);
-		K__Assert(strcmp(s, "off" ) != 0);
+	const std::string &s = getString(name);
+	if (s != "") {
 		int val = 0;
 		if (K::strToInt(s, &val)) {
 			if (outValue) *outValue = val != 0;
@@ -215,8 +218,8 @@ void KNamedValues::setInteger(const std::string &name, int value) {
 	setString(name, s);
 }
 bool KNamedValues::queryInteger(const std::string &name, int *outValue) const {
-	const char *s = getString(name);
-	if (s && K::strToInt(s, outValue)) {
+	const std::string &s = getString(name);
+	if (K::strToInt(s, outValue)) {
 		return true;
 	}
 	return false;
@@ -232,7 +235,7 @@ void KNamedValues::setUInt(const std::string &name, unsigned int value) {
 	setString(name, s);
 }
 bool KNamedValues::queryUInt(const std::string &name, unsigned int *outValue) const {
-	const char *s = getString(name);
+	const std::string &s = getString(name);
 	return K::strToUInt32(s, outValue);
 }
 int KNamedValues::getUInt(const std::string &name, unsigned int defaultValue) const {
@@ -246,8 +249,8 @@ void KNamedValues::setFloat(const std::string &name, float value) {
 	setString(name, s);
 }
 bool KNamedValues::queryFloat(const std::string &name, float *outValue) const {
-	const char *s = getString(name);
-	if (s && K::strToFloat(s, outValue)) {
+	const std::string &s = getString(name);
+	if (K::strToFloat(s, outValue)) {
 		return true;
 	}
 	return false;
@@ -268,7 +271,7 @@ void KNamedValues::setFloatArray(const std::string &name, const float *values, i
 	setString(name, s.c_str());
 }
 int KNamedValues::getFloatArray(const std::string &name, float *outValues, int maxout) const {
-	const char *s = getString(name);
+	const std::string &s = getString(name);
 	auto tok = K::strSplit(s, ", ");
 	if (outValues) {
 		int idx = 0;
@@ -292,7 +295,7 @@ void KNamedValues::setBinary(const std::string &name, const void *data, int size
 	setString(name, s.c_str());
 }
 int KNamedValues::getBinary(const std::string &name, void *out, int maxsize) const {
-	const char *s = getString(name);
+	const std::string &s = getString(name);
 
 	// コロンよりも左側の文字列を得る。データのバイト数が16進数表記されている
 	int colonPos = K::strFindChar(s, ':');
@@ -302,7 +305,7 @@ int KNamedValues::getBinary(const std::string &name, void *out, int maxsize) con
 
 	// 得られたバイト数HEX文字列から整数値を得る
 	char szstr[16] = {0};
-	strncpy(szstr, s, colonPos);
+	strncpy(szstr, s.c_str(), colonPos);
 	szstr[colonPos] = '\0';
 	int sz = 0;
 	K::strToInt(szstr, &sz);

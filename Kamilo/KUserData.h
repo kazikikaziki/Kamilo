@@ -13,7 +13,8 @@ public:
 	static void clearValues(); /// すべての値を削除する
 	static void clearValuesByTag(int tag); /// 指定されたタグの値をすべて削除する
 	static void clearValuesByPrefix(const char *prefix); /// 指定された文字で始まる名前の値をすべて削除する
-	static std::string getString(const std::string &key, const std::string &def=""); /// 文字列を得る
+	static std::string getString(const std::string &key); /// 文字列を得る
+	static std::string getString(const std::string &key, const std::string &def); /// 文字列を得る
 	static void setString(const std::string &key, const std::string &val, int tag=0); /// 文字列を設定する
 	static bool hasKey(const std::string &key); /// キーが存在するかどうか
 	static int getKeys(std::vector<std::string> *p_keys); /// 全てのキーを得る

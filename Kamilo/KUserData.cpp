@@ -45,18 +45,19 @@ public:
 		int id = 0;
 		ImGui::Indent();
 		for (int i=0; i<m_Values.size(); i++) {
-			const char *key = m_Values.getName(i);
-			const char *val = m_Values.getString(i);
+			const std::string &key = m_Values.getName(i);
+			const std::string &val = m_Values.getString(i);
 			char val_u8[256];
-			strcpy_s(val_u8, sizeof(val_u8), val);
+			strcpy_s(val_u8, sizeof(val_u8), val.c_str());
 			ImGui::PushID(KImGui::KImGui_ID(id));
 			ImGui::PushItemWidth((float)w);
 			if (ImGui::InputText("", val_u8, sizeof(val_u8))) {
-				m_Values.setString(key, KPath::fromUtf8(val_u8).u8());
+				std::string s = val_u8;
+				m_Values.setString(key, s);
 			}
 			ImGui::PopItemWidth();
 			ImGui::SameLine();
-			ImGui::Text("%s", key);
+			ImGui::Text("%s", key.c_str());
 			ImGui::PopID();
 			id++;
 		}
@@ -89,7 +90,7 @@ public:
 	void clearValuesByPrefix(const char *prefix) {
 		std::vector<std::string> keys;
 		for (int i=0; i<m_Values.size(); i++) {
-			const char *key = m_Values.getName(i);
+			const std::string &key = m_Values.getName(i);
 			if (K::strStartsWith(key, prefix)) {
 				keys.push_back(key);
 			}
@@ -99,20 +100,20 @@ public:
 	int getKeys(std::vector<std::string> *p_keys) const {
 		if (p_keys) {
 			for (int i=0; i<m_Values.size(); i++) {
-				const char *key = m_Values.getName(i);
+				const std::string &key = m_Values.getName(i);
 				p_keys->push_back(key);
 			}
 		}
 		return m_Values.size();
 	}
 	bool hasKey(const std::string &key) const {
-		return m_Values.getString(key.c_str()) != nullptr;
+		return m_Values.getString(key) != "";
 	}
 	std::string getString(const std::string &key, const std::string &def) const {
-		return m_Values.getString(key.c_str(), def.c_str());
+		return m_Values.getString(key, def);
 	}
 	void setString(const std::string &key, const std::string &val, int tag) {
-		m_Values.setString(key.c_str(), val.c_str());
+		m_Values.setString(key, val);
 		m_Tags[key] = tag;
 	}
 	bool saveToFileEx(const KNamedValues *nv, const std::string &filename, const std::string &password) {
@@ -222,6 +223,11 @@ void KUserData::clearValuesByTag(int tag) {
 void KUserData::clearValuesByPrefix(const char *prefix) {
 	K__Assert(g_UserData);
 	g_UserData->clearValuesByPrefix(prefix);
+}
+std::string KUserData::getString(const std::string &key) {
+	static const std::string s_Empty;
+	K__Assert(g_UserData);
+	return g_UserData->getString(key, s_Empty);
 }
 std::string KUserData::getString(const std::string &key, const std::string &def) {
 	K__Assert(g_UserData);

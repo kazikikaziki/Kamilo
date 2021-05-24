@@ -709,9 +709,10 @@ float KAnimation::getCurrentParameterFloat(const std::string &name, float def) c
 	auto nv = getCurrentUserParameters();
 	return nv ? nv->getFloat(name, def) : def;
 }
-const char * KAnimation::getCurrentParameter(const std::string &name) const {
+const std::string & KAnimation::getCurrentParameter(const std::string &name) const {
+	static const std::string s_Empty;
 	auto nv = getCurrentUserParameters();
-	return nv ? nv->getString(name) : nullptr;
+	return nv ? nv->getString(name, s_Empty) : s_Empty;
 }
 bool KAnimation::queryCurrentParameterInt(const std::string &name, int *value) const {
 	auto nv = getCurrentUserParameters();
@@ -833,9 +834,9 @@ void KAnimation::updateInspector() {
 		auto nv = getCurrentUserParameters();
 		if (nv) {
 			for (int i=0; i<nv->size(); i++) {
-				const char *k = nv->getName(i);
-				const char *v = nv->getString(i);
-				ImGui::Text("%s: %s", k, v);
+				const std::string &k = nv->getName(i);
+				const std::string &v = nv->getString(i);
+				ImGui::Text("%s: %s", k.c_str(), v.c_str());
 			}
 		}
 		ImGui::TreePop();

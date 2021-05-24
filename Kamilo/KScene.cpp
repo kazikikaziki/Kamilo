@@ -91,9 +91,9 @@ public:
 			if (m_curr_scene.scene) {
 				const KNamedValues *nv = m_curr_scene.scene->getParams();
 				for (int i=0; i<nv->size(); i++) {
-					const char *key = nv->getName(i);
-					const char *val = nv->getString(i);
-					ImGui::Text("%s: %s", key, val);
+					const std::string &key = nv->getName(i);
+					const std::string &val = nv->getString(i);
+					ImGui::Text("%s: %s", key.c_str(), val.c_str());
 				}
 			}
 			ImGui::TreePop();

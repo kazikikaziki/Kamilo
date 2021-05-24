@@ -26,14 +26,15 @@ public:
 	void saveToFile(const std::string &filename, bool pack_in_attr=false) const;
 	void saveToXml(KXmlElement *elm, bool pack_in_attr=false) const;
 	std::string saveToString(bool pack_in_attr=false) const;
-	const char * getName(int index) const;
-	const char * getString(int index) const;
+	const std::string & getName(int index) const;
+	const std::string & getString(int index) const;
 	void setString(const std::string &name, const std::string &value);
 	KNamedValues clone() const;
 	void append(const KNamedValues &nv);
 	int find(const std::string &name) const;
 	bool contains(const std::string &name) const;
-	const char * getString(const std::string &name, const std::string &defaultValue="") const;
+	const std::string & getString(const std::string &name) const;
+	const std::string & getString(const std::string &name, const std::string &defaultValue) const;
 
 	void setBool(const std::string &name, bool value);
 	bool queryBool(const std::string &name, bool *outValue) const;
@@ -61,8 +62,8 @@ private:
 	int _size() const;
 	void _clear();
 	void _remove(const std::string &name);
-	const char * _getName(int index) const;
-	const char * _getString(int index) const;
+	const std::string & _getName(int index) const;
+	const std::string & _getString(int index) const;
 	void _setString(const std::string &name, const std::string &value);
 	int _find(const std::string &name) const;
 	typedef std::pair<std::string, std::string> Pair;

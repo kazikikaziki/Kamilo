@@ -220,6 +220,9 @@ struct _StrW {
 	_StrW(float x) {
 		ws = std::to_wstring(x);
 	}
+	_StrW(const char *u8) {
+		ws = K::strUtf8ToWide(u8);
+	}
 	_StrW(const std::string &u8) {
 		ws = K::strUtf8ToWide(u8);
 	}
