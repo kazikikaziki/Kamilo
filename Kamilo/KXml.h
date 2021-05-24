@@ -41,6 +41,11 @@ public:
 	int getAttrInt(const char *name, int def=0) const;
 
 	virtual void setAttrString(const char *name, const char *value) = 0;
+
+	void setAttrString(const std::string &name, const std::string &value) {
+		setAttrString(name.c_str(), value.c_str());
+	}
+
 	void setAttrInt(const char *name, int value);
 	void setAttrFloat(const char *name, float value);
 
