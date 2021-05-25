@@ -661,7 +661,9 @@ void KClipRes::gui_key(const SPRITE_KEY &key, int framenumber) const {
 		ImGui::Indent();
 		if (ImGui::TreeNodeEx("User parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
 			for (int i=0; i<(int)key.user_parameters.size(); i++) {
-				ImGui::BulletText("%s: '%s'", key.user_parameters.getName(i), key.user_parameters.getString(i));
+				std::string k = key.user_parameters.getName(i);
+				std::string v = key.user_parameters.getString(i);
+				ImGui::BulletText("%s: '%s'", k.c_str(), v.c_str());
 			}
 			if (key.xml_data) {
 				std::string s = key.xml_data->toString(0);
