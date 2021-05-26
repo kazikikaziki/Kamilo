@@ -979,7 +979,7 @@ private:
 				// Enabled
 				{
 					bool b = bodynode->getBodyEnabled();
-					if (ImGui::Checkbox("Enabled", &b)) {
+					if (ImGui::Checkbox("Body Enabled", &b)) {
 						bodynode->setBodyEnabled(b);
 					}
 				}
@@ -1006,7 +1006,7 @@ private:
 		// Enabled
 		{
 			bool b = bodynode->getBodyEnabled();
-			if (ImGui::Checkbox("Enabled", &b)) {
+			if (ImGui::Checkbox("Body Enabled", &b)) {
 				bodynode->setBodyEnabled(b);
 			}
 		}
@@ -1038,68 +1038,99 @@ private:
 		ImGui::Text("Actial accel: %g", act_accel.getLength());
 		ImGui::InputFloat3("Actial speed", (float*)&act_speed, "%.1f", ImGuiInputTextFlags_ReadOnly);
 		ImGui::InputFloat3("Actial accel", (float*)&act_accel, "%.1f", ImGuiInputTextFlags_ReadOnly);
-
-		float skin_width = bodynode->m_Desc.get_skin_width();
-		if (ImGui::DragFloat("Skin width", &skin_width)) {
-			bodynode->m_Desc.set_skin_width(skin_width);
+		{
+			float skin_width = bodynode->m_Desc.get_skin_width();
+			if (ImGui::DragFloat("Skin width", &skin_width)) {
+				bodynode->m_Desc.set_skin_width(skin_width);
+			}
 		}
-
-		float snap_height = bodynode->m_Desc.get_snap_height();
-		if (ImGui::DragFloat("Snap height", &snap_height)) {
-			bodynode->m_Desc.set_snap_height(snap_height);
+		{
+			float snap_height = bodynode->m_Desc.get_snap_height();
+			if (ImGui::DragFloat("Snap height", &snap_height)) {
+				bodynode->m_Desc.set_snap_height(snap_height);
+			}
 		}
-
-		float sliding_friction = bodynode->m_Desc.get_sliding_friction();
-		if (ImGui::DragFloat("Sliding friction", &sliding_friction, 0.1f, 0.0f, 10.0f)) {
-			bodynode->m_Desc.set_sliding_friction(sliding_friction);
+		{
+			float sliding_friction = bodynode->m_Desc.get_sliding_friction();
+			if (ImGui::DragFloat("Sliding friction", &sliding_friction, 0.1f, 0.0f, 10.0f)) {
+				bodynode->m_Desc.set_sliding_friction(sliding_friction);
+			}
 		}
-
-		float penetratin_response = bodynode->m_Desc.get_penetratin_response();
-		if (ImGui::DragFloat("Penetration response", &penetratin_response)) {
-			bodynode->m_Desc.set_penetratin_response(penetratin_response);
+		{
+			float penetratin_response = bodynode->m_Desc.get_penetratin_response();
+			if (ImGui::DragFloat("Penetration response", &penetratin_response)) {
+				bodynode->m_Desc.set_penetratin_response(penetratin_response);
+			}
 		}
-
-		float climb_height = bodynode->m_Desc.get_climb_height();
-		if (ImGui::DragFloat("Climb height", &climb_height)) {
-			bodynode->m_Desc.set_climb_height(climb_height);
+		{
+			float climb_height = bodynode->m_Desc.get_climb_height();
+			if (ImGui::DragFloat("Climb height", &climb_height)) {
+				bodynode->m_Desc.set_climb_height(climb_height);
+			}
 		}
+		{
+			float bounce = bodynode->m_Desc.get_bounce();
+			if (ImGui::DragFloat("Bounce (Vert)", &bounce, 0.1f, 0.0f, 1.0f)) {
+				bodynode->m_Desc.set_bounce(bounce);
+			}
 
-		float bounce = bodynode->m_Desc.get_bounce();
-		if (ImGui::DragFloat("Bounce (Vert)", &bounce, 0.1f, 0.0f, 1.0f)) {
-			bodynode->m_Desc.set_bounce(bounce);
+			float bounce_horz = bodynode->m_Desc.get_bounce_horz();
+			if (ImGui::DragFloat("Bounce (Horz)", &bounce_horz, 0.1f, 0.0f, 1.0f)) {
+				bodynode->m_Desc.set_bounce_horz(bounce_horz);
+			}
+
+			float bounce_min_speed = bodynode->m_Desc.get_bounce_min_speed();
+			if (ImGui::DragFloat("Bounce min speed", &bounce_min_speed, 0.1f)) {
+				bodynode->m_Desc.set_bounce_min_speed(bounce_min_speed);
+			}
 		}
-
-		float bounce_horz = bodynode->m_Desc.get_bounce_horz();
-		if (ImGui::DragFloat("Bounce (Horz)", &bounce_horz, 0.1f, 0.0f, 1.0f)) {
-			bodynode->m_Desc.set_bounce_horz(bounce_horz);
+		{
+			float gravity = bodynode->m_Desc.get_gravity();
+			if (ImGui::DragFloat("Gravity", &gravity, 0.1f)) {
+				bodynode->m_Desc.set_gravity(gravity);
+			}
 		}
+		{
+			bool slip_ctrl = bodynode->m_Desc._slip_control;
+			if (ImGui::Checkbox("Slip ctrl", &slip_ctrl)) {
+				bodynode->m_Desc._slip_control = slip_ctrl;
+			}
 
-		float bounce_min_speed = bodynode->m_Desc.get_bounce_min_speed();
-		if (ImGui::DragFloat("Bounce min speed", &bounce_min_speed, 0.1f)) {
-			bodynode->m_Desc.set_bounce_min_speed(bounce_min_speed);
+			float slip_deg = bodynode->m_Desc._slip_limit_degrees;
+			if (ImGui::DragFloat("No slip deg (less)", &slip_deg, 0.1f)) {
+				bodynode->m_Desc.set_gravity(slip_deg);
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip(u8"衝突時の角度によるスリップの有無。進行方向と衝突面法線の角度差がこの値未満だったら正面衝突とみなし、滑らずに停止する");
+			}
+
+			float slip_spd = bodynode->m_Desc._slip_limit_speed;
+			if (ImGui::DragFloat("No slip spd (more)", &slip_spd, 0.1f)) {
+				bodynode->m_Desc.set_gravity(slip_spd);
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip(u8" 衝突時の速度によるスリップの有無。この速度未満だったら滑り、以上だったら滑らずに停止する");
+			}
 		}
-
-		float gravity = bodynode->m_Desc.get_gravity();
-		if (ImGui::DragFloat("Gravity", &gravity, 0.1f)) {
-			bodynode->m_Desc.set_gravity(gravity);
+		{
+			float alt = -1;
+			if (getDynamicBodyAltitude(bodynode->getNode(), &alt)) {
+				ImGui::Text("Altitude: %g", alt);
+			} else {
+				ImGui::Text("Altitude: N/A");
+			}
 		}
-
-		float alt = -1;
-		if (getDynamicBodyAltitude(bodynode->getNode(), &alt)) {
-			ImGui::Text("Altitude: %g", alt);
-		} else {
-			ImGui::Text("Altitude: N/A");
-		}
-
-		if (bodynode->m_Desc.get_sleep_time() == 0) {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
-			ImGui::Text("Sleep Off");
-		} else if (bodynode->m_Desc.get_sleep_time() > 0) {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
-			ImGui::Text("Sleep On (%d)", bodynode->m_Desc.get_sleep_time());
-		} else {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
-			ImGui::Text("Sleep: On (INF)");
+		{
+			if (bodynode->m_Desc.get_sleep_time() == 0) {
+				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
+				ImGui::Text("Sleep Off");
+			} else if (bodynode->m_Desc.get_sleep_time() > 0) {
+				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+				ImGui::Text("Sleep On (%d)", bodynode->m_Desc.get_sleep_time());
+			} else {
+				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+				ImGui::Text("Sleep: On (INF)");
+			}
 		}
 		KImGui::KImGui_PopTextColor();
 
