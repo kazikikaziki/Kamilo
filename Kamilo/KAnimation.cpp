@@ -355,53 +355,18 @@ public:
 
 class CAnimationMgr: public KManager {
 public:
-	std::unordered_map<KNode*, KAnimation*> m_Nodes;
-	mutable std::recursive_mutex m_Mutex;
+	KCompNodes<KAnimation> m_Nodes;
 
 	CAnimationMgr() {
 		KEngine::addManager(this);
-	//	KEngine::addInspectorCallback(this); // KInspectorCallback
 	}
-	~CAnimationMgr() {
+	virtual bool on_manager_isattached(KNode *node) override {
+		return m_Nodes.contains(node);
 	}
-
-	void lock() const {
-	#if K_THREAD_SAFE
-		m_Mutex.lock();
-	#endif
+	virtual void on_manager_detach(KNode *node) override {
+		m_Nodes.detach(node);
 	}
-	void unlock() const {
-	#if K_THREAD_SAFE
-		m_Mutex.unlock();
-	#endif
-	}
-	void _addAni(KNode *node, KAnimation *ani) {
-		auto it = m_Nodes.find(node);
-		if (it == m_Nodes.end()) {
-			m_Nodes[node] = ani;
-			m_Nodes[node]->grab();
-		}
-	}
-	void on_manager_end() {
-		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
-	}
-	bool on_manager_isattached(KNode *node) {
-		return getAni(node) != nullptr;
-	}
-	void on_manager_detach(KNode *node) {
-		lock();
-		{
-			auto it = m_Nodes.find(node);
-			if (it != m_Nodes.end()) {
-				KAnimation *ani = it->second;
-				ani->_setNode(nullptr);
-				ani->drop();
-				m_Nodes.erase(it);
-			}
-		}
-		unlock();
-	}
-	void on_manager_frame() {
+	virtual void on_manager_frame() override {
 		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			KNode *node = it->first;
 			if (node->getEnableInTree() && !node->getPauseInTree()) {
@@ -410,15 +375,8 @@ public:
 			}
 		}
 	}
-	void on_manager_nodeinspector(KNode *node) {
-		getAni(node)->updateInspector();
-	}
-	KAnimation * getAni(KNode *node) {
-		auto it = m_Nodes.find(node);
-		if (it != m_Nodes.end()) {
-			return it->second;
-		}
-		return nullptr;
+	virtual void on_manager_nodeinspector(KNode *node) override {
+		m_Nodes.get(node)->updateInspector();
 	}
 };
 
@@ -437,19 +395,23 @@ void KAnimation::uninstall() {
 	}
 }
 void KAnimation::attach(KNode *node) {
+	K__Assert(g_AnimationMgr);
 	if (node && !isAttached(node)) {
-		KAnimation *ani = new KAnimation();
-		ani->_setNode(node);
-		g_AnimationMgr->_addAni(node, ani);
-		ani->drop();
+		KAnimation *co = new KAnimation();
+		g_AnimationMgr->m_Nodes.attach(node, co);
+		co->drop();
 	}
 }
 bool KAnimation::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KAnimation * KAnimation::of(KNode *node) {
-	return g_AnimationMgr->getAni(node);
+	K__Assert(g_AnimationMgr);
+	return g_AnimationMgr->m_Nodes.get(node);
 }
+
+
+
 KAnimation::KAnimation() {
 	K__ASSERT_RETURN(KBank::getAnimationBank());
 	m_Node = nullptr;

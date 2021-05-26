@@ -29,16 +29,15 @@ public:
 	CCameraManager() {
 		KEngine::addManager(this);
 	}
-
-	#pragma region KManager
+	virtual bool on_manager_isattached(KNode *node) override {
+		return m_Nodes.contains(node);
+	}
 	virtual void on_manager_detach(KNode *node) override {
 		m_Nodes.detach(node);
 	}
 	virtual void on_manager_nodeinspector(KNode *node) override {
 		KCamera::of(node)->on_inspector();
 	}
-	#pragma endregion // KManager
-
 	KNode * findCameraFor(const KNode *target) {
 		if (target == nullptr) return nullptr;
 		int target_layer = target->getLayerInTree();
