@@ -20,7 +20,7 @@ public:
 		KEngine::addManager(this);
 		KEngine::addInspectorCallback(this);
 	}
-	bool on_manager_isattached(KNode *node) {
+	virtual bool on_manager_isattached(KNode *node) override {
 		return m_Nodes.contains(node);
 	}
 	virtual void on_manager_detach(KNode *node) override {
