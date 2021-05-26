@@ -19,11 +19,23 @@ typedef std::vector<KSolidBody *> KBodyList;
 
 
 #pragma region Functions
-static bool _IsDebugInfoVisible(KNode *target, KNode *camera) {
-	if (target == nullptr) return false;
+static bool _IsDebugInfoVisible(KSolidBody *body, KNode *camera) {
+	if (body == nullptr) return false;
+	
+	KNode *node = body->getNode();
+	if (node == nullptr) return false;
+
 	K__Assert(camera);
-	if (! target->getEnableInTree()) return false;
-	if (! target->getVisibleInTree()) return false;
+	if (node->getEnableInTree() == false) {
+		return false; // ノードが無効になっている
+	}
+	if (node->getVisibleInTree() == false) {
+		return false; // ノードが非表示になっている
+	}
+	if (body->getBodyEnabled() == false) {
+		return false; // ノードの Body が無効になっている
+	}
+
 	/*
 	if (KInspector::isInstalled()) {
 		if (KInspector::isEntityVisible(target)) {
@@ -32,14 +44,14 @@ static bool _IsDebugInfoVisible(KNode *target, KNode *camera) {
 	}
 	*/
 
-	// 対応するカメラ
-	KNode *cameraOfTarget = KCamera::findCameraFor(target);
-	if (cameraOfTarget == nullptr) {
-		return false; // オブジェクトに対応するカメラが存在しない
+	// このノードを映しているカメラ
+	KNode *camera_for_node = KCamera::findCameraFor(node);
+	if (camera_for_node == nullptr) {
+		return false; // ノードに対応するカメラが存在しない
 	}
 
-	if (cameraOfTarget != camera) {
-		return false; // オブジェクトとは関係のないカメラが指定されている
+	if (camera_for_node != camera) {
+		return false; // ノードは関係のないカメラが指定されている
 	}
 	return true;
 }
@@ -1144,14 +1156,18 @@ private:
 	}
 	void draw_staticbody_gizmo_list(KNode *cameranode) {
 		KGizmo *gizmo = KScreen::getGizmo();
+
 		KMatrix4 tr;
 		cameranode->getWorld2LocalMatrix(&tr);
-		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
-			KSolidBody *bodynode = it->second;
-			if (bodynode->m_Desc.is_static()) {
-				if (_IsDebugInfoVisible(bodynode->getNode(), cameranode)) {
-					draw_staticbody_gizmo_each(gizmo, bodynode, tr);
-				}
+
+		// オブジェクトリスト
+		KBodyList list;
+		get_active_static_body_list_unsafe(list);
+
+		for (auto it=list.begin(); it!=list.end(); ++it) {
+			KSolidBody *body = *it;
+			if (_IsDebugInfoVisible(body, cameranode)) {
+				draw_staticbody_gizmo_each(gizmo, body, tr);
 			}
 		}
 	}
@@ -1233,6 +1249,11 @@ private:
 			KSolidBody *bodynode = it->second;
 			if (!bodynode->m_Desc.is_static()) {
 				continue; // NOT STATIC
+			}
+
+			// コライダーが無効になっていたら判定しない
+			if (bodynode->getBodyEnabled() == false) {
+				continue;
 			}
 
 			// Entity がツリー内で disabled だったら判定しない
@@ -1372,15 +1393,18 @@ private:
 	}
 	void draw_dynamicbody_gizmo_list(KNode *cameranode) {
 		KGizmo *gizmo = KScreen::getGizmo();
-		KMatrix4 m;
-		cameranode->getWorld2LocalMatrix(&m);
+
+		KMatrix4 tr;
+		cameranode->getWorld2LocalMatrix(&tr);
+
+		// オブジェクトリスト
 		KBodyList list;
 		update_dynamicbody_list_unsafe(nullptr, &list);
 
 		for (auto it=list.begin(); it!=list.end(); ++it) {
-			KSolidBody *dyNode = *it;
-			if (_IsDebugInfoVisible(dyNode->getNode(), cameranode)) {
-				draw_dynamicbody_gizmo_each_unsafe(gizmo, dyNode, m);
+			KSolidBody *body = *it;
+			if (_IsDebugInfoVisible(body, cameranode)) {
+				draw_dynamicbody_gizmo_each_unsafe(gizmo, body, tr);
 			}
 		}
 	}
