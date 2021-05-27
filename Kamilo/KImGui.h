@@ -41,6 +41,7 @@ namespace KImGui {
 		bool linear_filter;
 	};
 
+	const ImVec4 KImGui_COLOR_GRAYED_OUT = {0.5f, 0.5f, 0.5f, 1.0f}; // グレーアウト色
 	const ImVec4 KImGui_COLOR_STRONG = {1.0f, 0.8f, 0.2f, 1.0f}; // 強調テキスト色
 	const ImVec4 KImGui_COLOR_WARNING(1.0f, 0.8f, 0.2f, 1.0f); // 警告テキスト色
 	const ImVec4 KImGui_COLOR_ERROR  (1.0f, 0.5f, 0.5f, 1.0f); // エラー色
