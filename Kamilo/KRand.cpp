@@ -109,7 +109,7 @@ void KRand::init(uint32_t seed) {
 	g_Random.init(seed);
 }
 void KRand::initByTime() {
-	int tm = ::time(NULL);
+	int tm = (int)::time(NULL);
 	g_Random.init(tm);
 }
 uint32_t KRand::random() {

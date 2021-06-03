@@ -330,7 +330,7 @@ std::string KXmlElement::toString(int indent) const {
 	s += K::str_sprintf("%*s<%s", indent*2, "", getTag());
 
 	// Attr
-	for (size_t i=0; i<getAttrCount(); i++) {
+	for (int i=0; i<getAttrCount(); i++) {
 		const char *k = getAttrName(i);
 		const char *v = getAttrValue(i);
 		if (k && k[0] && v) {

@@ -10,7 +10,7 @@
 #include "KDirectoryWalker.h"
 #include "KSig.h"
 
-#define INVALID_OPERATION    KLog::printWarning("INVALID_OPERATION at %s(%d)", __FUNCTION__, __LINE__)
+#define INVALID_OPERATION    KLog::printWarning("INVALID_OPERATION at %s(%d): %s", __FILE__, __LINE__, __FUNCTION__)
 
 
 namespace Kamilo {
@@ -2055,8 +2055,8 @@ public:
 		sp->mAtlasY = y;
 		sp->mAtlasW = w;
 		sp->mAtlasH = h;
-		sp->mPivot.x = ox;
-		sp->mPivot.y = oy;
+		sp->mPivot.x = (float)ox;
+		sp->mPivot.y = (float)oy;
 		sp->mPivotInPixels = true;
 		bool ret = addSpriteFromDesc(sprite_name, KSpriteAuto(sp), true);
 		sp->drop();

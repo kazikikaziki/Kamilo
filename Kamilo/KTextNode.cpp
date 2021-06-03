@@ -971,21 +971,21 @@ KVec3 KTextLayout::getOffset() const {
 	
 	switch (m_horzalign) {
 	case -1: // left
-		offset.x = -m_talkbox_w/2 + m_margin_left; // テキスト原点（１文字目の基準点）をテキスト表示領域の左上に合わせる
+		offset.x = (float)(-m_talkbox_w/2 + m_margin_left); // テキスト原点（１文字目の基準点）をテキスト表示領域の左上に合わせる
 		break;
 
 	case 0: // center
-		offset.x = -m_textboundsize.x/2;
+		offset.x = (float)(-m_textboundsize.x/2);
 		break;
 
 	case 1: // right
-		offset.x = m_talkbox_w/2 - m_margin_right - m_textboundsize.x;
+		offset.x = (float)m_talkbox_w/2 - (float)m_margin_right - m_textboundsize.x;
 		break;
 	}
 
 	switch (m_vertalign) {
 	case -1: // top
-		offset.y = m_talkbox_h/2 - m_margin_top; // １行目のベースラインをテキスト領域の上端に合わせる（ベースラインが上端なので、１行目は全体が上橋よりも上側にあることに注意）
+		offset.y = (float)(m_talkbox_h/2 - m_margin_top); // １行目のベースラインをテキスト領域の上端に合わせる（ベースラインが上端なので、１行目は全体が上橋よりも上側にあることに注意）
 		offset.y -= m_real_fontsize; // 現時点では上端に１行目のベースラインが重なっているので、１文字分下げる
 		offset.y -= m_real_linepitch; // 行間分さらに下げる。これをしないと文字の上側に余白がなくなり、ルビがふれなくなる
 		offset.y *= -1; // テキスト座標系はY軸下向きになっているので、これを反転する
@@ -1096,7 +1096,7 @@ bool KTextLayout::isOverRight() const {
 bool KTextLayout::isOverBottom() const {
 #if 1
 	// 1行目のベースライン(テキストボックス上端基準でY軸下向き)
-	int baseY = m_margin_top + m_real_fontsize + m_real_linepitch;
+	int baseY = (int)(m_margin_top + m_real_fontsize + m_real_linepitch);
 
 	// バウンドボックスを得る。
 	// このボックスは、文字が置いてある最初の行（ルビではなく、その元のテキストのほう）のベースライン左端を原点としている
