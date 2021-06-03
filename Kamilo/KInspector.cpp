@@ -20,7 +20,9 @@ namespace Kamilo {
 
 static const float GIZMO_AXIS_LEN = 32;
 
-
+static ImVec2 _ImVec2i(int x, int y) {
+	return ImVec2((float)x, (float)y);
+}
 
 
 class CNdIcons {
@@ -1166,7 +1168,7 @@ private:
 			m_world_viewport_in_window.y = (int)p.y;
 			m_world_viewport_in_window.w = w;
 			m_world_viewport_in_window.h = h;
-			KImGui::KImGui_Image(game_tex, ImVec2(w, h));
+			KImGui::KImGui_Image(game_tex, _ImVec2i(w, h));
 		}
 	}
 	void gui_status_tip() {
@@ -1229,12 +1231,12 @@ private:
 				item_spacing_x +
 				splitter_thickness + 
 				wnd_padding_x;
-			ImGui::SetNextWindowPos(ImVec2(0, menubar_h), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(lwidth, window_h-menubar_h), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(_ImVec2i(0, menubar_h), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(_ImVec2i(lwidth, window_h-menubar_h), ImGuiCond_Always);
 			ImGui::Begin("##window1", nullptr, ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize);
 			{
 				// 左ペイン
-				ImGui::BeginChild("##systems", ImVec2(m_system_pane_w, 0));
+				ImGui::BeginChild("##systems", _ImVec2i(m_system_pane_w, 0));
 				gui_system_browser();
 				ImGui::EndChild();
 				ImGui::SameLine();
@@ -1251,8 +1253,8 @@ private:
 				item_spacing_x +
 				m_entity_pane_w +
 				wnd_padding_x;
-			ImGui::SetNextWindowPos(ImVec2(window_w - rwidth, menubar_h), ImGuiCond_Always);
-			ImGui::SetNextWindowSize(ImVec2(rwidth, window_h-menubar_h), ImGuiCond_Always);
+			ImGui::SetNextWindowPos(_ImVec2i(window_w - rwidth, menubar_h), ImGuiCond_Always);
+			ImGui::SetNextWindowSize(_ImVec2i(rwidth, window_h-menubar_h), ImGuiCond_Always);
 			ImGui::Begin("##window2", nullptr, ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize);
 			{
 				// 右スプリッター
@@ -1260,7 +1262,7 @@ private:
 				ImGui::SameLine();
 
 				// 右ペイン
-				ImGui::BeginChild("##ent", ImVec2(m_entity_pane_w, 0));
+				ImGui::BeginChild("##ent", _ImVec2i(m_entity_pane_w, 0));
 				m_entity_inspector.updateGui();
 				ImGui::EndChild();
 				ImGui::SameLine();

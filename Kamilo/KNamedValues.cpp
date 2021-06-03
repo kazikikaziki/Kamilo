@@ -46,7 +46,7 @@ void KNamedValues::_setString(const std::string &name, const std::string &value)
 	}
 }
 int KNamedValues::_find(const std::string &name) const {
-	for (int i=0; i<m_Items.size(); i++) {
+	for (int i=0; i<(int)m_Items.size(); i++) {
 		if (m_Items[i].first.compare(name) == 0) {
 			return i;
 		}

@@ -231,7 +231,7 @@ KQuat KQuat::normalized() const {
 	return KQuat();
 }
 bool KQuat::normalizedSafe(KQuat *out) const {
-	int len = length();
+	float len = length();
 	if (len > 0) {
 		out->x = x / len;
 		out->y = y / len;

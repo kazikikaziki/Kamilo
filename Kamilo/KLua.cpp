@@ -253,7 +253,7 @@ int KLua::load(lua_State *ls, const char *code, int size, const char *debug_name
 }
 int KLua::getglobal_int(lua_State *ls, const char *key) {
 	lua_getglobal(ls, key);
-	int ret = lua_tointeger(ls, -1);
+	int ret = (int)lua_tointeger(ls, -1);
 	lua_pop(ls, 1);
 	return ret;
 }
@@ -268,22 +268,22 @@ void KLua::getglobal_int4(lua_State *ls, const char *key, int *x, int *y, int *z
 	if (lua_istable(ls, -1)) {
 		if (x) {
 			lua_geti(ls, -1, 1);
-			*x = lua_tointeger(ls, -1);
+			*x = (int)lua_tointeger(ls, -1);
 			lua_pop(ls, 1);
 		}
 		if (y) {
 			lua_geti(ls, -1, 2);
-			*y = lua_tointeger(ls, -1);
+			*y = (int)lua_tointeger(ls, -1);
 			lua_pop(ls, 1);
 		}
 		if (z) {
 			lua_geti(ls, -1, 3);
-			*z = lua_tointeger(ls, -1);
+			*z = (int)lua_tointeger(ls, -1);
 			lua_pop(ls, 1);
 		}
 		if (w) {
 			lua_geti(ls, -1, 4);
-			*w = lua_tointeger(ls, -1);
+			*w = (int)lua_tointeger(ls, -1);
 			lua_pop(ls, 1);
 		}
 	}

@@ -1408,7 +1408,7 @@ std::vector<std::string> K::strSplitLines(const std::string &str, bool skip_empt
 	std::vector<std::string> result;
 	const char *s = nullptr;
 	int len = 0;
-	for (int i=0; i<str.size(); i++) {
+	for (int i=0; i<(int)str.size(); i++) {
 		if (str[i]=='\r' && str[i+1]=='\n') { // 改行コードが2文字
 			std::string line(s, len);
 			if (_trim) strTrim(line);
