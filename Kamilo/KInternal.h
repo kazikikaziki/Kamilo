@@ -49,7 +49,6 @@ bool K__IsDebuggerPresent();
 void K__Dialog(const char *u8);
 void K__Notify(const char *u8);
 
-void K__RawPrintf(const char *fmt_u8, ...);
 void K__DebugPrint(const char *fmt_u8, ...);
 void K__Print(const char *fmt_u8, ...);
 void K__PrintW(const wchar_t *wfmt, ...);
@@ -67,6 +66,15 @@ void K__SetWarningHook(void (*hook)(const char *u8));
 void K__SetErrorHook(void (*hook)(const char *u8));
 
 
+struct _StrW {
+	_StrW();
+	_StrW(int x);
+	_StrW(float x);
+	_StrW(const char *u8);
+	_StrW(const std::string &u8);
+	_StrW(const std::wstring &x);
+	std::wstring ws;
+};
 
 //----------------------------------------------------
 // string
@@ -83,6 +91,34 @@ public:
 	static std::string sysGetCurrentExecName(); ///< 自分自身（実行ファイル）のファイル名をフルパスで得る
 	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリをフルパスで得る
 	#pragma endregion // sys
+
+	#pragma region output debug string
+	static void outputDebugStringU(const std::string &u8);
+	static void outputDebugStringW(const std::wstring &ws);
+	static void outputDebugFmt(const char *fmt, ...);
+	template <class... Args> static void outputDebug(Args... args) {
+		_StrW arglist[] = {args...};
+		int numargs = sizeof...(args);
+		std::wstring ws;
+		for (int i=0; i<numargs; i++) {
+			ws += arglist[i].ws;
+		}
+		outputDebugStringW(ws);
+		outputDebugStringW(L"\n");
+	}
+	#pragma endregion // output debug string
+
+	#pragma region print
+	void print(const char *fmt_u8, ...);
+	void printW(const wchar_t *wfmt, ...);
+	void debug(const char *fmt_u8, ...);
+	void debugW(const wchar_t *wfmt, ...);
+	void warning(const char *fmt_u8, ...);
+	void warningW(const wchar_t *wfmt, ...);
+	void error(const char *fmt_u8, ...);
+	void errorW(const wchar_t *wfmt, ...);
+	void verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
+	#pragma endregion // print
 
 	#pragma region clock
 	static uint64_t clockNano64(); ///< システム時刻をナノ秒単位で得る
@@ -208,44 +244,6 @@ public:
 	static std::string strBinToUtf8(const std::string &bin);
 	#pragma endregion // string
 };
-
-
-
-struct _StrW {
-	_StrW() {
-	}
-	_StrW(int x) {
-		ws = std::to_wstring(x);
-	}
-	_StrW(float x) {
-		ws = std::to_wstring(x);
-	}
-	_StrW(const char *u8) {
-		ws = K::strUtf8ToWide(u8);
-	}
-	_StrW(const std::string &u8) {
-		ws = K::strUtf8ToWide(u8);
-	}
-	_StrW(const std::wstring &x) {
-		ws = x;
-	}
-	std::wstring ws;
-};
-
-void _OutputW(const std::wstring &ws);
-
-// Win32 の OutputDebugString に可変引数を渡せるようにしたもの。
-// デバッガーの「出力ウィンドウ」に対してだけ文字列を出力する
-template <class... Args> void K__OutputDebugString(Args... args) {
-	_StrW arglist[] = {args...};
-	int numargs = sizeof...(args);
-	std::wstring ws;
-	for (int i=0; i<numargs; i++) {
-		ws += arglist[i].ws;
-	}
-	_OutputW(ws);
-	_OutputW(L"\n");
-}
 
 
 namespace Test {

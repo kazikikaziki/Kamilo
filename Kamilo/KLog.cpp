@@ -22,8 +22,8 @@
 
 // ログ自身がつかうログ機構（ログのログを取るために使う）
 #if K_USE_LOGLOG
-#	define K__LOGLOG_BEGIN(type, u8) K__RawPrintf("# %s [%c] \"%s\"", __FUNCTION__, (isprint(type) ? type : ' '), u8)
-#	define K__LOGLOG_END()           K__RawPrintf("# %s [END]",       __FUNCTION__)
+#	define K__LOGLOG_BEGIN(type, u8) K::outputDebugFmt("# %s [%c] \"%s\"", __FUNCTION__, (isprint(type) ? type : ' '), u8)
+#	define K__LOGLOG_END()           K::outputDebugFmt("# %s [END]",       __FUNCTION__)
 #else
 #	define K__LOGLOG_BEGIN(type, u8)  /* empty */
 #	define K__LOGLOG_END()            /* empty */
@@ -64,7 +64,7 @@ bool KLogFile::open(const char *filename_u8) {
 	} else {
 		m_File = nullptr;
 		m_FileName = "";
-		K__RawPrintf("[Log] ERROR Failed to open log file: '%s'", filename_u8);
+		K::outputDebugFmt("[Log] ERROR Failed to open log file: '%s'", filename_u8);
 	}
 	return m_File != nullptr;
 }
@@ -624,9 +624,9 @@ public:
 		if (filename_u8 && filename_u8[0]) {
 			m_File.open(filename_u8);
 			m_File.clampBySeparator(-2); // 過去2回分のログだけ残し、それ以外を削除
-			K__RawPrintf("[Log] file open: %s", filename_u8);
+			K::outputDebugFmt("[Log] file open: %s", filename_u8);
 		} else {
-			K__RawPrintf("[Log] file close");
+			K::outputDebugFmt("[Log] file close");
 			m_File.close();
 		}
 		threadUnlock();
@@ -642,11 +642,11 @@ public:
 			// コンソールへの出力を有効にする
 			// 順番に注意：有効にしてからログを出す
 			m_Console.open(no_taskbar);
-			K__RawPrintf("[Log] console on");
+			K::outputDebugFmt("[Log] console on");
 		} else {
 			// コンソールへの出力を停止する。
 			// 順番に注意：ログを出してから無効にする
-			K__RawPrintf("[Log] console off");
+			K::outputDebugFmt("[Log] console off");
 			m_Console.close();
 		}
 		threadUnlock();
@@ -655,9 +655,9 @@ public:
 		threadLock();
 		if (value) {
 			m_Debugger.open();
-			K__RawPrintf("[Log] debugger on");
+			K::outputDebugFmt("[Log] debugger on");
 		} else {
-			K__RawPrintf("[Log] debugger off");
+			K::outputDebugFmt("[Log] debugger off");
 			m_Debugger.close();
 		}
 		threadUnlock();
@@ -665,25 +665,25 @@ public:
 	void setLevel_info(bool value) {
 		threadLock();
 		m_InfoEnabled = value;
-		K__RawPrintf("[Log] level info %s", value ? "on" :"off");
+		K::outputDebugFmt("[Log] level info %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void setLevel_debug(bool value) {
 		threadLock();
 		m_DebugEnabled = value;
-		K__RawPrintf("[Log] level debug %s", value ? "on" :"off");
+		K::outputDebugFmt("[Log] level debug %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void setLevel_verbose(bool value) {
 		threadLock();
 		m_VerboseEnabled = value;
-		K__RawPrintf("[Log] level verbose %s", value ? "on" :"off");;
+		K::outputDebugFmt("[Log] level verbose %s", value ? "on" :"off");;
 		threadUnlock();
 	}
 	void setDialogEnabled(bool value) {
 		threadLock();
 		m_DialogEnabled = value;
-		K__RawPrintf("[Log] dialog %s", value ? "on" :"off");
+		K::outputDebugFmt("[Log] dialog %s", value ? "on" :"off");
 		threadUnlock();
 	}
 	void muteDialog() {
@@ -847,13 +847,13 @@ void KLog::emitf_w(Level lv, const wchar_t *fmt, ...) {
 void KLog::rawEmit(const char *s) {
 	// 渡されたテキストを無変更、無加工で出力する
 	// 文字コード変換も何も行わない
-	K__RawPrintf(s);
+	K::outputDebugFmt(s);
 }
 void KLog::rawEmitv(const char *fmt, va_list args) {
 	char s[K__LOG_SPRINTF_BUFSIZE];
 	vsnprintf(s, sizeof(s), fmt, args);
 	s[sizeof(s)-1] = '\0'; // 念のため、バッファ最後にヌル文字を入れておく
-	K__RawPrintf(s);
+	K::outputDebugFmt(s);
 }
 void KLog::rawEmitf(const char *fmt, ...) {
 	va_list args;

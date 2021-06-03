@@ -9,7 +9,7 @@
 #include <Shlwapi.h> // PathFindFileNameW
 
 
-#define K_SPRINTF_BUFSIZE    (1024 * 4)
+#define OUTPUT_STRING_SIZE    (1024 * 4)
 #define K_USE_MBSTOWCS_SAFE  1
 #define K_USE_WCSTOMBS_SAFE  1
 
@@ -41,37 +41,9 @@ void K__SetWarningHook(void (*hook)(const char *u8)) {
 void K__SetErrorHook(void (*hook)(const char *u8)) {
 	g_ErrorHook = hook;
 }
-void _OutputW(const std::wstring &ws) {
-	OutputDebugStringW(ws.c_str());
-}
 
-static void K__WPrintLn(const wchar_t *ws) {
-#if 1
-	// windows では wprintf があまり信用できないので普通の printf を使う
-	std::string mb = K::strWideToAnsi(ws, "");
-	printf("%s\n", mb.c_str());
-#else
-	wprintf(L"%s\n", ws);
-#endif
-
-	OutputDebugStringW(ws);
-	OutputDebugStringW(L"\n");
-}
-
-void K__RawPrintf(const char *fmt_u8, ...) {
-	// 無限再帰防止のため、いかなるライブラリ関数も呼んではいけない (K_assert 含む)
-	char s[1024 * 4];
-	va_list args;
-	va_start(args, fmt_u8);
-	vsnprintf(s, sizeof(s), fmt_u8, args);
-	va_end(args);
-
-	printf("%s\n", s);
-	OutputDebugStringA(s);
-	OutputDebugStringA("\n");
-}
 void K__DebugPrint(const char *fmt_u8, ...) {
-	char u8[K_SPRINTF_BUFSIZE] = {0};
+	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
@@ -80,11 +52,11 @@ void K__DebugPrint(const char *fmt_u8, ...) {
 		g_DebugPrintHook(u8);
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
-		K__WPrintLn(ws.c_str());
+		K::outputDebugStringW(ws);
 	}
 }
 void K__Print(const char *fmt_u8, ...) {
-	char u8[K_SPRINTF_BUFSIZE] = {0};
+	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
@@ -93,11 +65,11 @@ void K__Print(const char *fmt_u8, ...) {
 		g_PrintHook(u8);
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
-		K__WPrintLn(ws.c_str());
+		K::outputDebugStringW(ws);
 	}
 }
 void K__PrintW(const wchar_t *wfmt, ...) {
-	wchar_t ws[K_SPRINTF_BUFSIZE] = {0};
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, wfmt);
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
@@ -106,11 +78,11 @@ void K__PrintW(const wchar_t *wfmt, ...) {
 		std::string u8 = K::strWideToUtf8(ws);
 		g_PrintHook(u8.c_str());
 	} else {
-		K__WPrintLn(ws);
+		K::outputDebugStringW(ws);
 	}
 }
 void K__Warning(const char *fmt_u8, ...) {
-	char u8[K_SPRINTF_BUFSIZE] = {0};
+	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
@@ -119,11 +91,11 @@ void K__Warning(const char *fmt_u8, ...) {
 		g_WarningHook(u8);
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
-		K__WPrintLn(ws.c_str());
+		K::outputDebugStringW(ws);
 	}
 }
 void K__WarningW(const wchar_t *wfmt, ...) {
-	wchar_t ws[K_SPRINTF_BUFSIZE] = {0};
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, wfmt);
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
@@ -132,11 +104,11 @@ void K__WarningW(const wchar_t *wfmt, ...) {
 		std::string u8 = K::strWideToUtf8(ws);
 		g_WarningHook(u8.c_str());
 	} else {
-		K__WPrintLn(ws);
+		K::outputDebugStringW(ws);
 	}
 }
 void K__Error(const char *fmt_u8, ...) {
-	char u8[K_SPRINTF_BUFSIZE] = {0};
+	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
@@ -145,11 +117,11 @@ void K__Error(const char *fmt_u8, ...) {
 		g_ErrorHook(u8);
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
-		K__WPrintLn(ws.c_str());
+		K::outputDebugStringW(ws);
 	}
 }
 void K__ErrorW(const wchar_t *wfmt, ...) {
-	wchar_t ws[K_SPRINTF_BUFSIZE] = {0};
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, wfmt);
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
@@ -158,13 +130,13 @@ void K__ErrorW(const wchar_t *wfmt, ...) {
 		std::string u8 = K::strWideToUtf8(ws);
 		g_ErrorHook(u8.c_str());
 	} else {
-		K__WPrintLn(ws);
+		K::outputDebugStringW(ws);
 	}
 }
 
 void K__Verbose(const char *fmt_u8, ...) {
 #ifdef KAMILO_VERBOSE
-	char u8[K_SPRINTF_BUFSIZE] = {0};
+	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
@@ -173,7 +145,7 @@ void K__Verbose(const char *fmt_u8, ...) {
 		g_WarningHook(u8);
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
-		K__WPrintLn(ws.c_str());
+		K::outputDebugStringW(ws);
 	}
 #endif
 }
@@ -230,6 +202,181 @@ std::string K::win32GetErrorString(long hr) {
 	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
 	return buf;
 }
+
+
+
+
+
+#pragma region output debug string
+_StrW::_StrW() {
+}
+_StrW::_StrW(int x) {
+	ws = std::to_wstring(x);
+}
+_StrW::_StrW(float x) {
+	ws = std::to_wstring(x);
+}
+_StrW::_StrW(const char *u8) {
+	ws = K::strUtf8ToWide(u8);
+}
+_StrW::_StrW(const std::string &u8) {
+	ws = K::strUtf8ToWide(u8);
+}
+_StrW::_StrW(const std::wstring &x) {
+	ws = x;
+}
+
+
+void K::outputDebugStringU(const std::string &u8) {
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, u8.c_str(), -1, ws, sizeof(ws)/sizeof(ws[0])) > 0) {
+		::OutputDebugStringW(ws);
+		::OutputDebugStringW(L"\n");
+	} else {
+		::OutputDebugStringA(u8.c_str()); // 無変換のまま出力する
+		::OutputDebugStringA("\n");
+	}
+}
+void K::outputDebugStringW(const std::wstring &ws) {
+	::OutputDebugStringW(ws.c_str());
+	::OutputDebugStringW(L"\n");
+}
+void K::outputDebugFmt(const char *fmt_u8, ...) {
+	char s[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(s, sizeof(s), fmt_u8, args);
+	va_end(args);
+	outputDebugStringU(s);
+}
+#pragma endregion // output debug string
+
+
+
+
+#pragma region print
+void K::print(const char *fmt_u8, ...) {
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_PrintHook) {
+		g_PrintHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+}
+void K::printW(const wchar_t *wfmt, ...) {
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, wfmt);
+	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
+	va_end(args);
+	if (g_PrintHook) {
+		std::string u8 = K::strWideToUtf8(ws);
+		g_PrintHook(u8.c_str());
+	} else {
+		outputDebugStringW(ws);
+	}
+}
+void K::debug(const char *fmt_u8, ...) {
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_DebugPrintHook) {
+		g_DebugPrintHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+}
+void K::debugW(const wchar_t *wfmt, ...) {
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, wfmt);
+	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
+	va_end(args);
+	if (g_DebugPrintHook) {
+		std::string u8 = K::strWideToUtf8(ws);
+		g_DebugPrintHook(u8.c_str());
+	} else {
+		outputDebugStringW(ws);
+	}
+}
+
+
+void K::warning(const char *fmt_u8, ...) {
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_WarningHook) {
+		g_WarningHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+}
+void K::warningW(const wchar_t *wfmt, ...) {
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, wfmt);
+	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
+	va_end(args);
+	if (g_WarningHook) {
+		std::string u8 = K::strWideToUtf8(ws);
+		g_WarningHook(u8.c_str());
+	} else {
+		outputDebugStringW(ws);
+	}
+}
+void K::error(const char *fmt_u8, ...) {
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_ErrorHook) {
+		g_ErrorHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+}
+void K::errorW(const wchar_t *wfmt, ...) {
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, wfmt);
+	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
+	va_end(args);
+	if (g_ErrorHook) {
+		std::string u8 = K::strWideToUtf8(ws);
+		g_ErrorHook(u8.c_str());
+	} else {
+		outputDebugStringW(ws);
+	}
+}
+void K::verbose(const char *fmt_u8, ...) {
+#ifdef KAMILO_VERBOSE
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_WarningHook) {
+		g_WarningHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+#endif
+}
+#pragma endregion // print
 
 
 
@@ -338,7 +485,7 @@ FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
 		// 読み取りモードで開く場合は、他のアプリが対象ファイルを開いていても成功する
 		file = ::_wfopen(wpath.c_str(), wmode.c_str());
 		if (file == nullptr) {
-			K__OutputDebugString("*** Failed to open file \"", path_u8, "\"");
+			K::outputDebug("*** Failed to open file \"", path_u8, "\"");
 		}
 	} else {
 		errno_t err = ::_wfopen_s(&file, wpath.c_str(), wmode.c_str());
@@ -346,11 +493,11 @@ FILE * K::fileOpen(const std::string &path_u8, const std::string &mode_u8) {
 		// https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/errno-constants?view=msvc-160
 		if (err == ENOENT) {
 			// 指定された名前のファイルが存在しない
-			K__OutputDebugString("*** No file named \"", path_u8, "\"");
+			K::outputDebug("*** No file named \"", path_u8, "\"");
 		}
 		if (err == EACCES) {
 			// 指定されたモードでアクセスできない (_wfopen だと成功するかも）
-			K__OutputDebugString("*** Permission denied \"", path_u8, "\"");
+			K::outputDebug("*** Permission denied \"", path_u8, "\"");
 		}
 	}
 	return file;
@@ -1630,8 +1777,7 @@ std::wstring K::strUtf8ToWide(const std::string &u8) {
 	std::wstring ws;
 	int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, nullptr, 0);
 	if (len == 0) {
-		// 副作用防止のため K__Error などではなく K__RawPrintf を使う
-		K__RawPrintf("!!!! Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
+		outputDebugFmt("!!!! Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
 		K__Break();
 		return L"";
 	}
@@ -2139,7 +2285,7 @@ void Test_internal_path() {
 			} else {
 				s = "  ";
 			}
-			K__OutputDebugString(s, path);
+			K::outputDebug(s, path);
 		}
 	}
 }

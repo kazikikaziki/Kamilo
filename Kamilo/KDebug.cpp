@@ -17,7 +17,7 @@ void K_assertion_failure(const char *file, int line, const char *expr) {
 		KLog::emitf(KLog::LEVEL_AST, "[ASSERTION_FAILURE]: %s(%d): %s", file, line, expr);
 		s_locked--;
 	} else {
-		K__RawPrintf("[ASSERTION_FAILURE] (Recucsively): %s(%d): %s", file, line, expr);
+		K::outputDebugFmt("[ASSERTION_FAILURE] (Recucsively): %s(%d): %s", file, line, expr);
 		K__Break();
 	}
 }
