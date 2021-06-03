@@ -1479,10 +1479,10 @@ void KImageUtils::modifyColor(KImage &image, const float *matrix4x3) {
 			float outB = inR * m[8] + inG * m[9] + inB * m[10]+ m[11];
 			float outA = inA;
 
-			bmp.data[i + 0] = KMath::clampi(outR, 0, 255);
-			bmp.data[i + 1] = KMath::clampi(outG, 0, 255);
-			bmp.data[i + 2] = KMath::clampi(outB, 0, 255);
-			bmp.data[i + 3] = KMath::clampi(outA, 0, 255);
+			bmp.data[i + 0] = KMath::clampi((int)outR, 0, 255);
+			bmp.data[i + 1] = KMath::clampi((int)outG, 0, 255);
+			bmp.data[i + 2] = KMath::clampi((int)outB, 0, 255);
+			bmp.data[i + 3] = KMath::clampi((int)outA, 0, 255);
 		}
 	}
 	image.unlock();

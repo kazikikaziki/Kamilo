@@ -633,7 +633,7 @@ public:
 
 		// システムのスタートアップ処理
 		if (m_mgr_call_start.size() > 0) {
-			for (int i=0; i<m_mgr_call_start.size(); i++) {
+			for (int i=0; i<(int)m_mgr_call_start.size(); i++) {
 				KManager *s = m_mgr_call_start[i];
 				s->on_manager_start();
 			}
@@ -644,7 +644,7 @@ public:
 		broadcastProcessQueue();
 
 		// on_manager_appframe
-		for (int i=0; i<m_managers.size(); i++) {
+		for (int i=0; i<(int)m_managers.size(); i++) {
 			KManager *mgr = m_managers[i];
 			mgr->on_manager_appframe();
 		}
@@ -654,20 +654,20 @@ public:
 	}
 	void frame_update() {
 		// on_manager_beginframe
-		for (int i=0; i<m_managers.size(); i++) {
+		for (int i=0; i<(int)m_managers.size(); i++) {
 			KManager *mgr = m_managers[i];
 			mgr->on_manager_beginframe();
 		}
 
 		// on_manager_frame
-		for (int i=0; i<m_managers.size(); i++) {
+		for (int i=0; i<(int)m_managers.size(); i++) {
 			KManager *mgr = m_managers[i];
 			mgr->on_manager_frame();
 		}
 		KNodeTree::tick_nodes(0);
 
 		// on_manager_frame2
-		for (int i=0; i<m_managers.size(); i++) {
+		for (int i=0; i<(int)m_managers.size(); i++) {
 			KManager *mgr = m_managers[i];
 			mgr->on_manager_frame2();
 		}

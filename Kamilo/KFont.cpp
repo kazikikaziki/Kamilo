@@ -260,10 +260,10 @@ public:
 
 		if (met) {
 			met->advance = (float)du_advance * scale;
-			met->left   = bmp_left;
-			met->top    = bmp_top;
-			met->width  = bmp_right - bmp_left;
-			met->height = bmp_bottom - bmp_top;
+			met->left   = (float)bmp_left;
+			met->top    = (float)bmp_top;
+			met->width  = (float)(bmp_right - bmp_left);
+			met->height = (float)(bmp_bottom - bmp_top);
 		}
 		if (out_alpha8) {
 			if (stbtt_IsGlyphEmpty(&info_, stbtt_FindGlyphIndex(&info_, chr))) {

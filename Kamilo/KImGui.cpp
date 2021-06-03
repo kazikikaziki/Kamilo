@@ -1228,7 +1228,7 @@ void KImGuiCombo::end() {
 	K__Assert(mUpdating >= 0);
 	if (mUpdating == 0) {
 		mPChars.clear();
-		for (int i=0; i<mItems.size(); i++) {
+		for (int i=0; i<(int)mItems.size(); i++) {
 			mPChars.push_back(mItems[i].first.c_str());
 		}
 	}
@@ -1238,7 +1238,7 @@ void KImGuiCombo::addItem(const char *s, int value) {
 	mItems.push_back(Pair(s, value));
 }
 int KImGuiCombo::indexOfText(const char *s) const {
-	for (int i=0; i<mItems.size(); i++) {
+	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].first == s) {
 			return i;
 		}
@@ -1246,7 +1246,7 @@ int KImGuiCombo::indexOfText(const char *s) const {
 	return -1;
 }
 int KImGuiCombo::indexOfValue(int value) const {
-	for (int i=0; i<mItems.size(); i++) {
+	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].second == value) {
 			return i;
 		}

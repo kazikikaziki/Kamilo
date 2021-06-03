@@ -327,7 +327,7 @@ public:
 			//
 			if (out_dist) *out_dist = fabs(delta.x) - m_halfsize.x;
 			if (out_normal) {
-				out_normal->x = (delta.x >= 0) ? 1 : -1;
+				out_normal->x = (delta.x >= 0) ? 1.0f : -1.0f;
 				out_normal->y = 0;
 				out_normal->z = 0;
 			}
@@ -346,7 +346,7 @@ public:
 			if (out_dist) *out_dist = fabs(delta.y) - m_halfsize.y;
 			if (out_normal) {
 				out_normal->x = 0;
-				out_normal->y = (delta.y >= 0) ? 1 : -1;
+				out_normal->y = (delta.y >= 0) ? 1.0f : -1.0f;
 				out_normal->z = 0;
 			}
 			return true;
@@ -365,7 +365,7 @@ public:
 			if (out_normal) {
 				out_normal->x = 0;
 				out_normal->y = 0;
-				out_normal->z = (delta.z >= 0) ? 1 : -1;
+				out_normal->z = (delta.z >= 0) ? 1.0f : -1.0f;
 			}
 			return true;
 		}
