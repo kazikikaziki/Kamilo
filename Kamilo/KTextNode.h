@@ -524,6 +524,7 @@ public:
 	void setVertAlign(KVertAlign align);
 	void setKerning(bool kerning);
 	void setKerningFunc(KTextBoxKerningFunc fn);
+	void setLinePitch(float pitch);
 	void updateMesh();
 	void getAabb(KVec3 *minpoint, KVec3 *maxpoint) const;
 	KVec3 getAabbSize() const;
@@ -554,6 +555,7 @@ private:
 	KFont::Style m_tb_fontstyle;
 	float m_tb_fontsize;
 	float m_tb_pitch;
+	float m_tb_linepitch;
 };
 
 

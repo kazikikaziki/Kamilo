@@ -197,12 +197,22 @@ static std::string _FromWin32PathW(const std::wstring &wpath) {
 
 
 
-std::string K::win32GetErrorString(long hr) {
+std::string K::win32_GetErrorString(long hr) {
 	char buf[1024] = {0};
 	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
 	return buf;
 }
-
+void K::win32_MemoryLeakCheck() {
+	// メモリリークの自動ダンプ用
+	// _CrtDumpMemoryLeaks でも同じことができるが、使わないようにする。
+	// WinMain を抜けることで初めて解放されるメモリ（グローバル変数など）は
+	// _CrtDumpMemoryLeaks を呼んだ時点ではまだ解放されていないため、メモリリークとして報告されてしまう
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+}
+void K::win32_ImmDisableIME() {
+	// IMEを無効化する
+	ImmDisableIME((DWORD)(-1));
+}
 
 
 
@@ -769,7 +779,7 @@ bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool over
 	}
 	if (!CopyFileW(wsrc.c_str(), wdst.c_str(), !overwrite)) {
 		// エラー原因の確認用
-		std::string err = win32GetErrorString(GetLastError());
+		std::string err = win32_GetErrorString(GetLastError());
 		K__Error("Faield to CopyFile(): %s", err.c_str());
 		return false;
 	}
@@ -791,7 +801,7 @@ bool K::fileMakeDir(const std::string &dir_u8) {
 	if (CreateDirectoryW(wdir.c_str(), nullptr)) {
 		return true;
 	}
-	std::string err = win32GetErrorString(GetLastError());
+	std::string err = win32_GetErrorString(GetLastError());
 	K__Error("Faield to CreateDirectory(): %s", err.c_str());
 	return false;
 }

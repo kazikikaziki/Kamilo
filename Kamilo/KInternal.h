@@ -81,7 +81,9 @@ struct _StrW {
 //----------------------------------------------------
 class K {
 public:
-	static std::string win32GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
+	static std::string win32_GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
+	static void win32_MemoryLeakCheck();
+	static void win32_ImmDisableIME();
 
 	#pragma region sys
 	static uint32_t sysGetCurrentProcessId(); ///< 現在のプロセスIDを得る
@@ -104,7 +106,6 @@ public:
 			ws += arglist[i].ws;
 		}
 		outputDebugStringW(ws);
-		outputDebugStringW(L"\n");
 	}
 	#pragma endregion // output debug string
 

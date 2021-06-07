@@ -80,7 +80,7 @@ public:
 	bool loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
 
 	/// カラム名のインデックスを返す。カラム名が存在しない場合は -1 を返す
-	int getDataColIndexByName(const char *column_name) const;
+	int getDataColIndexByName(const std::string &column_name) const;
 
 	/// 指定された列に対応するカラム名を返す
 	std::string getColumnName(int col) const;
@@ -106,12 +106,14 @@ public:
 	/// @param row データ行インデックス（ゼロ起算）
 	/// @param def セルが存在しない時の戻り値
 	int getDataInt(int col, int row, int def=0) const;
+	bool getDataIntTry(int col, int row, int *p_val) const;
 
 	/// このテーブルのデータ実数を得る
 	/// @param col データ列インデックス（ゼロ起算）
 	/// @param row データ行インデックス（ゼロ起算）
 	/// @param def セルが存在しない時の戻り値
 	float getDataFloat(int col, int row, float def=0.0f) const;
+	bool getDataFloatTry(int col, int row, float *p_val) const;
 
 	/// データ列とデータ行を指定し、それが定義されている列と行を得る
 	bool getDataSource(int col, int row, int *col_in_file, int *row_in_file) const;

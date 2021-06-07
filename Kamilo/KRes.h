@@ -205,7 +205,7 @@ public:
 	};
 	typedef int Flags;
 
-	KClipRes(const char *name);
+	KClipRes(const std::string &name);
 	virtual ~KClipRes();
 	const char * getName() const;
 	void clear();

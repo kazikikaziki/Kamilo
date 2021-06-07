@@ -219,30 +219,36 @@ public:
 
 		return m_excel.getDataString(m_sheet, col, row);
 	}
-	int getDataInt(int data_col, int data_row, int def) const {
+	bool getDataIntTry(int data_col, int data_row, int *p_val) const {
 		const char *s = getDataString(data_col, data_row);
 		// 実数形式で記述されている値を整数として取り出す可能性
 		float f = 0.0f;
 		if (K::strToFloat(s, &f)) {
-			return (int)f;
+			if (p_val) *p_val = (int)f;
+			return true;
 		}
 		// 8桁の16進数を取り出す可能性。この場合は符号なしで取り出しておかないといけない
 		unsigned int u = 0;
 		if (K::strToUInt32(s, &u)) {
-			return (int)u;
+			if (p_val) *p_val = (int)u;
+			return true;
 		}
 		// 普通の整数として取り出す
 		int i = 0;
 		if (K::strToInt(s, &i)) {
-			return i;
+			if (p_val) *p_val = i;
+			return true;
 		}
-		return def;
+		return false;
 	}
-	float getDataFloat(int data_col, int data_row, float def) const {
+	bool getDataFloatTry(int data_col, int data_row, float *p_val) const {
 		const char *s = getDataString(data_col, data_row);
-		float ret = def;
-		K::strToFloat(s, &ret);
-		return ret;
+		float f = 0.0f;
+		if (K::strToFloat(s, &f)) {
+			if (p_val) *p_val = f;
+			return true;
+		}
+		return false;
 	}
 	bool getDataSource(int data_col, int data_row, int *col_in_file, int *row_in_file) const {
 		if (data_col < 0) return false;
@@ -302,7 +308,7 @@ bool KTable::loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const c
 	return false;
 }
 
-int KTable::getDataColIndexByName(const char *column_name) const {
+int KTable::getDataColIndexByName(const std::string &column_name) const {
 	if (m_impl) {
 		return m_impl->getDataColIndexByName(column_name);
 	}
@@ -339,16 +345,20 @@ const char * KTable::getDataString(int col, int row) const {
 	return nullptr;
 }
 int KTable::getDataInt(int col, int row, int def) const {
-	if (m_impl) {
-		return m_impl->getDataInt(col, row, def);
-	}
-	return def;
+	int val = def;
+	getDataIntTry(col, row, &val);
+	return val;
+}
+bool KTable::getDataIntTry(int col, int row, int *p_val) const {
+	return m_impl && m_impl->getDataIntTry(col, row, p_val);
 }
 float KTable::getDataFloat(int col, int row, float def) const {
-	if (m_impl) {
-		return m_impl->getDataFloat(col, row, def);
-	}
-	return def;
+	float val = def;
+	getDataFloatTry(col, row, &val);
+	return val;
+}
+bool KTable::getDataFloatTry(int col, int row, float *p_val) const {
+	return m_impl && m_impl->getDataFloatTry(col, row, p_val);
 }
 bool KTable::getDataSource(int col, int row, int *col_in_file, int *row_in_file) const {
 	if (m_impl && m_impl->getDataSource(col, row, col_in_file, row_in_file)) {
@@ -361,9 +371,11 @@ int KTable::findRowByIntData(int col, int value) const {
 	int numrows = getDataRowCount();
 	if (col < 0 || numcols <= col) return -1;
 	for (int i=0; i<numrows; i++) {
-		int n = getDataInt(col, i);
-		if (n == value) {
-			return i;
+		int n = 0;
+		if (getDataIntTry(col, i, &n)) { // 正しく整数に変換できて、かつ指定された値と同じならばOK
+			if (n == value) {
+				return i;
+			}
 		}
 	}
 	return -1;

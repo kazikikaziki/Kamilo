@@ -1399,6 +1399,7 @@ KTextDrawable::KTextDrawable() {
 	m_tb_fontstyle = KFont::STYLE_NONE;
 	m_tb_fontsize = 20;
 	m_tb_pitch = 0.0f;
+	m_tb_linepitch = 0.0f;
 	m_kerning = false;
 	m_kerningfunc = nullptr;
 	m_horz_align = KHorzAlign_LEFT;
@@ -1430,7 +1431,7 @@ void KTextDrawable::updateTextMesh() {
 	m_textbox.setFont(m_tb_font);
 	m_textbox.setFontStyle(m_tb_fontstyle);
 	m_textbox.setFontSize(m_tb_fontsize);
-	m_textbox.setLineHeight(m_tb_fontsize);
+	m_textbox.setLineHeight(m_tb_fontsize + m_tb_linepitch);
 	m_textbox.setFontColor(KColor32::WHITE); // フォント色はメッシュの master_color によって変化させるため、ここでは常に WHITE を指定しておく
 	m_textbox.setFontPitch(m_tb_pitch);
 	m_textbox.addString(m_text.c_str());
@@ -1570,6 +1571,9 @@ void KTextDrawable::onDrawable_inspector() {
 	if (ImGui::DragFloat("Pitch", &m_tb_pitch, 0.1f, -20, 20)) {
 		updateTextMesh();
 	}
+	if (ImGui::DragFloat("Line Pitch", &m_tb_linepitch, 0.1f, -20, 20)) {
+		updateTextMesh();
+	}
 	// 編集用の文字列を得る
 	std::string s = K::strWideToUtf8(m_text);
 
@@ -1646,9 +1650,15 @@ void KTextDrawable::setVertAlign(KVertAlign align) {
 }
 void KTextDrawable::setKerning(bool kerning) {
 	m_kerning = kerning;
+	m_should_update_mesh = true;
 }
 void KTextDrawable::setKerningFunc(KTextBoxKerningFunc fn) {
 	m_kerningfunc = fn;
+	m_should_update_mesh = true;
+}
+void KTextDrawable::setLinePitch(float pitch) {
+	m_tb_linepitch = pitch;
+	m_should_update_mesh = true;
 }
 void KTextDrawable::updateMesh() {
 	updateTextMesh();

@@ -370,7 +370,7 @@ bool KSpriteRes::buildFromPng(const void *png_data, int png_size, const KPath &t
 
 
 #pragma region KClipImpl
-KClipRes::KClipRes(const char *name) {
+KClipRes::KClipRes(const std::string &name) {
 	mName = name;
 	mEditInfoXml = nullptr;
 	clear();
