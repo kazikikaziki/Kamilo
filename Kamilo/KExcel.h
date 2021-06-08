@@ -46,7 +46,7 @@ public:
 
 	/// シート名からシートを探し、見つかればゼロ起算のシート番号を返す。
 	/// 見つからなければ -1 を返す
-	int getSheetByName(const char *name) const;
+	int getSheetByName(const std::string &name) const;
 
 	/// シート名を得る
 	std::string getSheetName(int sheet) const;
@@ -70,7 +70,7 @@ public:
 	/// 空文字列を検索することはできない。
 	/// col: 見つかったセルの列番号（ゼロ起算）
 	/// row: 見つかったセルの行番号（ゼロ起算）
-	bool getCellByText(int sheet, const char *s, int *col, int *row) const;
+	bool getCellByText(int sheet, const std::string &s, int *col, int *row) const;
 
 	/// 全てのセルを巡回する
 	/// sheet   : シート番号（ゼロ起算）

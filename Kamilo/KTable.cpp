@@ -9,6 +9,7 @@ namespace Kamilo {
 
 class KTable::Impl {
 	KExcelFile m_excel;
+	std::string m_sheetname;
 	std::vector<std::string> m_colnames; // 列の名前
 	int m_sheet;   // 選択中のテーブルを含んでいるシートのインデックス
 	int m_leftcol;   // テーブルの左端の列インデックス
@@ -37,8 +38,9 @@ public:
 		m_leftcol = 0;
 		m_toprow = 0;
 		m_bottomrow = 0;
+		m_sheetname = "";
 	}
-	bool _selectTable(const char *sheet_name, const char *top_cell_text, const char *bottom_cell_text) {
+	bool _selectTable(const std::string &sheet_name, const std::string &top_cell_text, const std::string &bottom_cell_text) {
 		m_sheet = -1;
 		m_leftcol = 0;
 		m_toprow = 0;
@@ -58,23 +60,23 @@ public:
 		// シートを探す
 		sheet = m_excel.getSheetByName(sheet_name);
 		if (sheet < 0) {
-			K__Error(u8"E_EXCEL: シート '%s' が見つかりません", sheet_name);
+			K__Error(u8"E_EXCEL: シート '%s' が見つかりません", sheet_name.c_str());
 			return false;
 		}
 
 		// 開始セルを探す
 		if (! m_excel.getCellByText(sheet, top_cell_text, &col0, &row0)) {
 			K__Error(u8"E_EXCEL_MISSING_TABLE_BEGIN: シート '%s' にはテーブル開始セル '%s' がありません", 
-				sheet_name, top_cell_text);
+				sheet_name.c_str(), top_cell_text.c_str());
 			return false;
 		}
-		K__Verbose("TOP CELL '%s' FOUND AT %s", top_cell_text, KExcelFile::encodeCellName(col0, row0).c_str());
+		K__Verbose("TOP CELL '%s' FOUND AT %s", top_cell_text.c_str(), KExcelFile::encodeCellName(col0, row0).c_str());
 
 		// セルの定義範囲
 		int dim_row_top = 0;
 		int dim_row_cnt = 0;
 		if (! m_excel.getSheetDimension(sheet, nullptr, &dim_row_top, nullptr, &dim_row_cnt)) {
-			K__Error(u8"E_EXCEL_MISSING_SHEET_DIMENSION: シート '%s' のサイズが定義されていません", sheet_name);
+			K__Error(u8"E_EXCEL_MISSING_SHEET_DIMENSION: シート '%s' のサイズが定義されていません", sheet_name.c_str());
 			return false;
 		}
 
@@ -82,19 +84,19 @@ public:
 		// 終了セルは開始セルと同じ列で、開始セルよりも下の行にあるはず
 		for (int i=row0+1; i<dim_row_top+dim_row_cnt; i++) {
 			const char *s = m_excel.getDataString(sheet, col0, i);
-			if (strcmp(bottom_cell_text, s) == 0) {
+			if (s && bottom_cell_text.compare(s) == 0) {
 				row1 = i;
 				break;
 			}
 		}
 		if (row1 == 0) {
 			K__Error(u8"E_EXCEL_MISSING_TABLE_END: シート '%s' のセル '%s' に対応する終端セル '%s' が見つかりません",
-				sheet_name, top_cell_text, bottom_cell_text);
+				sheet_name.c_str(), top_cell_text.c_str(), bottom_cell_text.c_str());
 			return false;
 		}
 		{
 			std::string s = KExcelFile::encodeCellName(col0, row0);
-			K__Verbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text, s.c_str());
+			K__Verbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text.c_str(), s.c_str());
 		}
 		// 開始セルの右隣からは、カラム名の定義が続く
 		std::vector<std::string> cols;
@@ -110,7 +112,7 @@ public:
 			}
 			if (cols.empty()) {
 				K__Error(u8"E_EXCEL_MISSING_COLUMN_HEADER: シート '%s' のテーブル '%s' にはカラムヘッダがありません", 
-					sheet_name, top_cell_text);
+					sheet_name.c_str(), top_cell_text.c_str());
 			}
 			col1 = c;
 		}
@@ -121,6 +123,7 @@ public:
 		m_toprow    = row0;
 		m_bottomrow = row1;
 		m_leftcol   = col0;
+		m_sheetname = sheet_name;
 		return true;
 	}
 	std::string getColumnName(int col) const {
@@ -272,11 +275,11 @@ void KTable::clear() {
 		m_impl->clear();
 	}
 }
-bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
+bool KTable::loadFromExcelFile(const KExcelFile &excel, const std::string &sheetname, const std::string &top_cell_text, const std::string &btm_cell_text) {
 	auto impl = std::make_shared<Impl>();
 	if (impl->_loadFromExcelFile(excel)) {
-		const char *top = (top_cell_text && top_cell_text[0]) ? top_cell_text : "@BEGIN";
-		const char *btm = (btm_cell_text && btm_cell_text[0]) ? btm_cell_text : "@END";
+		std::string top = (top_cell_text != "") ? top_cell_text : "@BEGIN";
+		std::string btm = (btm_cell_text != "") ? btm_cell_text : "@END";
 		if (impl->_selectTable(sheetname, top, btm)) {
 			m_impl = impl;
 			return true;
@@ -285,7 +288,7 @@ bool KTable::loadFromExcelFile(const KExcelFile &excel, const char *sheetname, c
 	m_impl = nullptr;
 	return false;
 }
-bool KTable::loadFromStream(KInputStream &xlsx, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
+bool KTable::loadFromStream(KInputStream &xlsx, const std::string &filename, const std::string &sheetname, const std::string &top_cell_text, const std::string &btm_cell_text) {
 	KExcelFile excel;
 	if (excel.loadFromStream(xlsx, filename)) {
 		if (loadFromExcelFile(excel, sheetname, top_cell_text, btm_cell_text)) {
@@ -295,7 +298,7 @@ bool KTable::loadFromStream(KInputStream &xlsx, const char *filename, const char
 	m_impl = nullptr;
 	return false;
 }
-bool KTable::loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text) {
+bool KTable::loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const std::string &filename, const std::string &sheetname, const std::string &top_cell_text, const std::string &btm_cell_text) {
 	if (xlsx_bin && xlsx_size > 0) {
 		KExcelFile excel;
 		if (excel.loadFromMemory(xlsx_bin, xlsx_size, filename)) {

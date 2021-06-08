@@ -60,7 +60,7 @@ public:
 	///     table.getRowMarker(0) ==> nullptr  <---- セルA3の内容
 	///     table.getRowMarker(1) ==> "//"     <---- セルA4の内容
 	/// @endcode
-	bool loadFromExcelFile(const KExcelFile &file, const char *sheet_name, const char *top_cell_text, const char *bottom_cell_text);
+	bool loadFromExcelFile(const KExcelFile &file, const std::string &sheet_name, const std::string &top_cell_text, const std::string &bottom_cell_text);
 
 	/// テーブルを作成する。詳細は loadFromExcelFile を参照
 	/// @param xlsx .xlsx ファイルオブジェクト
@@ -68,7 +68,7 @@ public:
 	/// @param sheetname シート名
 	/// @param top_cell_text テーブル範囲の左上にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左上とする
 	/// @param btm_cell_text テーブル範囲の左下（右下ではない）にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左下とする
-	bool loadFromStream(KInputStream &xlsx, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
+	bool loadFromStream(KInputStream &xlsx, const std::string &filename, const std::string &sheetname, const std::string &top_cell_text, const std::string &btm_cell_text);
 
 	/// テーブルを作成する。詳細は loadFromExcelFile を参照
 	/// @param xlsx_bin  .xlsx ファイルのバイナリデータ
@@ -77,7 +77,7 @@ public:
 	/// @param sheetname シート名
 	/// @param top_cell_text テーブル範囲の左上にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左上とする
 	/// @param btm_cell_text テーブル範囲の左下（右下ではない）にあるセルのテキスト。このテキストと一致するセルを探し、それをテーブル左下とする
-	bool loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const char *filename, const char *sheetname, const char *top_cell_text, const char *btm_cell_text);
+	bool loadFromExcelMemory(const void *xlsx_bin, size_t xlsx_size, const std::string &filename, const std::string &sheetname, const std::string &top_cell_text, const std::string &btm_cell_text);
 
 	/// カラム名のインデックスを返す。カラム名が存在しない場合は -1 を返す
 	int getDataColIndexByName(const std::string &column_name) const;

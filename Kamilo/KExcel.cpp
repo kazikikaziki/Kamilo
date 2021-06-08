@@ -144,7 +144,7 @@ public:
 		}
 		return "";
 	}
-	int getSheetByName(const char *name) const {
+	int getSheetByName(const std::string &name) const {
 		const KXmlElement *root_elm = m_WorkBookDoc->getChild(0);
 		K__Assert(root_elm);
 
@@ -155,7 +155,7 @@ public:
 		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			const char *name_u8 = xSheet->getAttrString("name");
-			if (name_u8 && strcmp(name, name_u8) == 0) {
+			if (name_u8 && name.compare(name_u8) == 0) {
 				#ifdef _DEBUG
 				{
 					// <sheet> の sheetId には１起算のシート番号が入っていて、
@@ -239,9 +239,9 @@ public:
 		const KXmlElement *c = get_cell_xml(r, col);
 		return get_cell_text(c);
 	}
-	bool getCellByText(int sheet, const char *s, int *col, int *row) const {
+	bool getCellByText(int sheet, const std::string &s, int *col, int *row) const {
 		if (sheet < 0) return false;
-		if (s==nullptr || s[0]=='\0') return false;
+		if (s.empty()) return false;
 
 		// シートを選択
 		const KXmlElement *sheet_xml = get_sheet_xml(sheet);
@@ -406,9 +406,9 @@ private:
 		return val;
 	}
 
-	const KXmlElement *find_cell(const KXmlElement *sheet_xml, const char *s) const {
+	const KXmlElement *find_cell(const KXmlElement *sheet_xml, const std::string &s) const {
 		if (sheet_xml == nullptr) return nullptr;
-		if (s==nullptr || s[0]=='\0') return nullptr;
+		if (s.empty()) return nullptr;
 
 		for (int r=0; r<sheet_xml->getChildCount(); r++) {
 			const KXmlElement *xRow = sheet_xml->getChild(r);
@@ -419,7 +419,7 @@ private:
 				if (!xCell->hasTag("c")) continue;
 
 				const char *str = get_cell_text(xCell);
-				if (strcmp(str, s) == 0) {
+				if (str && s.compare(str) == 0) {
 					return xCell;
 				}
 			}
@@ -675,7 +675,7 @@ bool KExcelFile::loadFromMemory(const void *bin, size_t size, const std::string 
 int KExcelFile::getSheetCount() const {
 	return m_Impl->getSheetCount();
 }
-int KExcelFile::getSheetByName(const char *name) const {
+int KExcelFile::getSheetByName(const std::string &name) const {
 	return m_Impl->getSheetByName(name);
 }
 std::string KExcelFile::getSheetName(int sheet) const {
@@ -687,7 +687,7 @@ bool KExcelFile::getSheetDimension(int sheet, int *col, int *row, int *colcount,
 const char * KExcelFile::getDataString(int sheet, int col, int row) const {
 	return m_Impl->getDataString(sheet, col, row);
 }
-bool KExcelFile::getCellByText(int sheet, const char *s, int *col, int *row) const {
+bool KExcelFile::getCellByText(int sheet, const std::string &s, int *col, int *row) const {
 	return m_Impl->getCellByText(sheet, s, col, row);
 }
 void KExcelFile::scanCells(int sheet, KExcelScanCellsCallback *cb) const {
