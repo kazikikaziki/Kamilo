@@ -172,26 +172,6 @@ void K__Verbose(const char *fmt_u8, ...) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static std::wstring _ToWin32PathW(const std::string &path_u8) {
 	// windows形式のパスに変換する
 	std::wstring ws = K::strUtf8ToWide(path_u8);
@@ -207,6 +187,33 @@ static std::string _FromWin32PathW(const std::wstring &wpath) {
 
 
 
+
+#pragma region debug
+void K::_break() {
+	if (IsDebuggerPresent()) {
+		__debugbreak();
+	}
+}
+
+void K::_exit() {
+	if (1) {
+		// 黙って強制終了する。
+		// exit() とは違い、この方法で終了すると例外発生ウィンドウが出ない
+		TerminateProcess(OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()), 0);
+	}
+	exit(-1);
+}
+
+bool K::_IsDebuggerPresent() {
+	return ::IsDebuggerPresent();
+}
+#pragma endregion // debug
+
+
+
+
+
+#pragma region win32
 std::string K::win32_GetErrorString(long hr) {
 	char buf[1024] = {0};
 	::FormatMessageA(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, K_LCID_ENGLISH, buf, sizeof(buf), nullptr);
@@ -223,7 +230,7 @@ void K::win32_ImmDisableIME() {
 	// IMEを無効化する
 	ImmDisableIME((DWORD)(-1));
 }
-
+	#pragma endregion // win32
 
 
 
@@ -2086,6 +2093,8 @@ std::string K::strBinToUtf8(const std::string &bin) {
 
 
 
+#if 1
+#else
 void K__Break() {
 	if (IsDebuggerPresent()) {
 		__debugbreak();
@@ -2104,9 +2113,6 @@ void K__Exit() {
 bool K__IsDebuggerPresent() {
 	return IsDebuggerPresent();
 }
-
-#if 1
-#else
 void K__Dialog(const char *u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);

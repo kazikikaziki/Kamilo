@@ -39,12 +39,11 @@ typedef int K_LCID;
 
 
 
-void K__Break();
-void K__Exit();
-bool K__IsDebuggerPresent();
-
 
 #if TEST
+#define K__Break()                 Kamilo::K::_break()
+#define K__Exit()                  Kamilo::K::_exit()
+#define K__IsDebuggerPresent()     Kamilo::K::_IsDebuggerPresent()
 #define K__Dialog(u8)              Kamilo::K::dialog(u8)
 #define K__Notify(u8)              Kamilo::K::notify(u8)
 #define K__DebugPrint(fmt, ...)    Kamilo::K::debug(fmt, ##__VA_ARGS__)
@@ -60,6 +59,9 @@ bool K__IsDebuggerPresent();
 #define K__SetWarningHook(hook)    Kamilo::K::setWarningHook(hook)
 #define K__SetErrorHook(hook)      Kamilo::K::setErrorHook(hook)
 #else
+void K__Break();
+void K__Exit();
+bool K__IsDebuggerPresent();
 void K__Dialog(const char *u8);
 void K__Notify(const char *u8);
 void K__DebugPrint(const char *fmt_u8, ...);
@@ -95,9 +97,17 @@ struct _StrW {
 //----------------------------------------------------
 class K {
 public:
+	#pragma region debug
+	static void _break();
+	static void _exit();
+	static bool _IsDebuggerPresent();
+	#pragma endregion debug
+
+	#pragma region win32
 	static std::string win32_GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
 	static void win32_MemoryLeakCheck();
 	static void win32_ImmDisableIME();
+	#pragma endregion // win32
 
 	#pragma region sys
 	static uint32_t sysGetCurrentProcessId(); ///< 現在のプロセスIDを得る
