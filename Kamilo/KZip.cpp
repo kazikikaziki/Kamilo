@@ -8,6 +8,9 @@
 #include "KCrc32.h"
 #include "KZlib.h"
 
+#define ZIP_ERROR(msg)  K__ERROR("%s", msg)
+
+
 namespace Kamilo {
 
 #pragma region ZIP
@@ -350,7 +353,7 @@ static void Zip__EncodeFileTime(uint16_t *zdate, uint16_t *ztime, time_t time) {
 static bool Zip__WriteEntry(KOutputStream &output, SZipEntryWritingParams &params) {
 	if (params.namebin.empty()) return false;
 	if (params.namebin[0] == '.') return false;
-	if (params.namebin[0] == K__PATH_SLASH) return false;
+	if (K::str_ispathdelim(params.namebin[0])) return false;
 
 	// 元データの CRC32 を計算
 	uint32_t data_crc32 = KCrc32::fromData(params.data.data(), params.data.size());
@@ -582,7 +585,7 @@ static bool Unzip__UnzipEntry(KInputStream &input, const SZipEntryBlock *entry, 
 	SZipCentralDirectoryHeader hdr = entry->cd_hdr;
 
 	if (hdr.compressed_size == 0) {
-		K__Error("E_ZIP: Invalid data size");
+		ZIP_ERROR("Invalid data size");
 		return false;
 	}
 
@@ -762,7 +765,7 @@ static bool Unzip__ReadCenteralDirectoryHeaderAndEntry(KInputStream &input, SZip
 			input.read(entry->namebin, cd->file_name_length);
 			entry->namebin[cd->file_name_length] = '\0';
 		} else {
-			K__Error("E_ZIP: Too long file name");
+			ZIP_ERROR("Too long file name");
 			return false;
 		}
 	}
@@ -787,7 +790,7 @@ static bool Unzip__ReadCenteralDirectoryHeaderAndEntry(KInputStream &input, SZip
 				entry->extras[entry->num_extras] = extra;
 				entry->num_extras++;
 			} else {
-				K__Error("E_ZIP: Too many extra fields");
+				ZIP_ERROR("Too many extra fields");
 				return false;
 			}
 		}
@@ -829,7 +832,7 @@ static bool Unzip__SeekToEndOfCentralDirectoryRecord(KInputStream &input) {
 		}
 		offset--;
 	}
-	K__Error("E_ZIP: Failed to find an End of Centeral Directory Record");
+	ZIP_ERROR("Failed to find an End of Centeral Directory Record");
 	return false;
 }
 
@@ -837,7 +840,7 @@ static bool Unzip__SeekToEndOfCentralDirectoryRecord(KInputStream &input) {
 static bool Unzip__SeekToCentralDirectoryHeader(KInputStream &input) {
 	// 終端レコードまでシーク
 	if (! Unzip__SeekToEndOfCentralDirectoryRecord(input)) {
-		K__Error("E_ZIP: Failed to find a Centeral Directory Record");
+		ZIP_ERROR("Failed to find a Centeral Directory Record");
 		return false;
 	}
 
@@ -851,7 +854,7 @@ static bool Unzip__SeekToCentralDirectoryHeader(KInputStream &input) {
 
 	// 中央ディレクトリヘッダの識別子を確認
 	if (!Unzip__CheckFileUint32(input, ZIP_SIGN_PK0102)) {
-		K__Error("E_ZIP: Failed to find a Centeral Directory Record");
+		ZIP_ERROR("Failed to find a Centeral Directory Record");
 		return false;
 	}
 	return true;
@@ -934,16 +937,16 @@ public:
 		K__Assert(name_u8);
 		if (strlen(name_u8) == 0) {
 			// 名前必須
-			K__Error("E_ZIP: Invliad name");
+			ZIP_ERROR("Invliad name");
 			return false;
 		}
 		// 名前チェック
 		if (strstr(name_u8, "..\\") || strstr(name_u8, "../")) {
-			K__Error("E_ZIP: Do not contain relative path");
+			ZIP_ERROR("Do not contain relative path");
 			return false;
 		}
 		if (strstr(name_u8, ":")) {
-			K__Error("E_ZIP: Do not contain drive path");
+			ZIP_ERROR("Do not contain drive path");
 			return false;
 		}
 

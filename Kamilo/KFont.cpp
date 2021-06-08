@@ -507,14 +507,14 @@ bool KFont::loadFromStream(KInputStream &input, int ttc_index) {
 	m_Impl = nullptr;
 	std::string bin = input.readBin();
 	if (bin.empty()) {
-		K__ERROR();
+		K__ERROR("");
 		return false;
 	}
 #ifdef K_USE_STB_TRUETYPE
 	int err = 0;
 	Impl *impl = new CStbFontImpl(bin.data(), bin.size(), ttc_index, &err);
 	if (err) {
-		K__ERROR();
+		K__ERROR("");
 		delete impl;
 		return false;
 	}

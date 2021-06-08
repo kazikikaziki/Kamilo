@@ -12,6 +12,13 @@
 #define OUTPUT_STRING_SIZE    (1024 * 4)
 #define K_USE_MBSTOWCS_SAFE  1
 #define K_USE_WCSTOMBS_SAFE  1
+#define K__UTF8BOM_STR       "\xEF\xBB\xBF" 
+#define K__UTF8BOM_LEN       3 
+#define K__PATH_SLASH        '/'
+#define K__PATH_BACKSLASH    '\\'
+#define K__PATH_SLASHW       L'/'
+#define K__PATH_BACKSLASHW   L'\\'
+
 
 
 // ファイルまたはディレクトリをコピー、削除する場合に確認のダイアログを出す。テスト用
@@ -40,6 +47,9 @@ void K__SetWarningHook(void (*hook)(const char *u8)) {
 }
 void K__SetErrorHook(void (*hook)(const char *u8)) {
 	g_ErrorHook = hook;
+}
+void K__DebugError(const char *fmt_u8, ...) {
+
 }
 
 void K__DebugPrint(const char *fmt_u8, ...) {
@@ -963,7 +973,7 @@ bool K::sysSetCurrentDir(const std::string &dir) {
 	if (::SetCurrentDirectoryW(wdir.c_str())) {
 		return true; // OK
 	} else {
-		K__ERROR_MSG(dir.c_str());
+		K__ERROR("%s", dir.c_str());
 		return false; // FAIL
 	}
 }
@@ -971,14 +981,14 @@ bool K::sysSetCurrentDir(const std::string &dir) {
 std::string K::sysGetCurrentExecName() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
-	strReplaceChar(wpath, L'\\', L'/');
+	strReplaceChar(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
 	return strWideToUtf8(wpath);
 }
 std::string K::sysGetCurrentExecDir() {
 	wchar_t wpath[MAX_PATH] = {0};
 	::GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 	::PathRemoveFileSpecW(wpath);
-	strReplaceChar(wpath, L'\\', L'/');
+	strReplaceChar(wpath, K__PATH_BACKSLASHW, K__PATH_SLASHW);
 	return strWideToUtf8(wpath);
 }
 #pragma endregion // sys
@@ -1762,6 +1772,16 @@ bool K::str_iswhalf(wchar_t wc) {
 	::GetStringTypeW(CT_CTYPE3, &wc, 1, &t);
 	return (t & C3_HALFWIDTH) != 0;
 }
+
+/// パスの区切り文字か
+bool K::str_iswpathdelim(wchar_t wc) {
+	return wc==K__PATH_SLASHW || wc==K__PATH_BACKSLASHW;
+}
+bool K::str_ispathdelim(char ch) {
+	return ch==K__PATH_SLASH || ch==K__PATH_BACKSLASH;
+}
+
+
 
 // utf8 から wide に変換する
 // out_ws に書き込んだバイト数を返す（終端文字を含むので必ず1以上の値になる）。エラーが発生した場合は 0 を返す

@@ -162,7 +162,7 @@ void KTextBox::addChar(wchar_t code) {
 void KTextBox::addCharEx(wchar_t code, const Attr &attr) {
 	if (!attr.font.isOpen()) {
 	//	KLog::printWarning(u8"フォントが未設定です");
-		K__ERROR_MSG("NO FONT LOADED"); // フォントがロードされていない。何も描画できない
+		K__ERROR("NO FONT LOADED"); // フォントがロードされていない。何も描画できない
 		return;
 	}
 

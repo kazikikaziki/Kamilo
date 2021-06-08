@@ -10,14 +10,6 @@
 #include <string>
 #include <vector>
 
-#define K__UTF8BOM_STR    "\xEF\xBB\xBF" 
-#define K__UTF8BOM_LEN    3 
-
-#define K__PATH_SLASH          '/'
-#define K__PATH_SLASHW        L'/'
-#define K__PATH_BACKSLASH      '\\'
-#define K__PATH_BACKSLASHW    L'\\'
-
 #define K__Assert(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
 #define K__Verify(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
 
@@ -25,8 +17,7 @@
 #define K__ASSERT_RETURN_ZERO(expr)      if (!(expr)) { K__Assert(expr); return 0; }
 #define K__ASSERT_RETURN_VAL(expr, val)  if (!(expr)) { K__Assert(expr); return val; }
 
-#define K__ERROR()        K__Error("An error occurred: %s(%d)", __FILE__, __LINE__)
-#define K__ERROR_MSG(msg) K__Error("An error occurred: %s(%d): %s", __FILE__, __LINE__, msg)
+#define K__ERROR(fmt, ...) K__Error("ERROR!! %s(%d): " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 
 namespace Kamilo {
@@ -229,6 +220,8 @@ public:
 	static bool str_iswgraph(wchar_t wc);
 	static bool str_iswblank(wchar_t wc);
 	static bool str_iswhalf(wchar_t wc);
+	static bool str_iswpathdelim(wchar_t wc);
+	static bool str_ispathdelim(char ch);
 	static int strUtf8ToWide(wchar_t *out_ws, int max_out_widechars, const char *u8, int u8bytes);
 	static int strWideToUtf8(char *out_u8, int max_out_bytes, const wchar_t *ws);
 	static int strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale);

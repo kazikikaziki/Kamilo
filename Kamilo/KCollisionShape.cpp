@@ -643,7 +643,7 @@ public:
 		m_trim_min = trim_min;
 		m_trim_max = trim_max;
 		if (!normal.getNormalizedSafe(&m_normal)) {
-			K__ERROR();
+			K__ERROR("");
 		}
 		update_aabb();
 	}
@@ -727,7 +727,7 @@ public:
 		if (value.getNormalizedSafe(&m_normal)) {
 			update_aabb();
 		} else {
-			K__ERROR();
+			K__ERROR("");
 		}
 	}
 	virtual const KVec3 & get_normal() const {

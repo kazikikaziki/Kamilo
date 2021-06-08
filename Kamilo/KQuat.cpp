@@ -1,7 +1,7 @@
 ﻿#include "KQuat.h"
 #include "KInternal.h"
 
-#define QUAT_ERROR() K__ERROR_MSG("Invalid quaternion operation")
+#define QUAT_ERROR() K__ERROR("Quaternion operation failed")
 
 namespace Kamilo {
 

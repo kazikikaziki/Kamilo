@@ -2,7 +2,7 @@
 #include "KMath.h"
 #include "KInternal.h"
 
-#define VEC_ERROR() K__ERROR_MSG("Invalid vector operation")
+#define VEC_ERROR() K__ERROR("Vector operation failed")
 
 namespace Kamilo {
 

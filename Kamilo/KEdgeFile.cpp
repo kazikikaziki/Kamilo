@@ -1278,7 +1278,7 @@ void KEdgeRawWriter::writeEdge(KEdgeDocument *e) {
 
 void KEdgeRawWriter::writeCompressedEdge(KOutputStream &file) const {
 	if (!file.isOpen()) {
-		K__ERROR();
+		K__ERROR("");
 		return;
 	}
 	// 圧縮前のサイズ
@@ -1298,7 +1298,7 @@ void KEdgeRawWriter::writeCompressedEdge(KOutputStream &file) const {
 
 void KEdgeRawWriter::writeUncompressedEdge(KEdgeDocument *e) {
 	if (e == NULL) {
-		K__ERROR();
+		K__ERROR("");
 		return;
 	}
 	// 初期化

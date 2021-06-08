@@ -15,6 +15,8 @@
 #include "stb_vorbis.c"
 
 
+#define SND_ERROR()   K__ERROR("Sound operation failed")
+
 namespace Kamilo {
 
 
@@ -222,7 +224,7 @@ public:
 		}
 		// いまのところ16ビットサウンドにのみ対応
 		if (m_fmt.wBitsPerSample != 16) {
-			K__ERROR();
+			SND_ERROR();
 		//	mmioClose(hMmio, 0);
 		//	return false;
 		}
@@ -792,7 +794,7 @@ public:
 		// 非ストリーム再生用のサウンドバッファ（サウンドデータを丸ごと持っている）を作成する
 		CDS8StaticBuffer *buf = new CDS8StaticBuffer(m_ds8);
 		if (!buf->loadSound(strm, 0.0f)) {
-			K__ERROR();
+			SND_ERROR();
 			delete buf;
 			return 0;
 		}
@@ -805,7 +807,7 @@ public:
 		// ストリーム再生用のサウンドバッファ（再生中はサウンドデータを常に供給しないといけない）を作成する
 		CDS8StreamingBuffer *buf = new CDS8StreamingBuffer(m_ds8);
 		if (!buf->loadSound(strm, buf_sec)) {
-			K__ERROR();
+			SND_ERROR();
 			delete buf;
 			return 0;
 		}
@@ -817,7 +819,7 @@ public:
 	KSoundPlayer::Buf makeClone(KSoundPlayer::Buf _buf) {
 		// 無効なサウンドバッファをチェック
 		if (! isValid(_buf)) {
-			K__ERROR();
+			SND_ERROR();
 			return 0;
 		}
 
@@ -826,7 +828,7 @@ public:
 		CDS8Buffer *sb = (CDS8Buffer*)_buf;
 		CDS8StaticBuffer *ssb = dynamic_cast<CDS8StaticBuffer*>(sb);
 		if (ssb == nullptr) {
-			K__ERROR();
+			SND_ERROR();
 			return 0;
 		}
 
