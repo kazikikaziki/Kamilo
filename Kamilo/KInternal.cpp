@@ -36,6 +36,10 @@ static void (*g_PrintHook)(const char *u8) = nullptr;
 static void (*g_WarningHook)(const char *u8) = nullptr;
 static void (*g_ErrorHook)(const char *u8) = nullptr;
 
+
+#if TEST
+
+#else
 void K__SetDebugPrintHook(void (*hook)(const char *u8)) {
 	g_DebugPrintHook = hook;
 }
@@ -48,10 +52,6 @@ void K__SetWarningHook(void (*hook)(const char *u8)) {
 void K__SetErrorHook(void (*hook)(const char *u8)) {
 	g_ErrorHook = hook;
 }
-void K__DebugError(const char *fmt_u8, ...) {
-
-}
-
 void K__DebugPrint(const char *fmt_u8, ...) {
 	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
@@ -159,7 +159,7 @@ void K__Verbose(const char *fmt_u8, ...) {
 	}
 #endif
 }
-
+#endif // TEST
 
 
 
@@ -273,8 +273,53 @@ void K::outputDebugFmt(const char *fmt_u8, ...) {
 
 
 
+#pragma region dialog
+void K::dialog(const char *u8) {
+	wchar_t wpath[MAX_PATH] = {0};
+	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
+
+	std::wstring ws = K::strUtf8ToWide(u8);
+
+	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONSTOP|MB_ABORTRETRYIGNORE);
+	if (btn == IDABORT) {
+		K__Exit();
+	}
+	if (btn == IDRETRY) {
+		K__Break();
+	}
+}
+void K::notify(const char *u8) {
+	wchar_t wpath[MAX_PATH] = {0};
+	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
+
+	std::wstring ws= K::strUtf8ToWide(u8);
+
+	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONINFORMATION|MB_OK);
+	if (btn == IDABORT) {
+		K__Exit();
+	}
+	if (btn == IDRETRY) {
+		K__Break();
+	}
+}
+
+#pragma endregion // dialog
+
+
 
 #pragma region print
+void K::setDebugPrintHook(void (*hook)(const char *u8)) {
+	g_DebugPrintHook = hook;
+}
+void K::setPrintHook(void (*hook)(const char *u8)) {
+	g_PrintHook = hook;
+}
+void K::setWarningHook(void (*hook)(const char *u8)) {
+	g_WarningHook = hook;
+}
+void K::setErrorHook(void (*hook)(const char *u8)) {
+	g_ErrorHook = hook;
+}
 void K::print(const char *fmt_u8, ...) {
 	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
@@ -2060,6 +2105,8 @@ bool K__IsDebuggerPresent() {
 	return IsDebuggerPresent();
 }
 
+#if 1
+#else
 void K__Dialog(const char *u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
@@ -2088,7 +2135,7 @@ void K__Notify(const char *u8) {
 		K__Break();
 	}
 }
-
+#endif
 
 
 

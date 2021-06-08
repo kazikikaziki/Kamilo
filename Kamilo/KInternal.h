@@ -10,6 +10,11 @@
 #include <string>
 #include <vector>
 
+
+#define TEST 1
+
+
+
 #define K__Assert(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
 #define K__Verify(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
 
@@ -18,6 +23,7 @@
 #define K__ASSERT_RETURN_VAL(expr, val)  if (!(expr)) { K__Assert(expr); return val; }
 
 #define K__ERROR(fmt, ...) K__Error("ERROR!! %s(%d): " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+
 
 
 namespace Kamilo {
@@ -37,9 +43,25 @@ void K__Break();
 void K__Exit();
 bool K__IsDebuggerPresent();
 
+
+#if TEST
+#define K__Dialog(u8)              Kamilo::K::dialog(u8)
+#define K__Notify(u8)              Kamilo::K::notify(u8)
+#define K__DebugPrint(fmt, ...)    Kamilo::K::debug(fmt, ##__VA_ARGS__)
+#define K__Print(fmt, ...)         Kamilo::K::print(fmt, ##__VA_ARGS__)
+#define K__PrintW(fmt, ...)        Kamilo::K::printW(fmt, ##__VA_ARGS__)
+#define K__Error(fmt, ...)         Kamilo::K::error(fmt, ##__VA_ARGS__)
+#define K__ErrorW(fmt, ...)        Kamilo::K::errorW(fmt, ##__VA_ARGS__)
+#define K__Warning(fmt, ...)       Kamilo::K::warning(fmt, ##__VA_ARGS__)
+#define K__WarningW(fmt, ...)      Kamilo::K::warningW(fmt, ##__VA_ARGS__)
+#define K__Verbose(fmt, ...)       Kamilo::K::verbose(fmt, ##__VA_ARGS__)
+#define K__SetDebugPrintHook(hook) Kamilo::K::setDebugPrintHook(hook)
+#define K__SetPrintHook(hook)      Kamilo::K::setPrintHook(hook)
+#define K__SetWarningHook(hook)    Kamilo::K::setWarningHook(hook)
+#define K__SetErrorHook(hook)      Kamilo::K::setErrorHook(hook)
+#else
 void K__Dialog(const char *u8);
 void K__Notify(const char *u8);
-
 void K__DebugPrint(const char *fmt_u8, ...);
 void K__Print(const char *fmt_u8, ...);
 void K__PrintW(const wchar_t *wfmt, ...);
@@ -47,14 +69,15 @@ void K__Error(const char *fmt_u8, ...);
 void K__ErrorW(const wchar_t *wfmt, ...);
 void K__Warning(const char *fmt_u8, ...);
 void K__WarningW(const wchar_t *wfmt, ...);
-
-// KAMILO_VERBOSE が定義されているときのみ動作する
-void K__Verbose(const char *fmt_u8, ...);
-
+void K__Verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
 void K__SetDebugPrintHook(void (*hook)(const char *u8));
 void K__SetPrintHook(void (*hook)(const char *u8));
 void K__SetWarningHook(void (*hook)(const char *u8));
 void K__SetErrorHook(void (*hook)(const char *u8));
+#endif
+
+
+
 
 
 struct _StrW {
@@ -85,6 +108,11 @@ public:
 	static std::string sysGetCurrentExecDir(); ///< 自分自身（実行ファイル）の親ディレクトリをフルパスで得る
 	#pragma endregion // sys
 
+	#pragma region dialog
+	static void dialog(const char *u8);
+	static void notify(const char *u8);
+	#pragma endregion // dialog
+
 	#pragma region output debug string
 	static void outputDebugStringU(const std::string &u8);
 	static void outputDebugStringW(const std::wstring &ws);
@@ -101,15 +129,19 @@ public:
 	#pragma endregion // output debug string
 
 	#pragma region print
-	void print(const char *fmt_u8, ...);
-	void printW(const wchar_t *wfmt, ...);
-	void debug(const char *fmt_u8, ...);
-	void debugW(const wchar_t *wfmt, ...);
-	void warning(const char *fmt_u8, ...);
-	void warningW(const wchar_t *wfmt, ...);
-	void error(const char *fmt_u8, ...);
-	void errorW(const wchar_t *wfmt, ...);
-	void verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
+	static void print(const char *fmt_u8, ...);
+	static void printW(const wchar_t *wfmt, ...);
+	static void debug(const char *fmt_u8, ...);
+	static void debugW(const wchar_t *wfmt, ...);
+	static void warning(const char *fmt_u8, ...);
+	static void warningW(const wchar_t *wfmt, ...);
+	static void error(const char *fmt_u8, ...);
+	static void errorW(const wchar_t *wfmt, ...);
+	static void verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
+	static void setDebugPrintHook(void (*hook)(const char *u8));
+	static void setPrintHook(void (*hook)(const char *u8));
+	static void setWarningHook(void (*hook)(const char *u8));
+	static void setErrorHook(void (*hook)(const char *u8));
 	#pragma endregion // print
 
 	#pragma region clock
