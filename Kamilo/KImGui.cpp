@@ -121,7 +121,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const std::string
 			KOutputStream output = KOutputStream::fromFileName(filename);
 			output.write(png.data(), png.size());
 
-			K__Print("Export texture image %s", filename.c_str());
+			K::print("Export texture image %s", filename.c_str());
 		}
 	}
 	if (K::pathExists(filename)) {

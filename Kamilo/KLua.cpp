@@ -217,12 +217,12 @@ int KLua::print_callstack(lua_State *ls) {
 	int line = 0;
 	if (getcallstack(ls, 0, file, sizeof(file), &line) == LUA_OK) {
 		int level = 0;
-		K__Print("Lua callstack >>>");
+		K::print("Lua callstack >>>");
 		while (getcallstack(ls, level, file, sizeof(file), &line) == LUA_OK ){
-			K__Print("[%d]  %s(%d)", level, file, line);
+			K::print("[%d]  %s(%d)", level, file, line);
 			level++;
 		}
-		K__Print("<<<");
+		K::print("<<<");
 		return LUA_OK;
 	}
 	return LUA_ERRRUN;

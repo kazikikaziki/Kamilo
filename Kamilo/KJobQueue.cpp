@@ -179,7 +179,7 @@ public:
 			JQITEM *job = m_waiting_jobs[job_index];
 			m_waiting_jobs.erase(m_waiting_jobs.begin() + job_index);
 			m_waiting_jobs.insert(m_waiting_jobs.begin(), job);
-			K__Print("Job(%d) moved to top of the waiting list", job_id);
+			K::print("Job(%d) moved to top of the waiting list", job_id);
 			retval = true;
 		}
 

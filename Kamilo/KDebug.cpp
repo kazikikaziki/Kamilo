@@ -18,19 +18,10 @@ void K_assertion_failure(const char *file, int line, const char *expr) {
 		s_locked--;
 	} else {
 		K::outputDebugFmt("[ASSERTION_FAILURE] (Recucsively): %s(%d): %s", file, line, expr);
-		K__Break();
+		K::_break();
 	}
 }
 #pragma endregion // Debug
-
-
-void K_dialog(const char *u8) {
-	K__Dialog(u8);
-}
-void K_notify(const char *u8) {
-	K__Notify(u8);
-}
-
 
 
 } // namespace

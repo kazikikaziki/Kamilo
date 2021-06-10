@@ -74,7 +74,7 @@ public:
 				// [大小文字区別なし]で比較した
 				// 念のために。[大小文字区別あり]でも比較する
 				if (K::pathCompare(*it, name, false, false) != 0) {
-					K__Print(
+					K::print(
 						u8"W_FILEANME_CASE: ファイル名 '%s' が指定されましたが、実際のファイル名は '%s' です。大小文字だけが異なる同名ファイルは"
 						u8"アーカイブ化したときに正しくロードできない可能性があります。必ず大小文字も一致させてください", name, it->c_str()
 					);
@@ -221,7 +221,7 @@ public:
 			int i = m_PacReader.getIndexByName(name, true, false);
 			if (i >= 0) {
 				std::string s = m_PacReader.getName(i);
-				K__Print(
+				K::print(
 					u8"W_PAC_FILEANME_CASE: ファイル名 '%s' の代わりに '%s' が存在します。大小文字を間違えていませんか？", name.c_str(), s.c_str());
 			}
 		}
@@ -332,7 +332,7 @@ public:
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにディレクトリ %s を追加しました", dir.c_str());
+			K::print(u8"検索パスにディレクトリ %s を追加しました", dir.c_str());
 			return true;
 		} else {
 			K__Warning("E_FILE_FAIL: Failed to open a dir: '%s'", dir.c_str());
@@ -344,7 +344,7 @@ public:
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにZIPファイル %s を追加しました", filename.c_str());
+			K::print(u8"検索パスにZIPファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
 			K__Warning("E_FILE_FAIL: Failed to open a zip file: '%s'", filename.c_str());
@@ -356,7 +356,7 @@ public:
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスにPACファイル %s を追加しました", filename.c_str());
+			K::print(u8"検索パスにPACファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
 			K__Warning("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
@@ -368,7 +368,7 @@ public:
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスに埋め込みリソースを追加しました");
+			K::print(u8"検索パスに埋め込みリソースを追加しました");
 			return true;
 		} else {
 			K__Warning("E_FILE_FAIL: Failed to open a embedded files");
@@ -380,7 +380,7 @@ public:
 		if (ar) {
 			addArchive(ar);
 			ar->drop();
-			K__Print(u8"検索パスに埋め込み pac ファイルを追加しました: %s", filename.c_str());
+			K::print(u8"検索パスに埋め込み pac ファイルを追加しました: %s", filename.c_str());
 			return true;
 		} else {
 			K__Warning("E_FILE_FAIL: Failed to open a embedded pac file: '%s'", filename.c_str());

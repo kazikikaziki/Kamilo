@@ -28,8 +28,8 @@
 namespace Kamilo {
 
 void K__math_error(const char *func) {
-	if (K__IsDebuggerPresent()) {
-		K__Break();
+	if (K::_IsDebuggerPresent()) {
+		K::_break();
 		K__Assert(0);
 		K__Error("K__math_error at %s", func);
 	} else {

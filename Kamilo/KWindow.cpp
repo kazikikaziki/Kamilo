@@ -373,11 +373,11 @@ public:
 			// https://gamedev.stackexchange.com/questions/20446/does-vk-snapshot-not-send-a-wm-keydown-only-wm-keyup
 			RegisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_DESKTOP, 0, VK_SNAPSHOT);
 			RegisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_CLIENT, KKeyboard::MODIF_ALT, VK_SNAPSHOT);
-			K__Print(u8"[PrtScr] を占有しました: HWND=0x%X", m_hWnd);
+			K::print(u8"[PrtScr] を占有しました: HWND=0x%X", m_hWnd);
 		} else {
 			UnregisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_DESKTOP);
 			UnregisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_CLIENT);
-			K__Print(u8"[PrtScr] を解放しました: HWND=0x%X", m_hWnd);
+			K::print(u8"[PrtScr] を解放しました: HWND=0x%X", m_hWnd);
 		}
 	}
 	void command(const char *cmd, void *data) {

@@ -49,7 +49,7 @@ public:
 		if (joyGetDevCapsW(JOYSTICKID1+index, &joy.caps, sizeof(joy.caps)) == 0) {
 			joy.connected = true;
 		}
-		K__Print("Joystick[%d]: %s", index, joy.connected ? "Connected" : "N/A");
+		K::print("Joystick[%d]: %s", index, joy.connected ? "Connected" : "N/A");
 		return true;
 	}
 	virtual bool isConnected(int index) {
@@ -155,7 +155,7 @@ public:
 			joy.info.dwFlags = JOY_RETURNALL;
 			if (joyGetPosEx(JOYSTICKID1+index, &joy.info) != 0) {
 				// 取得に失敗した。パッドが切断されたと判断する
-				K__Print("GamePad[%d]: Disconnected", index);
+				K::print("GamePad[%d]: Disconnected", index);
 				joy.connected = false;
 			}
 		} else {
@@ -173,7 +173,7 @@ public:
 					// caps を取得する
 					joyGetDevCapsW(JOYSTICKID1+index, &joy.caps, sizeof(joy.caps));
 					joy.connected = true;
-					K__Print("GamePad[%d]: Connected", index);
+					K::print("GamePad[%d]: Connected", index);
 				}
 			}
 		}

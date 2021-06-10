@@ -367,7 +367,7 @@ KLogDebugger::KLogDebugger() {
 }
 bool KLogDebugger::open() {
 	close();
-	m_IsOpen = K__IsDebuggerPresent();
+	m_IsOpen = K::_IsDebuggerPresent();
 	return m_IsOpen;
 }
 bool KLogDebugger::isOpen() {
@@ -957,11 +957,11 @@ void KLog::printFatal(const char *msg) {
 	// 余計なコールバックを通らないように KLog::emit_nocallback で直接出力する
 	KLog::emit_nocallback(LEVEL_ERR, msg);
 	#ifdef _WIN32
-	if (K__IsDebuggerPresent()) {
-		K__Break();
+	if (K::_IsDebuggerPresent()) {
+		K::_break();
 	}
 	#endif
-	K__Exit();
+	K::_exit();
 }
 #pragma endregion // KLog
 

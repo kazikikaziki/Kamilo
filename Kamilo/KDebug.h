@@ -27,10 +27,6 @@
 namespace Kamilo {
 
 void K_assertion_failure(const char *file, int line, const char *expr); ///< アサーションエラー
-void K_dialog(const char *u8);
-void K_notify(const char *u8);
-
-
 
 #pragma region Log
 

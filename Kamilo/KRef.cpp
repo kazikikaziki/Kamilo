@@ -23,16 +23,16 @@ public:
 	void check_leak() {
 		if (m_LockedObjects.empty()) return;
 
-		if (K__IsDebuggerPresent()) {
+		if (K::_IsDebuggerPresent()) {
 			for (auto it=m_LockedObjects.begin(); it!=m_LockedObjects.end(); ++it) {
 				KRef *ref = *it;
 				// ログ出力中に参照カウンタが操作されないように注意
 				const char *s = ref->getReferenceDebugString();
-				K__Print("%s: %s", typeid(*ref).name(), s ? s : "");
+				K::print("%s: %s", typeid(*ref).name(), s ? s : "");
 			}
 		}
-		K__Print("%d object(s) are still remain.", m_LockedObjects.size());
-		if (K__IsDebuggerPresent()) {
+		K::print("%d object(s) are still remain.", m_LockedObjects.size());
+		if (K::_IsDebuggerPresent()) {
 			// ここに到達してブレークした場合、参照カウンタがまだ残っているオブジェクトがある。
 			// デバッガーで m_LockedObjects の中身をチェックすること。
 			m_LockedObjects; // <-- 中身をチェック
@@ -86,7 +86,7 @@ void KRef::drop() const {
 	g_RefMutex.unlock();
 	K__Assert(m_RefCnt >= 0);
 	if (m_RefCnt == m_DebubBreakRefCnt) { // 参照カウンタが m_DebubBreakRefCnt になったら中断する
-		K__Break();
+		K::_break();
 	}
 	if (m_RefCnt == 0) {
 		delete this;

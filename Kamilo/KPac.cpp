@@ -251,7 +251,7 @@ public:
 #ifdef _DEBUG
 			if (K::pathCompare(name, entry_name, true, false) == 0) { // ignore case で一致した
 				if (K::pathCompare(name, entry_name, false, false) != 0) { // case sensitive で不一致になった
-					K__Print(
+					K::print(
 						u8"W_PAC_CASE_NAME: PACファイル内をファイル名 '%s' で検索中に、"
 						u8"大小文字だけが異なるファイル '%s' を発見しました。"
 						u8"これは意図した動作ですか？予期せぬ不具合の原因になるため、ファイル名の変更を強く推奨します",

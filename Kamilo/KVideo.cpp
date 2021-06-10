@@ -23,8 +23,8 @@
 #ifdef K_USE_D3D9
 
 #define K__VIDEO_ERR    K__Error
-#define K__VIDEO_WRN    K__Print
-#define K__VIDEO_PRINT  K__Print
+#define K__VIDEO_WRN    K::print
+#define K__VIDEO_PRINT  K::print
 
 
 #define K__DX9_SCREENTEX_TEST    1
@@ -661,7 +661,7 @@ public:
 		HRESULT hr = m_d3ddev->GetDeviceCaps(&m_caps);
 		if (FAILED(hr)) {
 			std::string msg = K::win32_GetErrorString(hr);
-			K__Print(msg.c_str());
+			K::print(msg.c_str());
 		}
 		D3DSURFACE_DESC desc;
 		{
@@ -680,7 +680,7 @@ public:
 					HRESULT hr = m_d3ddev->CreateTexture(w, h, 1, 0, desc.Format, D3DPOOL_SYSTEMMEM, &m_backup_tex, nullptr);
 					if (FAILED(hr)) {
 						std::string msg = K::win32_GetErrorString(hr);
-						K__Print(msg.c_str());
+						K::print(msg.c_str());
 					}
 				}
 			} else {
@@ -2472,7 +2472,7 @@ public:
 		}
 	}
 	bool resetDevice(int w, int h, int fullscreen) {
-		K__Print("ResetDevice %dx%d", w, h);
+		K::print("ResetDevice %dx%d", w, h);
 		if (m_video_thread_id != K::sysGetCurrentThreadId()) {
 			K__VIDEO_ERR("%s: Thread not matched", __FUNCTION__);
 			::InvalidateRect(m_hWnd, nullptr, TRUE);
