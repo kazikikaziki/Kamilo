@@ -58,6 +58,7 @@ public:
 	enum Flag {
 		PLAYBACKFLAG__NONE = 0,
 		PLAYBACKFLAG__CAN_PREDEF_SEEK = 1, // クリップに埋め込まれたジャンプ命令に従って、指定されたフレームとは異なるフレームに再設定してもよい
+		PLAYBACKFLAG__CLAMP = 2, // シーク時に範囲外のページまたはフレームが指定された場合、アニメ先頭または終端が指定されたものとする
 	};
 	typedef int Flags;
 
@@ -234,6 +235,16 @@ public:
 
 		// シーク前のページ
 		int old_page = m_Clip->getPageByFrame(m_Frame, nullptr);
+
+		// フレーム調整
+		if (flags & PLAYBACKFLAG__CLAMP) {
+			if (new_frame < 0) {
+				new_frame = 0;
+			}
+			if (new_frame >= total_length) {
+				new_frame = total_length - 1;
+			}
+		}
 
 		// シーク後のページ
 		int new_page = -1;
@@ -455,7 +466,7 @@ void KAnimation::seekMainClipBegin() {
 void KAnimation::seekMainClipEnd() {
 	if (m_MainPlayback->m_Clip) {
 		int len = m_MainPlayback->m_Clip->getLength();
-		if (m_MainPlayback->playbackSeek((float)len, CPlayback::PLAYBACKFLAG__CAN_PREDEF_SEEK)) {
+		if (m_MainPlayback->playbackSeek((float)len, CPlayback::PLAYBACKFLAG__CLAMP)) {
 		//	this->node_update_commands();
 		}
 	}
