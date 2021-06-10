@@ -514,7 +514,7 @@ KImage KEdgeDocument::exportSurfaceRaw(int pageindex, int layerindex, int transp
 	return output;
 }
 static KImage kk_ImageFromRGB24(int w, int h, const uint8_t *pixels, const uint8_t *transparent_color_BGR) {
-	if (w <= 0 || h <= 0 || pixels == NULL) { K__Error("invalid argument"); return KImage(); }
+	if (w <= 0 || h <= 0 || pixels == NULL) { K__ERROR("invalid argument"); return KImage(); }
 	KEdgeBin buf(w * h * 4, '\0');
 	uint8_t *buf_p = (uint8_t*)&buf[0];
 	const uint8_t *t = transparent_color_BGR;
@@ -536,7 +536,7 @@ static KImage kk_ImageFromRGB24(int w, int h, const uint8_t *pixels, const uint8
 }
 
 static KImage kk_ImageFromIndexed(int w, int h, const uint8_t *indexed_format_pixels, const uint8_t *palette_colors_BGR, int transparent_color_index) {
-	if (w <= 0 || h <= 0) { K__Error("invalid argument"); return KImage(); }
+	if (w <= 0 || h <= 0) { K__ERROR("invalid argument"); return KImage(); }
 	K__Assert(indexed_format_pixels);
 	K__Assert(palette_colors_BGR);
 	const int dstPitch = w * 4;
@@ -604,19 +604,19 @@ static KImage kk_ImageFromChannels(const KImage *src_r, const KImage *src_g, con
 	K__Assert(src_g);
 	K__Assert(src_b);
 	K__Assert(src_a);
-	if(off_r < 0 || 4 <= off_r) { K__Error("Invalid offset bytes for R channel"); return KImage(); }
-	if(off_g < 0 || 4 <= off_g) { K__Error("Invalid offset bytes for G channel"); return KImage(); }
-	if(off_b < 0 || 4 <= off_b) { K__Error("Invalid offset bytes for B channel"); return KImage(); }
-	if(off_a < 0 || 4 <= off_a) { K__Error("Invalid offset bytes for A channel"); return KImage(); }
+	if(off_r < 0 || 4 <= off_r) { K__ERROR("Invalid offset bytes for R channel"); return KImage(); }
+	if(off_g < 0 || 4 <= off_g) { K__ERROR("Invalid offset bytes for G channel"); return KImage(); }
+	if(off_b < 0 || 4 <= off_b) { K__ERROR("Invalid offset bytes for B channel"); return KImage(); }
+	if(off_a < 0 || 4 <= off_a) { K__ERROR("Invalid offset bytes for A channel"); return KImage(); }
 	// すべてのサーフェスでサイズが一致することを確認
 	const int w = src_r->getWidth();
 	const int h = src_r->getHeight();
-	if (w <= 0 || h <= 0) { K__Error("Invalid image size"); return KImage(); }
+	if (w <= 0 || h <= 0) { K__ERROR("Invalid image size"); return KImage(); }
 	const bool size_r_ok = (src_r->getWidth()==w && src_r->getHeight()==h);
 	const bool size_g_ok = (src_g->getWidth()==w && src_g->getHeight()==h);
 	const bool size_b_ok = (src_b->getWidth()==w && src_b->getHeight()==h);
 	const bool size_a_ok = (src_a->getWidth()==w && src_a->getHeight()==h);
-	if (!size_r_ok || !size_g_ok || !size_b_ok || !size_a_ok) { K__Error("Source images have different sizes"); return KImage(); }
+	if (!size_r_ok || !size_g_ok || !size_b_ok || !size_a_ok) { K__ERROR("Source images have different sizes"); return KImage(); }
 	// 準備
 	KImage out = KImage::createFromPixels(w, h, KColorFormat_RGBA32, NULL);
 	// RGBAそれぞれのチャンネルを合成する
@@ -688,23 +688,23 @@ int KEdgeDocument::findColorIndex(int paletteindex, uint8_t r, uint8_t g, uint8_
 /// 書き込みに成功すれば true を返す
 bool KEdgeDocument::writeImageToLayer(int pageindex, int layerindex, int paletteindex, const KImage *image) {
 	if (image == NULL) {
-		K__Error("E_INVALID_ARGUMENT");
+		K__ERROR("E_INVALID_ARGUMENT");
 		return false;
 	}
 	if (image->getBytesPerPixel() != 3) {
-		K__Error("E_EDGE_INVALID_BYTES_PER_PIXEL: %d", image->getBytesPerPixel());
+		K__ERROR("E_EDGE_INVALID_BYTES_PER_PIXEL: %d", image->getBytesPerPixel());
 		return false;
 	}
 
 	KEdgePage *page = getPage(pageindex);
 	if (page == NULL) {
-		K__Error("E_EDGE_INVALID_PAGE_INDEX: PAGE=%d/%d", pageindex, getPageCount());
+		K__ERROR("E_EDGE_INVALID_PAGE_INDEX: PAGE=%d/%d", pageindex, getPageCount());
 		return false;
 	}
 
 	KEdgeLayer *layer = page->getLayer(layerindex);
 	if (layer == NULL) {
-		K__Error("E_EDGE_INVALID_LAYER_INDEX: PAGE=%d, LAYER=%d/%d", pageindex, layerindex, page->getLayerCount());
+		K__ERROR("E_EDGE_INVALID_LAYER_INDEX: PAGE=%d, LAYER=%d/%d", pageindex, layerindex, page->getLayerCount());
 		return false;
 	}
 
@@ -761,7 +761,7 @@ bool KEdgeDocument::writeImageToLayer(int pageindex, int layerindex, int palette
 		return true;
 	}
 
-	K__Error("E_EDGE_INVALID_BIT_DEPTH: DEPTH=%d, PAGE=%d, LAYER=%d", m_bit_depth, pageindex, layerindex);
+	K__ERROR("E_EDGE_INVALID_BIT_DEPTH: DEPTH=%d, PAGE=%d, LAYER=%d", m_bit_depth, pageindex, layerindex);
 	return false;
 }
 #pragma endregion // KEdgeDocument

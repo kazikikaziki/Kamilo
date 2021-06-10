@@ -820,12 +820,12 @@ public:
 	}
 	virtual int bindKey(const char *button, IKeyElm *key) override {
 		if (key == nullptr) {
-			K__Error("invalid key");
+			K__ERROR("invalid key");
 			return -1;
 		}
 		CActionButtonKeyElm *btn = get_button(button);
 		if (btn == nullptr) {
-			K__Error(u8"E_BIND_KEY: 未登録のボタン(%s)にキーを割り当てようとしました", button);
+			K__ERROR(u8"E_BIND_KEY: 未登録のボタン(%s)にキーを割り当てようとしました", button);
 			return -1;
 		}
 		m_mutex.lock();
@@ -852,28 +852,28 @@ public:
 	}
 	virtual IKeyElm * createKeyboardKey(KKeyboard::Key key, KKeyboard::Modifiers mod) override {
 		if (key == KKeyboard::KEY_NONE) {
-			K__Error("invalid key");
+			K__ERROR("invalid key");
 			return nullptr;
 		}
 		return new CKbKeyElm(key, mod);
 	}
 	virtual IKeyElm * createJoystickKey(KJoystick::Button joybtn) override {
 		if (!KJoystick::isInit()) {
-			K__Error("no joystick support");
+			K__ERROR("no joystick support");
 			return nullptr;
 		}
 		return new CJoyKeyElm(joybtn);
 	}
 	virtual IKeyElm * createJoystickAxis(KJoystick::Axis axis, int halfrange) override {
 		if (!KJoystick::isInit()) {
-			K__Error("no joystick support");
+			K__ERROR("no joystick support");
 			return nullptr;
 		}
 		return new CJoyAxisKeyElm(axis, halfrange);
 	}
 	virtual IKeyElm * createJoystickPov(int xsign, int ysign) override {
 		if (!KJoystick::isInit()) {
-			K__Error("no joystick support");
+			K__ERROR("no joystick support");
 			return nullptr;
 		}
 		return new CJoyPovKeyElm(xsign, ysign);
@@ -885,7 +885,7 @@ public:
 		// コマンド入力を割り当てる
 		// keys にはボタン番号とその符号を並べた配列を指定し、最後に 0 を置く。
 		if (buttons == nullptr || buttons[0] == 0) {
-			K__Error("empty sequence");
+			K__ERROR("empty sequence");
 			return nullptr;
 		}
 		// 事前チェック
@@ -893,15 +893,15 @@ public:
 			const char *name = buttons[i];
 			const CActionButtonKeyElm *act_elm = get_button(name);
 			if (act_elm == nullptr) {
-				K__Error(u8"キーコマンドに含まれているボタン(%d)は未登録です", name);
+				K__ERROR(u8"キーコマンドに含まれているボタン(%d)は未登録です", name);
 				return nullptr;
 			}
 			if (act_elm->has_cmd()) {
-				K__Error(u8"キーコマンドに含まれているボタン(%d)には既に別のコマンドを持っています（再帰禁止）", name);
+				K__ERROR(u8"キーコマンドに含まれているボタン(%d)には既に別のコマンドを持っています（再帰禁止）", name);
 				return nullptr;
 			}
 			if (i >= MAX_SEQUENCE_SIZE) {
-				K__Error(u8"キーコマンドが長すぎます");
+				K__ERROR(u8"キーコマンドが長すぎます");
 				return nullptr;
 			}
 		}

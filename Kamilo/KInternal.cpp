@@ -842,7 +842,7 @@ bool K::fileCopy(const std::string &src_u8, const std::string &dst_u8, bool over
 	if (!CopyFileW(wsrc.c_str(), wdst.c_str(), !overwrite)) {
 		// エラー原因の確認用
 		std::string err = win32_GetErrorString(GetLastError());
-		K__Error("Faield to CopyFile(): %s", err.c_str());
+		K__ERROR("Faield to CopyFile(): %s", err.c_str());
 		return false;
 	}
 	return true;
@@ -864,7 +864,7 @@ bool K::fileMakeDir(const std::string &dir_u8) {
 		return true;
 	}
 	std::string err = win32_GetErrorString(GetLastError());
-	K__Error("Faield to CreateDirectory(): %s", err.c_str());
+	K__ERROR("Faield to CreateDirectory(): %s", err.c_str());
 	return false;
 }
 
@@ -1925,7 +1925,7 @@ int K::strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const
 		num_bytes = strWideToAnsiL(out_ansi, max_out_bytes, ws, loc);
 		_free_locale(loc);
 	} else {
-		K__Error("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
+		K__ERROR("INVALID_LOCALE '%s' at K__WideToAnsi", _locale);
 	}
 	return num_bytes; // 0=ERROR
 }
@@ -2046,7 +2046,7 @@ int K::strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, co
 		num_wchars = strAnsiToWideL(out_wide, max_out_wchars, ansi, loc);
 		_free_locale(loc);
 	} else {
-		K__Error("INVALID_LOCALE '%s' at K__AnsiToWide", _locale);
+		K__ERROR("INVALID_LOCALE '%s' at K__AnsiToWide", _locale);
 	}
 	return num_wchars; // 0=ERROR
 }

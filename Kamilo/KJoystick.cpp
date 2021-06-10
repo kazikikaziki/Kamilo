@@ -41,7 +41,7 @@ public:
 	}
 	bool init_stick(int index) {
 		if (!ID_CHECK(index)) {
-			K__Error("Invalid joystick index!: %d", index);
+			K__ERROR("Invalid joystick index!: %d", index);
 			return false;
 		}
 		_JOY &joy = m_joy[index];

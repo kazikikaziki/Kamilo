@@ -339,7 +339,7 @@ static void _GUI_ColliderAABB(KCollider *coll) {
 // Returns N: 2^N == group_bit
 static int _GetGroupBitPosition(uint32_t group_bit) {
 	if (group_bit == 0) {
-		K__Error("E_SETGROUPNAME: group_bit cannot be zero");
+		K__ERROR("E_SETGROUPNAME: group_bit cannot be zero");
 		return -1;
 	}
 
@@ -353,7 +353,7 @@ static int _GetGroupBitPosition(uint32_t group_bit) {
 	// この時点で i にはビットシフト数が入っている
 	// group_bit は 0x0001 になっているはず。それ以外だった場合、ほかにも 1 になっているビットを含んでいる
 	if (group_bit != 1) {
-		K__Error("E_SETGROUPNAME: invalid group_bit: 0x%08x (contains multiple 1)", group_bit);
+		K__ERROR("E_SETGROUPNAME: invalid group_bit: 0x%08x (contains multiple 1)", group_bit);
 		return -1;
 	}
 
@@ -549,7 +549,7 @@ public:
 				if (dynamic_cast<KStaticSolidBody *>(body)) {
 					return; // アタッチ済み
 				}
-				K__Error("Incompatible collision-body attached");
+				K__ERROR("Incompatible collision-body attached");
 				return;
 			}
 		}
@@ -570,7 +570,7 @@ public:
 				if (dynamic_cast<KDynamicSolidBody *>(body)) {
 					return; // アタッチ済み
 				}
-				K__Error("Incompatible collision-body attached");
+				K__ERROR("Incompatible collision-body attached");
 				return;
 			}
 		}
@@ -2065,7 +2065,7 @@ void KStaticSolidBody::setShapeGround() {
 void KStaticSolidBody::setShapePlane(const KVec3 &_normal) {
 	KVec3 normal;
 	if (!_normal.getNormalizedSafe(&normal)) {
-		K__Error("E_NORMALIZE_ZERO_VECTOR: setShapePlane");
+		K__ERROR("E_NORMALIZE_ZERO_VECTOR: setShapePlane");
 		return;
 	}
 	KCollider *coll = KPlaneCollider::create(
@@ -2122,7 +2122,7 @@ void KStaticSolidBody::setShapeWall(float x0, float z0, float x1, float z1) {
 	KVec3 normal(normal_x, 0.0f, normal_z);
 	KVec3 norNormal;
 	if (!normal.getNormalizedSafe(&norNormal)) {
-		K__Error("E_NORMALIZE_ZERO_VECTOR: %s", __FUNCTION__);
+		K__ERROR("E_NORMALIZE_ZERO_VECTOR: %s", __FUNCTION__);
 		return;
 	}
 

@@ -180,7 +180,7 @@ KNode * KNode::getParent() const {
 }
 void KNode::setParent(KNode *new_parent) {
 	if (this == new_parent) {
-		K__Error("Parent node can not have itself as a child");
+		K__ERROR("Parent node can not have itself as a child");
 		return;
 	}
 
@@ -490,7 +490,7 @@ void KNode::setName(const KName &name) {
 #ifdef _DEBUG
 	// パス区切りを含んでいてはいけない。
 	if (K::strFindChar(name.c_str(), '/') >= 0) {
-		K__Error("E_INVALID_ENTITY_NAME: %s", name.c_str());
+		K__ERROR("E_INVALID_ENTITY_NAME: %s", name.c_str());
 		return;
 	}
 #endif

@@ -171,14 +171,14 @@ public:
 		memcpy(&bin_[0], data, size);
 		int offset = stbtt_GetFontOffsetForIndex((unsigned char *)bin_.data(), ttc_index);
 		if (offset < 0) {
-			K__Error("CStbFont: no TTC data indexed '%d'", ttc_index);
+			K__ERROR("CStbFont: no TTC data indexed '%d'", ttc_index);
 			*err = 1;
 			return;
 		}
 		if (!stbtt_InitFont(&info_, (unsigned char *)bin_.data(), offset)) {
 			// フォントを解析できない。
 			// ちなみに stbtt は wingding 等の非文字フォントには対応していない（文字コード不明なので）
-			K__Error("CStbFont: failed to stbtt_InitFont");
+			K__ERROR("CStbFont: failed to stbtt_InitFont");
 			*err = 1;
 			return;
 		}
@@ -212,7 +212,7 @@ public:
 		);
 		const int name_len = name_bytes / sizeof(uint16_t);
 		if (name_len+1 >= WSIZE) {
-			K__Error("Font name string buffer has not enough size");
+			K__ERROR("Font name string buffer has not enough size");
 			return false;
 		}
 		// ビッグエンディアンで得られた文字列をリトルエンディアンに変換する

@@ -203,7 +203,7 @@ public:
 			if (output.isOpen()) {
 				output.write(png.data(), png.size());
 			} else {
-				K__Error("Failed to write imagefile: %s", imagefile.c_str());
+				K__ERROR("Failed to write imagefile: %s", imagefile.c_str());
 				return false;
 			}
 		}
@@ -217,7 +217,7 @@ public:
 			if (output.isOpen()) {
 				output.write(meta.data(), meta.size());
 			} else {
-				K__Error("Failed to write metafile: %s", metafile.c_str());
+				K__ERROR("Failed to write metafile: %s", metafile.c_str());
 				return false;
 			}
 		}
@@ -297,7 +297,7 @@ public:
 
 		KXmlElement *xml = KXmlElement::createFromString(xml_u8, __FUNCTION__);
 		if (xml == NULL) {
-			K__Error(u8"E_XML at CImgPackR");
+			K__ERROR(u8"E_XML at CImgPackR");
 			return false;
 		}
 

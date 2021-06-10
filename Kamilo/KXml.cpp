@@ -233,12 +233,12 @@ KXmlElement * KXmlElement::createFromFileName(const std::string &filename) {
 }
 KXmlElement * KXmlElement::createFromStream(KInputStream &input, const std::string &filename) {
 	if (!input.isOpen()) {
-		K__Error("file is nullptr: %s", filename.c_str());
+		K__ERROR("file is nullptr: %s", filename.c_str());
 		return nullptr;
 	}
 	std::string bin = input.readBin();
 	if (bin.empty()) {
-		K__Error("file is empty: %s", filename.c_str());
+		K__ERROR("file is empty: %s", filename.c_str());
 		return nullptr;
 	}
 	return createFromString(bin.data(), filename);
@@ -250,7 +250,7 @@ KXmlElement * KXmlElement::createFromString(const std::string &xmlTextU8, const 
 	if (_LoadTinyXml(xmlTextU8, filename, tiDoc, &tiErrMsg)) {
 		return CXNode::createFromTinyXml(&tiDoc);
 	}
-	K__Error("Failed to read xml: %s: %s", filename.c_str(), tiErrMsg.c_str());
+	K__ERROR("Failed to read xml: %s: %s", filename.c_str(), tiErrMsg.c_str());
 	return nullptr;
 }
 
@@ -308,7 +308,7 @@ bool KXmlElement::write(KOutputStream &output, int indent) const {
 	} else {
 		if (text && text[0]) {
 			// テキスト属性と子ノードは両立しない。
-			K__Error(u8"Xml element cannot have both Text Element and Child Elements");
+			K__ERROR(u8"Xml element cannot have both Text Element and Child Elements");
 
 		} else {
 			output.writeString(">\n");
@@ -352,7 +352,7 @@ std::string KXmlElement::toString(int indent) const {
 	} else {
 		if (text && text[0]) {
 			// テキスト属性と子ノードは両立しない。
-			K__Error(u8"Xml element cannot have both Text Element and Child Elements");
+			K__ERROR(u8"Xml element cannot have both Text Element and Child Elements");
 
 		} else {
 			s += ">\n";

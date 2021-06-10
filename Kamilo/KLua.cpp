@@ -103,7 +103,7 @@ int KLua::toboolean(lua_State *ls, int idx, bool mute) {
 int KLua::dump(lua_State *ls, std::string *bin) {
 	if (lua_dump(ls, KLua__writer, bin, 0) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
-		K__Error("E_LUA_DUMP: %s", msg);
+		K__ERROR("E_LUA_DUMP: %s", msg);
 	}
 	return LUA_OK;
 }
@@ -137,7 +137,7 @@ int KLua::call_yieldable(lua_State *ls, int nargs, char *out_errmsg, size_t errs
 		} else {
 			// エラーメッセージのコピー先が指定されていない。
 			// そのままエラーログに流す
-			K__Error("E_LUA_RESUME: %s", msg);
+			K__ERROR("E_LUA_RESUME: %s", msg);
 		}
 		lua_settop(ls, 0); // スタックを戻す
 	}
@@ -190,7 +190,7 @@ int KLua::call(lua_State *ls, int nargs, int ret_args, char *out_errmsg, size_t 
 		} else {
 			// エラーメッセージのコピー先が指定されていない。
 			// そのままエラーログに流す
-			K__Error("E_LUA_PCALL: %s", msg);
+			K__ERROR("E_LUA_PCALL: %s", msg);
 		}
 		lua_pop(ls, 1); // エラーメッセージを取り除く
 		lua_pop(ls, 1); // エラーハンドラを取り除く
@@ -241,12 +241,12 @@ int KLua::getcallstack(lua_State *ls, int level, char *file, size_t filelen, int
 int KLua::load(lua_State *ls, const char *code, int size, const char *debug_name, bool no_call) {
 	if (luaL_loadbuffer(ls, code, size, debug_name) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
-		K__Error("E_LUA: %s", msg);
+		K__ERROR("E_LUA: %s", msg);
 		return LUA_ERRRUN;
 	}
 	if (!no_call && lua_pcall(ls, 0, 0, 0) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
-		K__Error("E_LUA: %s", msg);
+		K__ERROR("E_LUA: %s", msg);
 		return LUA_ERRRUN;
 	}
 	return LUA_OK;
@@ -499,13 +499,13 @@ bool KLuapp_text(std::string *dst_u8, const char *src_u8, const char *name_u8, c
 		}
 		if (ok && lua_pcall(ls, 0, 0, 0)!=LUA_OK) { // 一番外側のスコープを実行
 			const char *err = luaL_optstring(ls, -1, "");
-			K__Error("E_LUAPP: %s", err ? err : "???");
+			K__ERROR("E_LUAPP: %s", err ? err : "???");
 			ok = false;
 		}
 		lua_getglobal(ls, "__CLuaPrep__"); // <-- 関数をゲット
 		if (ok && lua_pcall(ls, 0, 1, 0)!=LUA_OK) { // 実行
 			const char *err = luaL_optstring(ls, -1, "");
-			K__Error("E_LUAPP: %s", err ? err : "???");
+			K__ERROR("E_LUAPP: %s", err ? err : "???");
 			ok = false;
 		}
 		if (ok) {

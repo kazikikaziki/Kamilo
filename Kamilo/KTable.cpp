@@ -47,7 +47,7 @@ public:
 		m_bottomrow = 0;
 
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: Null data");
+			K__ERROR("E_EXCEL: Null data");
 			return false;
 		}
 
@@ -60,13 +60,13 @@ public:
 		// シートを探す
 		sheet = m_excel.getSheetByName(sheet_name);
 		if (sheet < 0) {
-			K__Error(u8"E_EXCEL: シート '%s' が見つかりません", sheet_name.c_str());
+			K__ERROR(u8"E_EXCEL: シート '%s' が見つかりません", sheet_name.c_str());
 			return false;
 		}
 
 		// 開始セルを探す
 		if (! m_excel.getCellByText(sheet, top_cell_text, &col0, &row0)) {
-			K__Error(u8"E_EXCEL_MISSING_TABLE_BEGIN: シート '%s' にはテーブル開始セル '%s' がありません", 
+			K__ERROR(u8"E_EXCEL_MISSING_TABLE_BEGIN: シート '%s' にはテーブル開始セル '%s' がありません", 
 				sheet_name.c_str(), top_cell_text.c_str());
 			return false;
 		}
@@ -76,7 +76,7 @@ public:
 		int dim_row_top = 0;
 		int dim_row_cnt = 0;
 		if (! m_excel.getSheetDimension(sheet, nullptr, &dim_row_top, nullptr, &dim_row_cnt)) {
-			K__Error(u8"E_EXCEL_MISSING_SHEET_DIMENSION: シート '%s' のサイズが定義されていません", sheet_name.c_str());
+			K__ERROR(u8"E_EXCEL_MISSING_SHEET_DIMENSION: シート '%s' のサイズが定義されていません", sheet_name.c_str());
 			return false;
 		}
 
@@ -90,7 +90,7 @@ public:
 			}
 		}
 		if (row1 == 0) {
-			K__Error(u8"E_EXCEL_MISSING_TABLE_END: シート '%s' のセル '%s' に対応する終端セル '%s' が見つかりません",
+			K__ERROR(u8"E_EXCEL_MISSING_TABLE_END: シート '%s' のセル '%s' に対応する終端セル '%s' が見つかりません",
 				sheet_name.c_str(), top_cell_text.c_str(), bottom_cell_text.c_str());
 			return false;
 		}
@@ -111,7 +111,7 @@ public:
 				c++;
 			}
 			if (cols.empty()) {
-				K__Error(u8"E_EXCEL_MISSING_COLUMN_HEADER: シート '%s' のテーブル '%s' にはカラムヘッダがありません", 
+				K__ERROR(u8"E_EXCEL_MISSING_COLUMN_HEADER: シート '%s' のテーブル '%s' にはカラムヘッダがありません", 
 					sheet_name.c_str(), top_cell_text.c_str());
 			}
 			col1 = c;
@@ -128,11 +128,11 @@ public:
 	}
 	std::string getColumnName(int col) const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return "";
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return "";
 		}
 		if (col < 0 || (int)m_colnames.size() <= col) {
@@ -142,11 +142,11 @@ public:
 	}
 	int getDataColIndexByName(const std::string &column_name) const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return -1;
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return -1;
 		}
 		for (size_t i=0; i<m_colnames.size(); i++) {
@@ -158,22 +158,22 @@ public:
 	}
 	int getDataColCount() const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return 0;
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return 0;
 		}
 		return (int)m_colnames.size();
 	}
 	int getDataRowCount() const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return 0;
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return 0;
 		}
 		// 開始行と終了行の間にある行数
@@ -184,11 +184,11 @@ public:
 	}
 	const char * getRowMarker(int data_row) const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return nullptr;
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return nullptr;
 		}
 		if (data_row < 0) return nullptr;
@@ -199,11 +199,11 @@ public:
 	}
 	const char * getDataString(int data_col, int data_row) const {
 		if (m_excel.empty()) {
-			K__Error("E_EXCEL: No table loaded");
+			K__ERROR("E_EXCEL: No table loaded");
 			return nullptr;
 		}
 		if (m_sheet < 0) {
-			K__Error("E_EXCEL: No table selected");
+			K__ERROR("E_EXCEL: No table selected");
 			return nullptr;
 		}
 		if (data_col < 0) return nullptr;

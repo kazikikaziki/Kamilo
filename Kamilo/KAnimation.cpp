@@ -242,7 +242,7 @@ public:
 				new_frame = 0;
 			}
 			if (new_frame >= total_length) {
-				new_frame = total_length - 1;
+				new_frame = (float)(total_length - 1);
 			}
 		}
 

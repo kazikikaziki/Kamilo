@@ -22,9 +22,9 @@
 
 #ifdef K_USE_D3D9
 
-#define K__VIDEO_ERR    K__Error
-#define K__VIDEO_WRN    K::print
-#define K__VIDEO_PRINT  K::print
+#define K__VIDEO_ERR(fmt, ...)    K__ERROR(fmt, ##__VA_ARGS__)
+#define K__VIDEO_WRN(fmt, ...)    K::print(fmt, ##__VA_ARGS__)
+#define K__VIDEO_PRINT(fmt, ...)  K::print(fmt, ##__VA_ARGS__)
 
 
 #define K__DX9_SCREENTEX_TEST    1
@@ -154,7 +154,7 @@ static void DX9_log(const char *msg_u8, HRESULT hr) {
 	if (SUCCEEDED(hr)) {
 		K__VIDEO_PRINT(text.c_str());
 	} else {
-		K__VIDEO_ERR(text.c_str());
+		K__VIDEO_ERR("%s", text.c_str());
 	}
 }
 static void DX9_printPresentParameter(const char *label, const D3DPRESENT_PARAMETERS &pp) {
@@ -1676,7 +1676,7 @@ public:
 			text += u8"\n";
 			text += msg_u8;
 		#if 1
-			K__VIDEO_ERR(text.c_str());
+			K__VIDEO_ERR("%s", text.c_str());
 		#else
 			K::dialog(text);
 		#endif

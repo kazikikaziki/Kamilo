@@ -25,7 +25,7 @@ public:
 	virtual bool addEntryFromFileName(const std::string &entry_name, const std::string &filename) {
 		KInputStream file = KInputStream::fromFileName(filename);
 		if (!file.isOpen()) {
-			K__Error(u8"E_PAC_WRITE: ファイル '%s' をロードできないため pac ファイルに追加しませんでした", filename.c_str());
+			K__ERROR(u8"E_PAC_WRITE: ファイル '%s' をロードできないため pac ファイルに追加しませんでした", filename.c_str());
 			return false;
 		}
 		std::string bin = file.readBin();
@@ -36,7 +36,7 @@ public:
 		// エントリー名を書き込む。固定長で、XORスクランブルをかけておく
 		{
 			if (entry_name.size() >= PAC_MAX_LABEL_LEN) {
-				K__Error(u8"ラベル名 '%s' が長すぎます", entry_name.c_str());
+				K__ERROR(u8"ラベル名 '%s' が長すぎます", entry_name.c_str());
 				return false;
 			}
 			char label[PAC_MAX_LABEL_LEN];
@@ -200,14 +200,14 @@ public:
 		// Data size (NOT USE)
 		uint32_t datasize_orig = m_Input.readUint32();
 		if (datasize_orig >= 1024 * 1024 * 100) { // 100MBはこえないだろう
-			K__Error("too big datasize_orig size");
+			K__ERROR("too big datasize_orig size");
 			return false;
 		}
 
 		// Data size in pac file
 		uint32_t datasize_inpac = m_Input.readUint32();
 		if (datasize_inpac >= 1024 * 1024 * 100) { // 100MBはこえないだろう
-			K__Error("too big datasize_inpac size");
+			K__ERROR("too big datasize_inpac size");
 			return false;
 		}
 
@@ -220,7 +220,7 @@ public:
 				std::string zdata = m_Input.readBin(datasize_inpac);
 				*p_data = KZlib::uncompress_zlib(zdata, datasize_orig);
 				if (p_data->size() != datasize_orig) {
-					K__Error("E_PAC_DATA_SIZE_NOT_MATCHED");
+					K__ERROR("E_PAC_DATA_SIZE_NOT_MATCHED");
 					p_data->clear();
 					return false;
 				}

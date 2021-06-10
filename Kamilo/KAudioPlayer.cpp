@@ -162,7 +162,7 @@ void CSoundImpl::poolSound(const std::string &name, const void *data, size_t siz
 			m_Pool[name] = buf;
 			return;
 		}
-		K__Error("E_FAIL_PLAY_SOUND: %s", name.c_str());
+		K__ERROR("E_FAIL_PLAY_SOUND: %s", name.c_str());
 		return;
 	}
 
@@ -174,10 +174,10 @@ void CSoundImpl::poolSound(const std::string &name, const void *data, size_t siz
 			m_Pool[name] = buf;
 			return;
 		}
-		K__Error("E_FAIL_PLAY_SOUND: %s", name.c_str());
+		K__ERROR("E_FAIL_PLAY_SOUND: %s", name.c_str());
 		return;
 	}
-	K__Error("E_FAIL_LOAD_SOUND: %s", name.c_str());
+	K__ERROR("E_FAIL_LOAD_SOUND: %s", name.c_str());
 	return;
 }
 /// サウンドファイルがロード済みかどうか。
@@ -233,13 +233,13 @@ KSOUNDID CSoundImpl::playStreamingSound(const void *data, size_t size, float off
 	K__SCOPED_LOCK;
 	KSoundFile strm = KSoundFile::createFromOgg(data, size);
 	if (!strm.isOpen()) {
-		K__Error("E_FAIL_OPEN_SOUND");
+		K__ERROR("E_FAIL_OPEN_SOUND");
 		return nullptr;
 	}
 
 	KSoundPlayer::Buf music = KSoundPlayer::makeStreaming(strm, K__DS_STREAMING_BUFFSER_SEC);
 	if (music == 0) {
-		K__Error("E_FAIL_OPEN_SOUND");
+		K__ERROR("E_FAIL_OPEN_SOUND");
 		return nullptr;
 	}
 
@@ -762,13 +762,13 @@ public:
 
 		std::string bin = m_Storage.loadBinary(name);
 		if (bin.empty()) {
-			K__Error("Failed to open asset file: %s", name.c_str());
+			K__ERROR("Failed to open asset file: %s", name.c_str());
 			return 0;
 		}
 
 		KSOUNDID snd_id = m_SndImpl.playStreamingSound(bin.data(), bin.size(), 0.0f, looping);
 		if (snd_id == 0) {
-			K__Error("playStreaming: No sound named: %s", name.c_str());
+			K__ERROR("playStreaming: No sound named: %s", name.c_str());
 			return 0;
 		}
 		K__Verbose("BGM: %s", name.c_str());
@@ -787,7 +787,7 @@ public:
 		if (! m_SndImpl.isPooled(name)) {
 			std::string bin = m_Storage.loadBinary(name);
 			if (bin.empty()) {
-				K__Error("Failed to open file: %s", name.c_str());
+				K__ERROR("Failed to open file: %s", name.c_str());
 				return 0;
 			}
 			m_SndImpl.poolSound(name, bin.data(), bin.size());
@@ -795,7 +795,7 @@ public:
 		float group_vol = getActualGroupVolume(group_id);
 		KSOUNDID snd_id = m_SndImpl.playPooledSound(name, group_vol);
 		if (snd_id == 0) {
-			K__Error("playOneShot: No sound named: %s", name.c_str());
+			K__ERROR("playOneShot: No sound named: %s", name.c_str());
 			return 0;
 		}
 		K__Verbose("SE: %s", name.c_str());

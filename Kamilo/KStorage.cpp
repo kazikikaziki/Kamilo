@@ -51,7 +51,7 @@ public:
 	CFolderArchive(const std::string &dir, int *err) {
 		m_Dir = dir;
 		if (!K::pathIsDir(dir)) {
-			K__Error("CFolderArchive: Directory not exists: '%s'", dir.c_str());
+			K__ERROR("CFolderArchive: Directory not exists: '%s'", dir.c_str());
 			*err = 1;
 		} else {
 			*err = 0;
@@ -259,7 +259,7 @@ KArchive * KArchive::createPacReader(const std::string &filename) {
 	if (reader.isOpen()) {
 		archive = new CPacFile(reader);
 	} else {
-		K__Error("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
+		K__ERROR("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
 	}
 	return archive;
 }
@@ -412,7 +412,7 @@ public:
 			}
 		}
 		if (should_exists) {
-			K__Error("Failed to open file: %s", filename.c_str());
+			K__ERROR("Failed to open file: %s", filename.c_str());
 		}
 		return KInputStream();
 	}

@@ -31,9 +31,9 @@ void K__math_error(const char *func) {
 	if (K::_IsDebuggerPresent()) {
 		K::_break();
 		K__Assert(0);
-		K__Error("K__math_error at %s", func);
+		K__ERROR("K__math_error at %s", func);
 	} else {
-		K__Error("K__math_error at %s", func);
+		K__ERROR("K__math_error at %s", func);
 	}
 }
 

@@ -440,7 +440,7 @@ std::string KImage::saveToMemory(int png_compress_level) const {
 		unlock();
 	}
 	if (bin.empty()) {
-		K__Error("E_PNG: FAILED TO MAKE PNG IMAGE");
+		K__ERROR("E_PNG: FAILED TO MAKE PNG IMAGE");
 	}
 	return bin;
 }
@@ -508,7 +508,7 @@ bool KImage::_loadFromMemory(const void *bin, size_t size) {
 		return true;
 	} else {
 		destroy();
-		K__Error("Failed to load image");
+		K__ERROR("Failed to load image");
 		return false;
 	}
 }

@@ -993,10 +993,10 @@ static void err_hook(const char *u8) {
 	K__LOGLOG_END();
 }
 void K_log_hook_internal_messages() {
-	K__SetDebugPrintHook(dbg_hook);
-	K__SetPrintHook(msg_hook);
-	K__SetWarningHook(warn_hook);
-	K__SetErrorHook(err_hook);
+	K::setDebugPrintHook(dbg_hook);
+	K::setPrintHook(msg_hook);
+	K::setWarningHook(warn_hook);
+	K::setErrorHook(err_hook);
 }
 
 
