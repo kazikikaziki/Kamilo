@@ -70,7 +70,7 @@ public:
 				sheet_name.c_str(), top_cell_text.c_str());
 			return false;
 		}
-		K__Verbose("TOP CELL '%s' FOUND AT %s", top_cell_text.c_str(), KExcelFile::encodeCellName(col0, row0).c_str());
+		K__VERBOSE("TOP CELL '%s' FOUND AT %s", top_cell_text.c_str(), KExcelFile::encodeCellName(col0, row0).c_str());
 
 		// セルの定義範囲
 		int dim_row_top = 0;
@@ -96,7 +96,7 @@ public:
 		}
 		{
 			std::string s = KExcelFile::encodeCellName(col0, row0);
-			K__Verbose("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text.c_str(), s.c_str());
+			K__VERBOSE("BOTTOM CELL '%s' FOUND AT %s", bottom_cell_text.c_str(), s.c_str());
 		}
 		// 開始セルの右隣からは、カラム名の定義が続く
 		std::vector<std::string> cols;
@@ -107,7 +107,7 @@ public:
 				if (cellstr.empty()) break;
 				cols.push_back(cellstr);
 				std::string s = KExcelFile::encodeCellName(col0, row0);
-				K__Verbose("ID CELL '%s' FOUND AT %s", cellstr.c_str(), s.c_str());
+				K__VERBOSE("ID CELL '%s' FOUND AT %s", cellstr.c_str(), s.c_str());
 				c++;
 			}
 			if (cols.empty()) {

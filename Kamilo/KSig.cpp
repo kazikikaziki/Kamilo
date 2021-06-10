@@ -53,7 +53,7 @@ const KAny & KSig::get(const char *key) {
 			return it->second;
 		}
 	}
-	K__Warning("KSig: \"%s\" not found", key);
+	K__WARNING("KSig: \"%s\" not found", key);
 	static const KAny s_dummy;
 	return s_dummy;
 }

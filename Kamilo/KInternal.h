@@ -14,16 +14,32 @@
 #define TEST 1
 
 
+// ファイル名と行番号付きでエラーメッセージを出力する
+// ※fmt はリテラルでないといけない。
+// マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
+#define K__ERROR(fmt, ...) Kamilo::K::error(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define K__Assert(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
-#define K__Verify(expr)  (!(expr) ? (K__Error("[ASSERTION_FAILURE]: %s(%d): %s", __FILE__, __LINE__, #expr), K__Break()) : (void)0)
+// ファイル名と行番号付きで警告を出力する
+// ※fmt はリテラルでないといけない。
+// マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
+#define K__WARNING(fmt, ...) Kamilo::K::warning(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define K__ASSERT_RETURN(expr)           if (!(expr)) { K__Assert(expr); return; }
-#define K__ASSERT_RETURN_ZERO(expr)      if (!(expr)) { K__Assert(expr); return 0; }
-#define K__ASSERT_RETURN_VAL(expr, val)  if (!(expr)) { K__Assert(expr); return val; }
+// ファイル名と行番号付きで詳細を出力する
+// ※verbose は KAMILO_VERBOSE が定義されているときのみ動作する
+// ※fmt はリテラルでないといけない。
+// マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
+#define K__VERBOSE(fmt, ...) Kamilo::K::verbose(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define K__ERROR(fmt, ...) K__Error("ERROR!! %s(%d): " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
+#define K__ASSERT(expr)  (!(expr) ? (K__ERROR("[ASSERTION_FAILURE] %s", #expr), Kamilo::K::_break()) : (void)0)
+#define K__VERIFY(expr)  (!(expr) ? (K__ERROR("[VERIFY_FAILURE] %s",    #expr), Kamilo::K::_break()) : (void)0)
+
+#define K__ASSERT_RETURN(expr)           if (!(expr)) { K__ASSERT(expr); return; }
+#define K__ASSERT_RETURN_ZERO(expr)      if (!(expr)) { K__ASSERT(expr); return 0; }
+#define K__ASSERT_RETURN_VAL(expr, val)  if (!(expr)) { K__ASSERT(expr); return val; }
+
+#define K__Assert(expr)  K__ASSERT(expr)
+#define K__Verify(expr)  K__VERIFY(expr)
 
 
 namespace Kamilo {

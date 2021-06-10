@@ -115,7 +115,7 @@ float KMath::perlin(float x, float y, float z, int x_wrap, int y_wrap, int z_wra
 	float zz = (z_wrap > 0) ? (z * x_wrap) : z;
 	return stb_perlin_noise3(xx, yy, zz, x_wrap, y_wrap, z_wrap);
 #else
-	K__Warning("No perlin support");
+	K__WARNING("No perlin support");
 	return 0.0f;
 #endif
 }

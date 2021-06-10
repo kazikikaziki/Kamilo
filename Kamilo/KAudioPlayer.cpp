@@ -771,7 +771,7 @@ public:
 			K__ERROR("playStreaming: No sound named: %s", name.c_str());
 			return 0;
 		}
-		K__Verbose("BGM: %s", name.c_str());
+		K__VERBOSE("BGM: %s", name.c_str());
 		float group_vol = getActualGroupVolume(group_id);
 		SSndItem snd;
 		snd.name = name;
@@ -798,7 +798,7 @@ public:
 			K__ERROR("playOneShot: No sound named: %s", name.c_str());
 			return 0;
 		}
-		K__Verbose("SE: %s", name.c_str());
+		K__VERBOSE("SE: %s", name.c_str());
 		SSndItem snd;
 		snd.name = name;
 		snd.vol = 1.0f;

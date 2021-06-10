@@ -852,7 +852,7 @@ KTextureRes::KTextureRes() {
 }
 void KTextureRes::release() {
 	if (mTexId) {
-		K__Verbose("Del texture: %s", mName.u8());
+		K__VERBOSE("Del texture: %s", mName.u8());
 		KVideo::deleteTexture(mTexId);
 		mTexId = nullptr;
 	}
@@ -2031,7 +2031,7 @@ public:
 		m_mutex.lock();
 		{
 			m_items[name.u8()] = sp;
-			K__Verbose("ADD_SPRITE: %s", name.u8());
+			K__VERBOSE("ADD_SPRITE: %s", name.u8());
 		}
 		m_mutex.unlock();
 
@@ -2274,7 +2274,7 @@ public:
 				KShaderAuto &sh = it->second;
 				sh->release();
 				m_items.erase(it);
-				K__Verbose("Del shader: %s", name.u8());
+				K__VERBOSE("Del shader: %s", name.u8());
 			}
 		}
 		m_mutex.unlock();
@@ -2286,7 +2286,7 @@ public:
 				KShaderAuto &sh = it->second;
 				if (sh->hasTag(tag)) {
 					sh->release();
-					K__Verbose("Del shader: %s (by tag \"%s\")", it->first.u8(), tag.c_str());
+					K__VERBOSE("Del shader: %s (by tag \"%s\")", it->first.u8(), tag.c_str());
 					it = m_items.erase(it);
 				} else {
 					it++;

@@ -335,7 +335,7 @@ public:
 			K::print(u8"検索パスにディレクトリ %s を追加しました", dir.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a dir: '%s'", dir.c_str());
+			K__WARNING("E_FILE_FAIL: Failed to open a dir: '%s'", dir.c_str());
 			return false;
 		}
 	}
@@ -347,7 +347,7 @@ public:
 			K::print(u8"検索パスにZIPファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a zip file: '%s'", filename.c_str());
+			K__WARNING("E_FILE_FAIL: Failed to open a zip file: '%s'", filename.c_str());
 			return false;
 		}
 	}
@@ -359,7 +359,7 @@ public:
 			K::print(u8"検索パスにPACファイル %s を追加しました", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
+			K__WARNING("E_FILE_FAIL: Failed to open a pac file: '%s'", filename.c_str());
 			return false;
 		}
 	}
@@ -371,7 +371,7 @@ public:
 			K::print(u8"検索パスに埋め込みリソースを追加しました");
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a embedded files");
+			K__WARNING("E_FILE_FAIL: Failed to open a embedded files");
 			return false;
 		}
 	}
@@ -383,7 +383,7 @@ public:
 			K::print(u8"検索パスに埋め込み pac ファイルを追加しました: %s", filename.c_str());
 			return true;
 		} else {
-			K__Warning("E_FILE_FAIL: Failed to open a embedded pac file: '%s'", filename.c_str());
+			K__WARNING("E_FILE_FAIL: Failed to open a embedded pac file: '%s'", filename.c_str());
 			return false;
 		}
 	}

@@ -124,7 +124,7 @@ bool KCamera::getView2WorldMatrix(KMatrix4 *out_matrix) {
 	// 投影の逆行列
 	KMatrix4 inv_proj;
 	if (!m_Data.projection_matrix.computeInverse(&inv_proj)) {
-		K__Warning("E_SCREEN: projection_matrix does not have an inverse");
+		K__WARNING("E_SCREEN: projection_matrix does not have an inverse");
 		return false;
 	}
 
