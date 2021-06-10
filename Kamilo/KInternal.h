@@ -119,8 +119,8 @@ public:
 	#pragma endregion // sys
 
 	#pragma region dialog
-	static void dialog(const char *u8);
-	static void notify(const char *u8);
+	static void dialog(const std::string &u8);
+	static void notify(const std::string &u8);
 	#pragma endregion // dialog
 
 	#pragma region output debug string

@@ -600,7 +600,7 @@ public:
 					KWindow::setAttribute(KWindow::ATTR_HAS_BORDER, true);
 					KWindow::setAttribute(KWindow::ATTR_HAS_TITLE, true);
 					KWindow::setAttribute(KWindow::ATTR_RESIZABLE, true);
-					K_dialog(u8"デバイスロストから回復できませんでした。ゲームエンジンを終了します");
+					K::dialog(u8"デバイスロストから回復できませんでした。ゲームエンジンを終了します");
 					quit();
 				}
 			}

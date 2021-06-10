@@ -281,7 +281,7 @@ void K::outputDebugFmt(const char *fmt_u8, ...) {
 
 
 #pragma region dialog
-void K::dialog(const char *u8) {
+void K::dialog(const std::string &u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
@@ -295,7 +295,7 @@ void K::dialog(const char *u8) {
 		K__Break();
 	}
 }
-void K::notify(const char *u8) {
+void K::notify(const std::string &u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
@@ -1861,7 +1861,14 @@ std::wstring K::strUtf8ToWide(const std::string &u8) {
 	if (len == 0) {
 		outputDebugFmt("!!!! Failed to convert UTF8 string into WideChar (%d bytes string)", u8.size());
 		K__Break();
-		return L"";
+		{
+			// エラーを無視して変換してみる
+			len = MultiByteToWideChar(CP_UTF8, 0, s, -1, nullptr, 0);
+			ws.resize(len + 1 + 32); // MultiByteToWideChar は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
+			MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, &ws[0], len);
+			ws.resize(wcslen(ws.c_str())); // ws.size が正しい文字列長さを返すように調整する
+		}
+		return ws;
 	}
 	ws.resize(len + 1 + 32); // MultiByteToWideChar は末尾のヌル文字も書き込むので、その領域も確保することに注意（念のため少し多めに確保する）
 	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s, -1, &ws[0], len);

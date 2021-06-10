@@ -1678,7 +1678,7 @@ public:
 		#if 1
 			K__VIDEO_ERR(text.c_str());
 		#else
-			K_dialog(text.c_str());
+			K::dialog(text);
 		#endif
 		}
 		return true;

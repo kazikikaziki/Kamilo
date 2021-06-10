@@ -595,7 +595,7 @@ public:
 		if (isLevelEnabled(lv)) {
 
 			bool no_emit = false;
-			bool no_dialog = true;
+			bool no_dialog = false;
 
 			// ユーザーによる処理を試みる
 			if (m_Callback) {
@@ -605,10 +605,12 @@ public:
 			if (!no_dialog) {
 				if (KLog::getState(KLog::STATE_DIALOG_ALLOWED) != 0) {
 					if (lv == KLog::LEVEL_AST) {
-						K__Dialog(u8); // assertion error
+						threadWait(); // ダイアログを出す前に、現在たまっているログを吐き出させる
+						K::dialog(u8); // assertion error
 					}
 					if (lv == KLog::LEVEL_ERR) {
-						K__Dialog(u8); // error
+						threadWait(); // ダイアログを出す前に、現在たまっているログを吐き出させる
+						K::dialog(u8); // error
 					}
 				}
 			}
