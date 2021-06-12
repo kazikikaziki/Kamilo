@@ -1484,7 +1484,7 @@ public:
 		};
 		static int s_border_mode = 1;
 
-		KImGui::ImgParams p;
+		KImguiImageParams p;
 		p.w = w;
 		p.h = h;
 		p.border_color = BORDER_COLORS[s_border_mode % BORDER_COLORS_SIZE];

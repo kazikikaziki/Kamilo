@@ -54,7 +54,7 @@ bool KImGui_ButtonRepeat(const char *label, ImVec2 size) {
 	return ret;
 }
 void KImGui_Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col) {
-	ImgParams p;
+	KImguiImageParams p;
 	p.w = (int)size.x;
 	p.h = (int)size.y;
 	p.u0 = uv0.x;
@@ -67,12 +67,12 @@ void KImGui_Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0, const ImVec
 	p.linear_filter = false;
 	KImGui_Image(tex, &p);
 }
-void KImGui_Image(KTEXID texid, ImgParams *_p) {
+void KImGui_Image(KTEXID texid, KImguiImageParams *_p) {
 	KTexture *tex = KVideo::findTexture(texid);
 	if (tex== NULL) return;
 	KTexture::Desc desc;
 	tex->getDesc(&desc);
-	ImgParams p;
+	KImguiImageParams p;
 	if (_p) {
 		p = *_p;
 	}
@@ -1216,14 +1216,14 @@ void KImGui::KImGui_ShowExampleAppCustomNodeGraph(bool* opened) {
 
 } // KImGui
 
-#pragma region KImGuiCombo
-KImGuiCombo::KImGuiCombo() {
+#pragma region KImguiCombo
+KImguiCombo::KImguiCombo() {
 	mUpdating = 0;
 }
-void KImGuiCombo::begin() {
+void KImguiCombo::begin() {
 	mUpdating++;
 }
-void KImGuiCombo::end() {
+void KImguiCombo::end() {
 	mUpdating--;
 	K__Assert(mUpdating >= 0);
 	if (mUpdating == 0) {
@@ -1233,11 +1233,11 @@ void KImGuiCombo::end() {
 		}
 	}
 }
-void KImGuiCombo::addItem(const char *s, int value) {
+void KImguiCombo::addItem(const char *s, int value) {
 	K__Assert(mUpdating > 0);
 	mItems.push_back(Pair(s, value));
 }
-int KImGuiCombo::indexOfText(const char *s) const {
+int KImguiCombo::indexOfText(const char *s) const {
 	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].first == s) {
 			return i;
@@ -1245,7 +1245,7 @@ int KImGuiCombo::indexOfText(const char *s) const {
 	}
 	return -1;
 }
-int KImGuiCombo::indexOfValue(int value) const {
+int KImguiCombo::indexOfValue(int value) const {
 	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].second == value) {
 			return i;
@@ -1253,19 +1253,19 @@ int KImGuiCombo::indexOfValue(int value) const {
 	}
 	return -1;
 }
-const char * KImGuiCombo::getText(int index) const {
+const char * KImguiCombo::getText(int index) const {
 	return mItems[index].first.c_str();
 }
-int KImGuiCombo::getValue(int index) const {
+int KImguiCombo::getValue(int index) const {
 	return mItems[index].second;
 }
-const char ** KImGuiCombo::getItemData() const {
+const char ** KImguiCombo::getItemData() const {
 	return (const char **)mPChars.data();
 }
-int KImGuiCombo::getCount() const {
+int KImguiCombo::getCount() const {
 	return mPChars.size();
 }
-bool KImGuiCombo::showGui(const char *label, std::string &value) const {
+bool KImguiCombo::showGui(const char *label, std::string &value) const {
 	K__ASSERT_RETURN_ZERO(label);
 	int sel = indexOfText(value.c_str());
 	if (ImGui::Combo(label, &sel, mPChars.data(), mPChars.size(), mPChars.size())) {
@@ -1274,7 +1274,7 @@ bool KImGuiCombo::showGui(const char *label, std::string &value) const {
 	}
 	return false;
 }
-bool KImGuiCombo::showGui(const char *label, int *value) const {
+bool KImguiCombo::showGui(const char *label, int *value) const {
 	K__ASSERT_RETURN_ZERO(label);
 	K__ASSERT_RETURN_ZERO(value);
 	int sel = indexOfValue(*value);
@@ -1284,7 +1284,7 @@ bool KImGuiCombo::showGui(const char *label, int *value) const {
 	}
 	return false;
 }
-#pragma endregion // KImGuiCombo
+#pragma endregion // KImguiCombo
 
 } // namespace Kamilo
 

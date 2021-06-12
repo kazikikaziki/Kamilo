@@ -45,7 +45,7 @@ void KMeshDrawable::onDrawable_inspector() {
 		ImGui::Checkbox("Color Write", &m_color_write_enabled);
 		ImGui::Checkbox("Stencil", &m_stencil_enabled);
 		{
-		KImGuiCombo combo;
+		KImguiCombo combo;
 		combo.begin();
 		combo.addItem("NEVER"       , KVideo::STENCILFUNC_NEVER);
 		combo.addItem("LESS"        , KVideo::STENCILFUNC_LESS);
@@ -59,7 +59,7 @@ void KMeshDrawable::onDrawable_inspector() {
 		combo.showGui("Stencil Func", (int*)&m_stencil_func);
 		}
 		{
-		KImGuiCombo combo;
+		KImguiCombo combo;
 		combo.begin();
 		combo.addItem("KEEP",    KVideo::STENCILOP_KEEP);
 		combo.addItem("REPLACE", KVideo::STENCILOP_REPLACE);
