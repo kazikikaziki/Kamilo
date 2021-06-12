@@ -285,6 +285,7 @@ void K::dialog(const std::string &u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
+	K::print("[K::dialog]: %s", u8.c_str());
 	std::wstring ws = K::strUtf8ToWide(u8);
 
 	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONSTOP|MB_ABORTRETRYIGNORE);
@@ -299,6 +300,7 @@ void K::notify(const std::string &u8) {
 	wchar_t wpath[MAX_PATH] = {0};
 	GetModuleFileNameW(nullptr, wpath, MAX_PATH);
 
+	K::print("[K::notify]: %s", u8.c_str());
 	std::wstring ws= K::strUtf8ToWide(u8);
 
 	int btn = MessageBoxW(nullptr, ws.c_str(), PathFindFileNameW(wpath), MB_ICONINFORMATION|MB_OK);

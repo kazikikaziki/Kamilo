@@ -967,6 +967,23 @@ public:
 	}
 	void init() {
 	}
+	KTextureAuto findById(KTEXID sid) const {
+		for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
+			const KTextureAuto &sh = it->second;
+			if (sh->mTexId == sid) {
+				return sh;
+			}
+		}
+		return nullptr;
+	}
+	KTextureAuto findByName(const KPath &name) const {
+		for (auto it=m_items.begin(); it!=m_items.end(); ++it) {
+			if (it->first == name.toUtf8()) {
+				return it->second;
+			}
+		}
+		return nullptr;
+	}
 	virtual int getTextureCount() override { 
 		return (int)m_items.size();
 	}
@@ -1034,12 +1051,73 @@ public:
 		}
 		m_mutex.unlock();
 	}
+	virtual void removeTexturesByTag(const std::string &_tag) override {
+		KName tag = _tag;
+		m_mutex.lock();
+		{
+			for (auto it=m_items.begin(); it!=m_items.end(); /*none*/) {
+				KTextureRes *tex = it->second;
+				if (tex->hasTag(tag)) {
+					tex->release();
+					it = m_items.erase(it);
+				} else {
+					it++;
+				}
+			}
+		}
+		m_mutex.unlock();
+	}
 	virtual bool hasTexture(const KPath &name) const override {
 		m_mutex.lock();
 		bool ret = m_items.find(name.u8()) != m_items.end();
 		m_mutex.unlock();
 		return ret;
 	}
+
+	virtual void setTag(KTEXID id, KName tag) override {
+		m_mutex.lock();
+		{
+			KTextureAuto sh = findById(id);
+			if (sh != nullptr) {
+				sh->addTag(tag);
+			}
+		}
+		m_mutex.unlock();
+	}
+	virtual bool hasTag(KTEXID id, KName tag) const override {
+		bool result = false;
+		m_mutex.lock();
+		{
+			KTextureAuto sh = findById(id);
+			if (sh != nullptr && sh->hasTag(tag)) {
+				result = true;
+			}
+		}
+		m_mutex.unlock();
+		return result;
+	}
+	virtual const KNameList & getTags(KTEXID id) const override {
+		static KNameList s_empty;
+
+		KNameList &result = s_empty;
+		m_mutex.lock();
+		{
+			KTextureAuto sh = findById(id);
+			if (sh != nullptr) {
+				result = sh->getTags();
+			}
+		}
+		m_mutex.unlock();
+		return result;
+	}
+
+
+
+
+
+
+
+
 	virtual KPath getTextureName(KTEXID tex) const override {
 		KPath name;
 		m_mutex.lock();
@@ -1595,6 +1673,21 @@ public:
 			auto it = m_items.find(name.u8());
 			if (it != m_items.end()) {
 				m_items.erase(it);
+			}
+		}
+		m_mutex.unlock();
+	}
+	virtual void removeSpritesByTag(const std::string &_tag) override {
+		KName tag = _tag;
+		m_mutex.lock();
+		{
+			for (auto it=m_items.begin(); it!=m_items.end(); /*none*/) {
+				KSpriteRes *sprite = it->second;
+				if (sprite->hasTag(tag)) {
+					it = m_items.erase(it);
+				} else {
+					it++;
+				}
 			}
 		}
 		m_mutex.unlock();

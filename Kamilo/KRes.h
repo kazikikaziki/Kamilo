@@ -349,7 +349,12 @@ public:
 	virtual void clearTextures(bool remove_protected_textures=false) = 0;
 	virtual void removeTexture(const KPath &name) = 0;
 	virtual void removeTexture(KTEXID tex) = 0;
+	virtual void removeTexturesByTag(const std::string &tag) = 0;
 	virtual bool hasTexture(const KPath &name) const = 0;
+	
+	virtual void setTag(KTEXID id, KName tag) = 0;
+	virtual bool hasTag(KTEXID id, KName tag) const = 0;
+	virtual const KNameList & getTags(KTEXID id) const = 0;
 
 	/// name テクスチャに対して modifier を適用したときのテクスチャ名を返す
 	virtual KPath makeTextureNameWithModifier(const KPath &name, int modifier) const = 0;
@@ -403,6 +408,7 @@ public:
 
 	virtual int getSpriteCount() = 0;
 	virtual void removeSprite(const KPath &name) = 0;
+	virtual void removeSpritesByTag(const std::string &tag) = 0;
 	virtual void clearSprites() = 0;
 	virtual bool hasSprite(const KPath &name) const = 0;
 	virtual void guiSpriteBank(KTextureBank *texbank) = 0;
@@ -526,11 +532,11 @@ public:
 	virtual void guiClips() const = 0;
 	virtual bool guiClip(KClipRes *clip) const = 0;
 	virtual void clearClipResources() = 0;
-	virtual void removeClipResource(const  std::string &name) = 0;
-	virtual void removeClipResourceByTag(const  std::string &tag) = 0;
-	virtual void addClipResource(const  std::string &name, KClipRes *clip) = 0;
-	virtual KClipRes * getClipResource(const  std::string &name) const = 0;
-	virtual KClipRes * find_clip(const  std::string &clipname) = 0;
+	virtual void removeClipResource(const std::string &name) = 0;
+	virtual void removeClipResourceByTag(const std::string &tag) = 0;
+	virtual void addClipResource(const std::string &name, KClipRes *clip) = 0;
+	virtual KClipRes * getClipResource(const std::string &name) const = 0;
+	virtual KClipRes * find_clip(const std::string &clipname) = 0;
 	virtual KPathList getClipNames() const = 0;
 };
 
