@@ -1074,6 +1074,20 @@ public:
 		return ret;
 	}
 
+	virtual void setProtect(KTEXID id, bool value) override {
+		KTextureAuto sh = findById(id);
+		if (sh != nullptr) {
+			sh->mProtected = value;
+		}
+	}
+	virtual bool getProtect(KTEXID id) override {
+		KTextureAuto sh = findById(id);
+		if (sh != nullptr) {
+			return sh->mProtected;
+		}
+		return false;
+	}
+
 	virtual void setTag(KTEXID id, KName tag) override {
 		m_mutex.lock();
 		{

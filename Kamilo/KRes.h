@@ -352,6 +352,9 @@ public:
 	virtual void removeTexturesByTag(const std::string &tag) = 0;
 	virtual bool hasTexture(const KPath &name) const = 0;
 	
+	virtual void setProtect(KTEXID id, bool value) = 0;
+	virtual bool getProtect(KTEXID id) = 0;
+
 	virtual void setTag(KTEXID id, KName tag) = 0;
 	virtual bool hasTag(KTEXID id, KName tag) const = 0;
 	virtual const KNameList & getTags(KTEXID id) const = 0;

@@ -399,6 +399,12 @@ private:
 			std::string texname = K::str_sprintf("__font%04d", m_numtex);
 			m_numtex++;
 			ret = mTexBank->addTextureFromSize(texname, w, h);
+
+			// フォント用のテクスチャであることが分かるように、タグをつけておく
+			KBank::getTextureBank()->setTag(ret, KName(K_FONT_TEXTURE_TAG));
+
+			// 保護しておく
+			KBank::getTextureBank()->setProtect(ret, true);
 		}
 		return ret;
 	}

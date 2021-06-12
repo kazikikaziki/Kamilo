@@ -16,6 +16,8 @@ class KInputStream;
 class KTextureBank;
 struct K_Metrics;
 
+static constexpr char *K_FONT_TEXTURE_TAG = "_FONT";
+
 /// フォント１文字の情報。
 /// 単位はすべてピクセル
 /// <pre>
