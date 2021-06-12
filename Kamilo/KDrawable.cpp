@@ -783,19 +783,19 @@ void KDrawable::updateInspector() {
 		ImGui::Separator();
 		ImGui::Checkbox("Snap to integer coordinate", &m_adj_snap);
 		ImGui::Checkbox("Offset half pixel", &m_adj_half);
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+		KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		if (!g_RenderMgr->getConfig(C_MASTER_ADJ_SNAP)) {
 			ImGui::Text("'adj_snap' has been disabled by KRenderManager!");
 		}
 		if (!g_RenderMgr->getConfig(C_MASTER_ADJ_HALF)) {
 			ImGui::Text("'adj_half' has been disabled by KRenderManager!");
 		}
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 	}
 	if (1) {
 		KDebugGui::K_DebugGui_InputMatrix("Local transform", &m_local_transform);
 	}
-	if (ImGui::TreeNode(KImGui::KImGui_ID(-2), "Test")) {
+	if (ImGui::TreeNode(KImGui::ID(-2), "Test")) {
 		ImGui::Text("SkewTest");
 		if (ImGui::Button("-20")) {
 			m_local_transform = KMatrix4::fromSkewX(-20);

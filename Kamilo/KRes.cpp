@@ -578,14 +578,14 @@ void KClipRes::on_track_gui_state(float frame) {
 	for (size_t i=0; i<mKeys.size(); i++) {
 		const SPRITE_KEY &key = mKeys[i];
 		if ((framenumber <= frame) && (frame < framenumber + key.duration)) {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+			KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		} else {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
+			KImGui::PushTextColor(KImGui::COLOR_DEFAULT());
 		}
-		ImGui::PushID(KImGui::KImGui_ID(i));
+		ImGui::PushID(KImGui::ID(i));
 		gui_key(key, framenumber);
 		ImGui::PopID();
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 
 		framenumber += key.duration;
 	}
@@ -595,17 +595,17 @@ void KClipRes::on_track_gui() {
 #ifndef NO_IMGUI
 	// アニメーションカーブをエクスポートする
 	for (size_t ki=0; ki<mKeys.size(); ki++) {
-		if (ImGui::TreeNode(KImGui::KImGui_ID(ki), "Page[%d]", ki)) {
+		if (ImGui::TreeNode(KImGui::ID(ki), "Page[%d]", ki)) {
 			const SPRITE_KEY &key = mKeys[ki];
 			ImGui::Text("Dur : %d", key.duration);
 			ImGui::Text("ThisMark: %d", key.this_mark);
 			ImGui::Text("NextMark: %d", key.next_mark);
 			for (int li=0; li<key.num_layers; li++) {
-				if (ImGui::TreeNode(KImGui::KImGui_ID(li), "Layer[%d]", li)) {
+				if (ImGui::TreeNode(KImGui::ID(li), "Layer[%d]", li)) {
 					ImGui::Text("Sprite : %s", key.layers[li].sprite.u8());
 					ImGui::Text("Label  : %s", key.layers[li].label.u8());
 					ImGui::Text("Command: %s", key.layers[li].command.u8());
-					if (ImGui::TreeNode(KImGui::KImGui_ID(li), "Params")) {
+					if (ImGui::TreeNode(KImGui::ID(li), "Params")) {
 						for (int ni=0; ni<key.user_parameters.size(); ni++) {
 							ImGui::Text("%s: %s", key.user_parameters.getName(ni), key.user_parameters.getString(ni));
 						}
@@ -1454,14 +1454,14 @@ public:
 		int tex_w = tex->getWidth();
 		int tex_h = tex->getHeight();
 		if (tex_w == 0 || tex_h == 0 || tex->getDirect3DTexture9() == nullptr) {
-			ImGui::TextColored(KImGui::KImGui_COLOR_ERROR, "Texture not loaded");
+			ImGui::TextColored(KImGui::COLOR_ERROR, "Texture not loaded");
 			return;
 		}
 		int w = tex_w;
 		int h = tex_h;
 		bool is_pow2 = KMath::isPow2(w) && KMath::isPow2(h);
 		if (!is_pow2) {
-			ImGui::TextColored(KImGui::KImGui_COLOR_WARNING, "Not power of 2");
+			ImGui::TextColored(KImGui::COLOR_WARNING, "Not power of 2");
 		}
 
 		if (box_size > 0) {
@@ -1484,11 +1484,11 @@ public:
 		};
 		static int s_border_mode = 1;
 
-		KImguiImageParams p;
+		KImGuiImageParams p;
 		p.w = w;
 		p.h = h;
 		p.border_color = BORDER_COLORS[s_border_mode % BORDER_COLORS_SIZE];
-		KImGui::KImGui_Image(texid, &p);
+		KImGui::Image(texid, &p);
 		ImGui::Text("Is render texture: %s", tex->isRenderTarget() ? "Yes" : "No");
 		ImGui::Text("Size: %dx%d", tex_w, tex_h);
 		ImGui::Text("TexID: 0x%X", tex);
@@ -1500,13 +1500,13 @@ public:
 			// テクスチャ画像を png でエクスポートする
 			std::string filename = K::str_sprintf("__export__%s.png", KGamePath::escapeFileName(texname).u8());
 			std::string fullname = K::pathGetFull(filename);
-			KImGui::KImGui_ImageExportButton("Export", texid, fullname.c_str(), false);
+			KImGui::ImageExportButton("Export", texid, fullname.c_str(), false);
 		}
 		if (1) {
 			// テクスチャ画像のアルファマスクを png でエクスポートする
 			std::string filename = K::str_sprintf("__export__%s_a.png", KGamePath::escapeFileName(texname).u8());
 			std::string fullname = K::pathGetFull(filename);
-			KImGui::KImGui_ImageExportButton("Export Alpha", texid, fullname.c_str(), true);
+			KImGui::ImageExportButton("Export Alpha", texid, fullname.c_str(), true);
 		}
 		ImGui::PopID();
 	}
@@ -1526,7 +1526,7 @@ public:
 		// レンダーテクスチャ
 		if (isrentex) {
 			ImGui::SameLine();
-			ImGui::TextColored(KImGui::KImGui_COLOR_WARNING, "[R]");
+			ImGui::TextColored(KImGui::COLOR_WARNING, "[R]");
 			if (ImGui::IsItemHovered()) {
 				ImGui::SetTooltip("[R] Render texture");
 			}
@@ -1537,7 +1537,7 @@ public:
 		int h = tex->getHeight();
 		if (!KMath::isPow2(w) || !KMath::isPow2(h)) {
 			ImGui::SameLine();
-			ImGui::TextColored(KImGui::KImGui_COLOR_WARNING, "[!2]");
+			ImGui::TextColored(KImGui::COLOR_WARNING, "[!2]");
 			if (ImGui::IsItemHovered()) {
 				ImGui::SetTooltip("[!2] Texture size is not power of 2");
 			}
@@ -1551,7 +1551,7 @@ public:
 	}
 	virtual void guiTextureBank() override {
 	#ifndef NO_IMGUI
-		if (ImGui::TreeNode(KImGui::KImGui_ID(0), "Textures (%d)", getTextureCount())) {
+		if (ImGui::TreeNode(KImGui::ID(0), "Textures (%d)", getTextureCount())) {
 			// 表示フィルタ
 			static char s_filter[256] = {0};
 			ImGui::InputText("Filter", s_filter, sizeof(s_filter));
@@ -1618,7 +1618,7 @@ public:
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 		//
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
+		if (KImGui::Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -1634,7 +1634,7 @@ public:
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 		//
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
+		if (KImGui::Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -1790,7 +1790,7 @@ public:
 			ImGui::Text("Packed : %s", sprite->mUsingPackedTexture ? "Yes" : "No");
 		}
 		if (1) {
-			if (ImGui::TreeNode(KImGui::KImGui_ID(1), "Tex: %s", sprite->mTextureName.u8())) {
+			if (ImGui::TreeNode(KImGui::ID(1), "Tex: %s", sprite->mTextureName.u8())) {
 				guiSpriteTextureInfo(name, texbank);
 				ImGui::TreePop();
 			}
@@ -2444,7 +2444,7 @@ public:
 		names.insert(names.begin(), "(nullptr)"); // nullptr を選択肢に含める
 
 		int sel_index = -1;
-		if (KImGui::KImGui_Combo(label, names, selected.u8(), &sel_index)) {
+		if (KImGui::Combo(label, names, selected.u8(), &sel_index)) {
 			if (sel_index > 0) {
 				*new_selected = names[sel_index];
 			} else {
@@ -2549,7 +2549,7 @@ public:
 	}
 	virtual void guiClips() const override {
 	#ifndef NO_IMGUI
-		if (ImGui::TreeNode(KImGui::KImGui_ID(0), u8"スプライトアニメ(%d)", m_clips.size())) {
+		if (ImGui::TreeNode(KImGui::ID(0), u8"スプライトアニメ(%d)", m_clips.size())) {
 			// 表示フィルタ
 			static char s_filter[256] = {0};
 			ImGui::InputText("Filter", s_filter, sizeof(s_filter));
@@ -2614,7 +2614,7 @@ public:
 
 		if (clip) {
 			ImGui::Text("%s", clip->getName());
-			if (ImGui::TreeNode(KImGui::KImGui_ID(-2), "segments")) {
+			if (ImGui::TreeNode(KImGui::ID(-2), "segments")) {
 				clip->on_track_gui();
 				ImGui::TreePop();
 			}
@@ -2977,9 +2977,9 @@ public:
 		mesh->getAabb(&minp, &maxp);
 		ImGui::Text("AABB min(%g, %g, %g)", minp.x, minp.y, minp.z);
 		ImGui::Text("AABB max(%g, %g, %g)", maxp.x, maxp.y, maxp.z);
-		if (ImGui::TreeNode(KImGui::KImGui_ID(mesh), "Submesh (%d)", mesh->getSubMeshCount())) {
+		if (ImGui::TreeNode(KImGui::ID(mesh), "Submesh (%d)", mesh->getSubMeshCount())) {
 			for (int i=0; i<mesh->getSubMeshCount(); i++) {
-				if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d]", i)) {
+				if (ImGui::TreeNode(KImGui::ID(i), "[%d]", i)) {
 					const KSubMesh *sub = mesh->getSubMesh(i);
 					ImGui::Text("Start %d", sub->start);
 					ImGui::Text("Count %d", sub->count);
@@ -3082,19 +3082,19 @@ public:
 	/// KInspectorCallback
 	virtual void onInspectorGui() override {
 	#ifndef NO_IMGUI
-		ImGui::PushID(KImGui::KImGui_ID(0)); // Textures
+		ImGui::PushID(KImGui::ID(0)); // Textures
 		m_texbank.guiTextureBank();
 		ImGui::PopID();
 
-		ImGui::PushID(KImGui::KImGui_ID(1)); // Sprites
+		ImGui::PushID(KImGui::ID(1)); // Sprites
 		m_spritebank.guiSpriteBank(&m_texbank);
 		ImGui::PopID();
 
-		ImGui::PushID(KImGui::KImGui_ID(2)); // Shader
+		ImGui::PushID(KImGui::ID(2)); // Shader
 		gui_main();
 		ImGui::PopID();
 
-		ImGui::PushID(KImGui::KImGui_ID(3)); // Animations
+		ImGui::PushID(KImGui::ID(3)); // Animations
 		m_anibank.guiClips();
 		ImGui::PopID();
 	#endif // !NO_IMGUI

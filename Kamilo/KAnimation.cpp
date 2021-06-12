@@ -746,9 +746,9 @@ bool KAnimation::updateClipGui() {
 	if (m_MainPlayback->m_SleepTime == 0) {
 		ImGui::Text("Frame %.1f/%d", m_MainPlayback->m_Frame, clip->getLength());
 	} else {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+		KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		ImGui::Text("Frame %.1f/%d (Sleep)", m_MainPlayback->m_Frame, clip->getLength());
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 	}
 	{
 		const auto FLAG = KClipRes::FLAG_LOOP;
@@ -785,16 +785,16 @@ bool KAnimation::updateClipGui() {
 }
 void KAnimation::updateInspector() {
 	if (m_MainPlayback->m_SleepTime == 0) {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
+		KImGui::PushTextColor(KImGui::COLOR_DEFAULT());
 		ImGui::Text("Sleep: Off");
 	} else if (m_MainPlayback->m_SleepTime > 0) {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+		KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		ImGui::Text("Sleep: On (%d)", m_MainPlayback->m_SleepTime);
 	} else {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+		KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		ImGui::Text("Sleep: On (INF)");
 	}
-	KImGui::KImGui_PopTextColor();
+	KImGui::PopTextColor();
 
 	{
 		std::string name = m_MainPlayback->m_Clip ? m_MainPlayback->m_Clip->getName() : "";

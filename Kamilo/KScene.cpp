@@ -101,7 +101,7 @@ public:
 		for (size_t i=0; i<m_scenelist.size(); i++) {
 			KScene *scene = m_scenelist[i];
 			const char *name = scene ? typeid(*scene).name() : nullname;
-			ImGui::PushID(KImGui::KImGui_ID(i));
+			ImGui::PushID(KImGui::ID(i));
 
 			char s[256];
 			sprintf_s(s, sizeof(s), "%d", i);

@@ -714,7 +714,7 @@ public:
 		KNode *node = KNodeTree::findNodeById(sel_id);
 		if (node == nullptr) {
 			ImGui::TextColored(
-				KImGui::KImGui_COLOR_WARNING,
+				KImGui::COLOR_WARNING,
 				"** Entiy %d(0x%X) does not exist.",
 				EID_toint(sel_id),
 				EID_toint(sel_id)
@@ -880,7 +880,7 @@ public:
 			// エディタ上での表示設定
 			KInspectableDesc *desc = getDesc(ins);
 
-			ImGui::PushID(KImGui::KImGui_ID(ins));
+			ImGui::PushID(KImGui::ID(ins));
 			if (lastkey != desc->sort_primary) {
 				ImGui::Separator();
 			}
@@ -963,9 +963,9 @@ public:
 		m_font_index = font_index;
 	}
 	void render(KTEXID game_display) {
-		KImGui::KImGui_PushFont(m_font_index);
+		KImGui::PushFont(m_font_index);
 		guiMain(game_display);
-		KImGui::KImGui_PopFont();
+		KImGui::PopFont();
 	}
 	void setHighlightedEntity(KNode *node) {
 		m_highlighted_entity = node ? node->getId() : nullptr;
@@ -1168,7 +1168,7 @@ private:
 			m_world_viewport_in_window.y = (int)p.y;
 			m_world_viewport_in_window.w = w;
 			m_world_viewport_in_window.h = h;
-			KImGui::KImGui_Image(game_tex, _ImVec2i(w, h));
+			KImGui::Image(game_tex, _ImVec2i(w, h));
 		}
 	}
 	void gui_status_tip() {
@@ -1445,7 +1445,7 @@ void KDebugGui::K_DebugGui_Image(KTEXID texid, int _w, int _h, KVec2 uv0, KVec2 
 		}
 	}
 	if (!linear_filter) {
-		KImGui::KImGui_SetFilterPoint(); // フィルターを POINT に変更
+		KImGui::SetFilterPoint(); // フィルターを POINT に変更
 	}
 	if (1) {
 		// ここで渡したテクスチャが具体的にどのように描画されるかについては
@@ -1462,7 +1462,7 @@ void KDebugGui::K_DebugGui_Image(KTEXID texid, int _w, int _h, KVec2 uv0, KVec2 
 		);
 	}
 	if (!linear_filter) {
-		KImGui::KImGui_SetFilterLinear(); // 元のフィルター (LINEAR) に戻す
+		KImGui::SetFilterLinear(); // 元のフィルター (LINEAR) に戻す
 	}
 }
 void KDebugGui::K_DebugGui_ImageExportButton(const char *label, KTEXID texid, const char *filename, bool alphamask) {
@@ -1974,14 +1974,14 @@ void KDebugGui::K_DebugGui_NodeAction(KNode *node) {
 
 void KDebugGui::K_DebugGui_NodeWarning(KNode *node) {
 	if (node == nullptr) return;
-	KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+	KImGui::PushTextColor(KImGui::COLOR_WARNING);
 	{
 		std::string warn = node->getWarningString();
 		if (warn.size() > 0) {
 			ImGui::Text(warn.c_str());
 		}
 	}
-	KImGui::KImGui_PopTextColor();
+	KImGui::PopTextColor();
 }
 void KDebugGui::K_DebugGui_Mouse() {
 	// スクリーン座標系でのマウス
@@ -2062,7 +2062,7 @@ void KDebugGui::K_DebugGui_TimeCtrl() {
 			KEngine::play();
 		}
 		ImGui::SameLine();
-		if (KImGui::KImGui_ButtonRepeat("Step")) {
+		if (KImGui::ButtonRepeat("Step")) {
 			KEngine::playStep();
 		}
 
@@ -2072,7 +2072,7 @@ void KDebugGui::K_DebugGui_TimeCtrl() {
 			KEngine::pause();
 		}
 		ImGui::SameLine();
-		if (KImGui::KImGui_ButtonRepeat("Step")) {
+		if (KImGui::ButtonRepeat("Step")) {
 			KEngine::pause();
 		}
 	}
@@ -2111,9 +2111,9 @@ void KDebugGui::K_DebugGui_FrameInfo() {
 	int gc = KEngine::getStatus(KEngine::ST_FRAME_COUNT_GAME);
 	ImGui::Text("[App ] %d:%02d:%02d(%d)", ac/fpsreq/60, ac/fpsreq%60, ac%fpsreq, ac);
 	if (KEngine::isPaused()) {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+		KImGui::PushTextColor(KImGui::COLOR_WARNING);
 		ImGui::Text("[Game] %d:%02d:%02d(%d) [PAUSED]", gc/fpsreq/60, gc/fpsreq%60, gc%fpsreq, gc);
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 	} else {
 		ImGui::Text("[Game] %d:%02d:%02d(%d)", gc/fpsreq/60, gc/fpsreq%60, gc%fpsreq, gc);
 	}

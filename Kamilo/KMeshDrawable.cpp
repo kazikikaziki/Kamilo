@@ -45,7 +45,7 @@ void KMeshDrawable::onDrawable_inspector() {
 		ImGui::Checkbox("Color Write", &m_color_write_enabled);
 		ImGui::Checkbox("Stencil", &m_stencil_enabled);
 		{
-		KImguiCombo combo;
+		KImGuiCombo combo;
 		combo.begin();
 		combo.addItem("NEVER"       , KVideo::STENCILFUNC_NEVER);
 		combo.addItem("LESS"        , KVideo::STENCILFUNC_LESS);
@@ -59,7 +59,7 @@ void KMeshDrawable::onDrawable_inspector() {
 		combo.showGui("Stencil Func", (int*)&m_stencil_func);
 		}
 		{
-		KImguiCombo combo;
+		KImGuiCombo combo;
 		combo.begin();
 		combo.addItem("KEEP",    KVideo::STENCILOP_KEEP);
 		combo.addItem("REPLACE", KVideo::STENCILOP_REPLACE);
@@ -75,7 +75,7 @@ void KMeshDrawable::onDrawable_inspector() {
 	ImGui::Text("Num Submeshes %d", m_mesh.getSubMeshCount());
 	for (int i=0; i<m_mesh.getSubMeshCount(); i++) {
 		ImGui::PushID(i);
-		if (ImGui::TreeNode(KImGui::KImGui_ID(0), "Submesh %d", i)) {
+		if (ImGui::TreeNode(KImGui::ID(0), "Submesh %d", i)) {
 			KSubMesh *subMesh = m_mesh.getSubMesh(i);
 			ImGui::Text("Start %d", subMesh->start);
 			ImGui::Text("Count %d", subMesh->count);

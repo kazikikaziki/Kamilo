@@ -385,11 +385,11 @@ public:
 			KVideoUtils::blit(nullptr, KVideo::findTexture(m_pass_tex[0]), nullptr);
 		}
 		// GUIを重ねる
-		if (KImGui::KImGui_IsActive()) {
+		if (KImGui::IsActive()) {
 			// ビューポートがウィンドウいっぱいになるようにリセットする
 			KVideo::setViewport(0, 0, m_gui_w, m_gui_h);
 
-			KImGui::KImGui_BeginRender();
+			KImGui::BeginRender();
 
 			// ノードGUI
 			render_debug_gui(KNodeTree::getRoot());
@@ -403,7 +403,7 @@ public:
 			if (KInspector::isInstalled()) {
 				KInspector::render(m_pass_tex[0]);
 			}
-			KImGui::KImGui_EndRender();
+			KImGui::EndRender();
 		}
 
 		// スクリーンショットが設定されていれば、画面のコピーを取る

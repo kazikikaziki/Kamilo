@@ -1559,7 +1559,7 @@ void KTextDrawable::onDrawable_inspector() {
 					sel = i;
 				}
 			}
-			if (KImGui::KImGui_Combo("Font", &sel, list)) {
+			if (KImGui::Combo("Font", &sel, list)) {
 				m_tb_font = KBank::getFontBank()->getFont(list[sel]);
 				updateTextMesh();
 			}

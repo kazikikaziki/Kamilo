@@ -798,9 +798,9 @@ void KSpriteDrawable::onDrawable_inspector() {
 			bool disable = !isLayerVisible(i);
 
 			if (disable) {
-				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DISABLED());
+				KImGui::PushTextColor(KImGui::COLOR_DISABLED());
 			}
-			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "Layer[%d]: %s", i, m_sprite_layers[i].sprite.u8())) {
+			if (ImGui::TreeNode(KImGui::ID(i), "Layer[%d]: %s", i, m_sprite_layers[i].sprite.u8())) {
 				ImGui::Text("Label: %s", m_sprite_layers[i].label.u8());
 				KBank::getSpriteBank()->guiSpriteSelector("Sprite", &m_sprite_layers[i].sprite);
 
@@ -813,11 +813,11 @@ void KSpriteDrawable::onDrawable_inspector() {
 				if (ImGui::DragFloat3("Offset", (float*)&p, 1)) {
 					setLayerOffset(i, p);
 				}
-				if (ImGui::TreeNode(KImGui::KImGui_ID(0), "Sprite: %s", m_sprite_layers[i].sprite.u8())) {
+				if (ImGui::TreeNode(KImGui::ID(0), "Sprite: %s", m_sprite_layers[i].sprite.u8())) {
 					KBank::getSpriteBank()->guiSpriteInfo(m_sprite_layers[i].sprite, KBank::getTextureBank());
 					ImGui::TreePop();
 				}
-				if (ImGui::TreeNode(KImGui::KImGui_ID(1), "Material")) {
+				if (ImGui::TreeNode(KImGui::ID(1), "Material")) {
 					KMaterial *mat = getLayerMaterial(i);
 					KBank::getVideoBank()->guiMaterialInfo(mat);
 					ImGui::TreePop();
@@ -825,18 +825,18 @@ void KSpriteDrawable::onDrawable_inspector() {
 				ImGui::TreePop();
 			}
 			if (disable) {
-				KImGui::KImGui_PopTextColor();
+				KImGui::PopTextColor();
 			}
 		} else {
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DISABLED());
-			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "Layer[%d]: (none)", i)) {
+			KImGui::PushTextColor(KImGui::COLOR_DISABLED());
+			if (ImGui::TreeNode(KImGui::ID(i), "Layer[%d]: (none)", i)) {
 				ImGui::TreePop();
 			}
-			KImGui::KImGui_PopTextColor();
+			KImGui::PopTextColor();
 		}
 		ImGui::PopID();
 	}
-	if (ImGui::TreeNode(KImGui::KImGui_ID(-1), "Layer filters")) {
+	if (ImGui::TreeNode(KImGui::ID(-1), "Layer filters")) {
 		for (auto it=m_sprite_filter_layer_labels.begin(); it!=m_sprite_filter_layer_labels.end(); ++it) {
 			if (it->first.empty()) {
 				ImGui::Checkbox("(Default)", &it->second);

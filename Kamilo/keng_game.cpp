@@ -106,11 +106,11 @@ public:
 		// GUI
 		void *d3ddev9 = nullptr; // IDirect3DDevice9
 		KVideo::getParameter(KVideo::PARAM_D3DDEV9, &d3ddev9);
-		KImGui::KImGui_InitWithDX9(KWindow::getHandle(), d3ddev9);
+		KImGui::InitWithDX9(KWindow::getHandle(), d3ddev9);
 
 		// Guiスタイルの設定
 		ImGui::StyleColorsDark();
-		KImGui::KImGui_StyleKK();
+		KImGui::StyleKK();
 
 		// インスペクター
 		if (params && params->use_inspector) {
@@ -149,7 +149,7 @@ public:
 		KSolidBody::uninstall();
 		KNodeTree::uninstall();
 		KInspector::uninstall();
-		KImGui::KImGui_Shutdown();
+		KImGui::Shutdown();
 		KBank::uninstall();
 		KScreen::uninstall();
 		KJoystick::shutdown();
@@ -759,10 +759,10 @@ public:
 		m_sleep_until = m_clock.getTimeMsec() + 500;
 	}
 	void deviceLost() {
-		KImGui::KImGui_DeviceLost();
+		KImGui::DeviceLost();
 	}
 	void deviceReset() {
-		KImGui::KImGui_DeviceReset();
+		KImGui::DeviceReset();
 	}
 
 
@@ -1010,7 +1010,7 @@ public:
 		// ※マウスカーソルの形状設定などに影響する。
 		// これを正しく処理しないと、ImGui のテキストエディタにカーソルを重ねてもカーソル形状が IBeam にならない。
 		if (ImGui::GetCurrentContext()) {
-			long lResult = KImGui::KImGui_WndProc(hWnd, msg, wParam, lParam);
+			long lResult = KImGui::WndProc(hWnd, msg, wParam, lParam);
 			if (lResult) {
 				*p_lResult = lResult;
 			}

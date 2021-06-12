@@ -1122,17 +1122,17 @@ private:
 		}
 		{
 			if (bodynode->m_Desc.get_sleep_time() == 0) {
-				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
+				KImGui::PushTextColor(KImGui::COLOR_DEFAULT());
 				ImGui::Text("Sleep Off");
 			} else if (bodynode->m_Desc.get_sleep_time() > 0) {
-				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+				KImGui::PushTextColor(KImGui::COLOR_WARNING);
 				ImGui::Text("Sleep On (%d)", bodynode->m_Desc.get_sleep_time());
 			} else {
-				KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+				KImGui::PushTextColor(KImGui::COLOR_WARNING);
 				ImGui::Text("Sleep: On (INF)");
 			}
 		}
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 
 		if (bodynode->m_Desc._ground_node) {
 			KPath name = bodynode->m_Desc._ground_node->getNameInTree();

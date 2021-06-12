@@ -290,11 +290,11 @@ public:
 	}
 	void updateHitboxGroupGui() {
 		ImGui::Text("Groups: %d", (int)m_Groups.size());
-		ImGui::PushID(KImGui::KImGui_ID(0));
+		ImGui::PushID(KImGui::ID(0));
 		for (size_t i=0; i<m_Groups.size(); i++) {
 			KHitboxGroup *group = &m_Groups[i];
 			ImGui::Separator();
-			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d] %s", i, group->m_NameForInspector.c_str())) {
+			if (ImGui::TreeNode(KImGui::ID(i), "[%d] %s", i, group->m_NameForInspector.c_str())) {
 				ImGui::Text("Name: %s", group->m_Name.c_str());
 				ImGui::Checkbox("Gizmo visible", &group->m_GizmoVisible);
 				ImGui::ColorEdit4("Gizmo color", reinterpret_cast<float*>(&group->m_GizmoColor));
@@ -308,7 +308,7 @@ public:
 		for (size_t i=0; i<m_HitPairs.size(); i++) {
 			KHitPair *pair = &m_HitPairs[i];
 			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
-			if (ImGui::TreeNode(KImGui::KImGui_ID(i), "[%d]", i)) {
+			if (ImGui::TreeNode(KImGui::ID(i), "[%d]", i)) {
 				std::string name1 = pair->m_Object1.node->getNameInTree().u8();
 				std::string name2 = pair->m_Object2.node->getNameInTree().u8();
 				ImGui::Text("Node1   : %s", name1.c_str());
@@ -723,9 +723,9 @@ void KHitbox::_setNode(KNode *node) {
 }
 void KHitbox::on_node_inspector() {
 	if (m_Mute) {
-		KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_STRONG);
+		KImGui::PushTextColor(KImGui::COLOR_STRONG);
 		ImGui::Text("Mute: %d", m_Mute);
-		KImGui::KImGui_PopTextColor();
+		KImGui::PopTextColor();
 	} else {
 		ImGui::Text("Mute: %d", m_Mute);
 	}

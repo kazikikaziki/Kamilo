@@ -17,22 +17,20 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 
 namespace Kamilo {
 
-namespace KImGui {
-
-void KImGui_HSpace(int size) {
+void KImGui::HSpace(int size) {
 	ImGui::SameLine(0, (float)size);
 }
-void KImGui_VSpace(int size) {
+void KImGui::VSpace(int size) {
 	ImGui::Dummy(ImVec2(1.0f, (float)size));
 }
-bool KImGui_Combo(const std::string &label, int *current_item, const std::vector<std::string> &items, int height_in_items) {
+bool KImGui::Combo(const std::string &label, int *current_item, const std::vector<std::string> &items, int height_in_items) {
 	std::vector<const char *> items_u8_ptr(items.size());
 	for (size_t i=0; i<items.size(); i++) {
 		items_u8_ptr[i] = items[i].c_str();
 	}
 	return ImGui::Combo(label.c_str(), current_item, items_u8_ptr.data(), items_u8_ptr.size(), height_in_items);
 }
-bool KImGui_Combo(const std::string &label, const std::vector<std::string> &pathlist, const std::string &selected, int *out_selected_index) {
+bool KImGui::Combo(const std::string &label, const std::vector<std::string> &pathlist, const std::string &selected, int *out_selected_index) {
 	if (pathlist.empty()) return false;
 	int sel = -1;
 	for (size_t i=0; i<pathlist.size(); i++) {
@@ -40,21 +38,21 @@ bool KImGui_Combo(const std::string &label, const std::vector<std::string> &path
 			sel = (int)i;
 		}
 	}
-	if (KImGui_Combo(label, &sel, pathlist)) {
+	if (KImGui::Combo(label, &sel, pathlist)) {
 		*out_selected_index = sel;
 		return true;
 	}
 	*out_selected_index = sel;
 	return false;
 }
-bool KImGui_ButtonRepeat(const char *label, ImVec2 size) {
+bool KImGui::ButtonRepeat(const char *label, ImVec2 size) {
 	ImGui::PushButtonRepeat(true);
 	bool ret = ImGui::Button(label, size);
 	ImGui::PopButtonRepeat();
 	return ret;
 }
-void KImGui_Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col) {
-	KImguiImageParams p;
+void KImGui::Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col) {
+	KImGuiImageParams p;
 	p.w = (int)size.x;
 	p.h = (int)size.y;
 	p.u0 = uv0.x;
@@ -65,14 +63,14 @@ void KImGui_Image(KTEXID tex, const ImVec2& size, const ImVec2& uv0, const ImVec
 	p.border_color = KColor(border_col.x, border_col.y, border_col.z, border_col.w);
 	p.keep_aspect = false;
 	p.linear_filter = false;
-	KImGui_Image(tex, &p);
+	KImGui::Image(tex, &p);
 }
-void KImGui_Image(KTEXID texid, KImguiImageParams *_p) {
+void KImGui::Image(KTEXID texid, KImGuiImageParams *_p) {
 	KTexture *tex = KVideo::findTexture(texid);
 	if (tex== NULL) return;
 	KTexture::Desc desc;
 	tex->getDesc(&desc);
-	KImguiImageParams p;
+	KImGuiImageParams p;
 	if (_p) {
 		p = *_p;
 	}
@@ -89,7 +87,7 @@ void KImGui_Image(KTEXID texid, KImguiImageParams *_p) {
 		// How is ImDrawList::AddCallback Used?
 		// https://github.com/ocornut/imgui/issues/876
 		// フィルターを POINT に変更
-		KImGui_SetFilterPoint();
+		KImGui::SetFilterPoint();
 	}
 	if (1) {
 		// ここで渡したテクスチャが具体的にどのように描画されるかについては
@@ -107,10 +105,10 @@ void KImGui_Image(KTEXID texid, KImguiImageParams *_p) {
 	}
 	if (!p.linear_filter) {
 		// 元のフィルター (LINEAR) に戻す
-		KImGui_SetFilterLinear();
+		KImGui::SetFilterLinear();
 	}
 }
-void KImGui_ImageExportButton(const char *label, KTEXID texid, const std::string &filename, bool alphamask) {
+void KImGui::ImageExportButton(const char *label, KTEXID texid, const std::string &filename, bool alphamask) {
 	// テクスチャ画像を png でエクスポートする
 	if (ImGui::Button(label)) {
 		KTexture *tex = KVideo::findTexture(texid);
@@ -132,7 +130,7 @@ void KImGui_ImageExportButton(const char *label, KTEXID texid, const std::string
 		}
 	}
 }
-void KImGui_StyleKK() {
+void KImGui::StyleKK() {
 	K__Assert(ImGui::GetCurrentContext());
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Alpha = 1.0f; // このアルファ値は文字も含んだウィンドウ全体のアルファなので注意
@@ -149,7 +147,7 @@ void KImGui_StyleKK() {
 	ImGuiIO &io = ImGui::GetIO();
 	io.FontAllowUserScaling = true; // Ctrl+Wheel scaling
 }
-void KImGui_PushFont(int index) {
+void KImGui::PushFont(int index) {
 	ImGuiIO &io = ImGui::GetIO();
 	K__Assert(0 <= index && index < io.Fonts->Fonts.size());
 	ImFont *font = io.Fonts->Fonts[index];
@@ -159,10 +157,10 @@ void KImGui_PushFont(int index) {
 		ImGui::PushFont(io.Fonts->Fonts[0]); // default font
 	}
 }
-void KImGui_PopFont() {
+void KImGui::PopFont() {
 	ImGui::PopFont();
 }
-int KImGui_FontCount() {
+int KImGui::FontCount() {
 	ImGuiIO &io = ImGui::GetIO();
 	return io.Fonts->Fonts.size();
 }
@@ -701,7 +699,7 @@ static const ImWchar g_GlyphRangesJapanese[] = {
 // const ImWchar *jpChars = ImGui_JapaneseCharTable();
 // ImFont *font = ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buf, size, size_pixels, NULL, jpChars);
 // @endcode
-static const ImWchar * KImGui__GetKanjiTable() {
+static const ImWchar * _GetKanjiTable() {
 	if (1) {
 		return g_GlyphRangesJapanese;
 	} else {
@@ -759,7 +757,7 @@ static IDirect3DStateBlock9 *g_d3d9_block = NULL;
 /// @param size フォントデータバイト数
 /// @param size_pixels ピクセル単位でのフォントサイズ
 /// @note 新しいフォントは ImGui::GetIO().Fonts->Fonts 配列の末尾に追加される
-ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_pixels) {
+ImFont * KImGui::AddFontFromMemoryTTF(const void *data, size_t size, float size_pixels) {
 	K__Assert(data);
 	K__Assert(size > 0);
 	K__Assert(size_pixels > 0);
@@ -770,7 +768,7 @@ ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_p
 	memcpy(buf, data, size);
 
 	// フォント追加
-	const ImWchar *kanji = KImGui__GetKanjiTable();
+	const ImWchar *kanji = _GetKanjiTable();
 	return ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buf, size, size_pixels, NULL, kanji);
 }
 
@@ -796,7 +794,7 @@ ImFont * KImGui_AddFontFromMemoryTTF(const void *data, size_t size, float size_p
 ///    デバッグモードでシーンを切り替えたり、リロードを実行したりしても、
 ///    フォントデータだけは最初にロードしたものをずっと使い続ける。
 ///
-ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels) {
+ImFont * KImGui::AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels) {
 	K__Assert(ttc_index >= 0);
 	K__Assert(size_pixels > 0);
 
@@ -809,7 +807,7 @@ ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index
 	conf.OversampleV = 1;
 
 	// フォント追加
-	const ImWchar *kanji = KImGui__GetKanjiTable();
+	const ImWchar *kanji = _GetKanjiTable();
 	return ImGui::GetIO().Fonts->AddFontFromFileTTF(filename_u8.c_str(), size_pixels, &conf, kanji);
 }
 
@@ -821,7 +819,7 @@ ImFont * KImGui_AddFontFromFileTTF(const std::string &filename_u8, int ttc_index
 ///
 /// @param hWnd ウィンドウハンドル (HWND)
 /// @param d3ddev9 作成済みの D3D9デバイス (IDirect3DDevice9)
-bool KImGui_InitWithDX9(void *hWnd, void *d3ddev9) {
+bool KImGui::InitWithDX9(void *hWnd, void *d3ddev9) {
 	if (hWnd == NULL) return false;
 	if (d3ddev9 == NULL) return false;
 
@@ -853,7 +851,7 @@ bool KImGui_InitWithDX9(void *hWnd, void *d3ddev9) {
 		SHGetFolderPathA(NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, fontfile_u8); // "c:\\windows\\fonts"
 		PathAppendA(fontfile_u8, "meiryo.ttc");
 		int meiryo_ui_ttc = 2; // MeiryoUI は meiryo フォントコレクションの 2 番目に入っている (Regular, Italic, Bold, Bold-Italic)
-		ImFont *added = KImGui_AddFontFromFileTTF(fontfile_u8, meiryo_ui_ttc, 14);
+		ImFont *added = KImGui::AddFontFromFileTTF(fontfile_u8, meiryo_ui_ttc, 14);
 		if (added == NULL) {
 			// 失敗した。
 			// Dear ImGui のデフォルトフォント (ProggyClean.ttf) を追加する
@@ -865,8 +863,8 @@ bool KImGui_InitWithDX9(void *hWnd, void *d3ddev9) {
 
 /// ImGuiを終了させる。
 /// 内部で ImGui::DestroyContext を呼び出すため、
-/// KImGui_Shutdown した後に Dear ImGui 関数を使おうとするとコンテキスト未設定エラーになる
-void KImGui_Shutdown() {
+/// KImGui::Shutdown した後に Dear ImGui 関数を使おうとするとコンテキスト未設定エラーになる
+void KImGui::Shutdown() {
 	if (ImGui::GetCurrentContext()) {
 		ImGui::GetIO().Fonts->Clear();
 		ImGui_ImplDX9_Shutdown();
@@ -882,17 +880,17 @@ void KImGui_Shutdown() {
 		g_d3d9_dev = NULL;
 	}
 }
-bool KImGui_IsActive() {
+bool KImGui::IsActive() {
 	return ImGui::GetCurrentContext() != NULL;
 }
-void KImGui_DeviceLost() {
+void KImGui::DeviceLost() {
 	if (g_d3d9_block) {
 		g_d3d9_block->Release();
 		g_d3d9_block = NULL;
 	}
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 }
-void KImGui_DeviceReset() {
+void KImGui::DeviceReset() {
 	if (g_d3d9_dev) {
 		g_d3d9_dev->CreateStateBlock(D3DSBT_ALL, &g_d3d9_block);
 		ImGui_ImplDX9_CreateDeviceObjects();
@@ -905,7 +903,7 @@ void KImGui_DeviceReset() {
 /// @param wp   WNDPROC の WPARAM に相当
 /// @param lp   WNDPROC の LPARAM に相当
 /// @retval     WNDPROC の 戻り値 HRESULT に相当
-long KImGui_WndProc(void *hWnd, uint32_t msg, uintptr_t wp, uintptr_t lp) {
+long KImGui::WndProc(void *hWnd, uint32_t msg, uintptr_t wp, uintptr_t lp) {
 	// ここで ImGui_ImplWin32_WndProcHandler が 1 を返した場合、そのメッセージは処理済みであるため
 	// 次に伝搬してはならない。
 	// これはマウスカーソルの形状設定などに影響し、
@@ -914,8 +912,8 @@ long KImGui_WndProc(void *hWnd, uint32_t msg, uintptr_t wp, uintptr_t lp) {
 }
 
 /// 新しい描画フレームを開始する。
-/// ImGui::Text() などの関数は KImGui_BeginRender() と KImGui_EndRender() の間で呼ぶこと。
-void KImGui_BeginRender() {
+/// ImGui::Text() などの関数は KImGui::BeginRender() と KImGui::EndRender() の間で呼ぶこと。
+void KImGui::BeginRender() {
 	K__Assert(ImGui::GetCurrentContext());
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -923,7 +921,7 @@ void KImGui_BeginRender() {
 }
 
 /// Dear ImGui の描画を終了し、画面を更新する。
-void KImGui_EndRender() {
+void KImGui::EndRender() {
 	K__Assert(ImGui::GetCurrentContext());
 	ImGui::EndFrame();
 
@@ -938,12 +936,12 @@ void KImGui_EndRender() {
 	}
 }
 
-static void KImGui__SetPointFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
+static void _SetPointFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
 	K__Assert(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 }
-static void KImGui__SetLinearFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
+static void _SetLinearFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
 	K__Assert(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
@@ -952,28 +950,28 @@ static void KImGui__SetLinearFilterCB(const ImDrawList* parent_list, const ImDra
 // How is ImDrawList::AddCallback Used?
 // https://github.com/ocornut/imgui/issues/876
 // フィルターを POINT に変更
-void KImGui_SetFilterPoint() {
+void KImGui::SetFilterPoint() {
 	// How is ImDrawList::AddCallback Used?
 	// https://github.com/ocornut/imgui/issues/876
-	ImGui::GetCurrentWindow()->DrawList->AddCallback(KImGui__SetPointFilterCB, NULL);
+	ImGui::GetCurrentWindow()->DrawList->AddCallback(_SetPointFilterCB, NULL);
 }
 
 // フィルターを LINEAR に変更
-void KImGui_SetFilterLinear() {
-	ImGui::GetCurrentWindow()->DrawList->AddCallback(KImGui__SetLinearFilterCB, NULL);
+void KImGui::SetFilterLinear() {
+	ImGui::GetCurrentWindow()->DrawList->AddCallback(_SetLinearFilterCB, NULL);
 }
 
-void KImGui_PushTextColor(const ImVec4 &col) {
+void KImGui::PushTextColor(const ImVec4 &col) {
 	ImGui::PushStyleColor(ImGuiCol_Text, col);
 }
-void KImGui_PopTextColor() {
+void KImGui::PopTextColor() {
 	ImGui::PopStyleColor();
 }
 
-ImVec4 KImGui_COLOR_DEFAULT() {
+ImVec4 KImGui::COLOR_DEFAULT() {
 	return ImGui::GetStyleColorVec4(ImGuiCol_Text);
 }
-ImVec4 KImGui_COLOR_DISABLED() {
+ImVec4 KImGui::COLOR_DISABLED() {
 	return ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
 }
 
@@ -995,7 +993,7 @@ static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return Im
 
 // Dummy data structure provided for the example.
 // Note that we storing links as indices (not ID) to make example code shorter.
-void KImGui::KImGui_ShowExampleAppCustomNodeGraph(bool* opened) {
+void KImGui::ShowExampleAppCustomNodeGraph(bool* opened) {
     ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Example: Custom Node Graph", opened))
     {
@@ -1214,16 +1212,23 @@ void KImGui::KImGui_ShowExampleAppCustomNodeGraph(bool* opened) {
     ImGui::End();
 }
 
-} // KImGui
 
-#pragma region KImguiCombo
-KImguiCombo::KImguiCombo() {
+
+
+
+
+
+
+
+
+#pragma region KImGuiCombo
+KImGuiCombo::KImGuiCombo() {
 	mUpdating = 0;
 }
-void KImguiCombo::begin() {
+void KImGuiCombo::begin() {
 	mUpdating++;
 }
-void KImguiCombo::end() {
+void KImGuiCombo::end() {
 	mUpdating--;
 	K__Assert(mUpdating >= 0);
 	if (mUpdating == 0) {
@@ -1233,11 +1238,11 @@ void KImguiCombo::end() {
 		}
 	}
 }
-void KImguiCombo::addItem(const char *s, int value) {
+void KImGuiCombo::addItem(const char *s, int value) {
 	K__Assert(mUpdating > 0);
 	mItems.push_back(Pair(s, value));
 }
-int KImguiCombo::indexOfText(const char *s) const {
+int KImGuiCombo::indexOfText(const char *s) const {
 	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].first == s) {
 			return i;
@@ -1245,7 +1250,7 @@ int KImguiCombo::indexOfText(const char *s) const {
 	}
 	return -1;
 }
-int KImguiCombo::indexOfValue(int value) const {
+int KImGuiCombo::indexOfValue(int value) const {
 	for (int i=0; i<(int)mItems.size(); i++) {
 		if (mItems[i].second == value) {
 			return i;
@@ -1253,19 +1258,19 @@ int KImguiCombo::indexOfValue(int value) const {
 	}
 	return -1;
 }
-const char * KImguiCombo::getText(int index) const {
+const char * KImGuiCombo::getText(int index) const {
 	return mItems[index].first.c_str();
 }
-int KImguiCombo::getValue(int index) const {
+int KImGuiCombo::getValue(int index) const {
 	return mItems[index].second;
 }
-const char ** KImguiCombo::getItemData() const {
+const char ** KImGuiCombo::getItemData() const {
 	return (const char **)mPChars.data();
 }
-int KImguiCombo::getCount() const {
+int KImGuiCombo::getCount() const {
 	return mPChars.size();
 }
-bool KImguiCombo::showGui(const char *label, std::string &value) const {
+bool KImGuiCombo::showGui(const char *label, std::string &value) const {
 	K__ASSERT_RETURN_ZERO(label);
 	int sel = indexOfText(value.c_str());
 	if (ImGui::Combo(label, &sel, mPChars.data(), mPChars.size(), mPChars.size())) {
@@ -1274,7 +1279,7 @@ bool KImguiCombo::showGui(const char *label, std::string &value) const {
 	}
 	return false;
 }
-bool KImguiCombo::showGui(const char *label, int *value) const {
+bool KImGuiCombo::showGui(const char *label, int *value) const {
 	K__ASSERT_RETURN_ZERO(label);
 	K__ASSERT_RETURN_ZERO(value);
 	int sel = indexOfValue(*value);
@@ -1284,7 +1289,7 @@ bool KImguiCombo::showGui(const char *label, int *value) const {
 	}
 	return false;
 }
-#pragma endregion // KImguiCombo
+#pragma endregion // KImGuiCombo
 
 } // namespace Kamilo
 

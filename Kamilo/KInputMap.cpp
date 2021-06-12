@@ -1148,21 +1148,21 @@ static void _UpdateButtonGui(KButton *mgr) {
 		// ボタンが入力状態かどうか？
 		if (mgr->isButtonDown(name, nullptr)) {
 			// 入力確定
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DEFAULT());
+			KImGui::PushTextColor(KImGui::COLOR_DEFAULT());
 			ImGui::Text("[%s]", name);
-			KImGui::KImGui_PopTextColor();
+			KImGui::PopTextColor();
 
 		} else if (mgr->isButtonDownByPoll(name, nullptr)) {
 			// 受付済み
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_WARNING);
+			KImGui::PushTextColor(KImGui::COLOR_WARNING);
 			ImGui::Text("[%s]", name);
-			KImGui::KImGui_PopTextColor();
+			KImGui::PopTextColor();
 
 		} else {
 			// 入力なし
-			KImGui::KImGui_PushTextColor(KImGui::KImGui_COLOR_DISABLED());
+			KImGui::PushTextColor(KImGui::COLOR_DISABLED());
 			ImGui::Text("[%s]", name);
-			KImGui::KImGui_PopTextColor();
+			KImGui::PopTextColor();
 		}
 	}
 }

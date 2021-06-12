@@ -49,7 +49,7 @@ public:
 			const std::string &val = m_Values.getString(i);
 			char val_u8[256];
 			strcpy_s(val_u8, sizeof(val_u8), val.c_str());
-			ImGui::PushID(KImGui::KImGui_ID(id));
+			ImGui::PushID(KImGui::ID(id));
 			ImGui::PushItemWidth((float)w);
 			if (ImGui::InputText("", val_u8, sizeof(val_u8))) {
 				std::string s = val_u8;

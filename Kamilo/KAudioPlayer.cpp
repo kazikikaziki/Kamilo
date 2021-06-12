@@ -548,7 +548,7 @@ public:
 	}
 	virtual void onInspectorGui() override { // KInspectorCallback
 		if (ImGui::TreeNodeEx("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
-			if (ImGui::TreeNodeEx(KImGui::KImGui_ID(-1), ImGuiTreeNodeFlags_Leaf, "Master")) {
+			if (ImGui::TreeNodeEx(KImGui::ID(-1), ImGuiTreeNodeFlags_Leaf, "Master")) {
 				if (ImGui::SliderFloat("Volume", &m_MasterVolume, 0.0f, 1.0f)) {
 					updateSoundVolumes(-1);
 				}
@@ -560,7 +560,7 @@ public:
 			for (size_t i=0; i<m_Groups.size(); i++) {
 				SSndGroup group = m_Groups[i];
 				ImGui::Separator();
-				if (ImGui::TreeNodeEx(KImGui::KImGui_ID(i), ImGuiTreeNodeFlags_Leaf, "%s", group.name.c_str())) {
+				if (ImGui::TreeNodeEx(KImGui::ID(i), ImGuiTreeNodeFlags_Leaf, "%s", group.name.c_str())) {
 					if (ImGui::SliderFloat("Master Vol.", &group.master_volume, 0.0f, 1.0f)) {
 						setGroupMasterVolume(i, group.master_volume);
 					}
