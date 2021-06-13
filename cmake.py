@@ -40,7 +40,7 @@ try:
 	# ついでに exe のビルドテストもする
 	call("cmake --build .")
 except:
-	pass
+	traceback.print_exc()
 
 
 # 終了
