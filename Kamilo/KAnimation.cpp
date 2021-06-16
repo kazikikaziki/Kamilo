@@ -230,6 +230,11 @@ public:
 	bool playbackSeekSprite(float new_frame, Flags flags) {
 		K__ASSERT(m_Clip);
 
+		// このクリップがキーを全く含んでいない場合は必ず失敗する
+		if (m_Clip->getKeyCount() == 0) {
+			return false;
+		}
+
 		// アニメ全体の長さ
 		int total_length = m_Clip->getLength();
 
