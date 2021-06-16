@@ -1704,12 +1704,12 @@ public:
 		mTable.clear();
 	}
 	const char * contains(const char *s) const {
-		K_assert(s);
+		K__ASSERT(s);
 		auto it = mTable.find(s);
 		return (it != mTable.end()) ? it->c_str() : nullptr;
 	}
 	const char * insert(const char *s) {
-		K_assert(s);
+		K__ASSERT(s);
 		auto it = mTable.insert(s);
 		return it.first->c_str();
 	}

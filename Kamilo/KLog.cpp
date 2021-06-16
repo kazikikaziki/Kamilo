@@ -35,7 +35,6 @@
 
 
 // ログ自身のアサート
-// （K_assert は再帰呼び出しになる可能性があるので使わない）
 #ifdef _DEBUG
 #  define K__LOGLOG_ASSERT(x)     (!(x) ? DebugBreak() : (void)0)
 #else

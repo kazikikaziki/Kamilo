@@ -2087,6 +2087,8 @@ public:
 			if (probably.empty()) {
 				KLog::printError(
 					u8"E_SPRITE: スプライト '%s' はロードされていません。"
+					u8"拡張子を間違えていませんか？ '.png' や '.tex' はテクスチャであり、スプライトではありません"
+					u8"スプライトには通常 .sprite を用います"
 					u8"xres のロード忘れ, xres 内での定義忘れ, "
 					u8"KTextureBank::addTexture での登録忘れの可能性があります",
 					name.u8()
