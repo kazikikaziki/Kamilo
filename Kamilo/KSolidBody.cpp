@@ -25,7 +25,7 @@ static bool _IsDebugInfoVisible(KSolidBody *body, KNode *camera) {
 	KNode *node = body->getNode();
 	if (node == nullptr) return false;
 
-	K__Assert(camera);
+	K__ASSERT(camera);
 	if (node->getEnableInTree() == false) {
 		return false; // ノードが無効になっている
 	}
@@ -70,8 +70,8 @@ static float _GetGizmoBlinkingAlpha(KNode *knode) {
 #endif
 }
 static bool _PassBodyFilter(KSolidBody *bodynode1, KSolidBody *bodynode2) {
-	K__Assert(bodynode1);
-	K__Assert(bodynode2);
+	K__ASSERT(bodynode1);
+	K__ASSERT(bodynode2);
 	const KCollider *co1 = bodynode1->getShape();
 	const KCollider *co2 = bodynode2->getShape();
 	// https://www.iforce2d.net/b2dtut/collision-filtering
@@ -420,7 +420,7 @@ public:
 
 	#pragma region KManager
 	virtual void on_manager_end() override {
-		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
+		K__ASSERT(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていれば、この時点でノード数はゼロのはず
 	}
 	virtual bool on_manager_isattached(KNode *node) override {
 		return getBody(node) != nullptr;
@@ -880,7 +880,7 @@ public:
 		return ret;
 	}
 	void setCollisionGroupBits(KNode *node, uint32_t group_bits) {
-		K__Assert(node);
+		K__ASSERT(node);
 		lock();
 		{
 			KCollider *coll = getBody(node)->getShape();
@@ -918,8 +918,8 @@ public:
 	// そのどちらでもない場合は両方に false をセットして true を返す
 	// 判定できない場合は何もせずに false を返す
 	bool getSurfaceType(const KVec3 &normalized_normal, bool *is_ground, bool *is_wall) const {
-		K__Assert(is_ground);
-		K__Assert(is_wall);
+		K__ASSERT(is_ground);
+		K__ASSERT(is_wall);
 		if (normalized_normal.isZero()) {
 			return false;
 		}
@@ -1203,7 +1203,7 @@ private:
 		}
 	}
 	void draw_staticbody_gizmo_each(KGizmo *gizmo, KSolidBody *cNode, const KMatrix4 &transform) const {
-		K__Assert(cNode);
+		K__ASSERT(cNode);
 		if (cNode==nullptr || cNode->getNode()==nullptr) return;
 		const float line_alpha = _GetGizmoBlinkingAlpha(cNode->getNode());
 		KColor color(0.0f, 1.0f, 1.0f, line_alpha);
@@ -1402,7 +1402,7 @@ private:
 		// バウンドするための最低Ｙ速度を上回っている場合だけバウンド考慮する
 		float min_bounce = dyBody->m_Desc.get_bounce_min_speed();
 		float gravity = dyBody->m_Desc.get_gravity();
-		K__Assert(min_bounce > 0);
+		K__ASSERT(min_bounce > 0);
 		// dySpeed.y ではなく実際の速度でバウンドするかどうかを決める。
 		// 重力下では常に下向きの加速度がかかっているため、dySpeed.y は重力加速度が影響した速度になってしまっている
 		// 見た目は静止していても下向きの速度が加算され続けるため、dySpeed.y では正しく判断できない
@@ -1440,8 +1440,8 @@ private:
 		}
 	}
 	void draw_dynamicbody_gizmo_each_unsafe(KGizmo *gizmo, KSolidBody *dyNode, const KMatrix4 &transform) {
-		K__Assert(gizmo);
-		K__Assert(dyNode);
+		K__ASSERT(gizmo);
+		K__ASSERT(dyNode);
 
 		KMatrix4 matrix;
 		dyNode->getNode()->getLocal2WorldMatrix(&matrix);
@@ -1502,7 +1502,7 @@ private:
 		}
 	}
 	void simple_move(KSolidBody *dyNode) {
-		K__Assert(dyNode);
+		K__ASSERT(dyNode);
 
 		if (dyNode->getNode()->getPauseInTree()) {
 			return;
@@ -1872,7 +1872,7 @@ extern CCollisionMgr *g_CollisionMgr = nullptr;
 
 #pragma region KSolidBody
 void KSolidBody::install() {
-	K__Assert(g_CollisionMgr == nullptr);
+	K__ASSERT(g_CollisionMgr == nullptr);
 	g_CollisionMgr = new CCollisionMgr();
 }
 void KSolidBody::uninstall() {
@@ -1885,67 +1885,67 @@ bool KSolidBody::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KSolidBody * KSolidBody::of(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getBody(node);
 }
 void KSolidBody::attachVelocity(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->attachVelocity(node);
 }
 bool KSolidBody::getGroundPoint(const KVec3 &pos, float max_penetration, float *out_ground_y, KNode **out_ground) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getGroundPoint(pos, max_penetration, out_ground_y, out_ground);
 }
 bool KSolidBody::getDynamicBodyAltitude(KNode *node, float *alt) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getDynamicBodyAltitude(node, alt);
 }
 float KSolidBody::getAltitudeAtPoint(const KVec3 &point, float max_penetration, KNode **out_ground) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getAltitudeAtPoint(point, max_penetration, out_ground);
 }
 bool KSolidBody::rayCast(const KVec3 &pos, const KVec3 &dir, float maxdist, KRayHit *out_hit) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->rayCast(pos, dir, maxdist, out_hit);
 }
 void KSolidBody::setDebugLineVisible(bool static_lines, bool dynamic_lines) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setDebugLineVisible(static_lines, dynamic_lines);
 }
 void KSolidBody::setDebug_alwaysShowDebug(bool value) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setDebug_alwaysShowDebug(value);
 }
 bool KSolidBody::getDebug_alwaysShowDebug() {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getDebug_alwaysShowDebug();
 }
 void KSolidBody::snapToGround(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->snapToGround(node);
 }
 void KSolidBody::setCallback(KSolidBodyCallback *cb) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setCallback(cb);
 }
 void KSolidBody::setGroupName(uint32_t group_bit, const char *name_literal) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setGroupName(group_bit, name_literal);
 }
 bool KSolidBody::rayCastEnumerate(const KVec3 &start, const KVec3 &dir, float maxdist, KRayCallback *cb) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->rayCastEnumerate(start, dir, maxdist, cb);
 }
 bool KSolidBody::getSurfaceType(const KVec3 &normalizedNormal, bool *isGround, bool *isWall) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getSurfaceType(normalizedNormal, isGround, isWall);
 }
 void KSolidBody::setCollisionGroupBits(uint32_t group_bits) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setCollisionGroupBits(m_Node, group_bits);
 }
 void KSolidBody::setCollisionMaskBits(uint32_t mask_bits) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	g_CollisionMgr->setCollisionMaskBits(m_Node, mask_bits);
 }
 
@@ -2023,7 +2023,7 @@ bool KSolidBody::getBodyEnabled() {
 
 #pragma region KStaticSolidBody
 void KStaticSolidBody::attach(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	if (node && !isAttached(node)) {
 		g_CollisionMgr->addStaticBody(node);
 	}
@@ -2032,7 +2032,7 @@ bool KStaticSolidBody::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KStaticSolidBody * KStaticSolidBody::of(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getStaticBody(node);
 }
 
@@ -2152,7 +2152,7 @@ void KDynamicSolidBody::attach(KNode *node) {
 	attachEx(node, true);
 }
 void KDynamicSolidBody::attachEx(KNode *node, bool with_default_shape) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	if (node && !isAttached(node)) {
 		g_CollisionMgr->addDynamicBody(node, with_default_shape);
 	}
@@ -2161,7 +2161,7 @@ bool KDynamicSolidBody::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KDynamicSolidBody * KDynamicSolidBody::of(KNode *node) {
-	K__Assert(g_CollisionMgr);
+	K__ASSERT(g_CollisionMgr);
 	return g_CollisionMgr->getDynamicBody(node);
 }
 KDynamicSolidBody::KDynamicSolidBody(bool with_default_shape) {
@@ -2249,46 +2249,46 @@ void Test_collision() {
 #ifdef _DEBUG
 	KVec3 c, s;
 
-	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 100, 10, 0), KVec3(5, 5, 0), &c, &s));
-	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(-100, 10, 0), KVec3(5, 5, 0), &c, &s));
-	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10, 100, 0), KVec3(5, 5, 0), &c, &s));
-	K__Assert(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10,-100, 0), KVec3(5, 5, 0), &c, &s));
+	K__ASSERT(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 100, 10, 0), KVec3(5, 5, 0), &c, &s));
+	K__ASSERT(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(-100, 10, 0), KVec3(5, 5, 0), &c, &s));
+	K__ASSERT(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10, 100, 0), KVec3(5, 5, 0), &c, &s));
+	K__ASSERT(!KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3( 10,-100, 0), KVec3(5, 5, 0), &c, &s));
 
 	// 片方が片方を完全に内包している
-	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 10), KVec3(0, 0, 0), KVec3(20, 20, 20), &c, &s));
-	K__Assert(c == KVec3(0, 0, 0));
-	K__Assert(s == KVec3(10, 10, 10));
+	K__ASSERT(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 10), KVec3(0, 0, 0), KVec3(20, 20, 20), &c, &s));
+	K__ASSERT(c == KVec3(0, 0, 0));
+	K__ASSERT(s == KVec3(10, 10, 10));
 
 	// めり込み深さ0の場合、つまり接しているだけの場合は衝突とみなす。
-	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(5, 5, 0), &c, &s));
-	K__Assert(c == KVec3(10, 10, 0));
-	K__Assert(s == KVec3( 0,  0, 0));
+	K__ASSERT(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(5, 5, 0), &c, &s));
+	K__ASSERT(c == KVec3(10, 10, 0));
+	K__ASSERT(s == KVec3( 0,  0, 0));
 
-	K__Assert(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(9, 9, 0), &c, &s));
-	K__Assert(c == KVec3(8, 8, 0));
-	K__Assert(s == KVec3(2, 2, 0));
+	K__ASSERT(KCollisionMath::isAabbIntersected(KVec3(0, 0, 0), KVec3(10, 10, 0), KVec3(15, 15, 0), KVec3(9, 9, 0), &c, &s));
+	K__ASSERT(c == KVec3(8, 8, 0));
+	K__ASSERT(s == KVec3(2, 2, 0));
 	
-	K__Assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 0, 100, 100, 0), -hypotf(50, 50))); // 点P(0, 0) と、A(0, 100) B(100, 0) を通る直線の距離。A から B を見た時、点Pは右側にあるので正の距離を返す
-	K__Assert(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 100, 0, 0, 100),  hypotf(50, 50))); // 点P(0, 0) と、A(100, 0) B(0, 100) を通る直線の距離。A から B を見た時、点Pは左側にあるので負の距離を返す
+	K__ASSERT(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 0, 100, 100, 0), -hypotf(50, 50))); // 点P(0, 0) と、A(0, 100) B(100, 0) を通る直線の距離。A から B を見た時、点Pは右側にあるので正の距離を返す
+	K__ASSERT(KMath::equals(KCollisionMath::getSignedDistanceOfLinePoint2D(0, 0, 100, 0, 0, 100),  hypotf(50, 50))); // 点P(0, 0) と、A(100, 0) B(0, 100) を通る直線の距離。A から B を見た時、点Pは左側にあるので負の距離を返す
 
 	// 円(0, 0, R=80) と点(50, 50) の衝突と解決。
 	// 衝突解決には、円を左下に向かって 80-hypotf(50, 50) だけ移動させる
 	float adj_x, adj_y;
-	K__Assert(KCollisionMath::collisionCircleWithPoint2D(0,0,80,  50,50,  1.0f, &adj_x, &adj_y));
-	K__Assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(50, 50)));
-	K__Assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
+	K__ASSERT(KCollisionMath::collisionCircleWithPoint2D(0,0,80,  50,50,  1.0f, &adj_x, &adj_y));
+	K__ASSERT(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(50, 50)));
+	K__ASSERT(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
 
 	// 円(0, 0, R=80) と直線点 (90, 0)-(0, 90) の衝突と解決。
 	// 衝突解決には、円を左下に向かって 80-hypotf(90, 90)/2 だけ移動させる（直線の向きに対して右側にはじく）
-	K__Assert(KCollisionMath::collisionCircleWithLine2D(0,0,80,  90,0,  0,90,  1.0f, &adj_x, &adj_y));
-	K__Assert(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(90, 90)/2));
-	K__Assert(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
+	K__ASSERT(KCollisionMath::collisionCircleWithLine2D(0,0,80,  90,0,  0,90,  1.0f, &adj_x, &adj_y));
+	K__ASSERT(KMath::equals(hypot(adj_x, adj_y), 80-hypotf(90, 90)/2));
+	K__ASSERT(adj_x < 0 && adj_y < 0); // 左下に移動させるので両方とも負の値になる
 
 	// 円１(0, 0, R=50) と円２(90, 0, R=50) の衝突と解決。
 	// 衝突解決には円１を左側に 10 だけ移動させる
-	K__Assert(KCollisionMath::collisionCircleWithCircle2D(0,0,50,  90,0,50,  1.0f, &adj_x, &adj_y));
-	K__Assert(KMath::equals(adj_x, -10));
-	K__Assert(KMath::equals(adj_y,  0));
+	K__ASSERT(KCollisionMath::collisionCircleWithCircle2D(0,0,50,  90,0,50,  1.0f, &adj_x, &adj_y));
+	K__ASSERT(KMath::equals(adj_x, -10));
+	K__ASSERT(KMath::equals(adj_y,  0));
 #endif // _DEBUG
 }
 } // Test

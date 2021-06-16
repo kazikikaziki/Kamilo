@@ -47,8 +47,8 @@ void KChunkedFileReader::openChunk(chunk_id_t id) {
 }
 void KChunkedFileReader::closeChunk() {
 	// 入れ子の終端に一致しているか確認する
-	K__Assert(!m_nest.empty());
-	K__Assert(m_nest.top() == m_ptr);
+	K__ASSERT(!m_nest.empty());
+	K__ASSERT(m_nest.top() == m_ptr);
 	m_nest.pop();
 }
 bool KChunkedFileReader::getChunkHeader(chunk_id_t *out_id, chunk_size_t *out_size) const {
@@ -64,7 +64,7 @@ bool KChunkedFileReader::getChunkHeader(chunk_id_t *out_id, chunk_size_t *out_si
 	return false;
 }
 void KChunkedFileReader::readChunkHeader(chunk_id_t id, chunk_size_t size) {
-	K__Assert(m_ptr);
+	K__ASSERT(m_ptr);
 
 	memcpy(&m_chunk_id, m_ptr, CHUNK_SIGN_SIZE);
 	m_ptr += CHUNK_SIGN_SIZE;
@@ -72,14 +72,14 @@ void KChunkedFileReader::readChunkHeader(chunk_id_t id, chunk_size_t size) {
 	memcpy(&m_chunk_size, m_ptr, CHUNK_SIZE_SIZE);
 	m_ptr += CHUNK_SIZE_SIZE;
 
-	K__Assert(id==0 || id==m_chunk_id);
-	K__Assert(size==0 || size==m_chunk_size);
+	K__ASSERT(id==0 || id==m_chunk_id);
+	K__ASSERT(size==0 || size==m_chunk_size);
 	m_chunk_data = m_ptr;
 }
 void KChunkedFileReader::readChunk(chunk_id_t id, chunk_size_t size, void *data) {
 	readChunkHeader(id, size);
 
-	K__Assert(m_chunk_data);
+	K__ASSERT(m_chunk_data);
 	if (m_chunk_size > 0) {
 		if (data) memcpy(data, m_chunk_data, m_chunk_size);
 	}
@@ -89,7 +89,7 @@ void KChunkedFileReader::readChunk(chunk_id_t id, chunk_size_t size, void *data)
 void KChunkedFileReader::readChunk(chunk_id_t id, chunk_size_t size, std::string *data) {
 	readChunkHeader(id, size);
 
-	K__Assert(m_chunk_data);
+	K__ASSERT(m_chunk_data);
 	if (data) {
 		data->resize(m_chunk_size);
 		if (m_chunk_size > 0) {
@@ -121,7 +121,7 @@ uint32_t KChunkedFileReader::readChunk4(chunk_id_t id) {
 void KChunkedFileReader::readChunk(chunk_id_t id, std::string *data) {
 	readChunkHeader(id, 0);
 
-	K__Assert(m_chunk_data);
+	K__ASSERT(m_chunk_data);
 	if (data) {
 		data->resize(m_chunk_size);
 		if (m_chunk_size > 0) {
@@ -242,14 +242,14 @@ void Test_chunk() {
 	// 読み取る
 	KChunkedFileReader r;
 	r.init(bin.data(), bin.size());
-	K__Assert(r.readChunk2(0x1000) == 0x2019);
-	K__Assert(r.readChunk4(0x1001) == 0xDeadBeef);
-	K__Assert(r.readChunk(0x1002) == "HELLO WOROLD!");
+	K__ASSERT(r.readChunk2(0x1000) == 0x2019);
+	K__ASSERT(r.readChunk4(0x1001) == 0xDeadBeef);
+	K__ASSERT(r.readChunk(0x1002) == "HELLO WOROLD!");
 
 	r.openChunk(0); // 入れ子チャンクに入る(識別子気にしない)
-	K__Assert(r.readChunk1(0) == 'a');
-	K__Assert(r.readChunk1(0) == 'b');
-	K__Assert(r.readChunk1(0) == 'c');
+	K__ASSERT(r.readChunk1(0) == 'a');
+	K__ASSERT(r.readChunk1(0) == 'b');
+	K__ASSERT(r.readChunk1(0) == 'c');
 	r.closeChunk();
 }
 /// [Test_chunk] <--- Doxgen @snippet コマンドからの参照用なので削除してはいけない

@@ -375,8 +375,8 @@ void KSpriteDrawable::unpackInTexture(KTEXID targetid, const KMatrix4 &transform
 	int texh = targettex->getHeight();
 
 	// レンダーターゲットのサイズが奇数になっていると、ドットバイドットでの描画が歪む
-	K__Assert(texw>0 && texw%2==0);
-	K__Assert(texh>0 && texh%2==0);
+	K__ASSERT(texw>0 && texw%2==0);
+	K__ASSERT(texh>0 && texh%2==0);
 
 	const KMatrix4 group_projection = KMatrix4::fromOrtho((float)texw, (float)texh, (float)(-1000), (float)1000);
 	const KMatrix4 group_transform = transform;
@@ -440,8 +440,8 @@ void KSpriteDrawable::drawInTexture(const RenderLayerDesc *layers, int num_layer
 	if (layers == nullptr) return;
 
 	// レンダーターゲットのサイズが奇数になっていると、ドットバイドットでの描画が歪む
-	K__Assert(w>0 && w%2==0);
-	K__Assert(h>0 && h%2==0);
+	K__ASSERT(w>0 && w%2==0);
+	K__ASSERT(h>0 && h%2==0);
 
 	const KMatrix4 group_projection_matrix = KMatrix4::fromOrtho((float)w, (float)h, (float)(-1000), (float)1000);
 	const KMatrix4 group_transform_matrix = opt->transform;
@@ -656,7 +656,7 @@ void KSpriteDrawable::onDrawable_draw(KNode *node, const RenderArgs *opt, KDrawL
 
 			// マテリアル
 			KMaterial *p_mat = getGroupingMaterial();
-			K__Assert(p_mat);
+			K__ASSERT(p_mat);
 			KMaterial mat = *p_mat; // COPY
 			mat.texture = group_tex;
 
@@ -715,7 +715,7 @@ void KSpriteDrawable::onDrawable_draw(KNode *node, const RenderArgs *opt, KDrawL
 
 		// マテリアル
 		KMaterial *p_mat = getLayerMaterialAnimatable(renderlayer.index);
-		K__Assert(p_mat);
+		K__ASSERT(p_mat);
 		KMaterial mat = *p_mat; // COPY
 		mat.texture = renderlayer.texid;
 

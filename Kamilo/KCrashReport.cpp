@@ -106,7 +106,7 @@ public:
 		if (bufsize_ < reqsize) {
 			bufsize_ = reqsize;
 			buf_ = (EVENTLOGRECORD *)realloc(buf_, bufsize_);
-			K__Assert(buf_);
+			K__ASSERT(buf_);
 		}
 
 		// サイズを正しく設定して再取得
@@ -116,8 +116,8 @@ public:
 			eof_ = true;
 			return false; // 想定外のエラー
 		}
-		K__Assert(buf_->Length == tmp_bufsize);
-		K__Assert(buf_->Length == readsize);
+		K__ASSERT(buf_->Length == tmp_bufsize);
+		K__ASSERT(buf_->Length == readsize);
 		return true;
 	}
 
@@ -130,8 +130,8 @@ public:
 	/// EVENTLOGRECORD から STRPARAMS を取得する
 	void getStringParams(STRPARAMS *params, const EVENTLOGRECORD *e) {
 		#define OFFSET_PTR(p, offset) (((uint8_t *)(p)) + (offset)) // p の型に関係なく常に、offset バイトだけずらす
-		K__Assert(params);
-		K__Assert(e);
+		K__ASSERT(params);
+		K__ASSERT(e);
 		ZeroMemory(params, sizeof(STRPARAMS));
 		params->source = (LPWSTR)OFFSET_PTR(e, sizeof(EVENTLOGRECORD));
 		params->computer = params->source + wcslen(params->source) + 1;
@@ -192,8 +192,8 @@ public:
 
 	/// イベントビューアで見らえるのと同じイベント詳細テキストを得る
 	bool getDetail(const EVENTLOGRECORD *e, std::wstring *ws) {
-		K__Assert(e);
-		K__Assert(ws);
+		K__ASSERT(e);
+		K__ASSERT(ws);
 		STRPARAMS params;
 		getStringParams(&params, e);
 

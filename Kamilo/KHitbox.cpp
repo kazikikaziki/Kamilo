@@ -14,7 +14,7 @@ namespace Kamilo {
 
 static bool _IsDebugInfoVisible(KNode *target, KNode *camera) {
 	if (target == nullptr) return false;
-	K__Assert(camera);
+	K__ASSERT(camera);
 	if (! target->getEnableInTree()) return false;
 	if (! target->getVisibleInTree()) return false;
 
@@ -222,7 +222,7 @@ public:
 	}
 	/// ヒットボックス同士が接触しているなら、その情報を返す
 	const KHitPair * getHitboxHit(KNode *node1, KNode *node2) const {
-		K__Assert(node1 != node2);
+		K__ASSERT(node1 != node2);
 		for (size_t i=0; i<m_HitPairs.size(); i++) {
 			const KHitPair *pair = &m_HitPairs[i];
 			if (pair->isPairOf(node1, node2, nullptr, nullptr)) {
@@ -403,7 +403,7 @@ private:
 		return false;
 	}
 	void drawHitbox(KHitbox *hitbox, const KMatrix4 &transform) const {
-		K__Assert(hitbox);
+		K__ASSERT(hitbox);
 		if (!hitbox->getNode()->getEnable()) return;
 		if (hitbox->getMute()) return;
 
@@ -416,7 +416,7 @@ private:
 		const float line_alpha = 1.0f;//kk_GetGizmoBlinkingAlpha(hitbox->getNode());
 		{
 			const KHitboxGroup *group = getGroupOfHitbox(hitbox);
-			K__Assert(group);
+			K__ASSERT(group);
 			if (group == nullptr || !group->m_GizmoVisible) return;
 			KColor color = group->m_GizmoColor;
 			color.a = line_alpha;
@@ -486,7 +486,7 @@ private:
 	}
 	/// グループ group_id1 と group_id2 のそれぞれのグループに属するヒットボックス同士で衝突処理を行う
 	void update_group_nodes(int groupIndex1, int groupIndex2) {
-		K__Assert(groupIndex1 != groupIndex2); // 同一グルーブ同士の比較はダメ
+		K__ASSERT(groupIndex1 != groupIndex2); // 同一グルーブ同士の比較はダメ
 		std::vector<KHitbox*> &groupHitboxes1 = m_GroupedEntries[groupIndex1];
 		std::vector<KHitbox*> &groupHitboxes2 = m_GroupedEntries[groupIndex2];
 		for (size_t i=0; i<groupHitboxes1.size(); i++) {
@@ -574,15 +574,15 @@ void KHitboxGroup::setCollideWithAny() {
 	m_Bitmask = -1;
 }
 void KHitboxGroup::setCollideWith(int groupIndex) {
-	K__Assert(0 <= groupIndex && groupIndex < 32);
+	K__ASSERT(0 <= groupIndex && groupIndex < 32);
 	m_Bitmask |= (1 << groupIndex);
 }
 void KHitboxGroup::setDontCollideWith(int groupIndex) {
-	K__Assert(0 <= groupIndex && groupIndex < 32);
+	K__ASSERT(0 <= groupIndex && groupIndex < 32);
 	m_Bitmask &= ~(1 << groupIndex);
 }
 bool KHitboxGroup::canCollidableWith(int groupIndex) const {
-	K__Assert(0 <= groupIndex && groupIndex < 32);
+	K__ASSERT(0 <= groupIndex && groupIndex < 32);
 	return (m_Bitmask & (1 << groupIndex)) != 0;
 }
 
@@ -669,7 +669,7 @@ const KHitPair::Obj * KHitPair::getObjectFor(const KNode *node) const {
 static CHitboxManagerImpl *g_HitboxMgr = nullptr;
 
 void KHitbox::install() {
-	K__Assert(g_HitboxMgr == nullptr);
+	K__ASSERT(g_HitboxMgr == nullptr);
 	g_HitboxMgr = new CHitboxManagerImpl();
 }
 void KHitbox::uninstall() {
@@ -679,7 +679,7 @@ void KHitbox::uninstall() {
 	}
 }
 void KHitbox::attach(KNode *node) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	if (node && !isAttached(node)) {
 		g_HitboxMgr->addHitbox(node);
 	}
@@ -700,7 +700,7 @@ KHitbox * KHitbox::cast(KNode *node) {
 	return dynamic_cast<KHitbox*>(node);
 }
 KHitbox * KHitbox::of(KNode *node) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getThisHitbox(node);
 }
 
@@ -814,51 +814,51 @@ bool KHitbox::getAabbInWorld(KVec3 *minpos, KVec3 *maxpos) const {
 	return true;
 }
 int KHitbox::getHitboxCount(KNode *node) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getChildHitboxCount(node);
 }
 KHitbox * KHitbox::getHitboxByGroup(KNode *node, int groupindex) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getHitboxByGroup(node, groupindex);
 }
 void KHitbox::setDebugLineVisible(bool visible) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	g_HitboxMgr->setDebugLineVisible(visible);
 }
 void KHitbox::setDebug_alwaysShowDebug(bool val) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	g_HitboxMgr->setDebug_alwaysShowDebug(val);
 }
 bool KHitbox::getDebug_alwaysShowDebug() {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getDebug_alwaysShowDebug();
 }
 int KHitbox::getIntersectHitboxes(KHitbox *hb, std::vector<KHitbox*> &out_list) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getIntersectHitboxes(hb, out_list);
 }
 KHitbox * KHitbox::getHitboxByIndex(KNode *node, int index) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getChildHitbox(node, index);
 }
 int KHitbox::getHitboxHitPairCount() {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getHitboxHitPairCount();
 }
 const KHitPair * KHitbox::getHitboxHitPairByIndex(int index) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getHitboxHitPair(index);
 }
 const KHitPair * KHitbox::getHitboxHitPairOf(KNode *node1, KNode *node2) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getHitboxHit(node1, node2);
 }
 void KHitbox::setGroupCount(int count) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	g_HitboxMgr->setGroupCount(count);
 }
 KHitboxGroup * KHitbox::getGroup(int index) {
-	K__Assert(g_HitboxMgr);
+	K__ASSERT(g_HitboxMgr);
 	return g_HitboxMgr->getGroup(index);
 }
 

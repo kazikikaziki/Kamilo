@@ -43,7 +43,7 @@ void KDirectoryWalker::scanFilesW(const std::wstring &wtop, const std::wstring &
 	}
 }
 void KDirectoryWalker::scanW(const std::wstring &wtop, const std::wstring &wdir, Callback *cb) {
-	K__Assert(cb);
+	K__ASSERT(cb);
 	std::vector<Item> list;
 	scanFilesW(wtop, wdir, list);
 	for (auto it=list.begin(); it!=list.end(); ++it) {
@@ -63,7 +63,7 @@ void KDirectoryWalker::scanW(const std::wstring &wtop, const std::wstring &wdir,
 	}
 }
 void KDirectoryWalker::walk(const std::string &dir_u8, KDirectoryWalker::Callback *cb) {
-	K__Assert(cb);
+	K__ASSERT(cb);
 	std::wstring wdir = K::strUtf8ToWide(dir_u8);
 	scanW(wdir, L"", cb);
 }

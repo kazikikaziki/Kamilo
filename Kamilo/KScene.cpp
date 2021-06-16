@@ -137,8 +137,8 @@ public:
 		return -1;
 	}
 	void addScene(KSCENEID id, KScene *scene) {
-		K__Assert(id >= 0);
-		K__Assert(id < SCENE_ID_LIMIT);
+		K__ASSERT(id >= 0);
+		K__ASSERT(id < SCENE_ID_LIMIT);
 		if (getScene(id)) {
 			KLog::printWarning("W_SCENE_OVERWRITE: KScene with the same id '%d' already exists. The scene will be overwritten by new one.", id);
 			if (m_curr_scene.scene == getScene(id)) {
@@ -231,7 +231,7 @@ public:
 static CSceneMgr * g_SceneMgr = nullptr;
 
 void KSceneManager::install() {
-	K__Assert(g_SceneMgr == nullptr);
+	K__ASSERT(g_SceneMgr == nullptr);
 	g_SceneMgr = new CSceneMgr();
 }
 void KSceneManager::uninstall() {
@@ -244,38 +244,38 @@ bool KSceneManager::isInstalled() {
 	return g_SceneMgr != nullptr;
 }
 void KSceneManager::setCallback(KGameSceneSystemCallback *cb) {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	g_SceneMgr->setCallback(cb);
 }
 void KSceneManager::restart() {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	g_SceneMgr->restart();
 }
 int KSceneManager::getClock() {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	return g_SceneMgr->getClock();
 }
 KScene * KSceneManager::getScene(KSCENEID id) {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	return g_SceneMgr->getScene(id);
 }
 KScene * KSceneManager::getCurrentScene() {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	return g_SceneMgr->getCurrentScene();
 }
 KSCENEID KSceneManager::getCurrentSceneId() {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	return g_SceneMgr->getCurrentSceneId();
 }
 void KSceneManager::addScene(KSCENEID id, KScene *scene) {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	g_SceneMgr->addScene(id, scene);
 }
 /// シーンを切り替える
 /// @param id      次のシーンの識別子（addScene で登録したもの）
 /// @param params  次のシーンに渡すパラメータ。ここで渡したパラメータは KScene::getParams で取得できる
 void KSceneManager::setNextScene(KSCENEID id, const KNamedValues *params) {
-	K__Assert(g_SceneMgr);
+	K__ASSERT(g_SceneMgr);
 	g_SceneMgr->setNextScene(id, params);
 }
 void KSceneManager::setSceneParamInt(const char *key, int val) {

@@ -237,8 +237,8 @@ int KStringView::find(const char *substr, int start, KStringView *result_view) c
 // 例えば文字列 "AAA <BBB> CCC" から "<" と ">" を探す場合、
 // 内側の範囲は "BBB" であり外側の範囲は "<BBB>" になる
 bool KStringView::findRange(const char *start_tok, const char *end_tok, KStringView *inner_range, KStringView *outer_range) const {
-	K__Assert(start_tok);
-	K__Assert(end_tok);
+	K__ASSERT(start_tok);
+	K__ASSERT(end_tok);
 	KStringView startrange;
 	if (find(start_tok, 0, &startrange) < 0) {
 		return false;
@@ -392,7 +392,7 @@ std::string KStringView::pathPushLast(const KStringView &last) const {
 //      maxcount=2 ==> returns: {"aaa", "bbb"}        rest: "ccc"
 //      maxcount=3 ==> returns: {"aaa", "bbb", "ccc"} rest: ""
 std::vector<KStringView> KStringView::split(const char *delims, bool condense_delims, bool _trim, int maxcount, KStringView *out_rest) const {
-	K__Assert(delims);
+	K__ASSERT(delims);
 	std::vector<KStringView> result;
 	int s = 0; // 開始インデックス
 	int i = 0;
@@ -1222,9 +1222,9 @@ void Test_str() {
 #if 0
 // 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 void KPathUtils::K_PathNormalizeEx(char *path_u8, char old_delim, char new_delim) {
-	K__Assert(path_u8);
-	K__Assert(isprint(old_delim));
-	K__Assert(isprint(new_delim));
+	K__ASSERT(path_u8);
+	K__ASSERT(isprint(old_delim));
+	K__ASSERT(isprint(new_delim));
 	KStringUtils::trim(path_u8); // 前後の空白をスキップ
 	K::strReplaceChar(path_u8, old_delim, new_delim); // 区切り文字を置換
 	K_PathRemoveLastDelim(path_u8); // 最後の区切り文字は削除する
@@ -1244,8 +1244,8 @@ void KPathUtils::K_PathNormalize(char *out_path, int out_size, const char *path_
 
 /// 2つのパスの先頭部分に含まれる共通のサブパスの文字列長さを得る（区切り文字を含む）
 int KPathUtils::K_PathGetCommonSize(const char *pathA, const char *pathB) {
-	K__Assert(pathA);
-	K__Assert(pathB);
+	K__ASSERT(pathA);
+	K__ASSERT(pathB);
 	int len = 0;
 	for (int i=0; ; i++) {
 		if (pathA[i] == pathB[i]) {
@@ -1265,7 +1265,7 @@ int KPathUtils::K_PathGetCommonSize(const char *pathA, const char *pathB) {
 
 /// 完全なパスを得る
 bool KPathUtils::K_PathGetFullPath(char *out_path, int out_size, const char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	wchar_t wpath[KPathUtils::MAX_SIZE] = {0};
 	wchar_t wfull[KPathUtils::MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, KPathUtils::MAX_SIZE, path_u8);
@@ -1279,9 +1279,9 @@ bool KPathUtils::K_PathGetFullPath(char *out_path, int out_size, const char *pat
 
 /// base から path への相対パスを得る
 void KPathUtils::K_PathGetRelative(char *out_path, int out_size, const char *path_u8, const char *base_u8) {
-	K__Assert(out_path);
-	K__Assert(path_u8);
-	K__Assert(base_u8);
+	K__ASSERT(out_path);
+	K__ASSERT(path_u8);
+	K__ASSERT(base_u8);
 	// パス区切り文字で区切る
 	auto tok_path = KStringView(path_u8).split("/\\", true, true, 0, nullptr);
 	auto tok_base = KStringView(base_u8).split("/\\", true, true, 0, nullptr);
@@ -1323,7 +1323,7 @@ const char * KPathUtils::K_PathGetLast(const char *path_u8) {
 	return K_PathGetLast((char *)path_u8);
 }
 char * KPathUtils::K_PathGetLast(char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	char *sl = strrchr(path_u8, K__PATH_SLASH);
 	char *bs = strrchr(path_u8, K__PATH_BACKSLASH);
 	char *delim = (sl > bs) ? sl : bs; // max(sl, bs)
@@ -1332,7 +1332,7 @@ char * KPathUtils::K_PathGetLast(char *path_u8) {
 
 /// パスの末尾が / で終わるようにする
 void KPathUtils::K_PathAppendLastDelim(char *path_u8, int size) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	int len = strlen(path_u8);
 	char *c = &path_u8[len-1];
 	if (*c == K__PATH_BACKSLASH) {
@@ -1349,7 +1349,7 @@ void KPathUtils::K_PathAppendLastDelim(char *out_path, int out_size, char *path)
 
 /// パスの末尾が / で終わっている場合、それを取り除く
 void KPathUtils::K_PathRemoveLastDelim(char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	int len = strlen(path_u8);
 	char *c = &path_u8[len-1];
 	if (*c == K__PATH_BACKSLASH) {
@@ -1367,13 +1367,13 @@ void KPathUtils::K_PathRemoveLastDelim(char *out_path, int out_size, const char 
 /// パス末尾の拡張子部分を返す (ドットを含む)
 /// 拡張子がない場合は末尾文字部分を返す
 const char * KPathUtils::K_PathGetExt(const char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	return K_PathGetExt((char *)path_u8);
 }
 
 char * KPathUtils::K_PathGetExt(char *path_u8) {
 	
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	// 末尾の "." を探す
 	// 見つからなかったら末尾文字のポインタを返す
 	char *p = strrchr(path_u8, '.');
@@ -1397,8 +1397,8 @@ char * KPathUtils::K_PathGetExt(char *path_u8) {
 
 /// パスの末尾にサブパスを追加する
 void KPathUtils::K_PathPushLast(char *path_u8, int size, const char *more_u8) {
-	K__Assert(path_u8);
-	K__Assert(more_u8);
+	K__ASSERT(path_u8);
+	K__ASSERT(more_u8);
 	if (KStringUtils::isEmpty(path_u8)) {
 		// "" + "morepath" ==> "morepath"
 		strcpy_s(path_u8, size, more_u8);
@@ -1420,8 +1420,8 @@ void KPathUtils::K_PathPushLast(char *out_path, int out_size, const char *path, 
 
 /// パスの末尾に拡張子を追加する
 void KPathUtils::K_PathPushExt(char *path_u8, int size, const char *ext_u8) {
-	K__Assert(path_u8);
-	K__Assert(ext_u8);
+	K__ASSERT(path_u8);
+	K__ASSERT(ext_u8);
 	if (ext_u8[0] != '.') {
 		strcat_s(path_u8, size, ".");
 	}
@@ -1436,11 +1436,11 @@ void KPathUtils::K_PathPushExt(char *out_path, int out_size, const char *path, c
 /// path_u8 の末尾にあるデリミタをヌル文字に書き換える。
 /// 取り除いた末尾部分の先頭を返す
 void KPathUtils::K_PathPopLast(char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	// K_PathGetLast はデリミタまたは末尾文字のアドレスを返すので、
 	// それをそのまま '\0' に書き換えるだけでよい
 	char *s = K_PathGetLast(path_u8);
-	K__Assert(s);
+	K__ASSERT(s);
 	s[0] = '\0';
 	K_PathRemoveLastDelim(path_u8);
 }
@@ -1451,11 +1451,11 @@ void KPathUtils::K_PathPopLast(char *out_path, int out_size, const char *path) {
 
 /// パス末尾にある拡張子を取り除く
 void KPathUtils::K_PathPopExt(char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	// K_PathGetExt は ドットまたは末尾文字のアドレスを返すので、
 	// それをそのまま '\0' に書き換えるだけでよい
 	char *s = K_PathGetExt(path_u8);
-	K__Assert(s);
+	K__ASSERT(s);
 	s[0] = '\0';
 }
 void KPathUtils::K_PathPopExt(char *out_path, int out_size, const char *path) {
@@ -1470,7 +1470,7 @@ bool KPathUtils::K_PathHasDelim(const char *path_u8) {
 
 /// パスが実在し、かつディレクトリかどうか調べる
 bool KPathUtils::K_PathIsDir(const char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	wchar_t wpath[MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, MAX_SIZE, path_u8);
 	return PathIsDirectoryW(wpath);
@@ -1478,7 +1478,7 @@ bool KPathUtils::K_PathIsDir(const char *path_u8) {
 
 /// パスが実在し、かつ非ディレクトリかどうか調べる
 bool KPathUtils::K_PathIsFile(const char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	wchar_t wpath[MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, MAX_SIZE, path_u8);
 	return PathFileExistsW(wpath) && !PathIsDirectoryW(wpath); // パスが存在し、かつディレクトリでないならファイルであるとする
@@ -1486,7 +1486,7 @@ bool KPathUtils::K_PathIsFile(const char *path_u8) {
 
 /// パスが実在するか調べる
 bool KPathUtils::K_PathExists(const char *path_u8) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	wchar_t wpath[MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, MAX_SIZE, path_u8);
 	return PathFileExistsW(wpath);
@@ -1495,8 +1495,8 @@ bool KPathUtils::K_PathExists(const char *path_u8) {
 /// FILETIME から time_t へ変換する
 static time_t K__FileTimeToTimeT(const FILETIME *ft) {
 	// FILETIME ==> time_t
-	K__Assert(ft);
-	K__Assert(sizeof(time_t) == 8); // 64bit
+	K__ASSERT(ft);
+	K__ASSERT(sizeof(time_t) == 8); // 64bit
 	// FILETIMEを等価な64ビットのファイル時刻形式（1601/1/1 0:00から100ナノ秒刻み）に変換
 	uint64_t ntfs64 = ((uint64_t)ft->dwHighDateTime << 32) | ft->dwLowDateTime;
 	// NTFSで使われている64ビットのファイル時刻形式から
@@ -1517,7 +1517,7 @@ static time_t K__FileTimeToTimeT(const FILETIME *ft) {
 ///		// cma[2] <-- access time
 /// @endcode
 bool KPathUtils::K_PathGetTimeStamp(const char *path_u8, time_t *out_time_cma) {
-	K__Assert(path_u8);
+	K__ASSERT(path_u8);
 	wchar_t wpath[MAX_SIZE] = {0};
 	K__Utf8ToWidePath(wpath, MAX_SIZE, path_u8);
 	//
@@ -1861,8 +1861,8 @@ const KPath KPath::Empty = KPath();
 
 
 KPath KPath::fromAnsi(const char *mb, const char *locale) {
-	K__Assert(mb);
-	K__Assert(locale);
+	K__ASSERT(mb);
+	K__ASSERT(locale);
 	return KPath(K::strAnsiToUtf8(mb, locale));
 }
 KPath KPath::fromUtf8(const char *u8) {
@@ -2090,7 +2090,7 @@ KPath KPath::changeExtension(const KPath &ext) const {
 	return changeExtension(ext.m_path);
 }
 KPath KPath::changeExtension(const char *ext) const {
-	K__Assert(ext);
+	K__ASSERT(ext);
 	char tmp[SIZE];
 	strcpy_s(tmp, sizeof(tmp), m_path);
 	if (ext[0] == '\0') {
@@ -2129,7 +2129,7 @@ bool KPath::endsWithPath(const KPath &sub) const {
 	size_t thislen = strlen(m_path);
 	if (thislen < sublen) return false;
 	int idx = (int)(thislen - sublen);
-	K__Assert(0 <= idx && idx < SIZE);
+	K__ASSERT(0 <= idx && idx < SIZE);
 	if (idx > 0 && m_path[idx-1] != K__PATH_SLASH) return false; // パス区切り単位でないとダメ
 	if (strcmp(m_path + idx, sub.m_path) != 0) return false;
 	return true;
@@ -2168,11 +2168,11 @@ bool KPath::operator < (const KPath &p) const {
 	return compare(p) < 0;
 }
 int KPath::compare_str(const char *p) const {
-	K__Assert(p);
+	K__ASSERT(p);
 	return strcmp(m_path, p);
 }
 int KPath::compare_str(const char *p, bool ignore_case, bool ignore_path) const {
-	K__Assert(p);
+	K__ASSERT(p);
 	if (ignore_path) {
 		const char *s1 = strrchr(m_path, K__PATH_SLASH);
 		const char *s2 = strrchr(p,     K__PATH_SLASH);
@@ -2221,7 +2221,7 @@ std::wstring KPath::toWideString(char sep) const {
 	return K::strUtf8ToWide(tmp);
 }
 std::string KPath::toAnsiString(char sep, const char *_locale) const {
-	K__Assert(_locale);
+	K__ASSERT(_locale);
 	char tmp[SIZE];
 	strcpy_s(tmp, sizeof(tmp), m_path);
 	K::strReplaceChar(tmp, K__PATH_SLASH, sep);
@@ -2244,101 +2244,101 @@ std::string KPath::toUtf8(char sep) const {
 namespace Test {
 void Test_pathstring() {
 	// なんとcrc32が同値になる (crc32b の場合）
-	//K__Assert(KPath("girl/186/05(cn).sprite").hash() == KPath("effect/fire_wide_05.mesh").hash());
+	//K__ASSERT(KPath("girl/186/05(cn).sprite").hash() == KPath("effect/fire_wide_05.mesh").hash());
 	{
-		K__Assert(KPath(".").compare(".") == 0); // 特殊な文字が省略されない
-		K__Assert(KPath("..").compare("..") == 0); // 特殊な文字が省略されない
-		K__Assert(KPath("../a").compare("../a") == 0); // 特殊な文字が省略されない
-		K__Assert(KPath("aaa/..").join("bbb").compare("aaa/../bbb") == 0); // 相対パス指定でも素直にパス結合できる
-		K__Assert(KPath("..").join("aaa").compare("../aaa") == 0); // 相対パス指定でも素直にパス結合できる
-		K__Assert(KPath("..").join("..").compare("../..") == 0); // 相対パス指定でも素直にパス結合できる
-		K__Assert(KPath("AAA").compare_str("AAA") == 0);
-		K__Assert(KPath("AAA\\bbb").compare_str("AAA/bbb") == 0); // compare_str は内部の文字列と直接比較する。内部ではデリミタが変換されているので注意
-		K__Assert(KPath("aaa/bbb").compare_str("bbb", false, true) == 0); // パスを無視して比較
-		K__Assert(KPath("aaa/bbb").compare_str("BBB", true, true) == 0); // 大小文字とパスを無視して比較
-		K__Assert(KPath("").directory() == "");
-		K__Assert(KPath("").filename() == "");
-		K__Assert(KPath("").extension() == "");
-		K__Assert(KPath("").isRelative());
-		K__Assert(KPath("aaa").isRelative());
-		K__Assert(KPath("../aaa").isRelative());
-		K__Assert(!KPath("c:").isRelative());
-		K__Assert(!KPath("c:\\aaa").isRelative());
+		K__ASSERT(KPath(".").compare(".") == 0); // 特殊な文字が省略されない
+		K__ASSERT(KPath("..").compare("..") == 0); // 特殊な文字が省略されない
+		K__ASSERT(KPath("../a").compare("../a") == 0); // 特殊な文字が省略されない
+		K__ASSERT(KPath("aaa/..").join("bbb").compare("aaa/../bbb") == 0); // 相対パス指定でも素直にパス結合できる
+		K__ASSERT(KPath("..").join("aaa").compare("../aaa") == 0); // 相対パス指定でも素直にパス結合できる
+		K__ASSERT(KPath("..").join("..").compare("../..") == 0); // 相対パス指定でも素直にパス結合できる
+		K__ASSERT(KPath("AAA").compare_str("AAA") == 0);
+		K__ASSERT(KPath("AAA\\bbb").compare_str("AAA/bbb") == 0); // compare_str は内部の文字列と直接比較する。内部ではデリミタが変換されているので注意
+		K__ASSERT(KPath("aaa/bbb").compare_str("bbb", false, true) == 0); // パスを無視して比較
+		K__ASSERT(KPath("aaa/bbb").compare_str("BBB", true, true) == 0); // 大小文字とパスを無視して比較
+		K__ASSERT(KPath("").directory() == "");
+		K__ASSERT(KPath("").filename() == "");
+		K__ASSERT(KPath("").extension() == "");
+		K__ASSERT(KPath("").isRelative());
+		K__ASSERT(KPath("aaa").isRelative());
+		K__ASSERT(KPath("../aaa").isRelative());
+		K__ASSERT(!KPath("c:").isRelative());
+		K__ASSERT(!KPath("c:\\aaa").isRelative());
 
-		K__Assert(KPath("").join("") == "");
-		K__Assert(KPath("").join("aaa") == "aaa");
-		K__Assert(KPath("aaa").join("bbb") == "aaa/bbb");
-		K__Assert(KPath("aaa").join("") == "aaa");
+		K__ASSERT(KPath("").join("") == "");
+		K__ASSERT(KPath("").join("aaa") == "aaa");
+		K__ASSERT(KPath("aaa").join("bbb") == "aaa/bbb");
+		K__ASSERT(KPath("aaa").join("") == "aaa");
 
-		K__Assert(KPath("").directory() == "");
-		K__Assert(KPath("aaa.txt").directory() == "");
-		K__Assert(KPath("aaa\\bbb.txt").directory() == "aaa");
-		K__Assert(KPath("aaa\\bbb\\ccc.txt").directory() == "aaa/bbb");
+		K__ASSERT(KPath("").directory() == "");
+		K__ASSERT(KPath("aaa.txt").directory() == "");
+		K__ASSERT(KPath("aaa\\bbb.txt").directory() == "aaa");
+		K__ASSERT(KPath("aaa\\bbb\\ccc.txt").directory() == "aaa/bbb");
 
-		K__Assert(KPath("aaa.txt").filename() == "aaa.txt");
-		K__Assert(KPath("aaa\\bbb.txt").filename() == "bbb.txt");
-		K__Assert(KPath("aaa\\bbb\\ccc.txt").filename() == "ccc.txt");
-		K__Assert(KPath("aaa\\bbb.zzz\\ccc.txt").filename() == "ccc.txt");
+		K__ASSERT(KPath("aaa.txt").filename() == "aaa.txt");
+		K__ASSERT(KPath("aaa\\bbb.txt").filename() == "bbb.txt");
+		K__ASSERT(KPath("aaa\\bbb\\ccc.txt").filename() == "ccc.txt");
+		K__ASSERT(KPath("aaa\\bbb.zzz\\ccc.txt").filename() == "ccc.txt");
 
-		K__Assert(KPath("q/aaa/bbb.c").getRelativePathFrom("q/aaa"    ).compare("bbb.c") == 0);
-		K__Assert(KPath("q/aaa/bbb.c").getRelativePathFrom("q/aaa/ccc").compare("../bbb.c") == 0);
-		K__Assert(KPath("q/aaa/bbb.c").getRelativePathFrom("q/bbb"    ).compare("../aaa/bbb.c") == 0);
-		K__Assert(KPath("q/aaa/bbb.c").getRelativePathFrom("q/bbb/ccc").compare("../../aaa/bbb.c") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").getRelativePathFrom("q/aaa"    ).compare("bbb.c") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").getRelativePathFrom("q/aaa/ccc").compare("../bbb.c") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").getRelativePathFrom("q/bbb"    ).compare("../aaa/bbb.c") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").getRelativePathFrom("q/bbb/ccc").compare("../../aaa/bbb.c") == 0);
 
-		K__Assert(KPath("q/aaa/bbb.c").changeExtension(".txt").compare("q/aaa/bbb.txt") == 0);
-		K__Assert(KPath("q/aaa/bbb.c").changeExtension( "txt").compare("q/aaa/bbb.txt") == 0);
-		K__Assert(KPath("q/aaa/bbb"  ).changeExtension(".txt").compare("q/aaa/bbb.txt") == 0);
-		K__Assert(KPath("q/aaa/bbb"  ).changeExtension( "txt").compare("q/aaa/bbb.txt") == 0);
-		K__Assert(KPath("q/aaa/bbb.c").changeExtension("").compare("q/aaa/bbb") == 0);
-		K__Assert(KPath("q/aaa/bbb"  ).changeExtension("").compare("q/aaa/bbb") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").changeExtension(".txt").compare("q/aaa/bbb.txt") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").changeExtension( "txt").compare("q/aaa/bbb.txt") == 0);
+		K__ASSERT(KPath("q/aaa/bbb"  ).changeExtension(".txt").compare("q/aaa/bbb.txt") == 0);
+		K__ASSERT(KPath("q/aaa/bbb"  ).changeExtension( "txt").compare("q/aaa/bbb.txt") == 0);
+		K__ASSERT(KPath("q/aaa/bbb.c").changeExtension("").compare("q/aaa/bbb") == 0);
+		K__ASSERT(KPath("q/aaa/bbb"  ).changeExtension("").compare("q/aaa/bbb") == 0);
 
 		KPathList list;
 		KPath("aaa/bbb/ccc").split(&list);
-		K__Assert(list.size() == 3);
-		K__Assert(list[0] == "aaa");
-		K__Assert(list[1] == "bbb");
-		K__Assert(list[2] == "ccc");
+		K__ASSERT(list.size() == 3);
+		K__ASSERT(list[0] == "aaa");
+		K__ASSERT(list[1] == "bbb");
+		K__ASSERT(list[2] == "ccc");
 
 		KPath("/").split(&list);
-		K__Assert(list.empty());
+		K__ASSERT(list.empty());
 
 		KPath("c:/aaa/bbb/").split(&list);
-		K__Assert(list.size() == 3);
-		K__Assert(list[0] == "c:");
-		K__Assert(list[1] == "aaa");
-		K__Assert(list[2] == "bbb");
+		K__ASSERT(list.size() == 3);
+		K__ASSERT(list[0] == "c:");
+		K__ASSERT(list[1] == "aaa");
+		K__ASSERT(list[2] == "bbb");
 	}
 	{
-		K__Assert(KPath("abc").glob("*") == true);
-		K__Assert(KPath("abc").glob("a*") == true);
-		K__Assert(KPath("abc").glob("ab*") == true);
-		K__Assert(KPath("abc").glob("abc*") == true);
-		K__Assert(KPath("abc").glob("a*c") == true);
-		K__Assert(KPath("abc").glob("*abc") == true);
-		K__Assert(KPath("abc").glob("*bc") == true);
-		K__Assert(KPath("abc").glob("*c") == true);
-		K__Assert(KPath("abc").glob("*a*b*c*") == true);
-		K__Assert(KPath("abc").glob("*bc*") == true);
-		K__Assert(KPath("abc").glob("*c*") == true);
-		K__Assert(KPath("aaa/bbb.ext").glob("a*.ext") == false);
-		K__Assert(KPath("aaa/bbb.ext").glob("a*/*.ext") == true);
-		K__Assert(KPath("aaa/bbb.ext").glob("a*/*.*t") == true);
-		K__Assert(KPath("aaa/bbb.ext").glob("aaa/*.ext") == true);
-		K__Assert(KPath("aaa/bbb.ext").glob("aaa/bbb*ext") == true);
-		K__Assert(KPath("aaa/bbb.ext").glob("aaa*bbb*ext") == false);
-		K__Assert(KPath("aaa/bbb/ccc.ext").glob("aaa/*/ccc.ext") == true);
-		K__Assert(KPath("aaa/bbb/ccc.ext").glob("aaa/*.ext") == false);
-		K__Assert(KPath("aaa/bbb.ext").glob("*.aaa") == false);
-		K__Assert(KPath("aaa/bbb.ext").glob("aaa*bbb") == false);
+		K__ASSERT(KPath("abc").glob("*") == true);
+		K__ASSERT(KPath("abc").glob("a*") == true);
+		K__ASSERT(KPath("abc").glob("ab*") == true);
+		K__ASSERT(KPath("abc").glob("abc*") == true);
+		K__ASSERT(KPath("abc").glob("a*c") == true);
+		K__ASSERT(KPath("abc").glob("*abc") == true);
+		K__ASSERT(KPath("abc").glob("*bc") == true);
+		K__ASSERT(KPath("abc").glob("*c") == true);
+		K__ASSERT(KPath("abc").glob("*a*b*c*") == true);
+		K__ASSERT(KPath("abc").glob("*bc*") == true);
+		K__ASSERT(KPath("abc").glob("*c*") == true);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("a*.ext") == false);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("a*/*.ext") == true);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("a*/*.*t") == true);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("aaa/*.ext") == true);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("aaa/bbb*ext") == true);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("aaa*bbb*ext") == false);
+		K__ASSERT(KPath("aaa/bbb/ccc.ext").glob("aaa/*/ccc.ext") == true);
+		K__ASSERT(KPath("aaa/bbb/ccc.ext").glob("aaa/*.ext") == false);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("*.aaa") == false);
+		K__ASSERT(KPath("aaa/bbb.ext").glob("aaa*bbb") == false);
 	}
 	{
 		char loc[32];
 		strcpy_s(loc, sizeof(loc), setlocale(LC_CTYPE, nullptr));
-		K__Assert(KPath(u8"表計算\\ソフト\\能力.txt").directory() == KPath(u8"表計算/ソフト"));
-		K__Assert(KPath(u8"表計算\\ソフト\\能力.txt").filename()  == KPath(u8"能力.txt"));
-		K__Assert(KPath(u8"表計算\\ソフト\\能力.txt").extension().compare(".txt") == 0);
-		K__Assert(KPath(u8"表計算\\ソフト\\能力.txt").changeExtension(".bmp") == KPath(u8"表計算\\ソフト\\能力.bmp"));
-		K__Assert(KPath(u8"表計算\\ソフト\\能力.txt").changeExtension("") == KPath(u8"表計算\\ソフト\\能力"));
+		K__ASSERT(KPath(u8"表計算\\ソフト\\能力.txt").directory() == KPath(u8"表計算/ソフト"));
+		K__ASSERT(KPath(u8"表計算\\ソフト\\能力.txt").filename()  == KPath(u8"能力.txt"));
+		K__ASSERT(KPath(u8"表計算\\ソフト\\能力.txt").extension().compare(".txt") == 0);
+		K__ASSERT(KPath(u8"表計算\\ソフト\\能力.txt").changeExtension(".bmp") == KPath(u8"表計算\\ソフト\\能力.bmp"));
+		K__ASSERT(KPath(u8"表計算\\ソフト\\能力.txt").changeExtension("") == KPath(u8"表計算\\ソフト\\能力"));
 		setlocale(LC_CTYPE, loc);
 	}
 }
@@ -2463,7 +2463,7 @@ const char * KToken::operator[](size_t index) const {
 const char * KToken::get(size_t index, const char *def) const {
 	if (index < m_tok.size()) {
 		auto tok = m_tok[index];
-		K__Assert(*tok.end() == '\0');
+		K__ASSERT(*tok.end() == '\0');
 		return tok.begin();
 	} else {
 		return def;
@@ -2497,7 +2497,7 @@ float KToken::toFloat(size_t index, float def) const {
 	return val;
 }
 int KToken::compare(size_t index, const char *str) const {
-	K__Assert(str);
+	K__ASSERT(str);
 	if (index < m_tok.size()) {
 		return m_tok[index].compare(str);
 	} else {
@@ -2533,7 +2533,7 @@ bool KNumval::parse(const char *expr) {
 	// 数字文字列と単位文字列に分割
 	int pos = (int)strlen(expr);
 	for (int i=(int)strlen(expr)-1; i>=0; i--) {
-		K__Assert(!isblank(expr[i]));
+		K__ASSERT(!isblank(expr[i]));
 		if (isdigit(expr[i])) {
 			break;
 		}
@@ -2573,34 +2573,34 @@ namespace Test {
 void Test_numval() {
 	{
 		KNumval n("20");
-		K__Assert(strcmp(n.num, "20") == 0);
-		K__Assert(strcmp(n.suf, "") == 0);
-		K__Assert(n.numf == 20);
-		K__Assert(n.has_suffix("") == true);
-		K__Assert(n.valuei(0) == 20); // % が付いていないので引数は無視される
-		K__Assert(n.valuei(100) == 20); // % が付いていないので引数は無視される
+		K__ASSERT(strcmp(n.num, "20") == 0);
+		K__ASSERT(strcmp(n.suf, "") == 0);
+		K__ASSERT(n.numf == 20);
+		K__ASSERT(n.has_suffix("") == true);
+		K__ASSERT(n.valuei(0) == 20); // % が付いていないので引数は無視される
+		K__ASSERT(n.valuei(100) == 20); // % が付いていないので引数は無視される
 	}
 
 	{
 		KNumval n("70%");
-		K__Assert(strcmp(n.num, "70") == 0);
-		K__Assert(strcmp(n.suf, "%") == 0);
-		K__Assert(n.numf == 70);
-		K__Assert(n.has_suffix("") == false);
-		K__Assert(n.has_suffix("%") == true);
-		K__Assert(n.valuei(0) == 0); // % が付いている。この場合は 0 の 70% の値を返す
-		K__Assert(n.valuei(200) == 140); // % が付いている。この場合は 200 の 70% の値を返す
+		K__ASSERT(strcmp(n.num, "70") == 0);
+		K__ASSERT(strcmp(n.suf, "%") == 0);
+		K__ASSERT(n.numf == 70);
+		K__ASSERT(n.has_suffix("") == false);
+		K__ASSERT(n.has_suffix("%") == true);
+		K__ASSERT(n.valuei(0) == 0); // % が付いている。この場合は 0 の 70% の値を返す
+		K__ASSERT(n.valuei(200) == 140); // % が付いている。この場合は 200 の 70% の値を返す
 	}
 
 	{
 		KNumval n("70pt");
-		K__Assert(strcmp(n.num, "70") == 0);
-		K__Assert(strcmp(n.suf, "pt") == 0);
-		K__Assert(n.numf == 70);
-		K__Assert(n.has_suffix("") == false);
-		K__Assert(n.has_suffix("pt") == true);
-		K__Assert(n.valuei(0) == 70); // % が付いていないので引数は無視される
-		K__Assert(n.valuei(200) == 70); // % が付いていないので引数は無視される
+		K__ASSERT(strcmp(n.num, "70") == 0);
+		K__ASSERT(strcmp(n.suf, "pt") == 0);
+		K__ASSERT(n.numf == 70);
+		K__ASSERT(n.has_suffix("") == false);
+		K__ASSERT(n.has_suffix("pt") == true);
+		K__ASSERT(n.valuei(0) == 70); // % が付いていないので引数は無視される
+		K__ASSERT(n.valuei(200) == 70); // % が付いていないので引数は無視される
 	}
 }
 } // Test

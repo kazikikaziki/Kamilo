@@ -41,7 +41,7 @@ int KXorShift::randInt(int range) {
 		n = random();
 	} while (n >= lim);
 	int val = (int)n % _range;
-	K__Assert(0 <= val && val < range);
+	K__ASSERT(0 <= val && val < range);
 	return val;
 }
 int KXorShift::randIntRange(int a, int b) {

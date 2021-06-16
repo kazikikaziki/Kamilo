@@ -242,35 +242,35 @@ void KWindowResizer::uninstall() {
 	}
 }
 bool KWindowResizer::isFullscreenTruly() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	return g_Resizer->isFullscreenTruly();
 }
 bool KWindowResizer::isFullscreenBorderless() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	return g_Resizer->isFullscreenBorderless();
 }
 bool KWindowResizer::isWindowed() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	return g_Resizer->isWindowed();
 }
 void KWindowResizer::setFullscreenTruly() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	g_Resizer->setFullscreenTruly();
 }
 void KWindowResizer::setFullscreenBorderless() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	g_Resizer->setFullscreenBorderless();
 }
 void KWindowResizer::setWindowed() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	g_Resizer->setWindowed();
 }
 void KWindowResizer::resizeNext() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	g_Resizer->resizeNext();
 }
 void KWindowResizer::resizePrev() {
-	K__Assert(g_Resizer);
+	K__ASSERT(g_Resizer);
 	g_Resizer->resizePrev();
 }
 #pragma endregion // KWindowResizer

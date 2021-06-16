@@ -44,7 +44,7 @@ KNode::KNode() {
 }
 KNode::~KNode() {
 	// 既にノードツリーからは切り離されているはず
-	K__Assert(m_NodeData.tree == nullptr);
+	K__ASSERT(m_NodeData.tree == nullptr);
 	m_NodeData.name; // ↑の assert でひっかかったら、この名前を確認
 
 	on_node_end();
@@ -205,7 +205,7 @@ void KNode::setParent(KNode *new_parent) {
 	}
 	drop();
 
-	K__Assert(m_NodeData.parent == new_parent);
+	K__ASSERT(m_NodeData.parent == new_parent);
 }
 KNode * KNode::getChild(int index) const {
 	if (0 <= index && index < (int)m_NodeData.children.size()) {
@@ -218,7 +218,7 @@ int KNode::getChildCount() const {
 }
 void KNode::setChildIndex(KNode *child, int new_index) {
 	if (child == nullptr) {
-		K__Assert(child);
+		K__ASSERT(child);
 		return;
 	}
 
@@ -238,14 +238,14 @@ void KNode::setChildIndex(KNode *child, int new_index) {
 
 		// 新しいインデックスで親に追加する
 		if (new_index < 0) {
-			K__Assert(child);
+			K__ASSERT(child);
 			m_NodeData.children.insert(m_NodeData.children.begin(), child);
 		} else if (new_index < (int)m_NodeData.children.size()) {
-			K__Assert(child);
+			K__ASSERT(child);
 			m_NodeData.children.insert(m_NodeData.children.begin() + new_index, child);
 
 		} else {
-			K__Assert(child);
+			K__ASSERT(child);
 			m_NodeData.children.push_back(child);
 		}
 	}
@@ -282,11 +282,11 @@ bool KNode::isParentOf(const KNode *child) const {
 	return ret;
 }
 void KNode::_add_child_nocheck(KNode *child) {
-	K__Assert(child);
-	K__Assert(child != this); // 自分自身はダメ
-	K__Assert(child->m_NodeData.tree == nullptr); // child は既にツリーから外れている
-	K__Assert(child->m_NodeData.parent == nullptr); // child の親子関係は既に解消されている
-	K__Assert(m_NodeData.blocked == 0);
+	K__ASSERT(child);
+	K__ASSERT(child != this); // 自分自身はダメ
+	K__ASSERT(child->m_NodeData.tree == nullptr); // child は既にツリーから外れている
+	K__ASSERT(child->m_NodeData.parent == nullptr); // child の親子関係は既に解消されている
+	K__ASSERT(m_NodeData.blocked == 0);
 
 	// node を子リストに追加する
 	m_NodeData.children.push_back(child);
@@ -301,8 +301,8 @@ void KNode::_add_child_nocheck(KNode *child) {
 	}
 }
 void KNode::_remove_child_nocheck(KNode *child) {
-	K__Assert(child);
-	K__Assert(m_NodeData.blocked == 0);
+	K__ASSERT(child);
+	K__ASSERT(m_NodeData.blocked == 0);
 
 	// child が自分の子ならばインデックスを得る
 	int index = -1;
@@ -378,9 +378,9 @@ void KNode::_remove_all() {
 void KNode::_Invalidated() {
 	setFlag(KNode::FLAG__INVALD, true);
 	m_NodeData.parent = nullptr;
-	K__Assert(m_NodeData.children.empty());
-	K__Assert(m_ActionNext == nullptr);
-	K__Assert(m_ActionCurr == nullptr);
+	K__ASSERT(m_NodeData.children.empty());
+	K__ASSERT(m_ActionNext == nullptr);
+	K__ASSERT(m_ActionCurr == nullptr);
 	m_ActionNext = nullptr;
 	m_ActionCurr = nullptr;
 }
@@ -982,7 +982,7 @@ void KNode::traverse_children(KTraverseCallback *cb, bool recurse) {
 	lock();
 	for (size_t i=0; i<m_NodeData.children.size(); i++) {
 		KNode *child = m_NodeData.children[i];
-		K__Assert(child);
+		K__ASSERT(child);
 		cb->onVisit(child);
 		if (recurse) {
 			child->traverse_children(cb, true);
@@ -1040,7 +1040,7 @@ void KNode::sys_tick() {
 	// あらかじめノード列をコピーしておく
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 		KNode *sub = *it;
-		K__Assert(sub);
+		K__ASSERT(sub);
 		// システムアクションは enabled や pause の影響を受けない
 		//if (sub->getEnable() && !sub->getPause()) {
 			sub->sys_tick();
@@ -1185,13 +1185,13 @@ void KNode::_RegisterForDelete(std::vector<KNode*> &list, bool all) {
 		list.push_back(this);
 		for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 			KNode *child = *it;
-			K__Assert(child);
+			K__ASSERT(child);
 			child->_RegisterForDelete(list, true);
 		}
 	} else {
 		for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 			KNode *child = *it;
-			K__Assert(child);
+			K__ASSERT(child);
 			child->_RegisterForDelete(list, false);
 		}
 	}
@@ -1726,27 +1726,27 @@ public:
 	}
 };
 static void KNodeTree_on_node_enter(CNodeTreeImpl *tree, KNode *node) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_on_node_enter(node);
 }
 static void KNodeTree_on_node_exit(CNodeTreeImpl *tree, KNode *node) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_on_node_exit(node);
 }
 static void KNodeTree_on_node_removing(CNodeTreeImpl *tree, KNode *node) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_on_node_removing(node);
 }
 static void KNodeTree_add_tag(CNodeTreeImpl *tree, KNode *node, const KName &tag) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_add_tag(node, tag);
 }
 static void KNodeTree_del_tag(CNodeTreeImpl *tree, KNode *node, const KName &tag) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_del_tag(node, tag);
 }
 static void KNodeTree_on_node_marked_as_remove(CNodeTreeImpl *tree, KNode *node) {
-	K__Assert(tree);
+	K__ASSERT(tree);
 	tree->_on_node_marked_as_remove(node);
 }
 #pragma endregion // CNodeTreeImpl
@@ -1758,7 +1758,7 @@ static CNodeTreeImpl *g_NodeTree = nullptr;
 
 #pragma region KNodeTree
 void KNodeTree::install() {
-	K__Assert(g_NodeTree == nullptr);
+	K__ASSERT(g_NodeTree == nullptr);
 	g_NodeTree = new CNodeTreeImpl();
 }
 void KNodeTree::uninstall() {
@@ -1771,99 +1771,99 @@ bool KNodeTree::isInstalled() {
 	return g_NodeTree != nullptr;
 }
 void KNodeTree::addCallback(KNodeManagerCallback *cb) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->addCallback(cb);
 }
 void KNodeTree::removeCallback(KNodeManagerCallback *cb) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->removeCallback(cb);
 }
 void KNodeTree::destroyMarkedNodes(KNodeRemovingCallback *cb) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->destroyMarkedNodes(cb);
 }
 KNode * KNodeTree::findNodeById(EID id) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeById(id);
 }
 KNode * KNodeTree::findNodeByName(const KNode *start, const char *name) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeByName(start, name);
 }
 KNode * KNodeTree::findNodeByPath(const KNode *start, const char *path) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeByPath(start, path);
 }
 KNode * KNodeTree::getRoot() {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getRoot();
 }
 void KNodeTree::setGroupName(KNode::Category category, int group, const char *name) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->setGroupName(category, group, name);
 }
 const char * KNodeTree::getGroupName(KNode::Category category, int group) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getGroupName(category, group);
 }
 void KNodeTree::tick_nodes(KNodeTickFlags flags) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->tick_nodes(flags);
 }
 void KNodeTree::tick_nodes2(KNodeTickFlags flags) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->tick_nodes2(flags);
 }
 void KNodeTree::tick_system_nodes() {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->tick_system_nodes();
 }
 void KNodeTree::broadcastSignal(KSig &sig) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->broadcastSignal(sig);
 }
 void KNodeTree::sendSignal(KNode *target, KSig &sig) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->sendSignal(target, sig);
 }
 void KNodeTree::sendSignalDelay(KNode *target, KSig &sig, int delay) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->sendSignalDelay(target, sig, delay);
 }
 int KNodeTree::getNodeList(KNodeArray *out_nodes) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getNodeList(out_nodes);
 }
 int KNodeTree::getNodeListByTag(KNodeArray *out_nodes, const KName &tag) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getNodeListByTag(out_nodes, tag);
 }
 bool KNodeTree::makeNodesByPath(const KPath &path, KNode **out_node, bool singleton) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	return g_NodeTree->makeNodesByPath(path, out_node, singleton);
 }
 void KNodeTree::_add_tag(KNode *node, const KName &tag) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_add_tag(node, tag);
 }
 void KNodeTree::_del_tag(KNode *node, const KName &tag) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_del_tag(node, tag);
 }
 void KNodeTree::_on_node_enter(KNode *node) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_on_node_enter(node);
 }
 void KNodeTree::_on_node_exit(KNode *node) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_on_node_exit(node);
 }
 void KNodeTree::_on_node_marked_as_remove(KNode *node) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_on_node_marked_as_remove(node);
 }
 void KNodeTree::_on_node_removing(KNode *node) {
-	K__Assert(g_NodeTree);
+	K__ASSERT(g_NodeTree);
 	g_NodeTree->_on_node_removing(node);
 }
 #pragma endregion // KNodeTree

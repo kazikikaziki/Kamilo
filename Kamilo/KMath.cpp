@@ -30,7 +30,7 @@ namespace Kamilo {
 void K__math_error(const char *func) {
 	if (K::_IsDebuggerPresent()) {
 		K::_break();
-		K__Assert(0);
+		K__ASSERT(0);
 		K__ERROR("K__math_error at %s", func);
 	} else {
 		K__ERROR("K__math_error at %s", func);
@@ -677,8 +677,8 @@ bool KCollisionMath::isPointInXShearedRect2D(float px, float py, float cx, float
 	return true;
 }
 bool KCollisionMath::collisionCircleWithPoint2D(float cx, float cy, float cr, float px, float py, float skin, float *xAdj, float *yAdj) {
-//	K__Assert(cr > 0);
-	K__Assert(skin >= 0);
+//	K__ASSERT(cr > 0);
+	K__ASSERT(skin >= 0);
 	float dx = cx - px;
 	float dy = cy - py;
 	float dist = hypotf(dx, dy);
@@ -704,8 +704,8 @@ bool KCollisionMath::collisionCircleWithPoint2D(float cx, float cy, float cr, fl
 	return false;
 }
 bool KCollisionMath::collisionCircleWithLine2D(float cx, float cy, float cr, float x0, float y0, float x1, float y1, float skin, float *xAdj, float *yAdj) {
-//	K__Assert(cr > 0);
-	K__Assert(skin >= 0);
+//	K__ASSERT(cr > 0);
+	K__ASSERT(skin >= 0);
 	float dist = getSignedDistanceOfLinePoint2D(cx, cy, x0, y0, x1, y1);
 	if (fabsf(dist) < cr+skin) {
 		if (xAdj || yAdj) {
@@ -733,8 +733,8 @@ bool KCollisionMath::collisionCircleWithLine2D(float cx, float cy, float cr, flo
 	return false;
 }
 bool KCollisionMath::collisionCircleWithLinearArea2D(float cx, float cy, float cr, float x0, float y0, float x1, float y1, float skin, float *xAdj, float *yAdj) {
-//	K__Assert(cr > 0);
-	K__Assert(skin >= 0);
+//	K__ASSERT(cr > 0);
+	K__ASSERT(skin >= 0);
 	float dist = getSignedDistanceOfLinePoint2D(cx, cy, x0, y0, x1, y1);
 
 	if (dist < cr+skin) {
@@ -777,8 +777,8 @@ bool KCollisionMath::collisionCircleWithSegment2D(float cx, float cy, float cr, 
 	return false;
 }
 bool KCollisionMath::collisionCircleWithCircle2D(float cx, float cy, float cr, float other_x, float other_y, float other_r, float skin, float *xAdj, float *yAdj) {
-//	K__Assert(cr > 0);
-	K__Assert(skin >= 0);
+//	K__ASSERT(cr > 0);
+	K__ASSERT(skin >= 0);
 	float dx = cx - other_x;
 	float dy = cy - other_y;
 	float dist = hypotf(dx, dy);
@@ -863,8 +863,8 @@ bool KCollisionMath::resolveYAxisCylinderCollision(KVec3 *p1, float r1, float k1
 #pragma region KCubicBezier functions
 static KVec3 kk_BezPos(const KVec3 *p4, float t) {
 	// http://geom.web.fc2.com/geometry/bezier/cubic.html
-	K__Assert(p4);
-	K__Assert(0 <= t && t <= 1);
+	K__ASSERT(p4);
+	K__ASSERT(0 <= t && t <= 1);
 	float T = 1.0f - t;
 	float x = t*t*t*p4[3].x + 3*t*t*T*p4[2].x + 3*t*T*T*p4[1].x + T*T*T*p4[0].x;
 	float y = t*t*t*p4[3].y + 3*t*t*T*p4[2].y + 3*t*T*T*p4[1].y + T*T*T*p4[0].y;
@@ -873,8 +873,8 @@ static KVec3 kk_BezPos(const KVec3 *p4, float t) {
 }
 static KVec3 kk_BezTan(const KVec3 *p4, float t) {
 	// http://geom.web.fc2.com/geometry/bezier/cubic.html
-	K__Assert(p4);
-	K__Assert(0 <= t && t <= 1);
+	K__ASSERT(p4);
+	K__ASSERT(0 <= t && t <= 1);
 	float T = 1.0f - t;
 	float dx = 3*(t*t*(p4[3].x-p4[2].x)+2*t*T*(p4[2].x-p4[1].x)+T*T*(p4[1].x-p4[0].x));
 	float dy = 3*(t*t*(p4[3].y-p4[2].y)+2*t*T*(p4[2].y-p4[1].y)+T*T*(p4[1].y-p4[0].y));
@@ -883,8 +883,8 @@ static KVec3 kk_BezTan(const KVec3 *p4, float t) {
 }
 // 3次ベジェ曲線を div 個の直線で分割して、その長さを返す
 static float kk_BezLen1(const KVec3 *p4, int div) {
-	K__Assert(p4);
-	K__Assert(div >= 2);
+	K__ASSERT(p4);
+	K__ASSERT(div >= 2);
 	float result = 0;
 	KVec3 pa = p4[0];
 	for (int i=1; i<div; i++) {
@@ -898,8 +898,8 @@ static float kk_BezLen1(const KVec3 *p4, int div) {
 
 // ベジェ曲線を2分割する
 static void kk_BezDiv(const KVec3 *p4, KVec3 *out8) {
-	K__Assert(p4);
-	K__Assert(out8);
+	K__ASSERT(p4);
+	K__ASSERT(out8);
 	// 区間1
 	out8[0] = p4[0];
 	out8[1] = (p4[0] + p4[1]) / 2;
@@ -1052,12 +1052,12 @@ float KCubicBezier::getLength(int seg) const {
 }
 float KCubicBezier::getLength_Test1(int seg, int numdiv) const {
 	// 直線分割による近似
-	K__Assert(0 <= seg && seg < (int)points_.size());
+	K__ASSERT(0 <= seg && seg < (int)points_.size());
 	return kk_BezLen1(&points_[seg * 4], 16);
 }
 float KCubicBezier::getLength_Test2(int seg) const {
 	// ベジェ曲線の再帰分割による近似
-	K__Assert(0 <= seg && seg < (int)points_.size());
+	K__ASSERT(0 <= seg && seg < (int)points_.size());
 	return kk_BezLen2(&points_[seg * 4]);
 }
 void KCubicBezier::addSegment(const KVec3 &a, const KVec3 &b, const KVec3 &c, const KVec3 &d) {
@@ -1662,7 +1662,7 @@ bool KAabb::rayTest(const KRay &ray, KRayDesc *out_near, KRayDesc *out_far) cons
 		// [レイの発射点 > aabbmax] なら max 側に当たっている。
 		// [aabbmin <= レイの発射点 <= aabbmax] のパターンは既に「交差なし」として除外されている筈なので考慮しない
 		// ※hit_near には 0, 1, 2 のいずれかが入っていて、それぞれ X,Y,Z に対応する
-		K__Assert(0 <= hit_near && hit_near < 3);
+		K__ASSERT(0 <= hit_near && hit_near < 3);
 		if (pos[hit_near] < aabbmin[hit_near]) {
 			out_near->normal = NORMALS[hit_near * 2 + 0]; // min 側
 		} else {
@@ -1678,7 +1678,7 @@ bool KAabb::rayTest(const KRay &ray, KRayDesc *out_near, KRayDesc *out_far) cons
 		// [レイの発射点 > aabbmax] なら max 側に当たっている。
 		// [aabbmin <= レイの発射点 <= aabbmax] のパターンは既に「交差なし」として除外されている筈なので考慮しない
 		// ※hit_far には 0, 1, 2 のいずれかが入っていて、それぞれ X,Y,Z に対応する
-		K__Assert(0 <= hit_far && hit_far < 3);
+		K__ASSERT(0 <= hit_far && hit_far < 3);
 		if (pos[hit_far] < aabbmin[hit_far]) {
 			out_far->normal = NORMALS[hit_far * 2 + 0]; // min 側
 		} else {
@@ -2099,19 +2099,19 @@ void Test_bezier() {
 
 void Test_geom() {
 	// 三角形の内部
-	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(50, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+	K__ASSERT(KGeom::K_GeomPointInTriangle(KVec3(50, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
 
 	// 三角形の辺に重なる場合も内部とみなす
-	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+	K__ASSERT(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 100), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
 
 	// 三角形の頂点に重なる場合も内部とみなす
-	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
+	K__ASSERT(KGeom::K_GeomPointInTriangle(KVec3(0, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == true); 
 
 	// 三角形の外部
-	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(200, 0, 200), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
+	K__ASSERT(KGeom::K_GeomPointInTriangle(KVec3(200, 0, 200), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
 
 	// 三角形の外部（三角形の辺の延長線上にぴったり重なっている場合。外積をとるとゼロになってしまうので判定に注意が必要）
-	K__Assert(KGeom::K_GeomPointInTriangle(KVec3(-250, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
+	K__ASSERT(KGeom::K_GeomPointInTriangle(KVec3(-250, 0, 140), KVec3(0, 0, 140), KVec3(100, 0, 140), KVec3(0, 0, 0)) == false); 
 }
 
 } // Test

@@ -177,7 +177,7 @@ static void DX9_printPresentParameter(const char *label, const D3DPRESENT_PARAME
 	K__VIDEO_PRINT("");
 }
 static void DX9_printAdapter(IDirect3D9 *d3d9) {
-	K__Assert(d3d9);
+	K__ASSERT(d3d9);
 	D3DADAPTER_IDENTIFIER9 adap;
 	ZeroMemory(&adap, sizeof(adap));
 	d3d9->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adap);
@@ -189,7 +189,7 @@ static void DX9_printAdapter(IDirect3D9 *d3d9) {
 	K__VIDEO_PRINT("");
 }
 static void DX9_printFullscreenResolutions(IDirect3D9 *d3d9) {
-	K__Assert(d3d9);
+	K__ASSERT(d3d9);
 	K__VIDEO_PRINT("Supported Fullscreen Resolutions:");
 	int num = d3d9->GetAdapterModeCount(D3DADAPTER_DEFAULT, D3DFMT_X8R8G8B8);
 	for (int i=0; i<num; i++) {
@@ -201,8 +201,8 @@ static void DX9_printFullscreenResolutions(IDirect3D9 *d3d9) {
 	K__VIDEO_PRINT("");
 }
 static void DX9_makeDefaultPresentParameters(IDirect3D9 *d3d9, HWND hWnd, D3DPRESENT_PARAMETERS *pp) {
-	K__Assert(d3d9);
-	K__Assert(pp);
+	K__ASSERT(d3d9);
+	K__ASSERT(pp);
 	D3DDISPLAYMODE disp;
 	ZeroMemory(&disp, sizeof(disp));
 	d3d9->GetAdapterDisplayMode(0, &disp);
@@ -303,7 +303,7 @@ static int DX9_getMaxTextureHeight(const D3DCAPS9 &caps) {
 	return (int)caps.MaxTextureHeight;
 }
 static void DX9_checkRenderIOTexture(IDirect3DDevice9 *d3ddev, IDirect3DTexture9 *tex) {
-	K__Assert(d3ddev);
+	K__ASSERT(d3ddev);
 	static bool err_raised = false; // 最初のエラーだけを調べる
 	if (K__DX9_STRICT_CHECK) {
 		if (!err_raised && tex) {
@@ -321,7 +321,7 @@ static void DX9_checkRenderIOTexture(IDirect3DDevice9 *d3ddev, IDirect3DTexture9
 	}
 }
 static void DX9_printDeviceCaps(IDirect3DDevice9 *d3ddev9) {
-	K__Assert(d3ddev9);
+	K__ASSERT(d3ddev9);
 	D3DCAPS9 caps;
 	d3ddev9->GetDeviceCaps(&caps);
 
@@ -350,9 +350,9 @@ static void DX9_printDeviceCaps(IDirect3DDevice9 *d3ddev9) {
 /// フルスクリーン解像度のチェック
 /// 指定したパラメータでフルスクリーンできるなら true を返す
 static bool DX9_checkFullScreenParams(IDirect3D9 *d3d9, int w, int h) {
-	K__Assert(d3d9);
-	K__Assert(w > 0);
-	K__Assert(h > 0);
+	K__ASSERT(d3d9);
+	K__ASSERT(w > 0);
+	K__ASSERT(h > 0);
 	int num = d3d9->GetAdapterModeCount(D3DADAPTER_DEFAULT, D3DFMT_X8R8G8B8);
 	for (int i=0; i<num; i++) {
 		D3DDISPLAYMODE mode;
@@ -367,7 +367,7 @@ static bool DX9_checkFullScreenParams(IDirect3D9 *d3d9, int w, int h) {
 static void DX9_setBlend(IDirect3DDevice9 *d3ddev, KBlend blend) {
 	// RGB と Alpha の双方に同一のブレンド式を設定する。
 	// これを別々にしたい場合は D3DRS_SEPARATEALPHABLENDENABLE を参照せよ
-	K__Assert(d3ddev);
+	K__ASSERT(d3ddev);
 	switch (blend) {
 	case KBlend_ONE:
 		d3ddev->SetRenderState(D3DRS_BLENDOP,   D3DBLENDOP_ADD);
@@ -728,7 +728,7 @@ public:
 		m_d3ddev->ColorFill(m_color_surf, nullptr, color.toColor32().toUInt32());
 	}
 	virtual void fillEx(const KColor &color, KColorChannels channels) override {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		DWORD color32 = color.toColor32().toUInt32();
 		if (channels == KColorChannel_RGBA) {
 			// 普通の塗りつぶし
@@ -839,12 +839,12 @@ public:
 		if (m_d3ddev == nullptr) {
 			return false;
 		}
-		K__Assert(m_d3ddev);
-		K__Assert(m_color_surf == nullptr);
-		K__Assert(m_depth_surf == nullptr);
-		K__Assert(m_lockable_surf == nullptr);
-		K__Assert(m_d3dtex == nullptr);
-		K__Assert(m_pitch == 0);
+		K__ASSERT(m_d3ddev);
+		K__ASSERT(m_color_surf == nullptr);
+		K__ASSERT(m_depth_surf == nullptr);
+		K__ASSERT(m_lockable_surf == nullptr);
+		K__ASSERT(m_d3dtex == nullptr);
+		K__ASSERT(m_pitch == 0);
 		D3DSURFACE_DESC param = _desc ? *_desc : m_desc;
 
 		m_required_w = param.Width;
@@ -895,7 +895,7 @@ public:
 			m_pitch = m_desc.Width * 8; // half float
 			break;
 		default:
-			K__Assert(0);
+			K__ASSERT(0);
 			m_pitch = 0;
 			break;
 		}
@@ -909,7 +909,7 @@ public:
 				if (src_bits) {
 					D3DLOCKED_RECT dst;
 					if (m_backup_tex->LockRect(0, &dst, nullptr, 0) == D3D_OK) {
-						K__Assert(dst.Pitch == m_pitch);
+						K__ASSERT(dst.Pitch == m_pitch);
 						memcpy(dst.pBits, src_bits, dst.Pitch * m_desc.Height);
 						m_backup_tex->UnlockRect(0);
 					}
@@ -1038,7 +1038,7 @@ public:
 		image.unlock();
 	}
 	virtual bool writeImageFromBackBuffer() override {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 
 		// バックバッファの内容を「ロック可能なサーフェス」 m_lockable_surf に転送する
 		updateLockableSurfaceFromBackBuffer();
@@ -1049,7 +1049,7 @@ public:
 				m_lockable_surf, nullptr, // Source
 				m_color_surf, nullptr // Destination
 			);
-			K__Assert(SUCCEEDED(hr));
+			K__ASSERT(SUCCEEDED(hr));
 			return true;
 		}
 		return false;
@@ -1059,14 +1059,14 @@ public:
 	/// orig_v 元画像の高さを 1.0 としたときの座標。
 	/// 戻り値は、現在のテクスチャのサイズを (1.0, 1.0) としたときの座標 (UV値)
 	virtual KVec2 getTextureUVFromOriginalUV(const KVec2 &orig_uv) override {
-		K__Assert(m_desc.Width > 0 && m_desc.Height > 0);
+		K__ASSERT(m_desc.Width > 0 && m_desc.Height > 0);
 		return KVec2(
 			orig_uv.x * m_original_w / (float)m_desc.Width,
 			orig_uv.y * m_original_h / (float)m_desc.Height
 		);
 	}
 	virtual KVec2 getTextureUVFromOriginalPoint(const KVec2 &pixel) override {
-		K__Assert(m_desc.Width > 0 && m_desc.Height > 0);
+		K__ASSERT(m_desc.Width > 0 && m_desc.Height > 0);
 		return KVec2(
 			pixel.x / (float)m_desc.Width,
 			pixel.y / (float)m_desc.Height
@@ -1197,14 +1197,14 @@ public:
 		// 現在のバックバッファを取得
 		IDirect3DSurface9 *back_surf = nullptr;
 		hr = m_d3ddev->GetRenderTarget(0, &back_surf);
-		K__Assert(SUCCEEDED(hr));
-		K__Assert(back_surf);
+		K__ASSERT(SUCCEEDED(hr));
+		K__ASSERT(back_surf);
 
 		// バックバッファのパラメータを得る
 		D3DSURFACE_DESC back_desc;
 		memset(&back_desc, 0, sizeof(back_desc));
 		hr = back_surf->GetDesc(&back_desc);
-		K__Assert(SUCCEEDED(hr));
+		K__ASSERT(SUCCEEDED(hr));
 
 		// 現在持っているロック可能サーフェスが再利用できるか調べる
 		bool recycle = false;
@@ -1227,13 +1227,13 @@ public:
 			// バックバッファは D3DPOOL_DEFAULT になっているので Lock できない。
 			// バックバッファと同じサイズ＆フォーマットで「ロック可能なサーフェス」を作成する
 			hr = m_d3ddev->CreateOffscreenPlainSurface(back_desc.Width, back_desc.Height, back_desc.Format, D3DPOOL_SYSTEMMEM, &m_lockable_surf, nullptr);
-			K__Assert(SUCCEEDED(hr));
-			K__Assert(m_lockable_surf);
+			K__ASSERT(SUCCEEDED(hr));
+			K__ASSERT(m_lockable_surf);
 		}
 
 		// バックバッファの内容をロック可能サーフェスに転送する
 		hr = m_d3ddev->GetRenderTargetData(back_surf, m_lockable_surf);
-		K__Assert(SUCCEEDED(hr));
+		K__ASSERT(SUCCEEDED(hr));
 
 		K__DX9_RELEASE(back_surf);
 	}
@@ -1311,11 +1311,11 @@ public:
 		}
 	}
 	bool make(IDirect3DDevice9 *d3ddev, const char *hlsl_u8, const char *name_debug) {
-		K__Assert(m_d3ddev == nullptr);
-		K__Assert(m_d3deff == nullptr);
-		K__Assert(d3ddev);
-		K__Assert(hlsl_u8);
-		K__Assert(name_debug);
+		K__ASSERT(m_d3ddev == nullptr);
+		K__ASSERT(m_d3deff == nullptr);
+		K__ASSERT(d3ddev);
+		K__ASSERT(hlsl_u8);
+		K__ASSERT(name_debug);
 		DWORD flags = 0;// = D3DXSHADER_PARTIALPRECISION; <-- もしかして、時間小数計算の精度が悪かったのでこれが原因じゃね？？
 	#ifdef _DEBUG
 		flags |= D3DXSHADER_DEBUG; // デバッグ有効
@@ -1358,7 +1358,7 @@ public:
 		zero_clear();
 	}
 	void setParameter_TimeSec() {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_TIME_SEC]) {
 			// time_sec の値が数万程度になるとHLSLでの浮動小数計算の情報落ちが顕著になるので注意
 			// HLSLに渡す値があまり大きくならないよう、一定の周期で区切っておく
@@ -1369,19 +1369,19 @@ public:
 		}
 	}
 	void setParameter_Diffuse(const float *rgba) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_DIFFUSE]) {
 			m_d3deff->SetFloatArray(m_param_handles[PH_DIFFUSE], rgba, 4);
 		}
 	}
 	void setParameter_Specular(const float *rgba) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_SPECULAR]) {
 			m_d3deff->SetFloatArray(m_param_handles[PH_SPECULAR], rgba, 4);
 		}
 	}
 	void setParameter_Texture(KTEXID texid) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_TEXTURE]) {
 			CD3DTex *tex = CD3D9_findTexture(texid);
 			if (tex) {
@@ -1391,7 +1391,7 @@ public:
 		}
 	}
 	void setParameter_TexSize(KTEXID texid) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_TEX_SIZE]) {
 			CD3DTex *tex = CD3D9_findTexture(texid);
 			if (tex) {
@@ -1406,7 +1406,7 @@ public:
 	// 現時点でスクリーンとして書き出している内容をテクスチャとして取得する
 	void setParameter_ScreenTexture() {
 		#if K__DX9_SCREENTEX_TEST
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_SCREEN_TEX]) {
 			// 現在のレンダーターゲットの内容をテクスチャとして使う
 
@@ -1439,7 +1439,7 @@ public:
 				}
 				g_ScreenCopyTex = KVideo::createRenderTexture(rt_desc.Width, rt_desc.Height);
 			}
-			K__Assert(g_ScreenCopyTex);
+			K__ASSERT(g_ScreenCopyTex);
 			
 			// Clear
 			{
@@ -1449,7 +1449,7 @@ public:
 
 			// 現在のレンダーターゲットの内容を取得
 			CD3DTex *screen_texobj = CD3D9_findTexture(g_ScreenCopyTex);
-			K__Assert(screen_texobj);
+			K__ASSERT(screen_texobj);
 			screen_texobj->writeImageFromBackBuffer();
 
 			// スクリーンテクスチャとして設定する
@@ -1460,7 +1460,7 @@ public:
 	}
 	void setParameter_ScreenTexSize() {
 		#if K__DX9_SCREENTEX_TEST
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_SCREEN_TEX_SIZE]) {
 			// 現在のターゲットのサイズを得る
 			IDirect3DSurface9 *surf_target = nullptr;
@@ -1477,19 +1477,19 @@ public:
 		#endif // K__DX9_SCREENTEX_TEST
 	}
 	void setParameter_ProjMatrix(const D3DXMATRIX &proj) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_MATRIX_PROJ]) {
 			m_d3deff->SetMatrix(m_param_handles[PH_MATRIX_PROJ], &proj);
 		}
 	}
 	void setParameter_ViewMatrix(const D3DXMATRIX &transform) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		if (m_param_handles[PH_MATRIX_VIEW]) {
 			m_d3deff->SetMatrix(m_param_handles[PH_MATRIX_VIEW], &transform);
 		}
 	}
 	void bindShader() {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		HRESULT hr;
 		D3DXHANDLE technique = m_d3deff->GetTechnique(0); // 最初のテクニック
 		hr = m_d3deff->SetTechnique(technique);
@@ -1509,17 +1509,17 @@ public:
 		}
 	}
 	void setInt( const char *name, const int *values, int count) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		D3DXHANDLE handle = m_d3deff->GetParameterByName(nullptr, name);
 		m_d3deff->SetIntArray(handle, values, count);
 	}
 	void setFloat(const char *name, const float *values, int count) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		D3DXHANDLE handle = m_d3deff->GetParameterByName(nullptr, name);
 		m_d3deff->SetFloatArray(handle, values, count);
 	}
 	void setTexture(const char *name, IDirect3DTexture9 *d3dtex) {
-		K__Assert(m_d3deff);
+		K__ASSERT(m_d3deff);
 		D3DXHANDLE handle = m_d3deff->GetParameterByName(nullptr, name);
 		m_d3deff->SetTexture(handle, d3dtex);
 		DX9_checkRenderIOTexture(m_d3ddev, d3dtex);
@@ -1703,14 +1703,14 @@ public:
 			sh->drop();
 		}
 		m_texlist.clear();
-		K__Assert(m_d3dblocks.empty()); // pushRenderState と popRenderState が等しく呼ばれていること
+		K__ASSERT(m_d3dblocks.empty()); // pushRenderState と popRenderState が等しく呼ばれていること
 		m_d3dblocks.clear();
 		K__DX9_RELEASE(m_d3ddev);
 		K__DX9_RELEASE(m_d3d9);
 		init_init(false);
 	}
 	bool _initD3D9(IDirect3D9 *d3d9) {
-		K__Assert(m_d3d9 == nullptr);
+		K__ASSERT(m_d3d9 == nullptr);
 		if (d3d9) {
 			// 与えられた IDirect3D9 を使う
 			m_d3d9 = d3d9;
@@ -1722,7 +1722,7 @@ public:
 	}
 	bool _initD3DDevice9(IDirect3DDevice9 *d3ddev) {
 		if (m_d3d9 == nullptr) return false;
-		K__Assert(m_d3ddev == nullptr);
+		K__ASSERT(m_d3ddev == nullptr);
 		m_shader_available = false;
 
 		if (d3ddev) {
@@ -1785,7 +1785,7 @@ public:
 		m_d3ddev->SetTransform(D3DTS_PROJECTION, &matrix);
 	}
 	bool _checkCaps(std::string *message_u8) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		
 		std::string text_u8;
 		bool ok = true;
@@ -1987,7 +1987,7 @@ public:
 		m_d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &vertex[0], sizeof(_Vert));
 	}
 	void fill(KTEXID target, const float *color_rgba, KColorChannels channels) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		DWORD color32 = K__Color32FromRgba(color_rgba);
 		if (channels == KColorChannel_RGBA) {
 			CD3DTex *tex = CD3D9_findTexture(target);
@@ -2050,7 +2050,7 @@ public:
 
 	#pragma region shader
 	KShader * createShaderFromHLSL_impl(const char *code, const char *name) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		if (! m_shader_available) {
 			K__VIDEO_WRN(u8"プログラマブルシェーダーは利用できません。'%s' はロードされませんでした", name);
 			return nullptr;
@@ -2098,7 +2098,7 @@ public:
 		}
 	}
 	void beginShader() {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		if (m_curr_shader) {
 			m_curr_shader->bindShader();
 		}
@@ -2151,7 +2151,7 @@ public:
 
 	#pragma region render state
 	void setTextureAndColors() {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 
 		// シェーダーが有効になっている場合、テクスチャステージを上書きしないようにする
 		if (m_curr_shader) {
@@ -2288,7 +2288,7 @@ public:
 		m_d3ddev->SetTransform(D3DTS_VIEW, &m_transform_matrix);
 	}
 	void pushRenderState() {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		IDirect3DStateBlock9 *block = nullptr;
 		m_d3ddev->CreateStateBlock(D3DSBT_ALL, &block);
 		m_d3dblocks.push_back(block);
@@ -2305,7 +2305,7 @@ public:
 	}
 	void pushRenderTarget(KTEXID render_target) {
 		K__DX9_LOCK_GUARD(m_mutex);
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		// 現在のターゲットを退避
 		SSurfItem item;
 		m_d3ddev->GetRenderTarget(0, &item.color_surf);
@@ -2325,8 +2325,8 @@ public:
 					if (texobj->m_color_surf && texobj->m_depth_surf) {
 						texobj->m_color_surf->GetDesc(&cdesc);
 						texobj->m_depth_surf->GetDesc(&zdesc);
-						K__Assert(cdesc.Width == zdesc.Width);
-						K__Assert(cdesc.Height == zdesc.Height);
+						K__ASSERT(cdesc.Width == zdesc.Width);
+						K__ASSERT(cdesc.Height == zdesc.Height);
 					}
 				}
 			} else {
@@ -2347,7 +2347,7 @@ public:
 	}
 	void popRenderTarget() {
 		K__DX9_LOCK_GUARD(m_mutex);
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		// 退避しておいたターゲットを元に戻す
 		if (! m_rendertarget_stack.empty()) {
 			SSurfItem item = m_rendertarget_stack.back();
@@ -2361,7 +2361,7 @@ public:
 		}
 	}
 	void setViewport(int x, int y, int w, int h) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		D3DVIEWPORT9 vp;
 		vp.X = (DWORD)KMath::max(x, 0);
 		vp.Y = (DWORD)KMath::max(y, 0);
@@ -2372,7 +2372,7 @@ public:
 		m_d3ddev->SetViewport(&vp);
 	}
 	void getViewport(int *x, int *y, int *w, int *h) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		D3DVIEWPORT9 vp;
 		m_d3ddev->GetViewport(&vp);
 		if (x) *x = (int)vp.X;
@@ -2381,7 +2381,7 @@ public:
 		if (h) *h = (int)vp.Height;
 	}
 	void setColorWriteMask(KColorChannels channels) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		DWORD d3dmask = 0;
 		d3dmask |= ((channels & KColorChannel_R) ? D3DCOLORWRITEENABLE_RED   : 0);
 		d3dmask |= ((channels & KColorChannel_G) ? D3DCOLORWRITEENABLE_GREEN : 0);
@@ -2432,7 +2432,7 @@ public:
 	#pragma region device
 	void resetDevice_lost() {
 		K__DX9_LOCK_GUARD(m_mutex);
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		{
 			// テクスチャーのデバイスロスト処理
 			for (auto it=m_texlist.begin(); it!=m_texlist.end(); ++it) {
@@ -2455,7 +2455,7 @@ public:
 			D3DPRESENT_PARAMETERS pp;
 			ZeroMemory(&pp, sizeof(pp));
 			IDirect3DSwapChain9 *sw = nullptr;
-			K__Assert(m_d3ddev->GetNumberOfSwapChains() > 0);
+			K__ASSERT(m_d3ddev->GetNumberOfSwapChains() > 0);
 			m_d3ddev->GetSwapChain(0, &sw);
 			sw->GetPresentParameters(&pp);
 		}
@@ -2517,13 +2517,13 @@ public:
 		return m_d3ddev->TestCooperativeLevel() == D3DERR_DEVICENOTRESET;
 	}
 	bool beginScene() {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		m_d3ddev->BeginScene();
 		setupDeviceStates();
 		return true;
 	}
 	bool endScene() {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		m_d3ddev->EndScene();
 		HRESULT hr = m_d3ddev->Present(nullptr, nullptr, nullptr, nullptr);
 		if (FAILED(hr)) {
@@ -2534,23 +2534,23 @@ public:
 		return true;
 	}
 	void clearColor(const float *color_rgba) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		m_d3ddev->Clear(0, nullptr, D3DCLEAR_TARGET, color_rgba ? K__Color32FromRgba(color_rgba) : 0, 0, 0);
 	}
 	void clearDepth(float z) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		m_d3ddev->Clear(0, nullptr, D3DCLEAR_ZBUFFER, 0, z, 0);
 	}
 	void clearStencil(int s) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		m_d3ddev->Clear(0, nullptr, D3DCLEAR_STENCIL, 0, 0, s);
 	}
 	#pragma endregion // device
 
 	#pragma region draw
 	void drawUserPtrV(const KVertex *vertices, int count, KPrimitive primitive) {
-		K__Assert(m_d3ddev);
-		K__Assert(count >= 0);
+		K__ASSERT(m_d3ddev);
+		K__ASSERT(count >= 0);
 
 		// 色とテクスチャの設定を反映
 		if (m_color_tex_changed) {
@@ -2575,14 +2575,14 @@ public:
 		// 描画
 		if (numface > 0 && count > 0) {
 			// DX9_VERTEX と KVertex は互換性がある
-			K__Assert(sizeof(DX9_VERTEX) == sizeof(KVertex)); // 最低限、サイズが同じであることを確認
+			K__ASSERT(sizeof(DX9_VERTEX) == sizeof(KVertex)); // 最低限、サイズが同じであることを確認
 			m_d3ddev->SetFVF(K__DX9_FVF_VERTEX);
 			m_d3ddev->DrawPrimitiveUP(d3dpt, numface, vertices, sizeof(DX9_VERTEX));
 		}
 	}
 	void drawIndexedUserPtrV(const KVertex *vertices, int vertex_count, const int *indices, int index_count, KPrimitive primitive) {
-		K__Assert(m_d3ddev);
-		K__Assert(index_count >= 0);
+		K__ASSERT(m_d3ddev);
+		K__ASSERT(index_count >= 0);
 
 		// 色とテクスチャの設定を反映
 		if (m_color_tex_changed) {
@@ -2619,14 +2619,14 @@ public:
 		// 現在のバックバッファを取得
 		IDirect3DSurface9 *back_surf = nullptr;
 		hr = m_d3ddev->GetRenderTarget(0, &back_surf);
-		K__Assert(SUCCEEDED(hr));
+		K__ASSERT(SUCCEEDED(hr));
 
 		// バックバッファのパラメータを得る
 		D3DSURFACE_DESC back_desc;
 		memset(&back_desc, 0, sizeof(back_desc));
 		if (back_surf) {
 			hr = back_surf->GetDesc(&back_desc);
-			K__Assert(SUCCEEDED(hr));
+			K__ASSERT(SUCCEEDED(hr));
 		}
 
 		// バックバッファは D3DPOOL_DEFAULT になっているので Lock できない。
@@ -2634,13 +2634,13 @@ public:
 		IDirect3DSurface9 *tmp_surf = nullptr;
 		if (back_desc.Width>0 && back_desc.Height>0) {
 			hr = m_d3ddev->CreateOffscreenPlainSurface(back_desc.Width, back_desc.Height, back_desc.Format, D3DPOOL_SYSTEMMEM, &tmp_surf, nullptr);
-			K__Assert(SUCCEEDED(hr));
+			K__ASSERT(SUCCEEDED(hr));
 		}
 
 		// バックバッファの内容をロック可能サーフェスに転送する
 		if (tmp_surf) {
 			hr = m_d3ddev->GetRenderTargetData(back_surf, tmp_surf);
-			K__Assert(SUCCEEDED(hr));
+			K__ASSERT(SUCCEEDED(hr));
 		}
 
 		// ロック可能サーフェスをロックしてピクセル情報を得る
@@ -2659,7 +2659,7 @@ public:
 		return img;
 	}
 	void command(const char *cmd) {
-		K__Assert(m_d3ddev);
+		K__ASSERT(m_d3ddev);
 		if (K__STREQ(cmd, "wireframe on")) {
 			m_d3ddev->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 			m_d3ddev->SetTexture(0, nullptr);
@@ -3370,35 +3370,35 @@ const KColor32 * KMesh::getSpecularInts(int offset) const {
 #undef OFFSET_BYTE
 
 KVec3 KMesh::getPosition(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return m_vertices.data()[index].pos;
 }
 KColor KMesh::getColor(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return KColor(m_vertices.data()[index].dif32); // KColor32 --> KColor
 }
 KColor KMesh::getSpecular(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return KColor(m_vertices.data()[index].spe32); // KColor32 --> KColor
 }
 KColor32 KMesh::getColor32(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return m_vertices.data()[index].dif32;
 }
 KColor32 KMesh::getSpecular32(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return m_vertices.data()[index].spe32;
 }
 KVec2 KMesh::getTexCoord(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return m_vertices.data()[index].tex;
 }
 KVec2 KMesh::getTexCoord2(int index) const {
-	K__Assert(0 <= index && index < (int)m_vertices.size());
+	K__ASSERT(0 <= index && index < (int)m_vertices.size());
 	return m_vertices.data()[index].tex2;
 }
 const KVertex * KMesh::getVertices(int offset) const {
-	K__Assert(0 <= offset && offset < (int)m_vertices.size());
+	K__ASSERT(0 <= offset && offset < (int)m_vertices.size());
 	return m_vertices.data() + offset;
 }
 const int * KMesh::getIndices(int offset) const {
@@ -3407,7 +3407,7 @@ const int * KMesh::getIndices(int offset) const {
 	if (m_indices.empty() && offset == 0) {
 		return nullptr;
 	}
-	K__Assert(0 <= offset && offset < (int)m_indices.size());
+	K__ASSERT(0 <= offset && offset < (int)m_indices.size());
 	return m_indices.data() + offset;
 }
 int KMesh::getVertexCount() const {
@@ -3633,8 +3633,8 @@ static void copy_mem(void *dst, int dst_stride, const void *src, int src_stride,
 	// p の型に関係なく x バイトだけずらしたアドレス
 	#define OFFSET_BYTE(p, x)  (void*)((char*)(p) + (x))
 
-	K__Assert(dst);
-	K__Assert(src);
+	K__ASSERT(dst);
+	K__ASSERT(src);
 	for (int i=0; i<copycount; i++) {
 		memcpy(
 			OFFSET_BYTE(dst, dst_stride*i), 
@@ -3800,7 +3800,7 @@ namespace KVideoUtils {
 /// @param materials_count  適用するマテリアルの個数
 void blitArray(KTexture *dst, KTexture *src, KMaterial **materials, int materials_count) {
 	if (src == nullptr) return;
-	K__Assert(src != dst);
+	K__ASSERT(src != dst);
 
 	// マテリアルなしの場合は普通にコピーする
 	if (materials == nullptr || materials_count == 0) {
@@ -4299,7 +4299,7 @@ KSubMesh * CMeshBuf::addToMesh(KMesh *mesh, KPrimitive prim, const KMaterial *ma
 
 // ２次ベジェ曲線。３個の制御点を使う
 static KVec2 _QuadricBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, float t) {
-	K__Assert(0 <= t && t <= 1);
+	K__ASSERT(0 <= t && t <= 1);
 	float T = 1.0f - t;
 	float x = t*t*p2.x + 2*t*T*p1.x + T*T*p0.x;
 	float y = t*t*p2.y + 2*t*T*p1.y + T*T*p0.y;
@@ -4308,7 +4308,7 @@ static KVec2 _QuadricBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, f
 
 // ３次ベジェ曲線。４個の制御点を使う
 static KVec2 _CubicBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, float t) {
-	K__Assert(0 <= t && t <= 1);
+	K__ASSERT(0 <= t && t <= 1);
 	float T = 1.0f - t;
 	float x = t*t*t*p3.x + 3*t*t*T*p2.x + 3*t*T*T*p1.x + T*T*T*p0.x;
 	float y = t*t*t*p3.y + 3*t*t*T*p2.y + 3*t*T*T*p1.y + T*T*T*p0.y;
@@ -4317,7 +4317,7 @@ static KVec2 _CubicBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, con
 
 // ４次ベジェ曲線。５個の制御点を使う
 static KVec2 _QuinticBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, const KVec2 &p4, float t) {
-	K__Assert(0 <= t && t <= 1);
+	K__ASSERT(0 <= t && t <= 1);
 	float T = 1.0f - t;
 	float x = t*t*t*t*p4.x + 4*t*t*t*T*p3.x + 6*t*t*T*T*p2.x + 4*t*T*T*T*p1.x + T*T*T*T*p0.x;
 	float y = t*t*t*t*p4.y + 4*t*t*t*T*p3.y + 6*t*t*T*T*p2.y + 4*t*T*T*T*p1.y + T*T*T*T*p0.y;
@@ -4371,7 +4371,7 @@ void CPathDraw::pathArcToAuto(const KVec2 &center, float radius, float rad_start
 // segments 線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する。
 //          その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathQuadricBezierTo(const KVec2 &p1, const KVec2 &p2, int segments) {
-	K__Assert(!mPoints.empty());
+	K__ASSERT(!mPoints.empty());
 	KVec2 p0 = mPoints.back();
 	if (segments == 0) {
 		segments = 8;
@@ -4402,7 +4402,7 @@ void CPathDraw::pathQuadricBezierToAuto(const KVec2 &p0, const KVec2 &p1, const 
 // segments    線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する。
 //             その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathCubicBezierTo(const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, int segments) {
-	K__Assert(!mPoints.empty());
+	K__ASSERT(!mPoints.empty());
 	KVec2 p0 = mPoints.back();
 	if (segments > 0) {
 		for (int i=1; i<=segments; i++) {
@@ -4438,7 +4438,7 @@ void CPathDraw::pathCubicBezierToAuto(const KVec2 &p0, const KVec2 &p1, const KV
 // segments        線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する
 //                 その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathQuinticBezierTo(const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, const KVec2 &p4, int segments) {
-	K__Assert(!mPoints.empty());
+	K__ASSERT(!mPoints.empty());
 	KVec2 p0 = mPoints.back();
 	if (segments > 0) {
 		for (int i=1; i<=segments; i++) {

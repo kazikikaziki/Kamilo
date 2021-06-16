@@ -81,7 +81,7 @@ public:
 		m_CellCount += item.cells.size();
 	}
 	bool getBestSize(int *w, int *h) const {
-		K__Assert(w && h);
+		K__ASSERT(w && h);
 		const int BIGNUM = 1000000;
 		int max_width = 1024 * 8;
 		int best_w = 0;
@@ -160,7 +160,7 @@ public:
 		return dest;
 	}
 	void getMetaString(std::string *p_meta) const {
-		K__Assert(p_meta);
+		K__ASSERT(p_meta);
 		std::string &meta = *p_meta;
 		char s[256];
 		sprintf_s(s, sizeof(s), "<pack cellsize='%d' cellspace='%d' numimages='%d'>\n", m_CellSize, m_CellSpace, m_Items.size());
@@ -304,10 +304,10 @@ public:
 		const KXmlElement *xPack = xml->findNode("pack");
 		if (xPack) {
 			m_cellsize = xPack->getAttrInt("cellsize");
-			K__Assert(m_cellsize > 0);
+			K__ASSERT(m_cellsize > 0);
 
 			m_cellspace = xPack->getAttrInt("cellspace");
-			K__Assert(m_cellspace >= 0);
+			K__ASSERT(m_cellspace >= 0);
 
 			const KXmlElement *xExtra = xPack->findNode("extra");
 			if (xExtra) {
@@ -338,7 +338,7 @@ public:
 				// 空白区切りでセル番号が列挙してある
 				const char *text = xImg->getText(""); // ascii 文字だけだとわかりきっているので、文字列コード考慮しない
 				auto tok = K::strSplit(text, " ");
-				K__Assert((int)tok.size() == numcells); // セル番号はセルと同じ個数だけあるはず
+				K__ASSERT((int)tok.size() == numcells); // セル番号はセルと同じ個数だけあるはず
 				item.cells.resize(numcells);
 
 				// セル番号を得る
@@ -350,7 +350,7 @@ public:
 
 				m_itemlist.push_back(item);
 			}
-			K__Assert((int)m_itemlist.size() == numimages);
+			K__ASSERT((int)m_itemlist.size() == numimages);
 		}
 		xml->drop();
 		return true;
@@ -370,20 +370,20 @@ public:
 		return (int)m_itemlist.size();
 	}
 	void getImageSize(int index, int *w, int *h) const {
-		K__Assert(w && h);
+		K__ASSERT(w && h);
 		const KImgPackItem &item = m_itemlist[index];
 		if (w) *w = item.img.getWidth();
 		if (h) *h = item.img.getHeight();
 	}
 	void getImageExtra(int index, KImgPackExtraData *extra) const {
-		K__Assert(0 <= index && index < (int)m_itemlist.size());
+		K__ASSERT(0 <= index && index < (int)m_itemlist.size());
 		const KImgPackItem &item = m_itemlist[index];
 		if (extra) *extra = item.extra;
 	}
 	KImage getImage(const KImage &pack_img, int index) const {
-		K__Assert(m_cellsize > 0);
-		K__Assert(!pack_img.empty());
-		K__Assert(pack_img.getFormat() == KColorFormat_RGBA32);
+		K__ASSERT(m_cellsize > 0);
+		K__ASSERT(!pack_img.empty());
+		K__ASSERT(pack_img.getFormat() == KColorFormat_RGBA32);
 
 		int cellarea = m_cellsize + m_cellspace * 2; // 1セルのために必要なサイズ。余白が設定されている場合はそれも含む
 		const KImgPackItem &packitem = m_itemlist[index];
@@ -414,10 +414,10 @@ public:
 		return item.cells.size() * 6; // 1セルにつき2個の三角形(=6頂点)が必要
 	}
 	const KVec3 * getPositionArray(int pack_w, int pack_h, int index) const {
-		K__Assert(m_cellsize > 0);
-		K__Assert(pack_w > 0);
-		K__Assert(pack_h > 0);
-		K__Assert(0 <= index && index < (int)m_itemlist.size());
+		K__ASSERT(m_cellsize > 0);
+		K__ASSERT(pack_w > 0);
+		K__ASSERT(pack_h > 0);
+		K__ASSERT(0 <= index && index < (int)m_itemlist.size());
 		const KImgPackItem &item = m_itemlist[index];
 		m_pos.resize(item.cells.size() * 6);
 
@@ -466,10 +466,10 @@ public:
 		return m_pos.data();
 	}
 	const KVec2 * getTexCoordArray(int pack_w, int pack_h, int index) const {
-		K__Assert(m_cellsize > 0);
-		K__Assert(pack_w > 0);
-		K__Assert(pack_h > 0);
-		K__Assert(0 <= index && index < (int)m_itemlist.size());
+		K__ASSERT(m_cellsize > 0);
+		K__ASSERT(pack_w > 0);
+		K__ASSERT(pack_h > 0);
+		K__ASSERT(0 <= index && index < (int)m_itemlist.size());
 		const KImgPackItem &item = m_itemlist[index];
 		m_tex.resize(item.cells.size() * 6);
 

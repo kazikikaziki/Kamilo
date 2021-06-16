@@ -356,12 +356,12 @@ KVec2 KVec2::operator / (const KVec2 &b) const {
 	return out;
 }
 KVec2 & KVec2::operator /= (float b) {
-	K__Assert(b != 0);
+	K__ASSERT(b != 0);
 	*this = *this / b;
 	return *this;
 }
 KVec2 & KVec2::operator /= (const KVec2 &b) {
-	K__Assert(!K_vec2_anyzero(b.floats()));
+	K__ASSERT(!K_vec2_anyzero(b.floats()));
 	*this = *this / b;
 	return *this;
 }
@@ -496,12 +496,12 @@ KVec3 KVec3::operator / (const KVec3 &b) const {
 	return out;
 }
 KVec3 & KVec3::operator /= (float b) {
-	K__Assert(b != 0);
+	K__ASSERT(b != 0);
 	*this = *this / b;
 	return *this;
 }
 KVec3 & KVec3::operator /= (const KVec3 &b) {
-	K__Assert(!K_vec3_anyzero(b.floats()));
+	K__ASSERT(!K_vec3_anyzero(b.floats()));
 	*this = *this / b;
 	return *this;
 }
@@ -654,12 +654,12 @@ KVec4 KVec4::operator / (const KVec4 &b) const {
 	return out;
 }
 KVec4 & KVec4::operator /= (float b) {
-	K__Assert(b != 0);
+	K__ASSERT(b != 0);
 	*this = *this / b;
 	return *this;
 }
 KVec4 & KVec4::operator /= (const KVec4 &b) {
-	K__Assert(!K_vec4_anyzero(b.floats()));
+	K__ASSERT(!K_vec4_anyzero(b.floats()));
 	*this = *this / b;
 	return *this;
 }

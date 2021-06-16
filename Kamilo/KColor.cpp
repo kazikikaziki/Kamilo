@@ -296,7 +296,7 @@ KColor::KColor(float _r, float _g, float _b, float _a) {
 	b = _b;
 	a = _a;
 #ifdef _DEBUG
-	K__Assert(r >= 0 && g >= 0 && b >= 0 && a >= 0);
+	K__ASSERT(r >= 0 && g >= 0 && b >= 0 && a >= 0);
 #endif
 }
 KColor::KColor(const KColor &rgb, float _a) {
@@ -305,7 +305,7 @@ KColor::KColor(const KColor &rgb, float _a) {
 	b = rgb.b;
 	a = _a;
 #ifdef _DEBUG
-	K__Assert(r >= 0 && g >= 0 && b >= 0 && a >= 0);
+	K__ASSERT(r >= 0 && g >= 0 && b >= 0 && a >= 0);
 #endif
 }
 KColor::KColor(const KColor32 &argb32) {
@@ -314,7 +314,7 @@ KColor::KColor(const KColor32 &argb32) {
 	b = (float)argb32.b / 255.0f;
 	a = (float)argb32.a / 255.0f;
 #ifdef _DEBUG
-	K__Assert(r >= 0 && g >= 0 && b >= 0 && a >= 0);
+	K__ASSERT(r >= 0 && g >= 0 && b >= 0 && a >= 0);
 #endif
 }
 KColor32 KColor::toColor32() const {

@@ -21,11 +21,11 @@ namespace Kamilo {
 
 
 static int _ReadLoop(KSoundFile::Impl *snd, void *_samples, int max_count, int loop_start, int loop_end) {
-	K__Assert(snd);
-	K__Assert(_samples);
-	K__Assert(max_count > 0);
-	K__Assert(0 <= loop_start);
-	K__Assert(0 <= loop_end);
+	K__ASSERT(snd);
+	K__ASSERT(_samples);
+	K__ASSERT(max_count > 0);
+	K__ASSERT(0 <= loop_start);
+	K__ASSERT(0 <= loop_end);
 
 	int rate=0, ch=0, total=0;
 	snd->getinfo(&rate, &ch, &total);
@@ -78,8 +78,8 @@ public:
 		m_total_samples = 0;
 	}
 	COggImpl(const void *data, size_t size, int *err) {
-		K__Assert(data && size > 0);
-		K__Assert(err);
+		K__ASSERT(data && size > 0);
+		K__ASSERT(err);
 		memset(&m_info, 0, sizeof(m_info));
 
 		m_bin.resize(size);
@@ -161,7 +161,7 @@ public:
 		m_total_samples = 0;
 		m_bytes_per_sample = 0;
 		//
-		K__Assert(err);
+		K__ASSERT(err);
 		m_buf.resize(size);
 		memcpy(&m_buf[0], data, size);
 		// http://hiroshi0945.blog75.fc2.com/?mode=m&no=33
@@ -474,9 +474,9 @@ protected:
 	bool createBuffer(int numSamples, int channels, int sample_rate) {
 		destroyBuffer(); // 既存のバッファを確実に削除しておくように
 
-		K__Assert(numSamples >= 0);
-		K__Assert(channels == 1 || channels == 2);
-		K__Assert(sample_rate >= 0);
+		K__ASSERT(numSamples >= 0);
+		K__ASSERT(channels == 1 || channels == 2);
+		K__ASSERT(sample_rate >= 0);
 
 		WAVEFORMATEX wf;
 		ZeroMemory(&wf, sizeof(WAVEFORMATEX));

@@ -223,7 +223,7 @@ public:
 		ImGui::DragFloat("Radius", &m_radius, 1.0f, 0.0f, 1000.0f);
 	}
 	virtual void set_radius(float value) {
-		K__Assert(value >= 0);
+		K__ASSERT(value >= 0);
 		m_radius = value;
 	}
 	virtual float get_radius() const {
@@ -283,9 +283,9 @@ public:
 		ImGui::DragFloat3("HalfSize", m_halfsize.floats());
 	}
 	virtual void set_halfsize(const KVec3 &value) {
-		K__Assert(value.x >= 0);
-		K__Assert(value.y >= 0);
-		K__Assert(value.z >= 0);
+		K__ASSERT(value.x >= 0);
+		K__ASSERT(value.y >= 0);
+		K__ASSERT(value.z >= 0);
 		m_halfsize = value;
 	}
 	virtual const KVec3 & get_halfsize() const {
@@ -406,12 +406,12 @@ public:
 		}
 	}
 	virtual void set_halfheight(float value) {
-		K__Assert(value >= 0);
+		K__ASSERT(value >= 0);
 		m_halfheight = value;
 		adj();
 	}
 	virtual void set_radius(float value) {
-		K__Assert(value >= 0);
+		K__ASSERT(value >= 0);
 		m_radius = value;
 		adj();
 	}
@@ -533,12 +533,12 @@ public:
 		}
 	}
 	virtual void set_halfheight(float value) {
-		K__Assert(value >= 0);
+		K__ASSERT(value >= 0);
 		m_halfheight = value;
 		adj();
 	}
 	virtual void set_radius(float value) {
-		K__Assert(value >= 0);
+		K__ASSERT(value >= 0);
 		m_radius = value;
 		adj();
 	}
@@ -666,7 +666,7 @@ public:
 
 		// 平面と AABB のX+側の面との交線を得る
 		if (KGeom::K_GeomIntersectPlane(m_offset, m_normal, aabb_min, KVec3(1, 0, 0), &dir, &pos)) {
-			K__Assert(KGeom::K_GEOM_ALMOST_ZERO(dir.x)); // AABB の X+　側平面との交線なのだから、直線の X 方向成分は 0 になっていないとおかしい
+			K__ASSERT(KGeom::K_GEOM_ALMOST_ZERO(dir.x)); // AABB の X+　側平面との交線なのだから、直線の X 方向成分は 0 になっていないとおかしい
 			if (fabsf(dir.z) < fabsf(dir.y)) {
 			//	minp.y = aabb_min.y;
 			//	maxp.y = aabb_max.y;
@@ -687,7 +687,7 @@ public:
 
 		// 平面と AABB のY+側の面との交線を得る
 		if (KGeom::K_GeomIntersectPlane(m_offset, m_normal, aabb_min, KVec3(0, 1, 0), &dir, &pos)) {
-			K__Assert(KGeom::K_GEOM_ALMOST_ZERO(dir.y)); // AABB の Y+　側平面との交線なのだから、直線の Y 方向成分は 0 になっていないとおかしい
+			K__ASSERT(KGeom::K_GEOM_ALMOST_ZERO(dir.y)); // AABB の Y+　側平面との交線なのだから、直線の Y 方向成分は 0 になっていないとおかしい
 			if (fabsf(dir.z) < fabsf(dir.x)) {
 			//	minp.x = aabb_min.x;
 			//	maxp.x = aabb_max.x;
@@ -1363,21 +1363,21 @@ void Test_collisionshape() {
 
 		// 原点（円の左下）から真上にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(), KVec3(0, 1, 0), 0, &pos, nullptr, nullptr);
-		K__Assert(!b); // 衝突しない
+		K__ASSERT(!b); // 衝突しない
 
 		// 原点（円の左下）から右上にレイを飛ばす
 		float maxerr = 0.0001f;
 		b = co->get_ray_collision_point(KVec3(), KVec3(1, 1, 0), 0, &pos, nullptr, nullptr);
 		float p = (hypotf(X,Y) - R) * 1/sqrtf(2);
-		K__Assert(b && pos.equals(KVec3(p, p, 0.0f), maxerr)); // 円の左下に衝突
+		K__ASSERT(b && pos.equals(KVec3(p, p, 0.0f), maxerr)); // 円の左下に衝突
 
 		// 円の真下から真上にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(X, 0.0f, 0.0f), KVec3(0, 1, 0), 0, &pos, nullptr, nullptr);
-		K__Assert(b && pos.equals(KVec3(X, Y-R, 0.0f), maxerr)); // 円の真下に衝突
+		K__ASSERT(b && pos.equals(KVec3(X, Y-R, 0.0f), maxerr)); // 円の真下に衝突
 
 		// 円の真左から右にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(0.0f, Y, 0.0f), KVec3(1, 0, 0), 0, &pos, nullptr, nullptr);
-		K__Assert(b && pos.equals(KVec3(X-R, Y, 0.0f), maxerr)); // 円の左に衝突
+		K__ASSERT(b && pos.equals(KVec3(X-R, Y, 0.0f), maxerr)); // 円の左に衝突
 
 		co->drop();
 	}
@@ -1389,23 +1389,23 @@ void Test_collisionshape() {
 
 		// 原点（AABBの左下）から真上にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(0, 0, 0), KVec3(0, 1, 0), 0, &pos, &nor, nullptr);
-		K__Assert(!b); // 衝突しない
+		K__ASSERT(!b); // 衝突しない
 
 		// AABBの下側（遠方）から右上にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(1000, 0, 0), KVec3(1, 1, 0), 0, &pos, &nor, nullptr);
-		K__Assert(!b); // 衝突しない
+		K__ASSERT(!b); // 衝突しない
 
 		// AABBの下側（近距離）から右上にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(1000, 900, 0), KVec3(1, 1, 0), 0, &pos, &nor, nullptr);
-		K__Assert(b && pos==KVec3(1060, 960, 0) && nor==KVec3(0, -1, 0)); // AABB底面に衝突
+		K__ASSERT(b && pos==KVec3(1060, 960, 0) && nor==KVec3(0, -1, 0)); // AABB底面に衝突
 
 		// AABBの左から右にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(0, 1000, 0), KVec3(1, 0, 0), 0, &pos, &nor, nullptr);
-		K__Assert(b && pos==KVec3(1000-HalfW, 1000, 0) && nor==KVec3(-1, 0, 0)); // AABB左に衝突
+		K__ASSERT(b && pos==KVec3(1000-HalfW, 1000, 0) && nor==KVec3(-1, 0, 0)); // AABB左に衝突
 
 		// AABBの右から左にレイを飛ばす
 		b = co->get_ray_collision_point(KVec3(2000, 1000, 0), KVec3(-1, 0, 0), 0, &pos, &nor, nullptr);
-		K__Assert(b && pos==KVec3(1000+HalfW, 1000, 0) && nor==KVec3( 1, 0, 0));
+		K__ASSERT(b && pos==KVec3(1000+HalfW, 1000, 0) && nor==KVec3( 1, 0, 0));
 
 		co->drop();
 	}

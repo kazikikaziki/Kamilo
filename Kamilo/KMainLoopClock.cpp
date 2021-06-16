@@ -156,7 +156,7 @@ int KMainLoopClock::getWaitMsec() {
 		m_fpstime_next += delta;
 		return 0;
 	}
-	K__Assert(m_fpstime_next > t);
+	K__ASSERT(m_fpstime_next > t);
 	return m_fpstime_next - t;
 }
 void KMainLoopClock::syncFreq() {

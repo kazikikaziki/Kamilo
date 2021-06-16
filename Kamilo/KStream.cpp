@@ -379,25 +379,25 @@ void Test_stream() {
 		KInputStream r = KInputStream::fromMemory(text, strlen(text));
 		char s[32] = {0};
 	
-		K__Assert(r.read(s, 5) == 5);
-		K__Assert(strncmp(s, "hello", 5) == 0);
-		K__Assert(r.tell() == 5);
+		K__ASSERT(r.read(s, 5) == 5);
+		K__ASSERT(strncmp(s, "hello", 5) == 0);
+		K__ASSERT(r.tell() == 5);
 	
-		K__Assert(r.read(s, 7) == 7);
-		K__Assert(strncmp(s, ", world", 7) == 0);
-		K__Assert(r.tell() == 12);
+		K__ASSERT(r.read(s, 7) == 7);
+		K__ASSERT(strncmp(s, ", world", 7) == 0);
+		K__ASSERT(r.tell() == 12);
 
-		K__Assert(r.read(s, 4) == 1);
-		K__Assert(strncmp(s, ".", 1) == 0);
-		K__Assert(r.tell() == 13);
+		K__ASSERT(r.read(s, 4) == 1);
+		K__ASSERT(strncmp(s, ".", 1) == 0);
+		K__ASSERT(r.tell() == 13);
 	}
 	{
 		std::string s;
 		KOutputStream w = KOutputStream::fromMemory(&s);
-		K__Assert(w.write("abc", 3) == 3);
-		K__Assert(w.write(" ",   1) == 1);
-		K__Assert(w.write("def", 3) == 3);
-		K__Assert(s.compare("abc def") == 0);
+		K__ASSERT(w.write("abc", 3) == 3);
+		K__ASSERT(w.write(" ",   1) == 1);
+		K__ASSERT(w.write("def", 3) == 3);
+		K__ASSERT(s.compare("abc def") == 0);
 	}
 }
 

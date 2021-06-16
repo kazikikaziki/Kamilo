@@ -23,9 +23,9 @@ class CUserDataImpl: public KInspectorCallback {
 		return s;
 	}
 	static void xorString(char *s, size_t len, const char *key) {
-		K__Assert(s);
-		K__Assert(key && key[0]); // 長さ１以上の文字列であること
-		K__Assert(len > 0);
+		K__ASSERT(s);
+		K__ASSERT(key && key[0]); // 長さ１以上の文字列であること
+		K__ASSERT(len > 0);
 		size_t keylen = strlen(key);
 		for (size_t i=0; i<len; i++) {
 			s[i] = s[i] ^ key[i % keylen];
@@ -203,7 +203,7 @@ static CUserDataImpl *g_UserData = nullptr;
 
 
 void KUserData::install() {
-	K__Assert(g_UserData == nullptr);
+	K__ASSERT(g_UserData == nullptr);
 	g_UserData = new CUserDataImpl();
 }
 void KUserData::uninstall() {
@@ -213,36 +213,36 @@ void KUserData::uninstall() {
 	}
 }
 void KUserData::clearValues() {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	g_UserData->clearValues();
 }
 void KUserData::clearValuesByTag(int tag) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	g_UserData->clearValuesByTag(tag);
 }
 void KUserData::clearValuesByPrefix(const char *prefix) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	g_UserData->clearValuesByPrefix(prefix);
 }
 std::string KUserData::getString(const std::string &key) {
 	static const std::string s_Empty;
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->getString(key, s_Empty);
 }
 std::string KUserData::getString(const std::string &key, const std::string &def) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->getString(key, def);
 }
 void KUserData::setString(const std::string &key, const std::string &val, int tag) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	g_UserData->setString(key, val, tag);
 }
 bool KUserData::hasKey(const std::string &key) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->hasKey(key);
 }
 int KUserData::getKeys(std::vector<std::string> *p_keys) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->getKeys(p_keys);
 }
 int KUserData::getInt(const std::string &key, int def) {
@@ -256,23 +256,23 @@ void KUserData::setInt(const std::string &key, int val, int tag) {
 	setString(key, pval, tag);
 }
 bool KUserData::saveToFile(const std::string &filename, const char *password) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->saveToFile(filename, password);
 }
 bool KUserData::saveToFileCompress(const std::string &filename) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->saveToFileCompress(filename);
 }
 bool KUserData::loadFromFile(const std::string &filename, const char *password) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->loadFromFile(filename, password);
 }
 bool KUserData::loadFromFileCompress(const std::string &filename) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->loadFromFileCompress(filename);
 }
 bool KUserData::peekFile(const std::string &filename, const char *password, KNamedValues *nv) {
-	K__Assert(g_UserData);
+	K__ASSERT(g_UserData);
 	return g_UserData->peekFile(filename, password, nv);
 }
 

@@ -493,7 +493,7 @@ public:
 		return 0;
 	}
 	void run() {
-		K__Assert(m_init_called);
+		K__ASSERT(m_init_called);
 
 		// タイマー精度を変更する
 		K::sleepPeriodBegin();
@@ -727,7 +727,7 @@ public:
 		}
 
 		// この時点でルートノードには子ノードが１つもないはず
-		K__Assert(root->getChildCount() == 0);
+		K__ASSERT(root->getChildCount() == 0);
 	}
 	void frame_render() {
 		// ウィンドウが最小化されているなら描画処理しない

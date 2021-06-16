@@ -93,8 +93,8 @@ public:
 		m_CB = cb;
 	}
 	void addDrawable(KNode *node, KDrawable *drawable) {
-		K__Assert(node);
-		K__Assert(drawable);
+		K__ASSERT(node);
+		K__ASSERT(drawable);
 		delDrawable(node);
 		m_Nodes[node] = drawable;
 		drawable->_setNode(node);
@@ -127,7 +127,7 @@ public:
 	virtual void on_manager_start() override {
 	}
 	virtual void on_manager_end() override {
-		K__Assert(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていればノードは存在しないはず
+		K__ASSERT(m_Nodes.empty()); // 正しく on_manager_detach が呼ばれていればノードは存在しないはず
 		m_DrawList.destroy();
 	}
 	virtual void on_manager_detach(KNode *node) override {
@@ -283,7 +283,7 @@ private:
 	void nodes_filter_by_frustum(KNodeArray &output, const KNodeArray &input, KNode *camera) {
 		for (auto it=input.begin(); it!=input.end(); ++it) {
 			KNode *node = *it;
-			K__Assert(node);
+			K__ASSERT(node);
 
 			if (!node->getViewCullingInTree()) {
 				// カメラ範囲によるカリング無効。常に描画する
@@ -309,7 +309,7 @@ private:
 		if (cb) {
 			for (auto it=input.begin(); it!=input.end(); ++it) {
 				KNode *node = *it;
-				K__Assert(node);
+				K__ASSERT(node);
 
 				bool skip = false;
 				cb->on_entityfilter_check(node, &skip);
@@ -404,8 +404,8 @@ private:
 
 	// ノードツリーを描画する
 	void renderNodeTree(KNode *node, const KMatrix4 &projection, const KMatrix4 &transform, KNode *camera, KDrawList *drawlist) {
-		K__Assert(node);
-		K__Assert(camera);
+		K__ASSERT(node);
+		K__ASSERT(camera);
 
 		// 子要素
 		int camera_layer = camera->getLayerInTree();
@@ -483,7 +483,7 @@ private:
 static CRenderMgr *g_RenderMgr = nullptr;
 
 void KDrawable::install() {
-	K__Assert(g_RenderMgr == nullptr);
+	K__ASSERT(g_RenderMgr == nullptr);
 	g_RenderMgr = new CRenderMgr();
 }
 void KDrawable::uninstall() {
@@ -493,25 +493,25 @@ void KDrawable::uninstall() {
 	}
 }
 void KDrawable::setConfig(EConfig c, bool value) {
-	K__Assert(g_RenderMgr);
+	K__ASSERT(g_RenderMgr);
 	g_RenderMgr->setConfig(c, value);
 }
 bool KDrawable::getConfig(EConfig c) {
-	K__Assert(g_RenderMgr);
+	K__ASSERT(g_RenderMgr);
 	return g_RenderMgr->getConfig(c);
 }
 void KDrawable::setCallback(KRenderCallback *cb) {
-	K__Assert(g_RenderMgr);
+	K__ASSERT(g_RenderMgr);
 	g_RenderMgr->setCallback(cb);
 }
 KDrawable * KDrawable::of(KNode *node) {
-	K__Assert(g_RenderMgr);
+	K__ASSERT(g_RenderMgr);
 	return g_RenderMgr->getDrawable(node);
 }
 void KDrawable::_attach(KNode *node, KDrawable *drawable) {
-	K__Assert(node);
-	K__Assert(drawable);
-	K__Assert(g_RenderMgr);
+	K__ASSERT(node);
+	K__ASSERT(drawable);
+	K__ASSERT(g_RenderMgr);
 	g_RenderMgr->addDrawable(node, drawable);
 }
 
@@ -544,7 +544,7 @@ void KDrawable::_setNode(KNode *node) {
 }
 void KDrawable::on_node_render_aabb(KVec3 *aabb_min, KVec3 *aabb_max) {
 	KNode *self = getNode();
-	K__Assert(self);
+	K__ASSERT(self);
 
 	// AABB
 	KVec3 lmin, lmax;
@@ -605,8 +605,8 @@ void KDrawable::onDrawable_willDraw(const KNode *camera) {
 void KDrawable::setGroupingImageSize(int w, int h, const KVec3 &pivot) {
 	if (w > 0 && h > 0) {
 		// レンダーターゲットのサイズが奇数になっていると、ドットバイドットでの描画が歪む
-		K__Assert(w % 2 == 0);
-		K__Assert(h % 2 == 0);
+		K__ASSERT(w % 2 == 0);
+		K__ASSERT(h % 2 == 0);
 		m_group_rentex_w = w;
 		m_group_rentex_h = h;
 		m_group_rentex_pivot = pivot;
@@ -668,7 +668,7 @@ void KDrawable::updateGroupRenderTextureAndMesh() {
 		target_tex = KVideo::findTexture(KBank::getTextureBank()->addRenderTexture(m_group_rentex_name, ren_w, ren_h));
 
 	} else if (target_tex->getWidth() != ren_w || target_tex->getHeight() != ren_h) {
-		K__Assert(target_tex->isRenderTarget());
+		K__ASSERT(target_tex->isRenderTarget());
 		// サイズが違う
 		// 一度削除して再生成する
 		KBank::getTextureBank()->removeTexture(m_group_rentex_name);

@@ -64,8 +64,8 @@ static CShadowMgr *g_ShadowMgr = nullptr;
 #define SHADOW_BASIC_RADIUS  64
 
 static void _MakeCircleMesh(KMesh *mesh, const KVec2 &radius, int numvertices, const KColor &center_color, const KColor &outer_color) {
-	K__Assert(mesh);
-	K__Assert(numvertices >= 3);
+	K__ASSERT(mesh);
+	K__ASSERT(numvertices >= 3);
 	mesh->clear();
 	mesh->setVertexCount(1+numvertices);
 	if (1) {
@@ -98,7 +98,7 @@ KShadow::GlobalSettings * KShadow::globalSettings() {
 }
 
 void KShadow::install() {
-	K__Assert(g_ShadowMgr == nullptr);
+	K__ASSERT(g_ShadowMgr == nullptr);
 	g_ShadowMgr = new CShadowMgr();
 }
 void KShadow::uninstall() {
@@ -108,7 +108,7 @@ void KShadow::uninstall() {
 	}
 }
 void KShadow::attach(KNode *node) {
-	K__Assert(g_ShadowMgr);
+	K__ASSERT(g_ShadowMgr);
 	if (node && !isAttached(node)) {
 		KShadow *co = new KShadow();
 		g_ShadowMgr->m_Nodes.attach(node, co);
@@ -119,7 +119,7 @@ bool KShadow::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KShadow * KShadow::of(KNode *node) {
-	K__Assert(g_ShadowMgr);
+	K__ASSERT(g_ShadowMgr);
 	return g_ShadowMgr->m_Nodes.get(node);
 }
 
@@ -230,7 +230,7 @@ void KShadow::update() {
 			// スプライト影を描画するには、キャラクターの描画モードをグループ化しておく必要がある
 			owner_renderer->setGrouping(true);
 			KTexture *owner_sprite_tex = KVideo::findTexture(owner_renderer->getGroupRenderTexture());
-			K__Assert(owner_sprite_tex);
+			K__ASSERT(owner_sprite_tex);
 
 			KVec3 pivot;
 			int tex_w=0, tex_h=0;
@@ -369,7 +369,7 @@ bool KShadow::getAltitude(float *alt) {
 	return false;
 }
 bool KShadow::compute_shadow_transform(const Data &data, KVec3 *out_pos, KVec3 *out_scale, float *out_alt) {
-	K__Assert(out_pos);
+	K__ASSERT(out_pos);
 	KNode *self = getNode();
 	KNode *owner = self->getParent();
 	if (owner == nullptr) return false;

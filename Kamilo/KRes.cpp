@@ -89,7 +89,7 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 	}
 	// Submeshes
 	if (num_vertices > 0) {
-		K__Assert(mesh->getSubMeshCount() > 0);
+		K__ASSERT(mesh->getSubMeshCount() > 0);
 		const int *indices = mesh->getIndices();
 		for (int sidx=0; sidx<mesh->getSubMeshCount(); ++sidx) {
 			const KSubMesh *sub = mesh->getSubMesh(sidx);
@@ -328,8 +328,8 @@ bool KSpriteRes::buildFromImageEx(int img_w, int img_h, const KPath &texture_nam
 	float pivot_y = floorf(atlas_h * 0.5f);
 
 	// あまり変な値が入ってたら警告
-	K__Assert(0 <= pivot_x && pivot_x <= atlas_w);
-	K__Assert(0 <= pivot_y && pivot_y <= atlas_h);
+	K__ASSERT(0 <= pivot_x && pivot_x <= atlas_w);
+	K__ASSERT(0 <= pivot_y && pivot_y <= atlas_h);
 
 	// スプライト構築
 	mImageW = img_w;
@@ -452,7 +452,7 @@ void KClipRes::saveForEdge(KXmlElement *xml, const KPath &homeDir) {
 		xml->setAttrInt("autokill", 1);
 	}
 	if (mEditInfoXml) {
-		K__Assert(mEditInfoXml->hasTag("EditInfo"));
+		K__ASSERT(mEditInfoXml->hasTag("EditInfo"));
 		xml->addChild(mEditInfoXml);
 	}
 
@@ -517,7 +517,7 @@ void KClipRes::saveForClip(KXmlElement *xml, const KPath &homeDir) {
 		xml->setAttrInt("autokill", 1);
 	}
 	if (mEditInfoXml) {
-		K__Assert(mEditInfoXml->hasTag("EditInfo"));
+		K__ASSERT(mEditInfoXml->hasTag("EditInfo"));
 		xml->addChild(mEditInfoXml);
 	}
 	for (int i=0; i<getKeyCount(); i++) {
@@ -796,9 +796,9 @@ int KClipRes::getLayerCount(int page) const {
 	return mKeys[page].num_layers;
 }
 bool KClipRes::getNextPage(int page, int mark, std::string *p_new_clip, int *p_new_page) const {
-	K__Assert(page >= 0);
-	K__Assert(p_new_clip);
-	K__Assert(p_new_page);
+	K__ASSERT(page >= 0);
+	K__ASSERT(p_new_clip);
+	K__ASSERT(p_new_page);
 
 	const SPRITE_KEY *key = getKey(page);
 	
@@ -1620,7 +1620,7 @@ public:
 		std::string cur_path = (p_texture && *p_texture) ? getTextureName(*p_texture).u8() : "";
 		KPath new_path;
 		if (guiTextureSelector(label, cur_path, &new_path)) {
-			K__Assert(p_texture);
+			K__ASSERT(p_texture);
 			*p_texture = findTextureRaw(new_path, true);
 			return true;
 		}
@@ -1675,7 +1675,7 @@ public:
 		clearSprites();
 	}
 	void init(KTextureBank *tex_bank) {
-		K__Assert(tex_bank);
+		K__ASSERT(tex_bank);
 		m_texbank = tex_bank;
 	}
 	virtual int getSpriteCount() override {
@@ -1897,32 +1897,32 @@ public:
 		return image;
 	}
 	void export_sprite_image(KImage &dest_image, const KImage &src_image, const KSpriteAuto &sprite, const KMesh *mesh) {
-		K__Assert(sprite != nullptr);
-		K__Assert(mesh);
-		K__Assert(mesh->getSubMeshCount() > 0);
-		K__Assert(mesh->getVertexCount() > 0);
+		K__ASSERT(sprite != nullptr);
+		K__ASSERT(mesh);
+		K__ASSERT(mesh->getSubMeshCount() > 0);
+		K__ASSERT(mesh->getVertexCount() > 0);
 		if (mesh->getIndexCount() > 0) {
 			// インデックス配列を使って定義されている
 
 			// 画像を復元する。この部分は KImgPackR::getMeshPositionArray によるメッシュ作成手順に依存していることに注意！
 			const KSubMesh *sub = mesh->getSubMesh(0);
-			K__Assert(sub->primitive == KPrimitive_TRIANGLES);
-			K__Assert(mesh->getIndexCount() % 6 == 0); // 頂点数が6の倍数であること
+			K__ASSERT(sub->primitive == KPrimitive_TRIANGLES);
+			K__ASSERT(mesh->getIndexCount() % 6 == 0); // 頂点数が6の倍数であること
 			const int index_count = mesh->getIndexCount();
 			const int *indices = mesh->getIndices();
 			const int src_w = src_image.getWidth();
 			const int src_h = src_image.getHeight();
 			for (int i=0; i<index_count; i+=6) {
-				K__Assert(indices[i] == i);
+				K__ASSERT(indices[i] == i);
 				const KVec3 p0 = mesh->getPosition(i + 0); // 0 ---- 1 左上から時計回りに 0, 1, 2, 3 になっている
 				const KVec3 p1 = mesh->getPosition(i + 1); // |      |
 				const KVec3 p2 = mesh->getPosition(i + 2); // |      |
 				const KVec3 p3 = mesh->getPosition(i + 3); // 3------2
 				// p0, p1, p2, p3 は座標軸に平行な矩形になっている
-				K__Assert(p0.x == p3.x);
-				K__Assert(p1.x == p2.x);
-				K__Assert(p0.y == p1.y);
-				K__Assert(p2.y == p3.y);
+				K__ASSERT(p0.x == p3.x);
+				K__ASSERT(p1.x == p2.x);
+				K__ASSERT(p0.y == p1.y);
+				K__ASSERT(p2.y == p3.y);
 				int left   = (int)p0.x;
 				int right  = (int)p2.x;
 				int top    = (int)p0.y;
@@ -1934,8 +1934,8 @@ public:
 				}
 				// 必ずひとつ以上のピクセルを含んでいる。
 				// 元画像が不透明ピクセルを一切含んでいない場合は、そもそもメッシュが生成されないはず
-				K__Assert(left < right);
-				K__Assert(top < bottom);
+				K__ASSERT(left < right);
+				K__ASSERT(top < bottom);
 				if (! sprite->mUsingPackedTexture) {
 					// 元画像が中途半端なサイズだった場合、ブロックが元画像範囲からはみ出ている場合がある事に注意
 					if (sprite->mImageW < right ) right  = sprite->mImageW;
@@ -1959,7 +1959,7 @@ public:
 			const KSubMesh *sub = mesh->getSubMesh(0);
 			const int vertex_count = mesh->getVertexCount();
 			if (sub->primitive == KPrimitive_TRIANGLES) {
-				K__Assert(vertex_count % 6 == 0); // 頂点数が6の倍数であること
+				K__ASSERT(vertex_count % 6 == 0); // 頂点数が6の倍数であること
 				const int src_w = src_image.getWidth();
 				const int src_h = src_image.getHeight();
 				for (int i=0; i<vertex_count; i+=6) {
@@ -1968,10 +1968,10 @@ public:
 					const KVec3 p2 = mesh->getPosition(i + 2); // |      |
 					const KVec3 p3 = mesh->getPosition(i + 3); // 3------2
 					// p0, p1, p2, p3 は座標軸に平行な矩形になっている
-					K__Assert(p0.x == p3.x);
-					K__Assert(p1.x == p2.x);
-					K__Assert(p0.y == p1.y);
-					K__Assert(p2.y == p3.y);
+					K__ASSERT(p0.x == p3.x);
+					K__ASSERT(p1.x == p2.x);
+					K__ASSERT(p0.y == p1.y);
+					K__ASSERT(p2.y == p3.y);
 					int left   = (int)p0.x;
 					int right  = (int)p2.x;
 					int top    = (int)p0.y;
@@ -1983,8 +1983,8 @@ public:
 					}
 					// 必ずひとつ以上のピクセルを含んでいる。
 					// 元画像が不透明ピクセルを一切含んでいない場合は、そもそもメッシュが生成されないはず
-					K__Assert(left < right);
-					K__Assert(top < bottom);
+					K__ASSERT(left < right);
+					K__ASSERT(top < bottom);
 					if (! sprite->mUsingPackedTexture) {
 						// 元画像が中途半端なサイズだった場合、ブロックが元画像範囲からはみ出ている場合がある事に注意
 						if (sprite->mImageW < right ) right  = sprite->mImageW;
@@ -2001,7 +2001,7 @@ public:
 					dest_image.copyRect(left, top, src_image, src_x, src_y, cpy_w, cpy_h);
 				}
 			} else if (sub->primitive == KPrimitive_TRIANGLE_STRIP) {
-				K__Assert(vertex_count == 4);
+				K__ASSERT(vertex_count == 4);
 				const int src_w = src_image.getWidth();
 				const int src_h = src_image.getHeight();
 				for (int i=0; i<vertex_count; i+=4) {
@@ -2010,10 +2010,10 @@ public:
 					const KVec3 p2 = mesh->getPosition(i + 2); // |      |
 					const KVec3 p3 = mesh->getPosition(i + 3); // 2------3
 					// p0, p1, p2, p3 は座標軸に平行な矩形になっている
-					K__Assert(p0.x == p2.x);
-					K__Assert(p1.x == p3.x);
-					K__Assert(p0.y == p1.y);
-					K__Assert(p2.y == p3.y);
+					K__ASSERT(p0.x == p2.x);
+					K__ASSERT(p1.x == p3.x);
+					K__ASSERT(p0.y == p1.y);
+					K__ASSERT(p2.y == p3.y);
 					int left   = (int)p0.x;
 					int right  = (int)p3.x;
 					int top    = (int)p0.y;
@@ -2025,8 +2025,8 @@ public:
 					}
 					// 必ずひとつ以上のピクセルを含んでいる。
 					// 元画像が不透明ピクセルを一切含んでいない場合は、そもそもメッシュが生成されないはず
-					K__Assert(left < right);
-					K__Assert(top < bottom);
+					K__ASSERT(left < right);
+					K__ASSERT(top < bottom);
 					if (! sprite->mUsingPackedTexture) {
 						// 元画像が中途半端なサイズだった場合、ブロックが元画像範囲からはみ出ている場合がある事に注意
 						if (sprite->mImageW < right ) right  = sprite->mImageW;
@@ -2043,14 +2043,14 @@ public:
 					dest_image.copyRect(left, top, src_image, src_x, src_y, cpy_w, cpy_h);
 				}
 			} else {
-				K__Assert(0 && "Invalid primitive type");
+				K__ASSERT(0 && "Invalid primitive type");
 			}
 		}
 	}
 	virtual void guiSpriteTextureInfo(const KPath &name, KTextureBank *texbank) override {
 		KSpriteAuto sprite = findSprite(name, false);
 		if (sprite != nullptr) {
-			K__Assert(texbank);
+			K__ASSERT(texbank);
 			texbank->guiTexture(sprite->mTextureName, THUMBNAIL_SIZE);
 		}
 	}
@@ -2072,7 +2072,7 @@ public:
 		auto it = m_items.find(name.u8());
 		if (it != m_items.end()) {
 			sp = it->second;
-			K__Assert(sp != nullptr);
+			K__ASSERT(sp != nullptr);
 		} else if (should_exist) {
 			// もしかして
 			// 例えば "player.sprite" は "chara/player.sprite" とはマッチしない。
@@ -2147,7 +2147,7 @@ public:
 		if (update_mesh) {
 			KSpriteAuto item = m_items[name.u8()];
 			if (item->mMesh.getVertexCount() == 0) {
-				K__Assert(m_texbank);
+				K__ASSERT(m_texbank);
 				updateSpriteMesh(item, m_texbank);
 			} else {
 				item->mMesh.copyFrom(&sp->mMesh);
@@ -2176,7 +2176,7 @@ public:
 		if (img.empty()) return false;
 
 		// テクスチャを登録する
-		K__Assert(m_texbank);
+		K__ASSERT(m_texbank);
 		m_texbank->addTextureFromImage(tex_name, img);
 
 		bool ok = false;
@@ -2194,8 +2194,8 @@ public:
 	}
 private:
 	static void updateSpriteMesh(KSpriteAuto &sp, KTextureBank *tbank) {
-		K__Assert(sp != nullptr);
-		K__Assert(tbank);
+		K__ASSERT(sp != nullptr);
+		K__ASSERT(tbank);
 
 		// インデックスなし。ただの png ファイルを参照する
 		const KPath &tex_name = sp->mTextureName;
@@ -2502,7 +2502,7 @@ public:
 				KLog::printInfo("W_CLIP_OVERWRITE: %s", name.c_str());
 				removeClipResource(name);
 			}
-			K__Assert(m_clips.find(name) == m_clips.end());
+			K__ASSERT(m_clips.find(name) == m_clips.end());
 			clip->grab();
 			m_clips[name] = clip;
 			KLog::printVerbose("ADD_CLIP: %s", name.c_str());
@@ -2597,7 +2597,7 @@ public:
 				const KPath &name = *it;
 				if (ImGui::TreeNode(name.u8())) {
 					auto cit = m_clips.find(name);
-					K__Assert(cit != m_clips.end());
+					K__ASSERT(cit != m_clips.end());
 					KClipRes *clip = cit->second;
 					guiClip(clip);
 					ImGui::TreePop();
@@ -2673,7 +2673,7 @@ lua_State * KLuaBank::addEmptyScript(const std::string &name) {
 			KLog::printWarning("W_SCRIPT_OVERWRITE: Resource named '%s' already exists. The resource data will be overwriten by new one", name.c_str());
 			this->remove(name);
 		}
-		K__Assert(m_items[name] == nullptr);
+		K__ASSERT(m_items[name] == nullptr);
 		m_items[name] = ls;
 	}
 	m_mutex.unlock();
@@ -2700,7 +2700,7 @@ bool KLuaBank::addScript(const std::string &name, const std::string &code) {
 	}
 
 	lua_State *ls = addEmptyScript(name);
-	K__Assert(ls);
+	K__ASSERT(ls);
 	// ロードする
 	if (luaL_loadbuffer(ls, code.c_str(), code.size(), name.c_str()) != LUA_OK) {
 		const char *msg = luaL_optstring(ls, -1, __FUNCTION__);
@@ -2741,7 +2741,7 @@ lua_State * KLuaBank::queryScript(const std::string &name, bool reload) {
 }
 lua_State * KLuaBank::makeThread(const std::string &name) {
 	lua_State *ls = queryScript(name);
-	K__Assert(ls);
+	K__ASSERT(ls);
 	return lua_newthread(ls);
 }
 
@@ -3732,7 +3732,7 @@ bool KGameEdgeBuilder::isIgnorableLabelColor(const KColor32 &color) {
 
 /// 無視可能なレイヤーならば true を返す（レイヤーのラベルの色によって判別）
 bool KGameEdgeBuilder::isIgnorableLayer(const KEdgeLayer *layer) {
-	K__Assert(layer);
+	K__ASSERT(layer);
 	return isIgnorableLabelColor(KColor32(
 		layer->m_label_color_rgbx[0],
 		layer->m_label_color_rgbx[1],
@@ -3743,7 +3743,7 @@ bool KGameEdgeBuilder::isIgnorableLayer(const KEdgeLayer *layer) {
 
 /// 無視可能なページならば true を返す（ページのラベルの色によって判別）
 bool KGameEdgeBuilder::isIgnorablePage(const KEdgePage *page) {
-	K__Assert(page);
+	K__ASSERT(page);
 	return isIgnorableLabelColor(KColor32(
 		page->m_label_color_rgbx[0],
 		page->m_label_color_rgbx[1],
@@ -3754,7 +3754,7 @@ bool KGameEdgeBuilder::isIgnorablePage(const KEdgePage *page) {
 
 /// 無視可能なレイヤーを全て削除する
 void KGameEdgeBuilder::removeIgnorableLayers(KEdgePage *page) {
-	K__Assert(page);
+	K__ASSERT(page);
 	for (int i=page->getLayerCount()-1; i>=0; i--) {
 		const KEdgeLayer *layer = page->getLayer(i);
 		if (isIgnorableLayer(layer)) {
@@ -3765,7 +3765,7 @@ void KGameEdgeBuilder::removeIgnorableLayers(KEdgePage *page) {
 
 /// 無視可能なページを全て削除する
 void KGameEdgeBuilder::removeIgnorablePages(KEdgeDocument *edge) {
-	K__Assert(edge);
+	K__ASSERT(edge);
 	for (int i=edge->getPageCount()-1; i>=0; i--) {
 		const KEdgePage *page = edge->getPage(i);
 		if (isIgnorablePage(page)) {
@@ -3776,7 +3776,7 @@ void KGameEdgeBuilder::removeIgnorablePages(KEdgeDocument *edge) {
 
 /// 無視可能なページ、レイヤーを全て削除する
 void KGameEdgeBuilder::removeIgnorableElements(KEdgeDocument *edge) {
-	K__Assert(edge);
+	K__ASSERT(edge);
 	removeIgnorablePages(edge);
 	for (int i=0; i<edge->getPageCount(); i++) {
 		KEdgePage *page = edge->getPage(i);
@@ -3785,7 +3785,7 @@ void KGameEdgeBuilder::removeIgnorableElements(KEdgeDocument *edge) {
 }
 
 bool KGameEdgeBuilder::parseLabel(const KPath &label, KGameEdgeLayerLabel *out) {
-	K__Assert(out);
+	K__ASSERT(out);
 	out->numcmds = 0;
 
 	// コマンド解析
@@ -3855,7 +3855,7 @@ bool KGameEdgeBuilder::loadFromStream(KEdgeDocument *edge, KInputStream &file, c
 	}
 }
 bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const std::string &debugname) {
-	K__Assert(edge);
+	K__ASSERT(edge);
 	bool ret = false;
 	KInputStream file = KInputStream::fromMemory(data, size);
 	if (file.isOpen()) {
@@ -3866,7 +3866,7 @@ bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *dat
 	return ret;
 }
 bool KGameEdgeBuilder::loadFromFileName(KEdgeDocument *edge, const std::string &filename) {
-	K__Assert(edge);
+	K__ASSERT(edge);
 	bool ret = false;
 	KInputStream file = KInputStream::fromFileName(filename);
 	if (file.isOpen()) {
@@ -4258,7 +4258,7 @@ private:
 	void writeTimestamp(KXmlElement *xmlBank, const std::string &name, time_t timestamp) {
 		if (xmlBank == nullptr) return;
 		if (name.empty()) return;
-		K__Assert(xmlBank->hasTag("Bank"));
+		K__ASSERT(xmlBank->hasTag("Bank"));
 
 		int idx = getFileNodeIndex(xmlBank, name);
 		KXmlElement *elm = nullptr;
@@ -4268,7 +4268,7 @@ private:
 		} else {
 			elm = xmlBank->getChild(idx);
 		}
-		K__Assert(elm);
+		K__ASSERT(elm);
 
 		char timeVal[256] = {0};
 		sprintf_s(timeVal, sizeof(timeVal), "%lld", timestamp);
@@ -4277,14 +4277,14 @@ private:
 	time_t readTimestamp(const KXmlElement *xmlBank, const std::string &name) const {
 		if (xmlBank == nullptr) return 0;
 		if (name.empty()) return 0;
-		K__Assert(xmlBank->hasTag("Bank"));
+		K__ASSERT(xmlBank->hasTag("Bank"));
 
 		// 各ノードを探していく
 		// <... name="filename" time="123456789" />
 		int cnt = xmlBank->getChildCount();
 		for (int i=0; i<cnt; i++) {
 			const KXmlElement *elm = xmlBank->getChild(i);
-			K__Assert(elm->hasTag("File"));
+			K__ASSERT(elm->hasTag("File"));
 
 			const std::string &nameVal = elm->getAttrString("name", "");
 			if (nameVal.compare(name) == 0) {
@@ -4301,12 +4301,12 @@ private:
 	int getFileNodeIndex(const KXmlElement *xmlBank, const std::string &name) const {
 		if (name.empty()) return -1;
 		if (xmlBank == nullptr) return -1;
-		K__Assert(xmlBank->hasTag("Bank"));
+		K__ASSERT(xmlBank->hasTag("Bank"));
 
 		int cnt = xmlBank->getChildCount();
 		for (int i=0; i<cnt; i++) {
 			const KXmlElement *elm = xmlBank->getChild(i);
-			K__Assert(elm->hasTag("File"));
+			K__ASSERT(elm->hasTag("File"));
 
 			const char *name_str = elm->getAttrString("name", "");
 			if (name.compare(name_str) == 0) {
@@ -4815,11 +4815,11 @@ public:
 						}
 						if (page_params.has_pivot_x) {
 							it->def->mPivot.x = page_params.getPivotXInPixels(it->def->mAtlasW);
-							K__Assert(it->def->mPivotInPixels);
+							K__ASSERT(it->def->mPivotInPixels);
 						}
 						if (page_params.has_pivot_y) {
 							it->def->mPivot.y = page_params.getPivotYInPixels(it->def->mAtlasH);
-							K__Assert(it->def->mPivotInPixels);
+							K__ASSERT(it->def->mPivotInPixels);
 						}
 					}
 				}
@@ -5196,7 +5196,7 @@ bool K_makeClip(KClipRes **out_clip, KInputStream &edge_file, const KPath &edge_
 		}
 		clip_page_index++;
 	}
-	K__Assert(out_clip);
+	K__ASSERT(out_clip);
 	KClipRes *new_clip = builder.createClip(clip_name.u8());
 	new_clip->setTag(""); // 作成元の .xres ファイル名タグを追加
 	new_clip->setTag(edge_name.u8()); // 作成元の .edg ファイル名タグを追加

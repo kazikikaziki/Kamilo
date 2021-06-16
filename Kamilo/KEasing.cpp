@@ -357,12 +357,12 @@ float KEasing::getValue(int time) const {
 		if (time < key1.time) {
 			const TimeKey &key0 = m_Keys[i0];
 			int dur = key1.time - key0.time;
-			K__Assert(dur > 0);
+			K__ASSERT(dur > 0);
 			float t = (float)(time - key0.time) / dur;
 			return easing(t, key0.value, key1.value, key1.expr); // key1 のイージング設定を使う事に注意
 		}
 	}
-	K__Assert(0);
+	K__ASSERT(0);
 	return 0.0f;
 }
 int KEasing::getIndexByTime(int time) const {

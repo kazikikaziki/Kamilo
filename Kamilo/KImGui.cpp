@@ -131,7 +131,7 @@ void KImGui::ImageExportButton(const char *label, KTEXID texid, const std::strin
 	}
 }
 void KImGui::StyleKK() {
-	K__Assert(ImGui::GetCurrentContext());
+	K__ASSERT(ImGui::GetCurrentContext());
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Alpha = 1.0f; // このアルファ値は文字も含んだウィンドウ全体のアルファなので注意
 	style.WindowPadding = ImVec2(2, 2); // ImGuiStyleVar_WindowPadding
@@ -149,7 +149,7 @@ void KImGui::StyleKK() {
 }
 void KImGui::PushFont(int index) {
 	ImGuiIO &io = ImGui::GetIO();
-	K__Assert(0 <= index && index < io.Fonts->Fonts.size());
+	K__ASSERT(0 <= index && index < io.Fonts->Fonts.size());
 	ImFont *font = io.Fonts->Fonts[index];
 	if (font) {
 		ImGui::PushFont(font);
@@ -758,9 +758,9 @@ static IDirect3DStateBlock9 *g_d3d9_block = NULL;
 /// @param size_pixels ピクセル単位でのフォントサイズ
 /// @note 新しいフォントは ImGui::GetIO().Fonts->Fonts 配列の末尾に追加される
 ImFont * KImGui::AddFontFromMemoryTTF(const void *data, size_t size, float size_pixels) {
-	K__Assert(data);
-	K__Assert(size > 0);
-	K__Assert(size_pixels > 0);
+	K__ASSERT(data);
+	K__ASSERT(size > 0);
+	K__ASSERT(size_pixels > 0);
 
 	// フォントデータを ImGUI 側で確保したバッファにコピーする。
 	// フォントデータの解放は ImGUI 側に任せるため、ローカルなポインタを渡してはいけない
@@ -795,8 +795,8 @@ ImFont * KImGui::AddFontFromMemoryTTF(const void *data, size_t size, float size_
 ///    フォントデータだけは最初にロードしたものをずっと使い続ける。
 ///
 ImFont * KImGui::AddFontFromFileTTF(const std::string &filename_u8, int ttc_index, float size_pixels) {
-	K__Assert(ttc_index >= 0);
-	K__Assert(size_pixels > 0);
+	K__ASSERT(ttc_index >= 0);
+	K__ASSERT(size_pixels > 0);
 
 	ImFontConfig conf;
 	conf.FontNo = ttc_index;
@@ -914,7 +914,7 @@ long KImGui::WndProc(void *hWnd, uint32_t msg, uintptr_t wp, uintptr_t lp) {
 /// 新しい描画フレームを開始する。
 /// ImGui::Text() などの関数は KImGui::BeginRender() と KImGui::EndRender() の間で呼ぶこと。
 void KImGui::BeginRender() {
-	K__Assert(ImGui::GetCurrentContext());
+	K__ASSERT(ImGui::GetCurrentContext());
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -922,7 +922,7 @@ void KImGui::BeginRender() {
 
 /// Dear ImGui の描画を終了し、画面を更新する。
 void KImGui::EndRender() {
-	K__Assert(ImGui::GetCurrentContext());
+	K__ASSERT(ImGui::GetCurrentContext());
 	ImGui::EndFrame();
 
 	if (g_d3d9_block && g_d3d9_dev) {
@@ -937,12 +937,12 @@ void KImGui::EndRender() {
 }
 
 static void _SetPointFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-	K__Assert(g_d3d9_dev);
+	K__ASSERT(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
 }
 static void _SetLinearFilterCB(const ImDrawList* parent_list, const ImDrawCmd* cmd) {
-	K__Assert(g_d3d9_dev);
+	K__ASSERT(g_d3d9_dev);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	g_d3d9_dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 }
@@ -1230,7 +1230,7 @@ void KImGuiCombo::begin() {
 }
 void KImGuiCombo::end() {
 	mUpdating--;
-	K__Assert(mUpdating >= 0);
+	K__ASSERT(mUpdating >= 0);
 	if (mUpdating == 0) {
 		mPChars.clear();
 		for (int i=0; i<(int)mItems.size(); i++) {
@@ -1239,7 +1239,7 @@ void KImGuiCombo::end() {
 	}
 }
 void KImGuiCombo::addItem(const char *s, int value) {
-	K__Assert(mUpdating > 0);
+	K__ASSERT(mUpdating > 0);
 	mItems.push_back(Pair(s, value));
 }
 int KImGuiCombo::indexOfText(const char *s) const {

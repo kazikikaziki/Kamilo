@@ -205,7 +205,7 @@ void CSoundImpl::deletePooledSound(const std::string &name) {
 /// @return 再生に成功すれば、そのサウンド ID 。失敗したら NULL
 KSOUNDID CSoundImpl::playPooledSound(const std::string &name, float volume) {
 	K__SCOPED_LOCK;
-	K__Assert(!name.empty());
+	K__ASSERT(!name.empty());
 	auto it = m_Pool.find(name);
 	if (it == m_Pool.end()) {
 		return nullptr;
@@ -921,151 +921,151 @@ void KAudioPlayer::uninstall() {
 	}
 }
 int KAudioPlayer::getGroupCount() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getGroupCount();
 }
 void KAudioPlayer::setGroupCount(int count) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setGroupCount(count);
 }
 KAudioFlags KAudioPlayer::getGroupFlags(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getGroupFlags(group_id);
 }
 void KAudioPlayer::setGroupFlags(int group_id, KAudioFlags flags) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setGroupFlags(group_id, flags);
 }
 float KAudioPlayer::getGroupMasterVolume(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getGroupMasterVolume(group_id);
 }
 float KAudioPlayer::getGroupVolume(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getGroupVolume(group_id);
 }
 void KAudioPlayer::setGroupMasterVolume(int group_id, float volume) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setGroupMasterVolume(group_id, volume);
 }
 void KAudioPlayer::setGroupVolume(int group_id, float volume, int time) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setGroupVolume(group_id, volume, time);
 }
 float KAudioPlayer::getActualGroupVolume(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getActualGroupVolume(group_id);
 }
 const std::string & KAudioPlayer::getGroupName(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getGroupName(group_id);
 }
 void KAudioPlayer::setGroupName(int group_id, const std::string &name) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setGroupName(group_id, name);
 }
 float KAudioPlayer::getMasterVolume() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getMasterVolume();
 }
 void KAudioPlayer::setMasterVolume(float volume) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setMasterVolume(volume);
 }
 int KAudioPlayer::getNumberOfPlaying() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getNumberOfPlaying();
 }
 int KAudioPlayer::getNumberOfPlayingInGroup(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getNumberOfPlayingInGroup(group_id);
 }
 bool KAudioPlayer::isMuted() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->isMuted();
 }
 void KAudioPlayer::setMuted(bool value) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setMuted(value);
 }
 KSOUNDID KAudioPlayer::playStreaming(const std::string &sound, bool looping, int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->playStreaming(sound, looping, group_id);
 }
 KSOUNDID KAudioPlayer::playOneShot(const std::string &sound, int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->playOneShot(sound, group_id);
 }
 void KAudioPlayer::stop(KSOUNDID id, int time) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stop(id, time);
 }
 void KAudioPlayer::stopAll(int fade) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stopAll(fade);
 }
 void KAudioPlayer::stopByGroup(int group_id, int fade) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stopByGroup(group_id, fade);
 }
 void KAudioPlayer::stopFade(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stopFade(id);
 }
 void KAudioPlayer::stopFadeAll() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stopFadeAll();
 }
 void KAudioPlayer::stopFadeByGroup(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->stopFadeByGroup(group_id);
 }
 void KAudioPlayer::seekSeconds(KSOUNDID id, float time) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->seekSeconds(id, time);
 }
 void KAudioPlayer::postDeleteHandle(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->postDeleteHandle(id);
 }
 void KAudioPlayer::clearAllSounds() {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->clearAllSounds();
 }
 bool KAudioPlayer::isValidSound(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->isValidSound(id);
 }
 float KAudioPlayer::getPositionInSeconds(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getPositionInSeconds(id);
 }
 float KAudioPlayer::getLengthInSeconds(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->getLengthInSeconds(id);
 }
 void KAudioPlayer::setLooping(KSOUNDID id, bool value) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setLooping(id, value);
 }
 void KAudioPlayer::setVolume(KSOUNDID id, float value) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setVolume(id, value);
 }
 void KAudioPlayer::setPitch(KSOUNDID id, float value) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->setPitch(id, value);
 }
 bool KAudioPlayer::isPlaying(KSOUNDID id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	return g_AudioPlayer->isPlaying(id);
 }
 void KAudioPlayer::updateSoundVolumes(int group_id) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->updateSoundVolumes(group_id);
 }
 void KAudioPlayer::groupCommand(int group_id, const char *cmd) {
-	K__Assert(g_AudioPlayer);
+	K__ASSERT(g_AudioPlayer);
 	g_AudioPlayer->groupCommand(group_id, cmd);
 }
 #pragma endregion // KAudioPlayer

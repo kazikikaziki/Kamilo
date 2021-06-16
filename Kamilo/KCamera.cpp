@@ -76,7 +76,7 @@ void KCamera::uninstall() {
 	}
 }
 void KCamera::attach(KNode *node) {
-	K__Assert(g_CameraMgr);
+	K__ASSERT(g_CameraMgr);
 	if (node && !isAttached(node)) {
 		KCamera *co = new KCamera();
 		g_CameraMgr->m_Nodes.attach(node, co);
@@ -87,15 +87,15 @@ bool KCamera::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KCamera * KCamera::of(KNode *node) {
-	K__Assert(g_CameraMgr);
+	K__ASSERT(g_CameraMgr);
 	return g_CameraMgr->m_Nodes.get(node);
 }
 KNode * KCamera::findCameraFor(const KNode *node) {
-	K__Assert(g_CameraMgr);
+	K__ASSERT(g_CameraMgr);
 	return g_CameraMgr->findCameraFor(node);
 }
 int KCamera::getCameraNodes(KNodeArray &list) {
-	K__Assert(g_CameraMgr);
+	K__ASSERT(g_CameraMgr);
 	return g_CameraMgr->m_Nodes.exportArray(list);
 }
 
@@ -282,12 +282,12 @@ KTEXID KCamera::getRenderTarget() const {
 }
 
 void KCamera::setProjectionW(float value) {
-	K__Assert(value > 0);
+	K__ASSERT(value > 0);
 	m_Data.size_w = value;
 	update_projection_matrix();
 }
 void KCamera::setProjectionH(float value) {
-	K__Assert(value > 0);
+	K__ASSERT(value > 0);
 	m_Data.size_h = value;
 	update_projection_matrix();
 }
@@ -298,11 +298,11 @@ float KCamera::getProjectionH() const {
 	return m_Data.size_h;
 }
 float KCamera::getProjectionZoomW() const {
-	K__Assert(m_Data.zoom > 0);
+	K__ASSERT(m_Data.zoom > 0);
 	return m_Data.size_w / m_Data.zoom;
 }
 float KCamera::getProjectionZoomH() const {
-	K__Assert(m_Data.zoom > 0);
+	K__ASSERT(m_Data.zoom > 0);
 	return m_Data.size_h / m_Data.zoom;
 }
 void KCamera::setProjectionOffset(const KVec3 &offset) {
@@ -322,7 +322,7 @@ void KCamera::setZoom(float value) {
 	if (value > 0) {
 		m_Data.zoom = value;
 	} else {
-		K__Assert(0);
+		K__ASSERT(0);
 		m_Data.zoom = 1.0f;
 	}
 	update_projection_matrix();

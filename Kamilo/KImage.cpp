@@ -65,7 +65,7 @@ static inline KColor32 _color32_mean4(const KColor32 &x, const KColor32 &y, cons
 
 /// a ÷ b の端数切り上げ整数を返す
 static int _ceil_div(int a, int b) {
-	K__Assert(b > 0);
+	K__ASSERT(b > 0);
 	return (int)ceilf((float)a / b);
 }
 
@@ -77,7 +77,7 @@ static int _ceil_div(int a, int b) {
 
 #pragma region KCorePng
 static void KCorePng__swap_endian32(void *data32) {
-	K__Assert(data32);
+	K__ASSERT(data32);
 	uint8_t *p = (uint8_t *)data32;
 	uint8_t t;
 	t = p[0]; p[0]=p[3]; p[3] = t; // p[0] <==> p[3]
@@ -140,7 +140,7 @@ bool KCorePng::decode(const void *data, int size, KBmp *bmp, int *out_w, int *ou
 			ok = true;
 			if (KBmp::isvalid(bmp)) {
 				if ((bmp->w >= w) && (bmp->h >= h)) {
-					K__Assert(bmp->pitch == w*COMP);
+					K__ASSERT(bmp->pitch == w*COMP);
 					memcpy(bmp->data, ptr, w*h*COMP);
 				} else {
 					// サイズが足りない
@@ -267,8 +267,8 @@ static void kk_blit(KImage &dstImg, int dstRectX, int dstRectY, const KImage &sr
 			// 全範囲コピーかつピッチが等しい
 			uint8_t *dstPtr = dstImg.lockData();
 			const uint8_t *srcPtr = srcImg.getData();
-			K__Assert(dstPtr);
-			K__Assert(srcPtr);
+			K__ASSERT(dstPtr);
+			K__ASSERT(srcPtr);
 			memcpy(dstPtr, srcPtr, srcImg.getDataSize());
 			dstImg.unlockData();
 
@@ -279,8 +279,8 @@ static void kk_blit(KImage &dstImg, int dstRectX, int dstRectY, const KImage &sr
 			const int copyBytes = range.cpy_w * pixelBytes;
 			uint8_t *dstPtr = dstImg.lockData();
 			const uint8_t *srcPtr = srcImg.getData();
-			K__Assert(dstPtr);
-			K__Assert(srcPtr);
+			K__ASSERT(dstPtr);
+			K__ASSERT(srcPtr);
 			for (int yy=0; yy<range.cpy_h; yy++) {
 				const int dstOffset = ((range.dst_y + yy) * dstW + range.dst_x) * pixelBytes;
 				const int srcOffset = ((range.src_y + yy) * srcW + range.src_x) * pixelBytes;
@@ -615,7 +615,7 @@ void KImage::fill(const KColor32 &color) {
 	if (w==0 || h==0) return;
 
 	uint8_t *ptr = lockData();
-	K__Assert(ptr);
+	K__ASSERT(ptr);
 	switch (fmt) {
 	case KColorFormat_RGBA32:
 		if (color==KColor32::ZERO) {
@@ -730,9 +730,9 @@ void KImageUtils::raw_set_pixel(KBmp &bmp, int x, int y, const KColor32 &color) 
 	p[3] = color.a;
 }
 bool KImageUtils::raw_adjust_rect(const KBmp &bmp, int *_x, int *_y, int *_w, int *_h) {
-	K__Assert(bmp.w >= 0);
-	K__Assert(bmp.h >= 0);
-	K__Assert(_x && _y && _w && _h);
+	K__ASSERT(bmp.w >= 0);
+	K__ASSERT(bmp.h >= 0);
+	K__ASSERT(_x && _y && _w && _h);
 	bool changed = false;
 	int x0 = *_x;
 	int y0 = *_y;
@@ -756,8 +756,8 @@ bool KImageUtils::raw_adjust_rect(const KBmp &dst, const KBmp &src, CopyRange *r
 }
 
 void KImageUtils::raw_copy(KBmp &dst, const KBmp &src) {
-	K__Assert(dst.w == src.w);
-	K__Assert(dst.h == src.h);
+	K__ASSERT(dst.w == src.w);
+	K__ASSERT(dst.h == src.h);
 
 	if (dst.pitch == src.pitch) {
 		// ピッチサイズがおなじ。一括コピーできる
@@ -824,9 +824,9 @@ void KImageUtils::raw_fill_rect(KBmp &bmp, int left, int top, int width, int hei
 	}
 }
 void KImageUtils::raw_get_channel(KBmp &dst, const KBmp &src, int channel) {
-	K__Assert(dst.w == src.w);
-	K__Assert(dst.h == src.h);
-	K__Assert(0 <= channel && channel < KBmp::K_BMP_BYTE_DEPTH);
+	K__ASSERT(dst.w == src.w);
+	K__ASSERT(dst.h == src.h);
+	K__ASSERT(0 <= channel && channel < KBmp::K_BMP_BYTE_DEPTH);
 	for (int y=0; y<src.h; y++) {
 		for (int x=0; x<src.w; x++) {
 			int offset = src.get_offset(x, y);
@@ -850,10 +850,10 @@ void KImageUtils::raw_join_channels(KBmp &dst,
 	const KBmp *srcB, int valB,
 	const KBmp *srcA, int valA
 ) {
-	if (srcR) { K__Assert(dst.w==srcR->w && dst.h==srcR->h); }
-	if (srcG) { K__Assert(dst.w==srcG->w && dst.h==srcG->h); }
-	if (srcB) { K__Assert(dst.w==srcB->w && dst.h==srcB->h); }
-	if (srcA) { K__Assert(dst.w==srcA->w && dst.h==srcA->h); }
+	if (srcR) { K__ASSERT(dst.w==srcR->w && dst.h==srcR->h); }
+	if (srcG) { K__ASSERT(dst.w==srcG->w && dst.h==srcG->h); }
+	if (srcB) { K__ASSERT(dst.w==srcB->w && dst.h==srcB->h); }
+	if (srcA) { K__ASSERT(dst.w==srcA->w && dst.h==srcA->h); }
 	for (int y=0; y<dst.h; y++) {
 		for (int x=0; x<dst.w; x++) {
 			int offset = dst.get_offset(x, y);
@@ -868,8 +868,8 @@ void KImageUtils::raw_join_channels(KBmp &dst,
 }
 void KImageUtils::raw_half_scale(KBmp &dst, const KBmp &src) {
 	// src を、その半分のサイズ dst に書き出す
-	K__Assert(dst.w*2 <= src.w); // src のサイズが奇数だった時に 1 ピクセルの誤差が発生するので == で判定したらダメ
-	K__Assert(dst.h*2 <= src.h);
+	K__ASSERT(dst.w*2 <= src.w); // src のサイズが奇数だった時に 1 ピクセルの誤差が発生するので == で判定したらダメ
+	K__ASSERT(dst.h*2 <= src.h);
 	for (int y=0; y<dst.h; y++) {
 		for (int x=0; x<dst.w; x++) {
 			// (x, y) を左上とする2x2の4ピクセルの平均色を計算する
@@ -884,8 +884,8 @@ void KImageUtils::raw_half_scale(KBmp &dst, const KBmp &src) {
 }
 void KImageUtils::raw_double_scale(KBmp &dst, const KBmp &src) {
 	// src を、その倍のサイズ dst に書き出す
-	K__Assert(src.w*2 <= dst.w); // dst のサイズが奇数だった時に 1 ピクセルの誤差が発生するので == で判定したらダメ
-	K__Assert(src.h*2 <= dst.h);
+	K__ASSERT(src.w*2 <= dst.w); // dst のサイズが奇数だった時に 1 ピクセルの誤差が発生するので == で判定したらダメ
+	K__ASSERT(src.h*2 <= dst.h);
 	for (int y=0; y<src.h; y++) {
 		for (int x=0; x<src.w; x++) {
 			KColor32 c = raw_get_pixel(src, x, y);
@@ -965,8 +965,8 @@ void KImageUtils::raw_inv(KBmp &bmp) {
 	}
 }
 void KImageUtils::raw_blur_x(KBmp &dst, const KBmp &src) {
-	K__Assert(dst.w >= src.w);
-	K__Assert(dst.h >= src.h);
+	K__ASSERT(dst.w >= src.w);
+	K__ASSERT(dst.h >= src.h);
 	for (int y=0; y<src.h; y++) {
 		for (int x=1; x+1<src.w; x++) {
 			KColor32 color0 = raw_get_pixel(src, x-1, y);
@@ -978,8 +978,8 @@ void KImageUtils::raw_blur_x(KBmp &dst, const KBmp &src) {
 	}
 }
 void KImageUtils::raw_blur_y(KBmp &dst, const KBmp &src) {
-	K__Assert(dst.w >= src.w);
-	K__Assert(dst.h >= src.h);
+	K__ASSERT(dst.w >= src.w);
+	K__ASSERT(dst.h >= src.h);
 	for (int x=0; x<src.w; x++) {
 		for (int y=1; y+1<src.h; y++) {
 			KColor32 color0 = raw_get_pixel(src, x, y-1);
@@ -991,8 +991,8 @@ void KImageUtils::raw_blur_y(KBmp &dst, const KBmp &src) {
 	}
 }
 void KImageUtils::raw_outline(KBmp &dst, const KBmp &src, const KColor32 &color) {
-	K__Assert(dst.w >= src.w);
-	K__Assert(dst.h >= src.h);
+	K__ASSERT(dst.w >= src.w);
+	K__ASSERT(dst.h >= src.h);
 	for (int y=0; y<src.h; y++) {
 		for (int x=0; x<src.w; x++) {
 			KColor32 dot = raw_get_pixel(src, x, y);
@@ -1056,9 +1056,9 @@ void KImageUtils::raw_perlin(KBmp &bmp, int x_wrap, int y_wrap, float mul) {
 	}
 }
 bool KImageUtils::raw_has_non_black_pixel(const KBmp &bmp, int x, int y, int w, int h) {
-	K__Assert(bmp.data);
-	K__Assert(0 <= x && x+w <= bmp.w);
-	K__Assert(0 <= y && y+h <= bmp.h);
+	K__ASSERT(bmp.data);
+	K__ASSERT(0 <= x && x+w <= bmp.w);
+	K__ASSERT(0 <= y && y+h <= bmp.h);
 	for (int yi=y; yi<y+h; yi++) {
 		for (int xi=x; xi<x+w; xi++) {
 			KColor32 color = raw_get_pixel(bmp, xi, yi);
@@ -1070,9 +1070,9 @@ bool KImageUtils::raw_has_non_black_pixel(const KBmp &bmp, int x, int y, int w, 
 
 /// 指定範囲の中に不透明なピクセルが存在するなら true を返す
 bool KImageUtils::raw_has_opaque_pixel(const KBmp &bmp, int x, int y, int w, int h) {
-	K__Assert(bmp.data);
-	K__Assert(0 <= x && x+w <= bmp.w);
-	K__Assert(0 <= y && y+h <= bmp.h);
+	K__ASSERT(bmp.data);
+	K__ASSERT(0 <= x && x+w <= bmp.w);
+	K__ASSERT(0 <= y && y+h <= bmp.h);
 	for (int yi=y; yi<y+h; yi++) {
 		for (int xi=x; xi<x+w; xi++) {
 			KColor32 color = raw_get_pixel(bmp, xi, yi);
@@ -1087,9 +1087,9 @@ bool KImageUtils::raw_has_opaque_pixel(const KBmp &bmp, int x, int y, int w, int
 /// cellsize セルの大きさ（ピクセル単位、正方形）
 /// cells 有効なピクセルを含むセルのインデックス配列
 void KImageUtils::raw_scan_non_black_cells(const KBmp &bmp, int cellsize, std::vector<int> *cells, int *xcells, int *ycells) {
-	K__Assert(bmp.data);
-	K__Assert(bmp.w > 0);
-	K__Assert(bmp.h > 0);
+	K__ASSERT(bmp.data);
+	K__ASSERT(bmp.w > 0);
+	K__ASSERT(bmp.h > 0);
 	int xcount = _ceil_div(bmp.w, cellsize);
 	int ycount = _ceil_div(bmp.h, cellsize);
 	cells->clear();
@@ -1114,9 +1114,9 @@ void KImageUtils::raw_scan_non_black_cells(const KBmp &bmp, int cellsize, std::v
 /// cellsize セルの大きさ（ピクセル単位、正方形）
 /// cells 有効なピクセルを含むセルのインデックス配列
 void KImageUtils::raw_scan_opaque_cells(const KBmp &bmp, int cellsize, std::vector<int> *cells, int *xcells, int *ycells) {
-	K__Assert(bmp.data);
-	K__Assert(bmp.w > 0);
-	K__Assert(bmp.h > 0);
+	K__ASSERT(bmp.data);
+	K__ASSERT(bmp.w > 0);
+	K__ASSERT(bmp.h > 0);
 	int xcount = _ceil_div(bmp.w, cellsize);
 	int ycount = _ceil_div(bmp.h, cellsize);
 	cells->clear();
@@ -1321,9 +1321,9 @@ void KImageUtils::expand(KImage &image, const KColor32 &color) {
 
 /// 指定範囲が画像範囲を超えないように調整する
 bool KImageUtils::adjustRect(int img_w, int img_h, int *_x, int *_y, int *_w, int *_h) {
-	K__Assert(img_w >= 0);
-	K__Assert(img_h >= 0);
-	K__Assert(_x && _y && _w && _h);
+	K__ASSERT(img_w >= 0);
+	K__ASSERT(img_h >= 0);
+	K__ASSERT(_x && _y && _w && _h);
 	bool changed = false;
 	int x0 = *_x;
 	int y0 = *_y;
@@ -1346,11 +1346,11 @@ bool KImageUtils::adjustRect(const KImage &dst, const KImage &src, CopyRange *ra
 	return adjustRect(dst.getWidth(), dst.getHeight(), src.getWidth(), src.getHeight(), range);
 }
 bool KImageUtils::adjustRect(int dst_w, int dst_h, int src_w, int src_h, CopyRange *range) {
-	K__Assert(dst_w >= 0);
-	K__Assert(dst_h >= 0);
-	K__Assert(src_w >= 0);
-	K__Assert(src_h >= 0);
-	K__Assert(range);
+	K__ASSERT(dst_w >= 0);
+	K__ASSERT(dst_h >= 0);
+	K__ASSERT(src_w >= 0);
+	K__ASSERT(src_h >= 0);
+	K__ASSERT(range);
 	bool changed = false;
 
 	// 転送元が範囲内に収まるように調整
@@ -1506,15 +1506,15 @@ void Test_image() {
 			img.setPixel(i%4, i/4, KColor32(data4x4[i]));
 		}
 		KImageUtils::halfScale(img); // 2x2ごとに混合（単純平均）しサイズを1/2に
-		K__Assert(img.getWidth() == 2);
+		K__ASSERT(img.getWidth() == 2);
 		KColor32 a = img.getPixel(0, 0);
 		KColor32 b = img.getPixel(1, 0);
 		KColor32 c = img.getPixel(0, 1);
 		KColor32 d = img.getPixel(1, 1);
-		K__Assert(a == KColor32(0x3F3F3F3F)); // 0xFFFFFFFF の 1/4
-		K__Assert(b == KColor32(0x7F7F7F7F)); // 0xFFFFFFFF の 1/2
-		K__Assert(c == KColor32(0xFFFFFFFF)); // 0xFFFFFFFF の 1/1
-		K__Assert(d == KColor32(0x7F7F7F7F)); // 0xFFFFFFFF の 1/2
+		K__ASSERT(a == KColor32(0x3F3F3F3F)); // 0xFFFFFFFF の 1/4
+		K__ASSERT(b == KColor32(0x7F7F7F7F)); // 0xFFFFFFFF の 1/2
+		K__ASSERT(c == KColor32(0xFFFFFFFF)); // 0xFFFFFFFF の 1/1
+		K__ASSERT(d == KColor32(0x7F7F7F7F)); // 0xFFFFFFFF の 1/2
 	}
 
 	{
@@ -1524,28 +1524,28 @@ void Test_image() {
 		img.setPixel(2, 0, KColor32(0xFFFFFFFF));
 		KImageUtils::blurX(img); // 3x1の範囲を単純平均
 		KColor32 a = img.getPixel(1, 0); // 中心ピクセルを取る
-		K__Assert(a == KColor32(0x66666666)); // (0x00 + 0x33 + 0xFF)/3
+		K__ASSERT(a == KColor32(0x66666666)); // (0x00 + 0x33 + 0xFF)/3
 	}
 
 	{
 		KImage img = KImage::createFromSize(1, 1, KColor32(30, 30, 30, 255));
 		KImageUtils::mul(img, 2.0f); // RGBA各要素を 2.0 倍し、0..255の範囲に丸める
 		KColor32 a = img.getPixel(0, 0);
-		K__Assert(a == KColor32(60, 60, 60, 255));
+		K__ASSERT(a == KColor32(60, 60, 60, 255));
 	}
 
 	{
 		KImage img = KImage::createFromSize(1, 1, KColor32(30, 30, 30, 255));
 		KImageUtils::mul(img, KColor32(127, 127, 255, 255/10)); // RGBA各要素を 0.5, 0.5, 1.0, 0.1 倍
 		KColor32 a = img.getPixel(0, 0);
-		K__Assert(a == KColor32(14, 14, 30, 25));
+		K__ASSERT(a == KColor32(14, 14, 30, 25));
 	}
 
 	{
 		KImage img = KImage::createFromSize(1, 1, KColor32(55, 55, 55, 230));
 		KImageUtils::inv(img);// RGBを反転。Aは不変
 		KColor32 a = img.getPixel(0, 0);
-		K__Assert(a == KColor32(200, 200, 200, 230));
+		K__ASSERT(a == KColor32(200, 200, 200, 230));
 	}
 }
 

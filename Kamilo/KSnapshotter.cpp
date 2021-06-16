@@ -172,15 +172,15 @@ void KSnapshotter::uninstall() {
 	}
 }
 void KSnapshotter::capture(const char *filename) {
-	K__Assert(g_Snapshot);
+	K__ASSERT(g_Snapshot);
 	g_Snapshot->capture(filename);
 }
 void KSnapshotter::captureNow(const char *filename) {
-	K__Assert(g_Snapshot);
+	K__ASSERT(g_Snapshot);
 	g_Snapshot->captureNow(filename);
 }
 void KSnapshotter::setCaptureTargetRenderTexture(const char *texname) {
-	K__Assert(g_Snapshot);
+	K__ASSERT(g_Snapshot);
 	g_Snapshot->setCaptureTargetRenderTexture(texname);
 }
 #pragma endregion // KSnapshotter

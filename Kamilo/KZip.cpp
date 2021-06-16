@@ -169,8 +169,8 @@ public:
 		m_Keys[2] = 0;
 	}
 	void encodeInit(const char *password, uint8_t *crypt_header, uint8_t crc32_hi_8bit) {
-		K__Assert(password);
-		K__Assert(crypt_header);
+		K__ASSERT(password);
+		K__ASSERT(crypt_header);
 		initKeys();
 		for (const char *p=password; *p!='\0'; p++) {
 			update(*p);
@@ -185,8 +185,8 @@ public:
 		}
 	}
 	void decodeInit(const char *password, const uint8_t *crypt_header) {
-		K__Assert(password);
-		K__Assert(crypt_header);
+		K__ASSERT(password);
+		K__ASSERT(crypt_header);
 		initKeys();
 		for (const char *p=password; *p!='\0'; p++) {
 			update(*p);
@@ -319,8 +319,8 @@ struct SZipEntryWritingParams {
 // ztime 更新時刻
 // mtime time_t 形式での更新日時
 static void Zip__EncodeFileTime(uint16_t *zdate, uint16_t *ztime, time_t time) {
-	K__Assert(zdate);
-	K__Assert(ztime);
+	K__ASSERT(zdate);
+	K__ASSERT(ztime);
 	if (time == 0) {
 		*ztime = 0;
 		*zdate = 0;
@@ -439,8 +439,8 @@ static bool Zip__WriteEntry(KOutputStream &output, SZipEntryWritingParams &param
 // 中央ディレクトリヘッダを書き込む
 // params は既に Zip__WriteEntry によって必要な値がセットされていないといけない
 static bool Zip__WriteCentralDirectoryHeader(KOutputStream &output, const SZipEntryWritingParams &params) {
-	K__Assert(!params.namebin.empty());
-	K__Assert(params.output_cd_hdr.file_name_length == params.namebin.size());
+	K__ASSERT(!params.namebin.empty());
+	K__ASSERT(params.output_cd_hdr.file_name_length == params.namebin.size());
 	output.write(&params.output_cd_hdr, sizeof(SZipCentralDirectoryHeader));
 	output.write(params.namebin.c_str(), params.output_cd_hdr.file_name_length);
 	return true;
@@ -516,13 +516,13 @@ static time_t Unzip__NtfsToTimeT(uint64_t ntfs_time64) {
 //         ZIP_OPT_DATADESC
 //         ZIP_OPT_UTF8
 static bool Unzip__HasOption(const SZipEntryBlock *entry, uint32_t zip_opt) {
-	K__Assert(entry);
+	K__ASSERT(entry);
 	return (entry->cd_hdr.general_purpose_bit_flag & zip_opt) != 0;
 }
 
 // 展開後のサイズ
 static size_t Unzip__GetUnzipSize(const SZipEntryBlock *entry) {
-	K__Assert(entry);
+	K__ASSERT(entry);
 	// サイズ情報を見る時は必ず中央ディレクトリヘッダを見るようにする。
 
 	// ファイルサイズは他にもローカルファイルヘッダとデータデスクリプタに記録されているが、
@@ -538,7 +538,7 @@ static size_t Unzip__GetUnzipSize(const SZipEntryBlock *entry) {
 // comment_bin コメント文字列。文字コード変換などは何も行わず、ZIPに記録されているバイト列をそのままセットする
 // ※ZIPファイル全体に対するコメントを得るには Unzip__GetZipFileComment を使う
 static size_t Unzip__GetComment(KInputStream &input, const SZipEntryBlock *entry, std::string *comment_bin) {
-	K__Assert(entry);
+	K__ASSERT(entry);
 	if (entry->comment_offset > 0) {
 		if (comment_bin) {
 			input.seek(entry->comment_offset);
@@ -551,7 +551,7 @@ static size_t Unzip__GetComment(KInputStream &input, const SZipEntryBlock *entry
 
 // 拡張情報を得る
 static size_t Unzip__GetExtra(KInputStream &input, const SZipExtraBlock *extra, std::string *bin) {
-	K__Assert(extra);
+	K__ASSERT(extra);
 	if (extra->offset > 0) {
 		if (bin) {
 			input.seek(extra->offset);
@@ -564,8 +564,8 @@ static size_t Unzip__GetExtra(KInputStream &input, const SZipExtraBlock *extra, 
 
 // コンテンツデータを復元する
 static bool Unzip__UnzipEntry(KInputStream &input, const SZipEntryBlock *entry, const char *password, std::string *output) {
-	K__Assert(entry);
-	K__Assert(output);
+	K__ASSERT(entry);
+	K__ASSERT(output);
 
 	// 圧縮データ部分に移動
 	input.seek(entry->dat_offset);
@@ -610,7 +610,7 @@ static bool Unzip__UnzipEntry(KInputStream &input, const SZipEntryBlock *entry, 
 		// 圧縮を解除
 		std::string input((const char*)data_ptr, data_len);
 		*output = KZlib::uncompress_raw(input, hdr.uncompressed_size);
-		K__Assert(output->size() == hdr.uncompressed_size);
+		K__ASSERT(output->size() == hdr.uncompressed_size);
 		return true;
 		
 	} else {
@@ -652,9 +652,9 @@ static time_t Unzip__DecodeFileTime(uint16_t zdate, uint16_t ztime) {
 // ZIPの仕様では最終更新日時のみが記録されており、作成日時、アクセス日時が知りたい場合は拡張フィールドを見る必要がある。
 // タイムスタンプは識別子 0x000A の拡張フィールドに記録されている
 static bool Unzip__ReadNtfsExtraField(KInputStream &input, time_t *ctime, time_t *mtime, time_t *atime) {
-	K__Assert(ctime);
-	K__Assert(mtime);
-	K__Assert(atime);
+	K__ASSERT(ctime);
+	K__ASSERT(mtime);
+	K__ASSERT(atime);
 	if (Unzip__CheckFileUint16(input, 0x000A)) {
 		// NTFS extra field for file attributes
 		// http://archimedespalimpsest.net/Documents/External/ZIPFileFormatSpecification_6.3.2.txt
@@ -697,7 +697,7 @@ static bool Unzip__ReadNtfsExtraField(KInputStream &input, time_t *ctime, time_t
 				}
 			}
 		}
-		K__Assert(input.tell() == ntfs_end); // この時点でぴったり NTFS extra field の末尾を指しているはず
+		K__ASSERT(input.tell() == ntfs_end); // この時点でぴったり NTFS extra field の末尾を指しているはず
 		input.seek(ntfs_end);
 		return true;
 	}
@@ -706,7 +706,7 @@ static bool Unzip__ReadNtfsExtraField(KInputStream &input, time_t *ctime, time_t
 
 // 現在の読み取り位置が中央ディレクトリヘッダを指していると仮定し、中央ディレクトリヘッダとコンテンツ情報を読み取る
 static bool Unzip__ReadCenteralDirectoryHeaderAndEntry(KInputStream &input, SZipEntryBlock *entry) {
-	K__Assert(entry);
+	K__ASSERT(entry);
 
 	if (!Unzip__CheckFileUint32(input, ZIP_SIGN_PK0102)) {
 		return false;
@@ -794,7 +794,7 @@ static bool Unzip__ReadCenteralDirectoryHeaderAndEntry(KInputStream &input, SZip
 				return false;
 			}
 		}
-		K__Assert(input.tell() == extra_end);
+		K__ASSERT(input.tell() == extra_end);
 	}
 
 	// コメント
@@ -934,7 +934,7 @@ public:
 	// @param times    タイムスタンプ。3要素から成る times_t 配列を指定する。creation, modification, access の順番で格納する。タイムスタンプ不要ならば nullptr 出もよい
 	// @param attr     ファイル属性。デフォルトは 0
 	bool addEntry(const char *name_u8, const void *data, int size, const time_t *timestamp_cma, int file_attr) {
-		K__Assert(name_u8);
+		K__ASSERT(name_u8);
 		if (strlen(name_u8) == 0) {
 			// 名前必須
 			ZIP_ERROR("Invliad name");

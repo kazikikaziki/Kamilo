@@ -185,7 +185,7 @@ public:
 		m_modifiers = KKeyboard::MODIF_NONE;
 	}
 	CKbKeyElm(KKeyboard::Key key, KKeyboard::Modifiers mod) {
-		K__Assert(key != KKeyboard::KEY_NONE);
+		K__ASSERT(key != KKeyboard::KEY_NONE);
 		m_key = key;
 		m_modifiers = mod;
 	}
@@ -403,7 +403,7 @@ public:
 		m_ok = false;
 	}
 	void add_seq(const IKeyElm *btn) {
-		K__Assert(btn);
+		K__ASSERT(btn);
 		m_keys.push_back(btn);
 		m_ok = false;
 	}
@@ -635,7 +635,7 @@ public:
 
 	// IKeyElm
 	virtual bool isConflictWith(const IKeyElm *other) const override {
-		K__Assert(0); // 未使用。このメソッドは呼ばれない
+		K__ASSERT(0); // 未使用。このメソッドは呼ばれない
 		return false;
 	}
 	virtual bool isPressed(float *val, KPollFlags flags) const override {
@@ -1392,7 +1392,7 @@ public:
 static CInputMap *g_InputMap = nullptr;
 
 void KInputMap::install() {
-	K__Assert(g_InputMap == nullptr);
+	K__ASSERT(g_InputMap == nullptr);
 	g_InputMap = new CInputMap();
 }
 void KInputMap::uninstall() {
@@ -1407,19 +1407,19 @@ void KInputMap::uninstall() {
 /// この仮想ボタンを物理キーに関連付けるためには bindAppKey を使う 
 /// （アプリケーションボタンにバインドできるのはキーボードのキーのみ）
 void KInputMap::addAppButton(const char *button, KButtonFlags flags) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->addAppButton(button, flags);
 }
 
 /// ゲームボタン（ポーズに影響されない）が押された状態になっているか？
 bool KInputMap::isAppButtonDown(const char *button) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->isAppButtonDown(button);
 }
 
 /// アプリボタン（ポーズに影響されない）がたった今押されたか？
 bool KInputMap::getAppButtonDown(const char *button) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getAppButtonDown(button);
 }
 
@@ -1428,19 +1428,19 @@ bool KInputMap::getAppButtonDown(const char *button) {
 /// この仮想ボタンを物理キーに関連付けるためにはバインド関数を使う
 /// @see bindKeyboardKey, bindJoystickKey, bindJoystickAxis, bindJoystickPov, bindMouseKey, bindKeySequence
 void KInputMap::addGameButton(const char *button, KButtonFlags flags) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->addGameButton(button, flags);
 }
 
 /// ゲームボタン（ポーズに影響される）が押された状態になっているか？
 bool KInputMap::isGameButtonDown(const char *button) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->isGameButtonDown(button);
 }
 
 /// ゲームボタン（ポーズに影響される）がたった今押されたか？
 bool KInputMap::getGameButtonDown(const char *button) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getGameButtonDown(button);
 }
 
@@ -1458,7 +1458,7 @@ bool KInputMap::getButtonDown(const char *button) {
 
 /// ボタンを押したことにする
 void KInputMap::postButtonDown(const char *button) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->postButtonDown(button);
 }
 
@@ -1466,7 +1466,7 @@ void KInputMap::postButtonDown(const char *button) {
 
 /// addAppButton で登録した仮想ボタンに対してキーボードのキーをバインドする
 void KInputMap::bindAppKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindAppKey(button, key, mods);
 }
 
@@ -1475,67 +1475,67 @@ void KInputMap::bindAppKey(const char *button, KKeyboard::Key key, KKeyboard::Mo
 /// /
 /// @see unbindByTag, findKeyboardByTag, findJoystickByTag
 void KInputMap::bindKeyboardKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindKeyboardKey(button, key, mods, tag);
 }
 void KInputMap::bindJoystickKey(const char *button, KJoystick::Button joybtn, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickKey(button, joybtn, tag);
 }
 void KInputMap::bindJoystickAxis(const char *button, KJoystick::Axis axis, int halfrange, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickAxis(button, axis, halfrange, tag);
 }
 void KInputMap::bindJoystickPov(const char *button, int xsign, int ysign, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickPov(button, xsign, ysign, tag);
 }
 void KInputMap::bindMouseKey(const char *button, KMouse::Button mousebtn, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindMouseKey(button, mousebtn, tag);
 }
 void KInputMap::bindKeySequence(const char *button, const char *keys[], int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->bindKeySequence(button, keys, tag);
 }
 void KInputMap::unbindByTag(const char *button, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->unbindByTag(button, tag);
 }
 int KInputMap::isConflict(const char *button1, const char *button2) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->isConflict(button1, button2);
 }
 void KInputMap::resetAllButtonStates() {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->resetAllButtonStates();
 }
 IKeyboardKeyElm * KInputMap::findKeyboardByTag(const char *button, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->findKeyboardByTag(button, tag);
 }
 IJoystickKeyElm * KInputMap::findJoystickByTag(const char *button, int tag) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->findJoystickByTag(button, tag);
 }
 const char * KInputMap::getJoystickName(KJoystick::Button joybtn) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getJoystickName(joybtn);
 }
 const char * KInputMap::getKeyboardName(KKeyboard::Key key) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getKeyboardName(key);
 }
 bool KInputMap::getKeyboardFromName(const char *s, KKeyboard::Key *key) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getKeyboardFromName(s, key);
 }
 bool KInputMap::getJoystickFromName(const char *s, KJoystick::Button *btn) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	return g_InputMap->getJoystickFromName(s, btn);
 }
 void KInputMap::setPollFlags(KPollFlags flags) {
-	K__Assert(g_InputMap);
+	K__ASSERT(g_InputMap);
 	g_InputMap->setPollFlags(flags);
 }
 #pragma endregion // KInputMapAct

@@ -117,7 +117,7 @@ public:
 			"#         #                                                                                     "
 			//-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
 		; // <== end of data
-		K__Assert(sizeof(data) == BMP_W * BMP_H);
+		K__ASSERT(sizeof(data) == BMP_W * BMP_H);
 		return data;
 	}
 
@@ -164,8 +164,8 @@ public:
 	stbtt_fontinfo info_;
 
 	CStbFontImpl(const void *data, int size, int ttc_index, int *err) {
-		K__Assert(data && size > 0);
-		K__Assert(err);
+		K__ASSERT(data && size > 0);
+		K__ASSERT(err);
 		memset(&info_, 0, sizeof(info_));
 		bin_.resize(size);
 		memcpy(&bin_[0], data, size);
@@ -194,7 +194,7 @@ public:
 	///     "https://docs.microsoft.com/ja-jp/previous-versions/windows/scripting/cc392381(v=msdn.10)"
 	///
 	bool get_name_string(KFont::NameId nid, K_LCID lang_id, char *out_u8, int out_size) const {
-		K__Assert(out_u8);
+		K__ASSERT(out_u8);
 		int name_bytes = 0;
 
 		const int WSIZE = 1024; // 著作権表示など、結構長いテキストが入っている場合があるので多めにとっておく
@@ -255,8 +255,8 @@ public:
 		int bmp_top;    // 文字AABBの上端。Y軸下向きなので、ベースラインよりも高ければ負の値になる
 		int bmp_bottom; // 文字AABBの下端。Y軸下向きなので、ベースラインよりも低ければ正の値になる
 		stbtt_GetCodepointBitmapBoxSubpixel(&info_, chr, scale, scale, 0, 0, &bmp_left, &bmp_top, &bmp_right, &bmp_bottom);
-		K__Assert(bmp_left <= bmp_right);
-		K__Assert(bmp_top <= bmp_bottom);
+		K__ASSERT(bmp_left <= bmp_right);
+		K__ASSERT(bmp_top <= bmp_bottom);
 
 		if (met) {
 			met->advance = (float)du_advance * scale;
@@ -272,7 +272,7 @@ public:
 			} else {
 				int w = bmp_right - bmp_left;
 				int h = bmp_bottom - bmp_top;
-				K__Assert(w > 0 && h > 0);
+				K__ASSERT(w > 0 && h > 0);
 				out_alpha8->resize(w * h);
 				stbtt_MakeCodepointBitmapSubpixel(&info_, (unsigned char*)out_alpha8->data(), w, h, w, scale, scale, 0, 0, chr);
 			}
@@ -362,7 +362,7 @@ public:
 
 private:
 	static std::string make_key(const KFont *font, wchar_t chr, float fontsize, KFont::Style style, bool with_alpha) {
-		K__Assert(font);
+		K__ASSERT(font);
 		int sizekey = (int)(fontsize * 10); // 0.1刻みで識別できるようにしておく
 
 		char s[256];
@@ -478,7 +478,7 @@ static CGlyphPack g_FontAtlas;
 
 
 static std::string kk_GetGlyphKey(const KFont *font, wchar_t chr, float fontsize, KFont::Style style, bool with_alpha) {
-	K__Assert(font);
+	K__ASSERT(font);
 	int sizekey = (int)(fontsize * 10); // 0.1刻みで識別できるようにしておく
 
 	char s[256];
@@ -613,7 +613,7 @@ inline uint8_t kk_uint8_add(uint8_t a, uint8_t b) {
 /// 文字画像 (Alpha8) を右に1ドット太らせる
 static KImage Glyph_bold(const KImage *raw) {
 	if (raw==nullptr || raw->empty()) return KImage();
-	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
+	K__ASSERT(raw->getFormat() == KColorFormat_INDEX8);
 	int sw = raw->getWidth();
 	int dw = sw + BOLD_INFLATE;
 	int h = raw->getHeight();
@@ -650,7 +650,7 @@ static KImage Glyph_bold(const KImage *raw) {
 /// 文字画像 (Alpha8) を上下左右に1ドット太らせる
 static KImage Glyph_inflate(const KImage *raw) {
 	if (raw==nullptr || raw->empty()) return KImage();
-	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
+	K__ASSERT(raw->getFormat() == KColorFormat_INDEX8);
 	int w = raw->getWidth();
 	int h = raw->getHeight();
 	KImage img = KImage::createFromPixels(w+2, h+2, KColorFormat_INDEX8, nullptr);
@@ -688,8 +688,8 @@ static KImage Glyph_sub(const KImage *raw, int px, int py, const KImage *raw2) {
 	if (raw==nullptr || raw->empty())  return KImage();
 	if (raw2==nullptr || raw2->empty()) return *raw;
 
-	K__Assert(raw->getFormat() == KColorFormat_INDEX8);
-	K__Assert(raw2->getFormat()== KColorFormat_INDEX8);
+	K__ASSERT(raw->getFormat() == KColorFormat_INDEX8);
+	K__ASSERT(raw2->getFormat()== KColorFormat_INDEX8);
 
 	// rawをコピー
 	KImage img = raw->clone();
@@ -775,8 +775,8 @@ float KFont::getKerningAdvanve(wchar_t chr1, wchar_t chr2, float fontsize) const
 }
 KGlyph KFont::getGlyph(wchar_t chr, float fontsize, KFont::Style style, bool with_alpha) const {
 	if (m_Impl == nullptr) return KGlyph();
-	K__Assert(chr);
-	K__Assert(fontsize > 0);
+	K__ASSERT(chr);
+	K__ASSERT(fontsize > 0);
 
 	KGlyph glyph;
 	

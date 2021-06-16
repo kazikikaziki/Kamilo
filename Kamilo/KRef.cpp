@@ -36,15 +36,15 @@ public:
 			// ここに到達してブレークした場合、参照カウンタがまだ残っているオブジェクトがある。
 			// デバッガーで m_LockedObjects の中身をチェックすること。
 			m_LockedObjects; // <-- 中身をチェック
-			K__Assert(0);
+			K__ASSERT(0);
 		}
 	}
 	void add(KRef *ref) {
-		K__Assert(ref);
+		K__ASSERT(ref);
 		m_LockedObjects.insert(ref);
 	}
 	void del(KRef *ref) {
-		K__Assert(ref);
+		K__ASSERT(ref);
 		m_LockedObjects.erase(ref);
 	}
 };
@@ -67,7 +67,7 @@ KRef::KRef() {
 	}
 }
 KRef::~KRef() {
-	K__Assert(m_RefCnt == 0); // ここで引っかかった場合、 drop しないで直接 delete してしまっている
+	K__ASSERT(m_RefCnt == 0); // ここで引っかかった場合、 drop しないで直接 delete してしまっている
 	if (K_REFCNT_DEBUG) {
 		// 参照カウンタの整合性をチェック
 		g_RefMutex.lock();
@@ -84,7 +84,7 @@ void KRef::drop() const {
 	g_RefMutex.lock();
 	m_RefCnt--;
 	g_RefMutex.unlock();
-	K__Assert(m_RefCnt >= 0);
+	K__ASSERT(m_RefCnt >= 0);
 	if (m_RefCnt == m_DebubBreakRefCnt) { // 参照カウンタが m_DebubBreakRefCnt になったら中断する
 		K::_break();
 	}

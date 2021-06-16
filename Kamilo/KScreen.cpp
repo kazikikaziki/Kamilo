@@ -201,10 +201,10 @@ public:
 		m_use_filter = false;
 	}
 	void init(int game_w, int game_h, int gui_w, int gui_h) {
-		K__Assert(game_w > 0);
-		K__Assert(game_h > 0);
-		K__Assert(gui_w > 0);
-		K__Assert(gui_h > 0);
+		K__ASSERT(game_w > 0);
+		K__ASSERT(game_h > 0);
+		K__ASSERT(gui_w > 0);
+		K__ASSERT(gui_h > 0);
 		zero_clear();
 		m_game_w = game_w;
 		m_game_h = game_h;
@@ -422,7 +422,7 @@ public:
 		*h = m_game_h;
 	}
 	void setGameSize(int w, int h) {
-		K__Assert(w >= 0 && h >= 0);
+		K__ASSERT(w >= 0 && h >= 0);
 		m_game_w = w;
 		m_game_h = h;
 	}
@@ -431,7 +431,7 @@ public:
 		*h = m_gui_h;
 	}
 	void setGuiSize(int w, int h) {
-		K__Assert(w >= 0 && h >= 0);
+		K__ASSERT(w >= 0 && h >= 0);
 		m_gui_w = w;
 		m_gui_h = h;
 	}
@@ -821,79 +821,79 @@ void KScreen::uninstall() {
 	}
 }
 void KScreen::startVideo(KTextureBank *texbank) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->startVideo(texbank);
 }
 void KScreen::endVideo() {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->endVideo();
 }
 void KScreen::getGameSize(int *w, int *h) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->getGameSize(w, h);
 }
 void KScreen::setGameSize(int w, int h) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->setGameSize(w, h);
 }
 void KScreen::getGuiSize(int *w, int *h) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->getGuiSize(w, h);
 }
 void KScreen::setGuiSize(int w, int h) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->setGuiSize(w, h);
 }
 KGizmo * KScreen::getGizmo() {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	return g_Screen->getGizmo();
 }
 KVec3 KScreen::windowClientToScreenPoint(const KVec3 &p) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	return g_Screen->windowClientToScreenPoint(p);
 }
 KRecti KScreen::getGameViewportRect() {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	return g_Screen->getGameViewportRect();
 }
 void KScreen::postExportScreenTexture(const KPath &filename) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->postExportScreenTexture(filename);
 }
 void KScreen::render() {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->render();
 }
 void KScreen::render_debug_gui(KNode *node) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->render_debug_gui(node);
 }
 void KScreen::set_call_gui(KManager *mgr, bool value) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->set_call_gui(mgr, value);
 }
 void KScreen::set_call_renderworld(KManager *mgr, bool value) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->set_call_renderworld(mgr, value);
 }
 void KScreen::set_call_renderdebug(KManager *mgr, bool value) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->set_call_renderdebug(mgr, value);
 }
 void KScreen::set_call_rendertop(KManager *mgr, bool value) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->set_call_rendertop(mgr, value);
 }
 bool KScreen::command(const char *s, void *n, int *retval) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	return g_Screen->command(s, n, retval);
 }
 KTEXID KScreen::getPerPassRenderTarget(int pass) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	return g_Screen->getPerPassRenderTarget(pass);
 }
 void KScreen::setPerPassRenderTargetSize(int pass, int w, int h) {
-	K__Assert(g_Screen);
+	K__ASSERT(g_Screen);
 	g_Screen->setPerPassRenderTargetSize(pass, w, h);
 }
 /// 単位座標系（画面中央原点、-1.0～1.0、Y軸上向き）の座標を、

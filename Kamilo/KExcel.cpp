@@ -30,7 +30,7 @@ static void _EscapeString(std::string &s) {
 
 // 文字列 s をエスケープする必要がある？
 static bool _ShouldEscapeString(const char *s) {
-	K__Assert(s);
+	K__ASSERT(s);
 	return HAS_CHAR(s, '<') || HAS_CHAR(s, '>') || HAS_CHAR(s, '"') || HAS_CHAR(s, '\'') || HAS_CHAR(s, '\n');
 }
 
@@ -119,10 +119,10 @@ public:
 	}
 	std::string getSheetName(int sheetId) const {
 		const KXmlElement *root_elm = m_WorkBookDoc->getChild(0);
-		K__Assert(root_elm);
+		K__ASSERT(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
-		K__Assert(sheets_xml);
+		K__ASSERT(sheets_xml);
 
 		int idx = 0;
 		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
@@ -135,7 +135,7 @@ public:
 					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
 					// 一応整合性を確認しておく
 					int id = xSheet->getAttrInt("sheetId", -1);
-					K__Assert(id == 1 + idx);
+					K__ASSERT(id == 1 + idx);
 				}
 				#endif
 				return s;
@@ -146,10 +146,10 @@ public:
 	}
 	int getSheetByName(const std::string &name) const {
 		const KXmlElement *root_elm = m_WorkBookDoc->getChild(0);
-		K__Assert(root_elm);
+		K__ASSERT(root_elm);
 
 		const KXmlElement *sheets_xml = root_elm->findNode("sheets");
-		K__Assert(sheets_xml);
+		K__ASSERT(sheets_xml);
 
 		int idx = 0;
 		for (int iSheet=sheets_xml->findChildByTag("sheet"); iSheet>=0; iSheet=sheets_xml->findChildByTag("sheet", iSheet+1)) {
@@ -162,7 +162,7 @@ public:
 					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
 					// 一応整合性を確認しておく
 					int id = xSheet->getAttrInt("sheetId", -1);
-					K__Assert(id == 1 + idx);
+					K__ASSERT(id == 1 + idx);
 				}
 				#endif
 				return idx;
@@ -176,13 +176,13 @@ public:
 		if (sheet >= (int)m_WorkSheets.size()) return false;
 
 		const KXmlElement *xdoc = m_WorkSheets[sheet];
-		K__Assert(xdoc);
+		K__ASSERT(xdoc);
 
 		const KXmlElement *xroot = xdoc->getChild(0);
-		K__Assert(xroot);
+		K__ASSERT(xroot);
 
 		const KXmlElement *xdim = xroot->findNode("dimension");
-		K__Assert(xdim);
+		K__ASSERT(xdim);
 
 		// セルの定義範囲を表す文字列を取得する
 		// この文字列は "A1:E199" のようにコロンで左上端セルと右下端セル番号が書いてある
@@ -251,8 +251,8 @@ public:
 		const KXmlElement *c_xml = find_cell(sheet_xml, s);
 		if (c_xml == nullptr) return false;
 
-		K__Assert(col);
-		K__Assert(row);
+		K__ASSERT(col);
+		K__ASSERT(row);
 
 		// 見つかったセルの行列番号を得る
 		int icol = -1;
@@ -272,10 +272,10 @@ public:
 		if (sheet >= (int)m_WorkSheets.size()) return;
 
 		const KXmlElement *doc = m_WorkSheets[sheet];
-		K__Assert(doc);
+		K__ASSERT(doc);
 
 		const KXmlElement *root_elm = doc->getChild(0);
-		K__Assert(root_elm);
+		K__ASSERT(root_elm);
 
 		const KXmlElement *sheet_xml = root_elm->findNode("sheetData");
 		if (sheet_xml) {
@@ -391,7 +391,7 @@ private:
 			// 対応する文字列を文字列テーブルから探す
 			int sid = -1;
 			K::strToInt(val, &sid);
-			K__Assert(sid >= 0);
+			K__ASSERT(sid >= 0);
 			auto it = m_Strings.find(sid);
 			if (it != m_Strings.end()) {
 				return it->second.c_str();
@@ -446,7 +446,7 @@ private:
 				int cidx = -1;
 				int ridx = -1;
 				if (parse_cell_position(pos, &cidx, &ridx)) {
-					K__Assert(cidx >= 0 && ridx >= 0);
+					K__ASSERT(cidx >= 0 && ridx >= 0);
 					const char *val = get_cell_text(xCell);
 					cb->onCell(cidx, ridx, val);
 				}
@@ -458,10 +458,10 @@ private:
 		if (sheet >= (int)m_WorkSheets.size()) return nullptr;
 
 		const KXmlElement *doc = m_WorkSheets[sheet];
-		K__Assert(doc);
+		K__ASSERT(doc);
 
 		const KXmlElement *root_elm = doc->getChild(0);
-		K__Assert(root_elm);
+		K__ASSERT(root_elm);
 
 		return root_elm->findNode("sheetData");
 	}
@@ -520,7 +520,7 @@ private:
 	// 無変換のセルデータを得る。得られた文字列が何を表しているかは type によって異なる
 	const char * get_cell_raw_data(const KXmlElement *cell_xml, Type *type) const {
 		if (cell_xml == nullptr) return nullptr;
-		K__Assert(type);
+		K__ASSERT(type);
 		// cell_xml の入力例:
 		// <c r="B1" s="0" t="n">
 		// 	<v>12</v>
@@ -586,8 +586,8 @@ std::string KExcelFile::encodeCellName(int col, int row) {
 		char c1 = (char)('A' + (col / EXCEL_ALPHABET_NUM));
 		char c2 = (char)('A' + (col % EXCEL_ALPHABET_NUM));
 		char s[256];
-		K__Assert(isalpha(c1));
-		K__Assert(isalpha(c2));
+		K__ASSERT(isalpha(c1));
+		K__ASSERT(isalpha(c2));
 		sprintf_s(s, sizeof(s), "%c%c%d", c1, c2, 1+row);
 		return s;
 	}
@@ -603,7 +603,7 @@ bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
 		// セル番号が [A-Z][0-9].* にマッチしている。
 		// 例えば "A1" や "Z42" など。
 		c = toupper(s[0]) - 'A';
-		K__Assert(0 <= c && c < EXCEL_ALPHABET_NUM);
+		K__ASSERT(0 <= c && c < EXCEL_ALPHABET_NUM);
 		r = strtol(s.c_str() + 1, nullptr, 0);
 		r--; // １起算 --> 0起算
 
@@ -612,8 +612,8 @@ bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
 		// 例えば "AA42" や "KZ1217" など
 		int idx1 = toupper(s[0]) - 'A';
 		int idx2 = toupper(s[1]) - 'A';
-		K__Assert(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
-		K__Assert(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
+		K__ASSERT(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
+		K__ASSERT(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
 		c = idx1 * EXCEL_ALPHABET_NUM + idx2;
 		r = strtol(s.c_str() + 2, nullptr, 0);
 		r--; // １起算 --> 0起算
@@ -624,8 +624,8 @@ bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
 		if (r >= 0xFFFFF) {
 			return false;
 		}
-		K__Assert(0 <= c && c < EXCEL_COL_LIMIT);
-		K__Assert(0 <= r && r < EXCEL_ROW_LIMIT);
+		K__ASSERT(0 <= c && c < EXCEL_COL_LIMIT);
+		K__ASSERT(0 <= r && r < EXCEL_ROW_LIMIT);
 		if (col) *col = c;
 		if (row) *row = r;
 		return true;
@@ -706,7 +706,7 @@ std::string KExcelFile::exportXmlString(bool with_header, bool with_comment) {
 		}
 		virtual void onCell(int col, int row, const char *s) override {
 			if (s==nullptr || s[0]=='\0') return;
-			K__Assert(last_row_ <= row); // 行番号は必ず前回と等しいか、大きくなる
+			K__ASSERT(last_row_ <= row); // 行番号は必ず前回と等しいか、大きくなる
 			if (last_row_ != row) {
 				if (last_row_ >= 0) { // 行タグを閉じる
 					dest_ += "</row>\n";

@@ -597,8 +597,8 @@ bool K::fileGetSize(const std::string &path_u8, int *out_size) {
 /// FILETIME から time_t へ変換する
 static time_t _FILETIME_to_timet(const FILETIME *ft) {
 	// FILETIME ==> time_t
-	K__Assert(ft);
-	K__Assert(sizeof(time_t) == 8); // 64bit
+	K__ASSERT(ft);
+	K__ASSERT(sizeof(time_t) == 8); // 64bit
 	// FILETIMEを等価な64ビットのファイル時刻形式（1601/1/1 0:00から100ナノ秒刻み）に変換
 	uint64_t ntfs64 = ((uint64_t)ft->dwHighDateTime << 32) | ft->dwLowDateTime;
 	// NTFSで使われている64ビットのファイル時刻形式から
@@ -701,7 +701,7 @@ static bool _FileConfirm(const wchar_t *op, const wchar_t *path1, const wchar_t 
 	}
 }
 static bool _FileIsRemovableDirectoryW(const wchar_t *wdir) {
-	K__Assert(wdir);
+	K__ASSERT(wdir);
 	// カレントディレクトリは指定できない
 	if (wdir[0]==0 || wcscmp(wdir, L".")==0 || wcscmp(wdir, L"./")==0) {
 		K__PrintW(L"E_REMOVE_DIR_FILES: path includes myself: %s", wdir);
@@ -726,7 +726,7 @@ static bool _FileIsRemovableDirectoryW(const wchar_t *wdir) {
 	return true;
 }
 static bool _FileRemoveFileW(const wchar_t *wpath) {
-	K__Assert(wpath);
+	K__ASSERT(wpath);
 	if (!PathFileExistsW(wpath)) {
 		return true; // 該当パスが存在しない場合は、削除に成功したものとする
 	}
@@ -746,7 +746,7 @@ static bool _FileRemoveFileW(const wchar_t *wpath) {
 	return false;
 }
 static bool _FileRemoveEmptyDirectoryW(const wchar_t *wdir) {
-	K__Assert(wdir);
+	K__ASSERT(wdir);
 	if (!PathFileExistsW(wdir)) {
 		return true; // 該当パスが存在しない場合は、削除に成功したものとする
 	}
@@ -766,7 +766,7 @@ static bool _FileRemoveEmptyDirectoryW(const wchar_t *wdir) {
 	return false;
 }
 static bool _FileRemoveEmptyDirectoryTreeW(const wchar_t *wdir) {
-	K__Assert(wdir);
+	K__ASSERT(wdir);
 	if (! _FileIsRemovableDirectoryW(wdir)) {
 		return false;
 	}
@@ -796,7 +796,7 @@ static bool _FileRemoveEmptyDirectoryTreeW(const wchar_t *wdir) {
 	return all_ok;
 }
 static bool _FileRemoveNonDirFilesInDirectoryW(const wchar_t *wdir, bool subdir) {
-	K__Assert(wdir);
+	K__ASSERT(wdir);
 	if (! _FileIsRemovableDirectoryW(wdir)) {
 		return false;
 	}
@@ -1202,9 +1202,9 @@ bool K::pathHasExtension(const std::string &path, const std::string &ext) {
 
 // 末尾の区切り文字を取り除き、指定した区切り文字に変換した文字列を得る
 std::string K::pathNormalize(const std::string &path, char old_delim, char new_delim) {
-	K__Assert(isprint(old_delim));
-	K__Assert(isprint(new_delim));
-	K__Assert(strStartsWithBom(path) == false); // BOMはあらかじめ取り除かれていること
+	K__ASSERT(isprint(old_delim));
+	K__ASSERT(isprint(new_delim));
+	K__ASSERT(strStartsWithBom(path) == false); // BOMはあらかじめ取り除かれていること
 	std::string s = path;
 	strTrim(s); // 前後の空白を削除
 	strReplaceChar(s, old_delim, new_delim); // 区切り文字を置換
@@ -1405,7 +1405,7 @@ bool K::pathExists(const std::string &path) {
 /// u8の先頭が utf8 bom で始まっているなら、その次の文字アドレスを返す。
 /// utf8 bom で始まっていない場合はそのまま u8 を返す
 const char * K::strSkipBom(const char *s) {
-	K__Assert(s);
+	K__ASSERT(s);
 	if (strncmp(s, K__UTF8BOM_STR, K__UTF8BOM_LEN) == 0) {
 		return s + K__UTF8BOM_LEN;
 	} else {
@@ -1435,7 +1435,7 @@ int K::strFind(const std::string &s, const std::string &sub, int start) {
 /// インデックス start 以降の部分から文字 chr に一致する部分を探す
 /// みつかれば、そのインデックスを返す。そうでなければ -1 を返す。
 int K::strFindChar(const char *s, char chr, int start) {
-	K__Assert(s);
+	K__ASSERT(s);
 	if (start < 0) start = 0;
 	if ((int)strlen(s) <= start) return -1;
 	const char *p = strchr(s + start, chr);
@@ -1469,7 +1469,7 @@ void K::strReplace(std::string &s, const std::string &before, const std::string 
 	}
 }
 void K::strReplaceChar(char *s, char before, char after) {
-	K__Assert(s);
+	K__ASSERT(s);
 	for (size_t i=0; s[i]; i++) {
 		if (s[i] == before) {
 			s[i] = after;
@@ -1477,7 +1477,7 @@ void K::strReplaceChar(char *s, char before, char after) {
 	}
 }
 void K::strReplaceChar(wchar_t *s, wchar_t before, wchar_t after) {
-	K__Assert(s);
+	K__ASSERT(s);
 	for (size_t i=0; s[i]; i++) {
 		if (s[i] == before) {
 			s[i] = after;
@@ -1502,8 +1502,8 @@ void K::strReplaceChar(std::wstring &ws, wchar_t before, wchar_t after) {
 ///
 /// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
 bool K::strStartsWith(const char *s, const char *sub) {
-	K__Assert(s);
-	K__Assert(sub);
+	K__ASSERT(s);
+	K__ASSERT(sub);
 	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
 		return true;
 	}
@@ -1524,8 +1524,8 @@ bool K::strStartsWith(const std::string &s, const std::string &sub) {
 ///
 /// s と sub のどちらかまたは両方が nullptr か空文字列だった場合は false を返す
 bool K::strEndsWith(const char *s, const char *sub) {
-	K__Assert(s);
-	K__Assert(sub);
+	K__ASSERT(s);
+	K__ASSERT(sub);
 	if (sub==nullptr || sub[0]=='\0') { // 空文字列はどんな文字列の先頭とも一致する
 		return true;
 	}
@@ -1715,10 +1715,10 @@ bool K::strToUInt64(const std::string &s, uint64_t *p_val) {
 ///		K_strptime_l("2020-12-17 10:12:01", "%Y-%m-%d %H:%M:%S", &tm, "");
 /// @endcode
 char * K::str_strptime(const char *str, const char *fmt, struct tm *out_tm, const char *_locale) {
-	K__Assert(str);
-	K__Assert(fmt);
-	K__Assert(out_tm);
-	K__Assert(_locale);
+	K__ASSERT(str);
+	K__ASSERT(fmt);
+	K__ASSERT(out_tm);
+	K__ASSERT(_locale);
 	#ifdef _WIN32
 	{
 		// strptime は Visual Studio では使えないので代替関数を用意する
@@ -1919,8 +1919,8 @@ std::string K::strWideToUtf8(const std::wstring &ws) {
 /// @see https://docs.microsoft.com/ja-jp/cpp/c-runtime-library/locale-names-languages-and-country-region-strings
 ///
 int K::strWideToAnsi(char *out_ansi, int max_out_bytes, const wchar_t *ws, const char *_locale) {
-	K__Assert(ws);
-	K__Assert(_locale);
+	K__ASSERT(ws);
+	K__ASSERT(_locale);
 	int num_bytes = 0;
 	_locale_t loc = _create_locale(LC_CTYPE, _locale);
 	if (loc) {
@@ -1937,8 +1937,8 @@ int K::strWideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _loc
 	// この関数は末尾のヌル文字も出力してそれを含めた長さを返すため、文字列長さ＋１のバッファを確保する必要がある
 	// エラーなどで何も出力できない場合は 0 を返す
 	// 空文字列を生成した場合は 1 を返す
-	K__Assert(ws);
-	K__Assert(loc);
+	K__ASSERT(ws);
+	K__ASSERT(loc);
 	if (K_USE_WCSTOMBS_SAFE) {
 		// ヌル文字含む長さ
 		// _wcstombs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
@@ -1950,7 +1950,7 @@ int K::strWideToAnsiL(char *out_ansi, int max_out_bytes, const wchar_t *ws, _loc
 		if (out_ansi && max_out_bytes>0) {
 			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
 			int new_strlen = (int)_wcstombs_l(out_ansi, ws, max_out_bytes, loc);
-			K__Assert(new_strlen <= max_out_bytes);
+			K__ASSERT(new_strlen <= max_out_bytes);
 			if (new_strlen == max_out_bytes) {
 				out_ansi[new_strlen-1] = '\0';
 				return max_out_bytes;
@@ -2007,8 +2007,8 @@ int K::strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _
 	// マルチバイト文字列からワイド文字列へ変換する。変換後の文字数（終端文字を含まない）を返す
 	// ※変換できない場合でもエラーメッセージやログを出さない。
 	// 　文字を変換するためではなく、「変換できるかどうかの確認」のために呼ばれる場合があるため。
-	K__Assert(ansi);
-	K__Assert(loc);
+	K__ASSERT(ansi);
+	K__ASSERT(loc);
 	if (K_USE_MBSTOWCS_SAFE) {
 		// ヌル文字含む長さ
 		// _mbstowcs_s_l は必ず末尾にヌル文字をおき、それを含めたサイズを返す
@@ -2020,7 +2020,7 @@ int K::strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _
 		if (out_wide && max_out_wchars>0) {
 			// 安全版の動作に合わせて、末尾には必ずヌル文字列を置く
 			int new_wcslen = (int)_mbstowcs_l(out_wide, ansi, max_out_wchars, loc);
-			K__Assert(new_wcslen <= max_out_wchars);
+			K__ASSERT(new_wcslen <= max_out_wchars);
 			if (new_wcslen == max_out_wchars) {
 				out_wide[new_wcslen-1] = '\0';
 				return max_out_wchars;
@@ -2040,8 +2040,8 @@ int K::strAnsiToWideL(wchar_t *out_wide, int max_out_wchars, const char *ansi, _
 /// ロケール引数については K_StrWideToAnsi を参照
 /// 終端文字を含むバイト数を返す（つまり必ず1以上の値になる）。エラーが発生した場合は 0
 int K::strAnsiToWide(wchar_t *out_wide, int max_out_wchars, const char *ansi, const char *_locale) {
-	K__Assert(ansi);
-	K__Assert(_locale);
+	K__ASSERT(ansi);
+	K__ASSERT(_locale);
 	int num_wchars = 0;
 	_locale_t loc = _create_locale(LC_CTYPE, _locale);
 	if (loc) {

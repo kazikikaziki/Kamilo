@@ -40,7 +40,7 @@ private:
 		item.hModule = module;
 		item.hRsrc = FindResourceW(module, name, type);
 		K::strWideToUtf8(item.name_u8, sizeof(item.name_u8), item.name_w);
-		K__Assert(item.hRsrc);
+		K__ASSERT(item.hRsrc);
 		m_Items.push_back(item);
 	}
 

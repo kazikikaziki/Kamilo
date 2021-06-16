@@ -89,7 +89,7 @@ namespace Test {
 
 void Test_localtime() {
 	// 作成直後はエポックタイム0を表す
-	K__Assert(KLocalTime().get_time() == 0);
+	K__ASSERT(KLocalTime().get_time() == 0);
 
 	{
 		// 時刻値 --> time_t
@@ -100,24 +100,24 @@ void Test_localtime() {
 		t.hour = 8;
 		t.minute = 15;
 		t.second = 0;
-		K__Assert(t.get_time() == 1545002100);
+		K__ASSERT(t.get_time() == 1545002100);
 	}
 	{
 		// time_t --> 時刻値
 		KLocalTime t;
 		t.set_time(1545002100);
-		K__Assert(t.year == 2018);
-		K__Assert(t.month == 12);
-		K__Assert(t.day == 17);
-		K__Assert(t.hour == 8);
-		K__Assert(t.minute == 15);
-		K__Assert(t.second == 0);
+		K__ASSERT(t.year == 2018);
+		K__ASSERT(t.month == 12);
+		K__ASSERT(t.day == 17);
+		K__ASSERT(t.hour == 8);
+		K__ASSERT(t.minute == 15);
+		K__ASSERT(t.second == 0);
 	}
 	{
 		// 文字列 --> time_t
 		KLocalTime t;
 		t.parse("18-12-17 8:15:00");
-		K__Assert(t.get_time() == 1545002100);
+		K__ASSERT(t.get_time() == 1545002100);
 	}
 }
 

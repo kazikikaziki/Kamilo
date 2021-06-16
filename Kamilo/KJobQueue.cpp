@@ -29,12 +29,12 @@ class CJobQueueImpl {
 		}
 	}
 	static void jq_mainloop(CJobQueueImpl *q) {
-		K__Assert(q);
+		K__ASSERT(q);
 		while (!q->m_should_abort) {
 			// 次のジョブ
 			q->m_mutex.lock();
 			if (q->m_waiting_jobs.empty()) {
-				K__Assert(q->m_job == NULL);
+				K__ASSERT(q->m_job == NULL);
 			} else {
 				q->m_job = q->m_waiting_jobs.front();
 				q->m_waiting_jobs.erase(q->m_waiting_jobs.begin());

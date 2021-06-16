@@ -73,8 +73,8 @@ static void _ComputeTextSize(HWND hWnd, const wchar_t *text, int *w, int *h) {
 	SelectObject(hDC, (HFONT)GetStockObject(DEFAULT_GUI_FONT));
 	DrawTextW(hDC, text, -1, &rect, DT_CALCRECT);
 	ReleaseDC(hWnd, hDC);
-	K__Assert(w);
-	K__Assert(h);
+	K__ASSERT(w);
+	K__ASSERT(h);
 	*w = rect.right - rect.left;
 	*h = rect.bottom - rect.top;
 }

@@ -228,7 +228,7 @@ public:
 	}
 
 	bool playbackSeekSprite(float new_frame, Flags flags) {
-		K__Assert(m_Clip);
+		K__ASSERT(m_Clip);
 
 		// アニメ全体の長さ
 		int total_length = m_Clip->getLength();
@@ -406,7 +406,7 @@ void KAnimation::uninstall() {
 	}
 }
 void KAnimation::attach(KNode *node) {
-	K__Assert(g_AnimationMgr);
+	K__ASSERT(g_AnimationMgr);
 	if (node && !isAttached(node)) {
 		KAnimation *co = new KAnimation();
 		g_AnimationMgr->m_Nodes.attach(node, co);
@@ -417,7 +417,7 @@ bool KAnimation::isAttached(KNode *node) {
 	return of(node) != nullptr;
 }
 KAnimation * KAnimation::of(KNode *node) {
-	K__Assert(g_AnimationMgr);
+	K__ASSERT(g_AnimationMgr);
 	return g_AnimationMgr->m_Nodes.get(node);
 }
 
@@ -516,7 +516,7 @@ bool KAnimation::isMainClipPlaying(const std::string &name_or_alias, std::string
 		const std::string &playing_clip_name = m_MainPlayback->m_Clip->getName();
 
 		// 名前が指定されている場合は、再生中のクリップ名も確認する
-		K__Assert(m_MainPlayback->m_Clip);
+		K__ASSERT(m_MainPlayback->m_Clip);
 		auto it = m_AliasMap.find(name_or_alias);
 		if (it != m_AliasMap.end()) {
 			// name_or_alias はエイリアス名で指定されている

@@ -132,11 +132,11 @@ void KWindowDragger::uninstall() {
 	}
 }
 void KWindowDragger::lock() {
-	K__Assert(g_WindowDrag);
+	K__ASSERT(g_WindowDrag);
 	g_WindowDrag->lock();
 }
 void KWindowDragger::unlock() {
-	K__Assert(g_WindowDrag);
+	K__ASSERT(g_WindowDrag);
 	g_WindowDrag->unlock();
 }
 #pragma endregion // KWindowDragger

@@ -178,7 +178,7 @@ public:
 		}
 		// 開始行と終了行の間にある行数
 		int rows = m_bottomrow - m_toprow - 1;
-		K__Assert(rows > 0);
+		K__ASSERT(rows > 0);
 
 		return rows;
 	}

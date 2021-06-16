@@ -8,9 +8,9 @@ namespace Kamilo {
 /// Lua API の lua_dump() に指定するためのコールバック関数
 /// @see http://milkpot.sakura.ne.jp/lua/lua52_manual_ja.html#lua_load
 static int KLua__writer(lua_State *ls, const void *p, size_t sz, void *ud) {
-	K__Assert(ls);
-	K__Assert(p);
-	K__Assert(ud);
+	K__ASSERT(ls);
+	K__ASSERT(p);
+	K__ASSERT(ud);
 	std::string *bin = reinterpret_cast<std::string *>(ud);
 	size_t off = bin->size();
 	bin->resize(off + sz);
@@ -21,7 +21,7 @@ static int KLua__writer(lua_State *ls, const void *p, size_t sz, void *ud) {
 // 実行中のトレースバックメッセージをスタックトップに置く。
 // スクリプト実行中にエラーが発生したときのコールバック関数として使う
 static int KLua__push_traceback_message(lua_State *ls) {
-	K__Assert(ls);
+	K__ASSERT(ls);
 
 	int top = lua_gettop(ls);
 
@@ -46,7 +46,7 @@ static int KLua__push_traceback_message(lua_State *ls) {
 	}
 
 	// この関数の呼び出し前後でスタックサイズが変わっていないことを確認
-	K__Assert(lua_gettop(ls) == top);
+	K__ASSERT(lua_gettop(ls) == top);
 	
 	return 1;
 }
@@ -108,8 +108,8 @@ int KLua::dump(lua_State *ls, std::string *bin) {
 	return LUA_OK;
 }
 int KLua::call_yieldable(lua_State *ls, int nargs, char *out_errmsg, size_t errsize) {
-	K__Assert(ls);
-	K__Assert(nargs >= 0);
+	K__ASSERT(ls);
+	K__ASSERT(nargs >= 0);
 	
 	// 実行（スクリプト内から自分自身が呼ばれる再入可能性に注意）
 	int res = lua_resume(ls, nullptr, nargs);
@@ -144,9 +144,9 @@ int KLua::call_yieldable(lua_State *ls, int nargs, char *out_errmsg, size_t errs
 	return res;
 }
 int KLua::call(lua_State *ls, int nargs, int ret_args, char *out_errmsg, size_t errsize) {
-	K__Assert(ls);
-	K__Assert(nargs >= 0);
-	K__Assert(ret_args >= 0);
+	K__ASSERT(ls);
+	K__ASSERT(nargs >= 0);
+	K__ASSERT(ret_args >= 0);
 
 	// http://bocchies.hatenablog.com/entry/2013/10/29/003014
 	// pcall でのエラー取得用コールバック関数を登録しておく。
@@ -375,8 +375,8 @@ static const char *KLuapp_text_prep =
 
 // 文字列で表現された値を適切な型で push する
 static void KLuapp__push_typed_value(lua_State *ls, const char *val) {
-	K__Assert(ls);
-	K__Assert(val);
+	K__ASSERT(ls);
+	K__ASSERT(val);
 	std::string str(val);
 
 	char *end_ptr = nullptr;
@@ -459,8 +459,8 @@ bool KLuapp_file(const char *srcfile_u8, const char *dstfile_u8, const char *nam
 	return ok;
 }
 bool KLuapp_text(std::string *dst_u8, const char *src_u8, const char *name_u8, const KLuappDef *defines, int numdef) {
-	K__Assert(dst_u8);
-	K__Assert(dst_u8->c_str() != src_u8);
+	K__ASSERT(dst_u8);
+	K__ASSERT(dst_u8->c_str() != src_u8);
 	std::string generated_lua;
 	bool ok = true;
 	{
@@ -539,7 +539,7 @@ void Test_luapp() {
 	KLuapp_text(&o, i, "Test1", nullptr, 0);
 
 	// 出力を比較
-	K__Assert(o.compare(m) == 0);
+	K__ASSERT(o.compare(m) == 0);
 }
 } // Test
 #pragma endregion // KLuapp
