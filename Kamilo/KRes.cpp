@@ -1790,7 +1790,14 @@ public:
 			ImGui::Text("(NO SPRITE)");
 			return;
 		}
-		ImGui::Text("Source image Size: %d x %d", sprite->mImageW, sprite->mImageH);
+#if 1
+		KTEXID texid = texbank->findTexture(sprite->mTextureName, 0, false);
+		KTexture::Desc desc;
+		KVideo::tex_getDesc(texid, &desc);
+		ImGui::Text("Source image size: %d x %d", desc.original_w, desc.original_h);
+#else
+		ImGui::Text("Source image size: %d x %d", sprite->mImageW, sprite->mImageH);
+#endif
 		ImGui::Text("Atlas Pos : %d, %d", sprite->mAtlasX, sprite->mAtlasY);
 		ImGui::Text("Atlas Size: %d, %d", sprite->mAtlasW, sprite->mAtlasH);
 		if (sprite->mSubMeshIndex >= 0) {
@@ -2131,7 +2138,10 @@ public:
 		return nullptr;
 	}
 	virtual bool addSpriteFromDesc(const KPath &name, KSpriteAuto sp, bool update_mesh) override {
-		if (name.empty()) return false;
+		if (name.empty()) { K__ERROR("Sprite name is empty"); return false; }
+		if (sp->mTextureName.empty()) { K__ERROR("Texture name is empty"); return false; }
+		if (sp->mAtlasW == 0 || sp->mAtlasH == 0) { K__ERROR("Sprite size is zero"); return false; }
+
 		if (hasSprite(name)) return false;
 
 		// 同名のリソースがあれば削除する
@@ -2185,6 +2195,8 @@ public:
 			sp->mPivot.x = (float)ox;
 			sp->mPivot.y = (float)oy;
 			sp->mPivotInPixels = true;
+			K__ASSERT(sp->mAtlasW > 0);
+			K__ASSERT(sp->mAtlasH > 0);
 			if (addSpriteFromDesc(spr_name, KSpriteAuto(sp), true)) {
 				ok = true;
 			}
