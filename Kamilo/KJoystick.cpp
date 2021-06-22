@@ -5,9 +5,10 @@
 
 namespace Kamilo {
 
+
+
 class CWin32Joy {
 	static constexpr int MAX_JOYS = 2;
-	static constexpr float THRESHOLD = 0.2f;
 	struct _JOY {
 		JOYCAPSW caps;
 		JOYINFOEX info;
@@ -15,10 +16,12 @@ class CWin32Joy {
 		bool connected;
 	};
 	_JOY m_joy[MAX_JOYS];
+
 	static bool ID_CHECK(int n) {
 		return 0 <= (n) && (n) < KJoystick::MAX_CONNECT;
 	}
 public:
+	float m_threshold;
 	bool m_is_init;
 
 	CWin32Joy() {
@@ -33,6 +36,7 @@ public:
 		for (int i=0; i<MAX_JOYS; i++) {
 			init_stick(i);
 		}
+		m_threshold = 0.05f;//0.20f;
 		m_is_init = true;
 		return true;
 	}
@@ -91,7 +95,7 @@ public:
 		// dwXpos なら 0 が一番左に倒したとき、0xFFFF が一番右に倒したときに該当する
 		// ニュートラル状態はその中間だが、きっちり真ん中の値 0x7FFF になっている保証はない。
 		float value = ((float)dwAxis / 0xFFFF - 0.5f) * 2.0f;
-		if (fabsf(value) < THRESHOLD) return 0.0f; // 絶対値が一定未満であればニュートラル状態であるとみなす
+		if (fabsf(value) < m_threshold) return 0.0f; // 絶対値が一定未満であればニュートラル状態であるとみなす
 		return value;
 	}
 	virtual bool getButton(int index, int btn) {
@@ -196,6 +200,9 @@ bool KJoystick::isConnected(int index) {
 }
 bool KJoystick::hasPov(int index) {
 	return g_Joy.hasPov(index);
+}
+void KJoystick::setThreshold(float value) {
+	g_Joy.m_threshold = value;
 }
 int KJoystick::getAxisCount(int index) {
 	return g_Joy.getAxisCount(index);
