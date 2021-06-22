@@ -23,7 +23,7 @@ def make_project(proj):
 
 	# 引数チェック
 	assert(type(proj) is str)
-	if (proj == "") or ("/" in proj) or ("\\" in proj):
+	if (proj.strip(". \t\n") == "") or ("/" in proj) or ("\\" in proj):
 		print(u"#### Invalid project name! ####")
 		return
 
@@ -46,7 +46,7 @@ def make_project(proj):
 
 	# ファイルをコピー
 	copy_file(proj, "WinMain.cpp")
-	copy_file(proj, "cmake.py")
+	copy_file(proj, "make_visual_studio_project_files.py")
 
 
 	# CMakeList の中身を書き換えてコピー
