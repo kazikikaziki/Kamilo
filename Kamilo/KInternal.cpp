@@ -230,7 +230,40 @@ void K::win32_ImmDisableIME() {
 	// IMEを無効化する
 	ImmDisableIME((DWORD)(-1));
 }
-	#pragma endregion // win32
+
+static int _ConsoleCnt = 0;
+static FILE *_Stdout = NULL;
+static FILE *_Stdin = NULL;
+
+void K::win32_AllocConsole() {
+	#ifndef _CONSOLE
+	if (_ConsoleCnt == 0) {
+		AllocConsole();
+		freopen_s(&_Stdout, "CON", "w", stdout);
+		freopen_s(&_Stdin, "CON", "r", stdin);
+	}
+	_ConsoleCnt++;
+	#endif
+}
+
+void K::win32_FreeConsole() {
+	#ifndef _CONSOLE
+	_ConsoleCnt--;
+	if (_ConsoleCnt == 0) {
+		if (_Stdout) {
+			fclose(_Stdout);
+			_Stdout = NULL;
+		}
+		if (_Stdin) {
+			fclose(_Stdin);
+			_Stdin = NULL;
+		}
+		FreeConsole();
+	}
+	#endif
+}
+
+#pragma endregion // win32
 
 
 

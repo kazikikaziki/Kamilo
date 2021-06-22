@@ -123,6 +123,8 @@ public:
 	static std::string win32_GetErrorString(long hr); // HRESULT hr の値からメッセージを得る
 	static void win32_MemoryLeakCheck();
 	static void win32_ImmDisableIME();
+	static void win32_AllocConsole();
+	static void win32_FreeConsole();
 	#pragma endregion // win32
 
 	#pragma region sys
