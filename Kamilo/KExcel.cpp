@@ -129,15 +129,6 @@ public:
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			if (idx == sheetId) {
 				const char *s = xSheet->getAttrString("name");
-				#ifdef _DEBUG
-				{
-					// <sheet> の sheetId には１起算のシート番号が入っていて、
-					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
-					// 一応整合性を確認しておく
-					int id = xSheet->getAttrInt("sheetId", -1);
-					K__ASSERT(id == 1 + idx);
-				}
-				#endif
 				return s;
 			}
 			idx++;
@@ -156,15 +147,6 @@ public:
 			const KXmlElement *xSheet = sheets_xml->getChild(iSheet);
 			const char *name_u8 = xSheet->getAttrString("name");
 			if (name_u8 && name.compare(name_u8) == 0) {
-				#ifdef _DEBUG
-				{
-					// <sheet> の sheetId には１起算のシート番号が入っていて、
-					// その番号は <sheets> 内での <sheet> の並び順と同じであると仮定している。
-					// 一応整合性を確認しておく
-					int id = xSheet->getAttrInt("sheetId", -1);
-					K__ASSERT(id == 1 + idx);
-				}
-				#endif
 				return idx;
 			}
 			idx++;
@@ -527,17 +509,21 @@ private:
 		// </c>
 
 		// データ型
+		const char *s = cell_xml->getAttrString("s");
 		const char *t = cell_xml->getAttrString("t");
-		if (t == nullptr) return nullptr;
-
-		if (strcmp(t, "n") == 0) {
-			*type = TP_NUMBER; // <v> には数値が指定されている
-		} else if (strcmp(t, "s") == 0) {
-			*type = TP_STRINGID; // <v> には文字列ＩＤが指定されている
-		} else if (strcmp(t, "str") == 0) {
-			*type = TP_LITERAL; // <v> には文字列が直接指定されている
-		} else { 
-			*type = TP_OTHER; // それ以外の値が入っている
+		if (t) {
+			if (strcmp(t, "n") == 0) {
+				*type = TP_NUMBER; // <v> には数値が指定されている
+			} else if (strcmp(t, "s") == 0) {
+				*type = TP_STRINGID; // <v> には文字列ＩＤが指定されている
+			} else if (strcmp(t, "str") == 0) {
+				*type = TP_LITERAL; // <v> には文字列が直接指定されている
+			} else { 
+				*type = TP_OTHER; // それ以外の値が入っている
+			}
+		} else {
+			// t 属性がない
+			*type = TP_LITERAL;
 		}
 		// データ文字列
 		const KXmlElement *v_elm = cell_xml->findNode("v");
