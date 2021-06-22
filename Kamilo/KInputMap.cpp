@@ -137,6 +137,8 @@ public:
 	/// 入力状態を更新する
 	/// newFrame よりも多い回数呼ぶと入力判定の精度が上がる
 	virtual void poll() = 0;
+
+	virtual void updateGui() {}
 };
 #pragma endregion // Button Decls
 
@@ -323,14 +325,14 @@ public:
 		if (m_halfrange < 0) {
 			// in[-1..0] ==> out[0..1]
 			if (axisval < 0) {
-				if (val) *val = -axisval;
+				if (val) *val = fabsf(axisval);
 				return true;
 			}
 		}
 		if (m_halfrange > 0) {
 			// in[0..1] ==> out[0..1]
 			if (axisval > 0) {
-				if (val) *val = axisval;
+				if (val) *val = fabsf(axisval);
 				return true;
 			}
 		}
@@ -979,6 +981,31 @@ public:
 
 		m_mutex.unlock();
 	}
+	virtual void updateGui() override {
+		ImGui::BeginTable("##pages", 2, ImGuiTableFlags_Resizable|ImGuiTableFlags_BordersV|ImGuiTableFlags_SizingFixedFit);
+		for (size_t i=0; i<m_buttons.size(); i++) {
+			CActionButtonKeyElm *elm = m_buttons[i];
+			ImVec4 color;
+			if (elm->m_raw_curr != 0) {
+			//	color = KImGui::COLOR_WARNING);
+				color = KImGui::COLOR_DEFAULT();
+			} else {
+				color = KImGui::COLOR_DISABLED();
+			}
+
+			ImGui::BeginGroup();
+			ImGui::TableNextColumn();
+			ImGui::TextColored(color, "%s", elm->m_name.c_str());
+
+			ImGui::TableNextColumn();
+			ImGui::TextColored(color, "%.2f", elm->m_raw_curr);
+			ImGui::EndGroup();
+
+			if (ImGui::IsItemHovered()) { ImGui::SetTooltip("%s", typeid(*elm).name()); }
+
+		}
+		ImGui::EndTable();
+	}
 	#pragma endregion // KButton inherit
 
 private:
@@ -1167,6 +1194,7 @@ static void _UpdateButtonGui(KButton *mgr) {
 	}
 }
 
+
 class CInputMap: public KManager, public KInspectorCallback {
 	KButton *m_game_buttons; // ゲーム内入力用のボタンマネージャ
 	KButton *m_app_buttons; // アプリ操作用のボタンマネージャ
@@ -1187,12 +1215,21 @@ public:
 		ImGui::Indent();
 		_UpdateButtonGui(m_app_buttons);
 		ImGui::Unindent();
+		KImGui::VSpace();
 
 		ImGui::Text("Game buttons");
 		ImGui::Separator();
 		ImGui::Indent();
 		_UpdateButtonGui(m_game_buttons);
 		ImGui::Unindent();
+		KImGui::VSpace();
+
+		ImGui::Text("Raw Input");
+		ImGui::Separator();
+		ImGui::Indent();
+		m_game_buttons->updateGui();
+		ImGui::Unindent();
+		KImGui::VSpace();
 	}
 	virtual void on_manager_appframe() override {
 		{
@@ -1252,6 +1289,12 @@ public:
 	bool getGameButtonDown(const char *button) const {
 		return m_game_buttons->getButtonDown(button, nullptr);
 	};
+	float getGameButtonAnalog(const char *button) const {
+		float analog_value = 0.0f;
+		m_game_buttons->isButtonDown(button, &analog_value); // getButtonDown で取得してはいけない（アナログには値は「入力の瞬間」というものがない）
+		return analog_value;
+	};
+
 	void postButtonDown(const char *button) {
 		if (m_app_buttons->findButtonItem(button)) {
 			m_app_buttons->postButtonDown(button);
@@ -1443,6 +1486,10 @@ bool KInputMap::getGameButtonDown(const char *button) {
 	K__ASSERT(g_InputMap);
 	return g_InputMap->getGameButtonDown(button);
 }
+float KInputMap::getGameButtonAnalog(const char *button) {
+	K__ASSERT(g_InputMap);
+	return g_InputMap->getGameButtonAnalog(button);
+}
 
 /// 指定されたボタンが押された状態になっているか？
 /// （アプリボタンとゲームボタンのどちらにも対応する）
@@ -1454,6 +1501,9 @@ bool KInputMap::isButtonDown(const char *button) {
 /// （アプリボタンとゲームボタンのどちらにも対応する）
 bool KInputMap::getButtonDown(const char *button) {
 	return getAppButtonDown(button) || getGameButtonDown(button);
+}
+float KInputMap::getButtonAnalog(const char *button) {
+	return getGameButtonAnalog(button);
 }
 
 /// ボタンを押したことにする

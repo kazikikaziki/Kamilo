@@ -83,11 +83,12 @@ public:
 	static void addGameButton(const char *button, KButtonFlags flags=0);
 	static bool isGameButtonDown(const char *button);
 	static bool getGameButtonDown(const char *button);
+	static float getGameButtonAnalog(const char *button);
 
 	static bool isButtonDown(const char *button);
 	static bool getButtonDown(const char *button);
-
 	static void postButtonDown(const char *button);
+	static float getButtonAnalog(const char *button);
 
 	// 互換性
 	static void addButton(const char *button, KButtonFlags flags=0) {

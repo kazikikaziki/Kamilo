@@ -55,6 +55,15 @@ public:
 	virtual void setInputAxisZ(int i) {
 		m_axis_z = (float)i;
 	}
+	virtual void setInputAxisX_Analog(float value) {
+		m_axis_x = value;
+	}
+	virtual void setInputAxisY_Analog(float value) {
+		m_axis_y = value;
+	}
+	virtual void setInputAxisZ_Analog(float value) {
+		m_axis_z = value;
+	}
 	virtual int getInputAxisX() {
 		return (int)_signf(m_axis_x); // returns -1, 0, 1
 	}
@@ -63,6 +72,12 @@ public:
 	}
 	virtual int getInputAxisZ() {
 		return (int)_signf(m_axis_z); // returns -1, 0, 1
+	}
+	virtual float getInputAxisX_Analog() {
+		return m_axis_x; // returns -1, 0, 1
+	}
+	virtual float getInputAxisZ_Analog() {
+		return m_axis_z; // returns -1, 0, 1
 	}
 
 	virtual void setInputTrigger(const std::string &button) {
