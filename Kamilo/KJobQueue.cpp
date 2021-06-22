@@ -18,7 +18,7 @@ class CJobQueueImpl {
 		void *data;
 	};
 	static void jq_sleep(int msec) {
-		Sleep(msec);
+		::Sleep(msec);
 	}
 	static void jq_deljob(JQITEM *job) {
 		if (job) {
@@ -30,24 +30,24 @@ class CJobQueueImpl {
 	}
 	static void jq_mainloop(CJobQueueImpl *q) {
 		K__ASSERT(q);
-		while (!q->m_should_abort) {
+		while (!q->m_ShouldAbort) {
 			// 次のジョブ
-			q->m_mutex.lock();
-			if (q->m_waiting_jobs.empty()) {
-				K__ASSERT(q->m_job == NULL);
+			q->m_Mutex.lock();
+			if (q->m_WaitingJobs.empty()) {
+				K__ASSERT(q->m_Job == NULL);
 			} else {
-				q->m_job = q->m_waiting_jobs.front();
-				q->m_waiting_jobs.erase(q->m_waiting_jobs.begin());
+				q->m_Job = q->m_WaitingJobs.front();
+				q->m_WaitingJobs.erase(q->m_WaitingJobs.begin());
 			}
-			q->m_mutex.unlock();
+			q->m_Mutex.unlock();
 
 			// ジョブがあれば実行。なければ待機
-			if (q->m_job) {
+			if (q->m_Job) {
 				// 実行
-				q->m_job->runfunc(q->m_job->data);
-				q->m_done_jobs.insert(q->m_job->id);
-				jq_deljob(q->m_job);
-				q->m_job = NULL;
+				q->m_Job->runfunc(q->m_Job->data);
+				q->m_FinishedJobs.insert(q->m_Job->id);
+				jq_deljob(q->m_Job);
+				q->m_Job = NULL;
 
 			} else {
 				// 待機
@@ -56,112 +56,112 @@ class CJobQueueImpl {
 		}
 	}
 private:
-	KJOBID m_last_id; // 最後に発行したジョブ識別子
-	JQITEM *m_job; // 実行中のジョブ
-	std::vector<JQITEM*> m_waiting_jobs; // 待機中のジョブ
-	std::unordered_set<KJOBID> m_done_jobs; // 完了のジョブ
-	std::mutex m_mutex;
-	std::thread m_thread; // ジョブを処理するためのスレッド
-	bool m_should_abort; // 中断命令
+	KJOBID m_LastJobId; // 最後に発行したジョブ識別子
+	JQITEM *m_Job; // 実行中のジョブ
+	std::vector<JQITEM*> m_WaitingJobs; // 待機中のジョブ
+	std::unordered_set<KJOBID> m_FinishedJobs; // 完了のジョブ
+	std::mutex m_Mutex;
+	std::thread m_Thread; // ジョブを処理するためのスレッド
+	bool m_ShouldAbort; // 中断命令
 public:
 	CJobQueueImpl() {
-		m_last_id = 0;
-		m_job = NULL;
-		m_should_abort = false;
-		m_thread = std::thread(jq_mainloop, this);
+		m_LastJobId = 0;
+		m_Job = NULL;
+		m_ShouldAbort = false;
+		m_Thread = std::thread(jq_mainloop, this);
 	}
 	~CJobQueueImpl() {
 		// ジョブを空っぽにする
 		clearJobs();
 
 		// ジョブ処理スレッドを停止
-		m_should_abort = true;
-		if (m_thread.joinable()) {
-			m_thread.join();
+		m_ShouldAbort = true;
+		if (m_Thread.joinable()) {
+			m_Thread.join();
 		}
 	}
 	KJOBID pushJob(K_JobFunc runfunc, K_JobFunc delfunc, void *data) {
-		m_mutex.lock();
-		m_last_id++;
+		m_Mutex.lock();
+		m_LastJobId++;
 
 		JQITEM *job = new JQITEM;
 		job->runfunc = runfunc;
 		job->delfunc = delfunc;
 		job->data = data;
-		job->id = m_last_id;
-		m_waiting_jobs.push_back(job);
-		m_mutex.unlock();
-		return m_last_id; // = job.id;
+		job->id = m_LastJobId;
+		m_WaitingJobs.push_back(job);
+		m_Mutex.unlock();
+		return m_LastJobId; // = job.id;
 	}
 	bool removeJob(KJOBID job_id) {
 		bool retval = false;
-		m_mutex.lock();
-		if (m_job && m_job->id == job_id) {
+		m_Mutex.lock();
+		if (m_Job && m_Job->id == job_id) {
 			// 実行中のジョブは削除できない
 			retval = false;
 
-		} else if (m_done_jobs.find(job_id) != m_done_jobs.end()) {
+		} else if (m_FinishedJobs.find(job_id) != m_FinishedJobs.end()) {
 			// 完了リストから削除
-			m_done_jobs.erase(job_id);
+			m_FinishedJobs.erase(job_id);
 			retval = true;
 
 		} else {
 			// 削除した場合でも、もともとキューになくて削除しなかった場合でも、
 			// 指定された JOBID がキューに存在しないことに変わりはないので成功とする
 			retval = true;
-			for (size_t i=0; i<m_waiting_jobs.size(); i++) {
-				if (m_waiting_jobs[i]->id == job_id) {
-					m_waiting_jobs.erase(m_waiting_jobs.begin() + i);
+			for (size_t i=0; i<m_WaitingJobs.size(); i++) {
+				if (m_WaitingJobs[i]->id == job_id) {
+					m_WaitingJobs.erase(m_WaitingJobs.begin() + i);
 					break;
 				}
 			}
 		}
-		m_mutex.unlock();
+		m_Mutex.unlock();
 		return retval;
 	}
 	KJobQueue::Stat getJobState(KJOBID job_id) {
 		KJobQueue::Stat retval = KJobQueue::STAT_INVALID;
-		m_mutex.lock();
-		if (m_job && m_job->id == job_id) {
+		m_Mutex.lock();
+		if (m_Job && m_Job->id == job_id) {
 			// ジョブは実行中
 			retval = KJobQueue::STAT_RUNNING;
 
-		} else if (m_done_jobs.find(job_id) != m_done_jobs.end()) {
+		} else if (m_FinishedJobs.find(job_id) != m_FinishedJobs.end()) {
 			// ジョブは実行済み
 			retval = KJobQueue::STAT_DONE;
 
 		} else {
 			// 待機中？
-			for (size_t i=0; i<m_waiting_jobs.size(); i++) {
-				const JQITEM *job = m_waiting_jobs[i];
+			for (size_t i=0; i<m_WaitingJobs.size(); i++) {
+				const JQITEM *job = m_WaitingJobs[i];
 				if (job->id == job_id) {
 					retval = KJobQueue::STAT_WAITING;
 					break;
 				}
 			}
 		}
-		m_mutex.unlock();
+		m_Mutex.unlock();
 		return retval;
 	}
 	int getRestJobCount() {
 		int cnt;
-		m_mutex.lock();
-		cnt = (int)m_waiting_jobs.size(); // 未実行のジョブ
-		if (m_job) cnt++; // 実行中のジョブ
-		m_mutex.unlock();
+		m_Mutex.lock();
+		cnt = (int)m_WaitingJobs.size(); // 未実行のジョブ
+		if (m_Job) cnt++; // 実行中のジョブ
+		m_Mutex.unlock();
 		return cnt;
 	}
 	bool raiseJobPriority(KJOBID job_id) {
 		// ジョブが待機列に入っているなら、待機列先頭に移動する。
 		// ジョブが先頭に移動した（または初めから先頭にいた）なら true を返す
 		bool retval = false;
-		m_mutex.lock();
+		m_Mutex.lock();
 
 		// 目的のジョブはどこにいる？
 		int job_index = -1;
 		{
-			for (size_t i=0; i<m_waiting_jobs.size(); i++) {
-				JQITEM *job = m_waiting_jobs[i];
+			for (size_t i=0; i<m_WaitingJobs.size(); i++) {
+				JQITEM *job = m_WaitingJobs[i];
 				if (job->id == job_id) {
 					job_index = (int)i;
 					break;
@@ -176,14 +176,14 @@ public:
 		} else if (job_index > 0) {
 			// 待機列の先頭以外の場所にいる。
 			// 先頭へ移動する
-			JQITEM *job = m_waiting_jobs[job_index];
-			m_waiting_jobs.erase(m_waiting_jobs.begin() + job_index);
-			m_waiting_jobs.insert(m_waiting_jobs.begin(), job);
+			JQITEM *job = m_WaitingJobs[job_index];
+			m_WaitingJobs.erase(m_WaitingJobs.begin() + job_index);
+			m_WaitingJobs.insert(m_WaitingJobs.begin(), job);
 			K::print("Job(%d) moved to top of the waiting list", job_id);
 			retval = true;
 		}
 
-		m_mutex.unlock();
+		m_Mutex.unlock();
 		return retval;
 	}
 	void waitJob(KJOBID job_id) {
@@ -206,14 +206,14 @@ public:
 	}
 	void clearJobs() {
 		// 現時点で待機列にあるジョブを削除
-		m_mutex.lock();
+		m_Mutex.lock();
 		{
-			for (size_t i=0; i<m_waiting_jobs.size(); i++) {
-				jq_deljob(m_waiting_jobs[i]);
+			for (size_t i=0; i<m_WaitingJobs.size(); i++) {
+				jq_deljob(m_WaitingJobs[i]);
 			}
-			m_waiting_jobs.clear();
+			m_WaitingJobs.clear();
 		}
-		m_mutex.unlock();
+		m_Mutex.unlock();
 
 		// 実行中のジョブの終了を待つ
 		waitAllJobs();

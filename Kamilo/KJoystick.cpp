@@ -15,29 +15,29 @@ class CWin32Joy {
 		DWORD last_check;
 		bool connected;
 	};
-	_JOY m_joy[MAX_JOYS];
+	_JOY m_Joy[MAX_JOYS];
 
 	static bool ID_CHECK(int n) {
 		return 0 <= (n) && (n) < KJoystick::MAX_CONNECT;
 	}
 public:
-	float m_threshold;
-	bool m_is_init;
+	float m_Threshold;
+	bool m_IsInit;
 
 	CWin32Joy() {
 		zero_clear();
 	}
 	void zero_clear() {
-		m_is_init = false;
-		ZeroMemory(m_joy, sizeof(m_joy));
+		m_IsInit = false;
+		ZeroMemory(m_Joy, sizeof(m_Joy));
 	}
 	bool init() {
 		zero_clear();
 		for (int i=0; i<MAX_JOYS; i++) {
 			init_stick(i);
 		}
-		m_threshold = 0.05f;//0.20f;
-		m_is_init = true;
+		m_Threshold = 0.05f;//0.20f;
+		m_IsInit = true;
 		return true;
 	}
 	void shutdown() {
@@ -48,7 +48,7 @@ public:
 			K__ERROR("Invalid joystick index!: %d", index);
 			return false;
 		}
-		_JOY &joy = m_joy[index];
+		_JOY &joy = m_Joy[index];
 		ZeroMemory(&joy, sizeof(joy));
 		if (joyGetDevCapsW(JOYSTICKID1+index, &joy.caps, sizeof(joy.caps)) == 0) {
 			joy.connected = true;
@@ -58,27 +58,27 @@ public:
 	}
 	virtual bool isConnected(int index) {
 		if (!ID_CHECK(index)) return false;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 		return joy.connected;
 	}
 	virtual bool hasPov(int index) {
 		if (!ID_CHECK(index)) return false;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 		return (joy.caps.wCaps & JOYCAPS_HASPOV) != 0;
 	}
 	virtual int getAxisCount(int index) {
 		if (!ID_CHECK(index)) return 0;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 		return joy.caps.wNumAxes;
 	}
 	virtual int getButtonCount(int index) {
 		if (!ID_CHECK(index)) return 0;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 		return joy.caps.wNumButtons;
 	}
 	virtual float getAxis(int index, int axis) {
 		if (!ID_CHECK(index)) return 0;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 	
 		if (axis < 0) return 0.0f;
 		if (axis >= (int)joy.caps.wNumAxes) return 0.0f;
@@ -95,12 +95,12 @@ public:
 		// dwXpos なら 0 が一番左に倒したとき、0xFFFF が一番右に倒したときに該当する
 		// ニュートラル状態はその中間だが、きっちり真ん中の値 0x7FFF になっている保証はない。
 		float value = ((float)dwAxis / 0xFFFF - 0.5f) * 2.0f;
-		if (fabsf(value) < m_threshold) return 0.0f; // 絶対値が一定未満であればニュートラル状態であるとみなす
+		if (fabsf(value) < m_Threshold) return 0.0f; // 絶対値が一定未満であればニュートラル状態であるとみなす
 		return value;
 	}
 	virtual bool getButton(int index, int btn) {
 		if (!ID_CHECK(index)) return false;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 
 		if (btn < 0) return false;
 		if (btn >= (int)joy.caps.wNumButtons) return false;
@@ -109,7 +109,7 @@ public:
 	}
 	virtual bool getPov(int index, int *x, int *y, int *deg) {
 		if (!ID_CHECK(index)) return false;
-		const _JOY &joy = m_joy[index];
+		const _JOY &joy = m_Joy[index];
 
 		// ハットスイッチの有無をチェック
 		if ((joy.caps.wCaps & JOYCAPS_HASPOV) == 0) {
@@ -152,7 +152,7 @@ public:
 		// 一度接続された状態になって joyGetDevCapsW が成功すると、たとえその後
 		// パッドを外しても joyGetDevCapsW は成功し続ける（最初に接続成功したときの結果を返し続ける）
 		// そのため、接続状態かどうかは joyGetPosEx がエラーになるかどうかで判断する
-		_JOY &joy = m_joy[index];
+		_JOY &joy = m_Joy[index];
 
 		if (joy.connected) {
 			joy.info.dwSize = sizeof(joy.info);
@@ -193,7 +193,7 @@ void KJoystick::shutdown() {
 	g_Joy.shutdown();
 }
 bool KJoystick::isInit() {
-	return g_Joy.m_is_init;
+	return g_Joy.m_IsInit;
 }
 bool KJoystick::isConnected(int index) {
 	return g_Joy.isConnected(index);
@@ -202,7 +202,7 @@ bool KJoystick::hasPov(int index) {
 	return g_Joy.hasPov(index);
 }
 void KJoystick::setThreshold(float value) {
-	g_Joy.m_threshold = value;
+	g_Joy.m_Threshold = value;
 }
 int KJoystick::getAxisCount(int index) {
 	return g_Joy.getAxisCount(index);
