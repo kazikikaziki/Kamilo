@@ -20,6 +20,7 @@ inline float _lerp_unclamped(float a, float b, float t) {
 #pragma region KEasing static
 KEasing::Func01 KEasing::getfunc01(KEasing::Expr expr) {
 	static const Func01 s_table[EXPR_ENUM_MAX] {
+		KEasing::one01,        // EXPR_ONE
 		KEasing::keep01,       // EXPR_KEEP
 		KEasing::step01,       // EXPR_STEP
 		KEasing::linear01,     // EXPR_LINEAR
@@ -59,6 +60,9 @@ KEasing::Func01 KEasing::getfunc01(KEasing::Expr expr) {
 	return s_table[expr];
 }
 
+float KEasing::one01(float t) {
+	return 1.0f;
+}
 float KEasing::keep01(float t) {
 	return (t < 1.0f) ? 0.0f : 1.0f;
 }
@@ -199,11 +203,14 @@ float KEasing::hermite(float t, float v0, float v1, float slope0, float slope1) 
 	float t3 = t * t2;
 	return a * t3  + b * t2 + c * t + d; 
 }
+float KEasing::one(float t, float a, float b) {
+	return linear(one01(t), a, b); // return b; と同じ
+}
 float KEasing::keep(float t, float a, float b) {
-	return (t < 1.0f) ? a : b;
+	return linear(keep01(t), a, b); // return (t < 1.0f) ? a : b; と同じ
 }
 float KEasing::step(float t, float a, float b) {
-	return (t <= 0.0f) ? a : b;
+	return linear(step01(t), a, b); // return (t <= 0.0f) ? a : b; と同じ
 }
 float KEasing::linear(float t, float a, float b) {
 	t = _clamp01(t);

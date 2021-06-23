@@ -13,6 +13,7 @@ namespace Kamilo {
 class KEasing {
 public:
 	enum Expr {
+		EXPR_ONE, // 常に終了値
 		EXPR_KEEP, // 常に初期値で、終了時刻(t>=1)になった瞬間に終端値になる
 		EXPR_STEP, // 開始時刻(t=0)でのみ初期値で、開始時刻を過ぎた(t>0)瞬間に終了値になる
 		EXPR_LINEAR,
@@ -70,6 +71,7 @@ public:
 	static constexpr float BACK_90  = 7.74502f; // 90%行き過ぎてから戻る
 	static constexpr float BACK_100 = 8.44353f; //100%行き過ぎてから戻る
 
+	static float one01(float t); // t の値に関係なく常に 1 を返す
 	static float keep01(float t); // (t < 1) ? 0 : 1 と同じ。 t が 1 未満のときに 0 を返す。それ以外ならば 1 (tが1になった瞬間に0→1になる)
 	static float step01(float t); // (t <= 0) ? 0 : 1 と同じ。 t が 0 以下のときに 0 を返す。それ以外ならば 1 (tが0を超えた瞬間に0→1になる)
 	static float linear01(float t);
@@ -101,6 +103,7 @@ public:
 	static float outBackEx01(float t, float s);
 	static float inOutBackEx01(float t, float s);
 
+	static float one(float t, float a, float b);
 	static float keep(float t, float a, float b);
 	static float step(float t, float a, float b);
 	static float linear(float t, float a, float b);
