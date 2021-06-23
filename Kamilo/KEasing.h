@@ -148,6 +148,7 @@ public:
 	/// @param b t=0.5 での値
 	static float wave(float t, float a, float b);
 
+	static float easing01(float t, Expr expr);
 	static float easing(float t, float a, float b, Expr expr);
 
 public:

@@ -292,6 +292,10 @@ float KEasing::wave(float t, float a, float b) {
 	float k = 0.5f + 0.5f * -cosf(2 * _pi * t);
 	return linear(k, a, b);
 }
+float KEasing::easing01(float t, Expr expr) {
+	Func01 func = getfunc01(expr);
+	return func(t);
+}
 float KEasing::easing(float t, float a, float b, Expr expr) {
 	Func01 func = getfunc01(expr);
 	return _lerp_unclamped(a, b, func(t));
