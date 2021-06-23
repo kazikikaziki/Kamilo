@@ -1235,7 +1235,7 @@ KRect KRect::getUnionRect(const KRect &rc) const {
 	);
 }
 bool KRect::isZeroSized() const {
-	return KMath::equals(xmin, xmax) && KMath::equals(ymin, ymax);
+	return KMath::equals(xmin, xmax) || KMath::equals(ymin, ymax);
 }
 bool KRect::isEqual(const KRect &rect) const {
 	return 
