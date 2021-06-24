@@ -69,48 +69,46 @@ void Test_button();
 
 
 
-class KButton; // internal
-
 class KInputMap {
 public:
 	static void install();
 	static void uninstall();
 
-	static void addAppButton(const char *button, KButtonFlags flags=0);
-	static bool isAppButtonDown(const char *button);
-	static bool getAppButtonDown(const char *button);
+	static void addAppButton(const std::string &button, KButtonFlags flags=0);
+	static bool isAppButtonDown(const std::string &button);
+	static bool getAppButtonDown(const std::string &button);
 
-	static void addGameButton(const char *button, KButtonFlags flags=0);
-	static bool isGameButtonDown(const char *button);
-	static bool getGameButtonDown(const char *button);
-	static float getGameButtonAnalog(const char *button);
+	static void addGameButton(const std::string &button, KButtonFlags flags=0);
+	static bool isGameButtonDown(const std::string &button);
+	static bool getGameButtonDown(const std::string &button);
+	static float getGameButtonAnalog(const std::string &button);
 
-	static bool isButtonDown(const char *button);
-	static bool getButtonDown(const char *button);
-	static void postButtonDown(const char *button);
-	static float getButtonAnalog(const char *button);
+	static bool isButtonDown(const std::string &button);
+	static bool getButtonDown(const std::string &button);
+	static void postButtonDown(const std::string &button);
+	static float getButtonAnalog(const std::string &button);
 
 	// 互換性
-	static void addButton(const char *button, KButtonFlags flags=0) {
+	static void addButton(const std::string &button, KButtonFlags flags=0) {
 		addGameButton(button, flags);
 	}
 
-	static void bindAppKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE);
-	static void bindKeyboardKey(const char *button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE, int tag=0);
-	static void bindJoystickKey(const char *button, KJoystick::Button joybtn, int tag=0);
-	static void bindJoystickAxis(const char *button, KJoystick::Axis axis, int halfrange, int tag=0);
-	static void bindJoystickPov(const char *button, int xsign, int ysign, int tag=0);
-	static void bindMouseKey(const char *button, KMouse::Button mousebtn, int tag=0);
-	static void bindKeySequence(const char *button, const char *keys[], int tag=0);
-	static void unbindByTag(const char *button, int tag);
-	static int isConflict(const char *button1, const char *button2);
+	static void bindAppKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE);
+	static void bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE, int tag=0);
+	static void bindJoystickKey(const std::string &button, KJoystick::Button joybtn, int tag=0);
+	static void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag=0);
+	static void bindJoystickPov(const std::string &button, int xsign, int ysign, int tag=0);
+	static void bindMouseKey(const std::string &button, KMouse::Button mousebtn, int tag=0);
+	static void bindKeySequence(const std::string &button, const char *keys[], int tag=0);
+	static void unbindByTag(const std::string &button, int tag);
+	static int isConflict(const std::string &button1, const std::string &button2);
 	static void resetAllButtonStates();
-	static IKeyboardKeyElm * findKeyboardByTag(const char *button, int tag);
-	static IJoystickKeyElm * findJoystickByTag(const char *button, int tag);
-	static const char * getJoystickName(KJoystick::Button joybtn);
-	static const char * getKeyboardName(KKeyboard::Key key);
-	static bool getKeyboardFromName(const char *s, KKeyboard::Key *key);
-	static bool getJoystickFromName(const char *s, KJoystick::Button *btn);
+	static IKeyboardKeyElm * findKeyboardByTag(const std::string &button, int tag);
+	static IJoystickKeyElm * findJoystickByTag(const std::string &button, int tag);
+	static std::string getJoystickName(KJoystick::Button joybtn);
+	static std::string getKeyboardName(KKeyboard::Key key);
+	static bool getKeyboardFromName(const std::string &s, KKeyboard::Key *key);
+	static bool getJoystickFromName(const std::string &s, KJoystick::Button *btn);
 	static void setPollFlags(KPollFlags flags);
 };
 
