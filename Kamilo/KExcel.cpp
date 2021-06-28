@@ -600,7 +600,8 @@ bool KExcelFile::decodeCellName(const std::string &s, int *col, int *row) {
 		int idx2 = toupper(s[1]) - 'A';
 		K__ASSERT(0 <= idx1 && idx1 < EXCEL_ALPHABET_NUM);
 		K__ASSERT(0 <= idx2 && idx2 < EXCEL_ALPHABET_NUM);
-		c = idx1 * EXCEL_ALPHABET_NUM + idx2;
+		// AA は A～Z の次の要素(26番目)なので、26からカウントする
+		c = EXCEL_ALPHABET_NUM + idx1 * EXCEL_ALPHABET_NUM + idx2;
 		r = strtol(s.c_str() + 2, nullptr, 0);
 		r--; // １起算 --> 0起算
 	}
