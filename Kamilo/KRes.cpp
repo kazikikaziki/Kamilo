@@ -12,6 +12,11 @@
 
 #define INVALID_OPERATION    KLog::printWarning("INVALID_OPERATION at %s(%d): %s", __FILE__, __LINE__, __FUNCTION__)
 
+#if defined(_DEBUG) && 0
+#	define K_DEBUG_IMAGE_FILTER 1
+#else
+#	define K_DEBUG_IMAGE_FILTER 0
+#endif
 
 namespace Kamilo {
 
@@ -4470,6 +4475,26 @@ private:
 				image_name.u8(), filter, xml_name, xTex->getLineNumber());
 			return false;
 		}
+
+
+		if (K_DEBUG_IMAGE_FILTER) {
+			if (filter != "") {
+				std::string dir = "__image_filter";
+				if (K::fileMakeDir(dir)) {
+					std::string ss = image_name.u8();
+					K::strReplace(ss, "/",  "###");
+					std::string s = K::str_sprintf("%s/%s_(%s).png", dir.c_str(), ss.c_str(), filter.c_str());
+					if (img.saveToFileName(s)) {
+						K__WARNING(u8"K_DEBUG_IMAGE_FILTER が ON になっているため、フィルター結果を %s に出力しました", s.c_str());
+					} else {
+						K__ERROR("FAILED TO WRITE %s", s.c_str());
+					}
+				} else {
+					K__ERROR("FAILED TO MAKE DIR");
+				}
+			}
+		}
+
 
 		// テクスチャとして登録する
 		contents->textureName = texture_name;
