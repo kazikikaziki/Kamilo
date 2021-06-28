@@ -696,8 +696,13 @@ KImage KImage::createFromFileInMemory(const std::string &bin) {
 	return img;
 }
 KImage KImage::createFromStream(KInputStream &input) {
-	std::string bin = input.readBin();
-	return createFromFileInMemory(bin);
+	if (input.isOpen()) {
+		std::string bin = input.readBin();
+		return createFromFileInMemory(bin);
+	} else {
+		K__ERROR("Empty input stream");
+		return KImage();
+	}
 }
 KImage KImage::createFromFileName(const std::string &filename) {
 	KImage img;

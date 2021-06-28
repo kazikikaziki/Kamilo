@@ -143,7 +143,7 @@ public:
 		return nullptr;
 	}
 	KHitbox * getThisHitbox(KNode *node) {
-		static const KName name = "$hitbox";
+		static const std::string name = "$hitbox";
 		if (node == nullptr) {
 			return nullptr;
 		}
@@ -309,8 +309,8 @@ public:
 			KHitPair *pair = &m_HitPairs[i];
 			ImGui::SetNextTreeNodeOpen(true, ImGuiCond_Appearing);
 			if (ImGui::TreeNode(KImGui::ID(i), "[%d]", i)) {
-				std::string name1 = pair->m_Object1.node->getNameInTree().u8();
-				std::string name2 = pair->m_Object2.node->getNameInTree().u8();
+				std::string name1 = pair->m_Object1.node->getNameInTree();
+				std::string name2 = pair->m_Object2.node->getNameInTree();
 				ImGui::Text("Node1   : %s", name1.c_str());
 				ImGui::Text("Node2   : %s", name2.c_str());
 				if (pair->m_TimestampEnter == pair->m_TimestampLastUpdate) {

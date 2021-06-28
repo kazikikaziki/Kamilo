@@ -142,10 +142,10 @@ public:
 	void sendActionCommand(KSig &cmd);
 
 	// Name and ID
-	const char * getName() const;
-	void setName(const KName &name);
-	bool hasName(const KName &name) const;
-	KPath getNameInTree() const;
+	const std::string & getName() const;
+	void setName(const std::string &name);
+	bool hasName(const std::string &name) const;
+	std::string getNameInTree() const;
 	EID getId() const;
 
 	#pragma region Tree
@@ -266,9 +266,9 @@ public:
 	// Find
 	// 指定された名前のノードを探す。tag を指定した場合は名前とタグの両方で探す
 	// 名前に nullptr を指定した場合はタグだけで探す。
-	KNode * findChild(const KName &name, const KTag &tag=nullptr) const;
-	KNode * findChildInTree(const KName &name, const KTag &tag=nullptr) const;
-	KNode * findChildInTree_unsafe(const KName &name, const KTag &tag=nullptr) const;
+	KNode * findChild(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildInTree(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildInTree_unsafe(const std::string &name, const KTag &tag=nullptr) const;
 
 	// Traverse
 	void traverse_parents(KTraverseCallback *cb);
@@ -323,22 +323,14 @@ private:
 	void lock() const;
 	void unlock() const;
 #ifdef _DEBUG
-#if NODE_NAME
-	KName *m_pName;
-#else
-	KPath *m_pName;
-#endif
+	std::string *m_pName;
 	KNode **m_pParent;
 #endif
 
 	struct NodeData {
 		EID uuid;
 		KNode *parent;
-#if NODE_NAME
-		KName name;
-#else
-		KPath name;
-#endif
+		std::string name;
 		std::vector<KNode *> children;
 		CNodeTreeImpl *tree;
 		int blocked;
@@ -577,10 +569,10 @@ public:
 	static void removeCallback(KNodeManagerCallback *cb);
 	static void destroyMarkedNodes(KNodeRemovingCallback *cb);
 	static KNode * findNodeById(EID id);
-	static KNode * findNodeByName(const KNode *start, const char *name);
-	static KNode * findNodeByPath(const KNode *start, const char *path);
+	static KNode * findNodeByName(const KNode *start, const std::string &name);
+	static KNode * findNodeByPath(const KNode *start, const std::string &path);
 	static KNode * getRoot();
-	static void setGroupName(KNode::Category category, int group, const char *name);
+	static void setGroupName(KNode::Category category, int group, const std::string &name);
 	static const char * getGroupName(KNode::Category category, int group);
 	static void tick_nodes(KNodeTickFlags flags);
 	static void tick_nodes2(KNodeTickFlags flags);
@@ -590,7 +582,7 @@ public:
 	static void sendSignalDelay(KNode *target, KSig &sig, int delay);
 	static int getNodeList(KNodeArray *out_nodes);
 	static int getNodeListByTag(KNodeArray *out_nodes, const KName &tag); // タグが付いているノードを一括取得する
-	static bool makeNodesByPath(const KPath &path, KNode **out_node, bool singleton=true);
+	static bool makeNodesByPath(const std::string &path, KNode **out_node, bool singleton=true);
 
 	// Internal
 	static void _add_tag(KNode *node, const KName &tag);

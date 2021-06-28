@@ -388,6 +388,11 @@ public:
 		}
 	}
 	KInputStream getInputStream(const std::string &filename, bool should_exists) {
+		if (filename.empty()) {
+			K__ERROR("Emptry filename");
+			return KInputStream();
+		}
+
 		// 絶対パスで指定されている場合は普通のファイルとして開く
 		if (!K::pathIsRelative(filename)) {
 			KInputStream file = KInputStream::fromFileName(filename);

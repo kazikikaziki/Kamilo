@@ -1144,7 +1144,8 @@ private:
 		ImGui::Text("Hits with: "); ImGui::SameLine();
 		if (bodynode->m_Desc._hits_with.size() > 0) {
 			for (int i=0; i<(int)bodynode->m_Desc._hits_with.size(); i++) {
-				ImGui::Text("  %s", bodynode->m_Desc._hits_with[i]->getNameInTree().u8());
+				std::string s = bodynode->m_Desc._hits_with[i]->getNameInTree();
+				ImGui::Text("  %s", s.c_str());
 			}
 		} else {
 			ImGui::Text("(none)");

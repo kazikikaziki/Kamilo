@@ -1675,7 +1675,7 @@ void KDebugGui::K_DebugGui_NodeCamera(KNode *node, KNode *camera, KDebugTree *tr
 		return;
 	}
 
-	std::string path = camera->getNameInTree().u8();
+	std::string path = camera->getNameInTree();
 	ImGui::Text("Camera: %s (#%p)", path.c_str(), camera->getId());
 
 	if (ImGui::BeginPopupContextItem(__FUNCTION__)) {
@@ -1693,12 +1693,12 @@ void KDebugGui::K_DebugGui_NodeCamera(KNode *node, KNode *camera, KDebugTree *tr
 }
 void KDebugGui::K_DebugGui_NodeNameId(KNode *node) {
 	if (node == nullptr) return;
-	const char *name = node->getName();
+	const std::string &name = node->getName();
 	ImGui::Text("ID: 0x%X", node->getId());
-	ImGui::Text("Name: %s", name);
+	ImGui::Text("Name: %s", name.c_str());
 	ImGui::Text("Type: %s", typeid(*node).name());
 	if (ImGui::IsItemHovered()) {
-		std::string path = node->getNameInTree().u8();
+		std::string path = node->getNameInTree();
 		ImGui::SetTooltip("%s", path.c_str());
 	}
 }
@@ -2609,7 +2609,7 @@ std::string KDebugTree::get_selected_node_name() const {
 	EID e = m_selected_entities.empty() ? 0 : m_selected_entities[0];
 	KNode *node = KNodeTree::findNodeById(e);
 	if (node) {
-		ret = node->getNameInTree().u8();
+		ret = node->getNameInTree();
 		if (ret.empty()) {
 			ret = K::str_sprintf("#%p", e);
 		}

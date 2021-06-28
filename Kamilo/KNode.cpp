@@ -415,7 +415,7 @@ void KNode::_invalidate_child_tree() {
 
 
 #pragma region Find
-KNode * KNode::findChild(const KName &name, const KTag &tag) const {
+KNode * KNode::findChild(const std::string &name, const KTag &tag) const {
 	KNode *ret = nullptr;
 	lock();
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
@@ -441,7 +441,7 @@ KNode * KNode::findChild(const KName &name, const KTag &tag) const {
 	unlock();
 	return ret;
 }
-KNode * KNode::findChildInTree(const KName &name, const KTag &tag) const {
+KNode * KNode::findChildInTree(const std::string &name, const KTag &tag) const {
 	KNode *ret = nullptr;
 	lock();
 	{
@@ -450,7 +450,7 @@ KNode * KNode::findChildInTree(const KName &name, const KTag &tag) const {
 	unlock();
 	return ret;
 }
-KNode * KNode::findChildInTree_unsafe(const KName &name, const KTag &tag) const {
+KNode * KNode::findChildInTree_unsafe(const std::string &name, const KTag &tag) const {
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
 		KNode *sub = *it;
 		#if IGNORE_REMOVING_NODES
@@ -477,15 +477,16 @@ KNode * KNode::findChildInTree_unsafe(const KName &name, const KTag &tag) const 
 
 
 #pragma region Name and ID
-const char * KNode::getName() const {
-	return m_NodeData.name.c_str();
+const std::string & KNode::getName() const {
+	return m_NodeData.name;
 }
-void KNode::setName(const KName &name) {
+void KNode::setName(const std::string &name) {
 	if (name.empty()) {
 		// 空文字列が指定された場合は自動的に名前をつける
 		char s[256] = {0};
 		sprintf_s(s, sizeof(s), "__%p", m_NodeData.uuid);
 		m_NodeData.name = s;
+		return;
 	}
 #ifdef _DEBUG
 	// パス区切りを含んでいてはいけない。
@@ -495,28 +496,20 @@ void KNode::setName(const KName &name) {
 	}
 #endif
 	// 名前を適用
-#if NODE_NAME
 	m_NodeData.name = name;
-#else
-	m_NodeData.name = name.c_str();
-#endif
 }
-bool KNode::hasName(const KName &name) const {
-#if NODE_NAME
-	return m_NodeData.name == name;
-#else
-	return m_NodeData.name == name.c_str();
-#endif
+bool KNode::hasName(const std::string &name) const {
+	return m_NodeData.name.compare(name) == 0;
 }
-KPath KNode::getNameInTree() const {
-	KPath parent_path;
+std::string KNode::getNameInTree() const {
+	std::string parent_path;
 
 	// 親のフルパスを得る
 	if (getParent()) {
 		parent_path = getParent()->getNameInTree();
 	}
 	// 末尾に自分の名前を追加する
-	return parent_path.join(m_NodeData.name);
+	return K::pathJoin(parent_path, m_NodeData.name);
 }
 EID KNode::getId() const {
 	return m_NodeData.uuid;
@@ -1519,6 +1512,7 @@ public:
 		if (m_cb) m_cb->on_node_remove_done();
 	}
 	KNode * findNodeById(EID uuid) const {
+		if (uuid == nullptr) return nullptr;
 		KNode *ret = nullptr;
 		lock();
 		{
@@ -1527,7 +1521,8 @@ public:
 		unlock();
 		return ret;
 	}
-	KNode * findNodeByName(const KNode *start, const char *name) const {
+	KNode * findNodeByName(const KNode *start, const std::string &name) const {
+		if (name.empty()) return nullptr;
 		KNode *ret = nullptr;
 		lock();
 		{
@@ -1554,7 +1549,7 @@ public:
 		}
 		return nullptr;
 	}
-	KNode * findNodeByPath(const KNode *start, const char *path) const {
+	KNode * findNodeByPath(const KNode *start, const std::string &path) const {
 		#if IGNORE_REMOVING_NODES
 		// start が削除マーク付きツリー内にある場合は、もう削除済みとして扱う
 		if (start && start->hasFlagInTreeAny(KNode::FLAG__MARK_REMOVE)) {
@@ -1621,7 +1616,7 @@ public:
 	KNode * getRoot() const {
 		return m_root;
 	}
-	void setGroupName(KNode::Category category, int group, const char *name) {
+	void setGroupName(KNode::Category category, int group, const std::string &name) {
 		lock();
 		m_group_names[category][group] = name;
 		unlock();
@@ -1660,11 +1655,11 @@ public:
 		}
 		return ret;
 	}
-	bool makeNodesByPath(const KPath &path, KNode **out_node, bool singleton) {
+	bool makeNodesByPath(const std::string &path, KNode **out_node, bool singleton) {
 		// パスを分解し、親を先に作成する
 		KNode *parent = nullptr;
-		if (path.hasDirectory()) {
-			KPath dir = path.directory();
+		if (K::pathHasDelim(path)) { // 親名を含んでいる
+			std::string dir = K::pathGetParent(path);
 			makeNodesByPath(dir, &parent, true); // 同名の親は複数作らない
 			if (parent == nullptr) {
 				return false;
@@ -1678,7 +1673,7 @@ public:
 		}
 
 		// 子を作成する
-		KPath name = path.filename();
+		std::string name = K::pathGetLast(path);
 		KNode *node = nullptr;
 		if (singleton) {
 			// すでに同名の子がある場合は再利用する
@@ -1786,11 +1781,11 @@ KNode * KNodeTree::findNodeById(EID id) {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeById(id);
 }
-KNode * KNodeTree::findNodeByName(const KNode *start, const char *name) {
+KNode * KNodeTree::findNodeByName(const KNode *start, const std::string &name) {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeByName(start, name);
 }
-KNode * KNodeTree::findNodeByPath(const KNode *start, const char *path) {
+KNode * KNodeTree::findNodeByPath(const KNode *start, const std::string &path) {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->findNodeByPath(start, path);
 }
@@ -1798,7 +1793,7 @@ KNode * KNodeTree::getRoot() {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getRoot();
 }
-void KNodeTree::setGroupName(KNode::Category category, int group, const char *name) {
+void KNodeTree::setGroupName(KNode::Category category, int group, const std::string &name) {
 	K__ASSERT(g_NodeTree);
 	g_NodeTree->setGroupName(category, group, name);
 }
@@ -1838,7 +1833,7 @@ int KNodeTree::getNodeListByTag(KNodeArray *out_nodes, const KName &tag) {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->getNodeListByTag(out_nodes, tag);
 }
-bool KNodeTree::makeNodesByPath(const KPath &path, KNode **out_node, bool singleton) {
+bool KNodeTree::makeNodesByPath(const std::string &path, KNode **out_node, bool singleton) {
 	K__ASSERT(g_NodeTree);
 	return g_NodeTree->makeNodesByPath(path, out_node, singleton);
 }
