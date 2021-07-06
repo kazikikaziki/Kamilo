@@ -885,7 +885,7 @@ int KEdgeRawReader::read(KEdgeDocument *e, KInputStream &file) {
 }
 
 KEdgeBin KEdgeRawReader::unzip(KInputStream &file, uint16_t *zflag) {
-	K__Verify(zflag);
+	K__VERIFY(zflag);
 
 	// 識別子
 	{

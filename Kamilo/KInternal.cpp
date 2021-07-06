@@ -2220,199 +2220,199 @@ namespace Test {
 void Test_internal_path() {
 	{
 		char s[256] = {0};
-		K__Verify(K::pathJoin("", "aaa")        == "aaa");
-		K__Verify(K::pathJoin("aaa", "")        == "aaa");
-		K__Verify(K::pathJoin("", "aaa/")       == "aaa/");
-		K__Verify(K::pathJoin("aaa", "")        == "aaa");
-		K__Verify(K::pathJoin("aaa", "bbb")     == "aaa/bbb");
-		K__Verify(K::pathJoin("aaa/bbb", "ccc") == "aaa/bbb/ccc");
-		K__Verify(K::pathJoin("aaa/", "bbb")   == "aaa/bbb"); // aaa//bbb にはならない
-		K__Verify(K::pathJoin("aaa/", "/bbb")   == "/bbb"); // 後続が絶対パスだった場合は、そのパスで置き換える
-		K__Verify(K::pathGetParent("")            == "");
-		K__Verify(K::pathGetParent("aaa.exe")     == "");
-		K__Verify(K::pathGetParent("aaa/bbb.exe") == "aaa");
-		K__Verify(K::pathGetParent("aaa/bbb/ccc") == "aaa/bbb");
-		K__Verify(K::pathGetLast("")                == "");
-		K__Verify(K::pathGetLast("aaa.exe")         == "aaa.exe");
-		K__Verify(K::pathGetLast("bbb/aaa.exe")     == "aaa.exe");
-		K__Verify(K::pathGetLast("ccc/bbb/aaa.exe") == "aaa.exe");
-		K__Verify(K::pathRenameExtension("", ".exe")== ".exe");
-		K__Verify(K::pathRenameExtension("aaa/bbb", ".exe") == "aaa/bbb.exe");
-		K__Verify(K::pathRenameExtension("aaa/bbb.exe", "") == "aaa/bbb");
-		K__Verify(K::pathRenameExtension("aaa/bbb", "")     == "aaa/bbb");
-		K__Verify(K::pathGetExt("bbb/aaa.exe")         == ".exe");
-		K__Verify(K::pathGetExt("bbb/aaa.exe.zip")     == ".zip");
-		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
-		K__Verify(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
-		K__Verify(K::pathGetExt("bbb/aaa")             == "");
+		K__VERIFY(K::pathJoin("", "aaa")        == "aaa");
+		K__VERIFY(K::pathJoin("aaa", "")        == "aaa");
+		K__VERIFY(K::pathJoin("", "aaa/")       == "aaa/");
+		K__VERIFY(K::pathJoin("aaa", "")        == "aaa");
+		K__VERIFY(K::pathJoin("aaa", "bbb")     == "aaa/bbb");
+		K__VERIFY(K::pathJoin("aaa/bbb", "ccc") == "aaa/bbb/ccc");
+		K__VERIFY(K::pathJoin("aaa/", "bbb")   == "aaa/bbb"); // aaa//bbb にはならない
+		K__VERIFY(K::pathJoin("aaa/", "/bbb")   == "/bbb"); // 後続が絶対パスだった場合は、そのパスで置き換える
+		K__VERIFY(K::pathGetParent("")            == "");
+		K__VERIFY(K::pathGetParent("aaa.exe")     == "");
+		K__VERIFY(K::pathGetParent("aaa/bbb.exe") == "aaa");
+		K__VERIFY(K::pathGetParent("aaa/bbb/ccc") == "aaa/bbb");
+		K__VERIFY(K::pathGetLast("")                == "");
+		K__VERIFY(K::pathGetLast("aaa.exe")         == "aaa.exe");
+		K__VERIFY(K::pathGetLast("bbb/aaa.exe")     == "aaa.exe");
+		K__VERIFY(K::pathGetLast("ccc/bbb/aaa.exe") == "aaa.exe");
+		K__VERIFY(K::pathRenameExtension("", ".exe")== ".exe");
+		K__VERIFY(K::pathRenameExtension("aaa/bbb", ".exe") == "aaa/bbb.exe");
+		K__VERIFY(K::pathRenameExtension("aaa/bbb.exe", "") == "aaa/bbb");
+		K__VERIFY(K::pathRenameExtension("aaa/bbb", "")     == "aaa/bbb");
+		K__VERIFY(K::pathGetExt("bbb/aaa.exe")         == ".exe");
+		K__VERIFY(K::pathGetExt("bbb/aaa.exe.zip")     == ".zip");
+		K__VERIFY(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
+		K__VERIFY(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
+		K__VERIFY(K::pathGetExt("bbb/aaa")             == "");
 
-		K__Verify(K::pathStartsWith("aaa/bbb", "aa") == false);
-		K__Verify(K::pathStartsWith("aaa/bbb", "aaa") == true);
-		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/") == true);
-		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/bbb") == true);
-		K__Verify(K::pathStartsWith("aaa/bbb", "aaa/b") == false);
-		K__Verify(K::pathStartsWith("aaa/bbb", "") == true);
-		K__Verify(K::pathEndsWith("aaa/bbb", "bbb") == true);
-		K__Verify(K::pathEndsWith("aaa/bbb", "/bbb") == false);
-		K__Verify(K::pathEndsWith("aaa/bbb", "bb") == false);
-		K__Verify(K::pathEndsWith("aaa/bbb", "") == true);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "aa") == false);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa") == true);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa/") == true);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa/bbb") == true);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa/b") == false);
+		K__VERIFY(K::pathStartsWith("aaa/bbb", "") == true);
+		K__VERIFY(K::pathEndsWith("aaa/bbb", "bbb") == true);
+		K__VERIFY(K::pathEndsWith("aaa/bbb", "/bbb") == false);
+		K__VERIFY(K::pathEndsWith("aaa/bbb", "bb") == false);
+		K__VERIFY(K::pathEndsWith("aaa/bbb", "") == true);
 	}
 	{
-		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
-		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ddd") == 8);
-		K__Verify(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb_ccc") == 4);
-		K__Verify(K::pathGetCommonSize("aaa", "") == 0);
-		K__Verify(K::pathGetCommonSize("", "") == 0);
+		K__VERIFY(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
+		K__VERIFY(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ddd") == 8);
+		K__VERIFY(K::pathGetCommonSize("aaa/bbb/ccc", "aaa/bbb_ccc") == 4);
+		K__VERIFY(K::pathGetCommonSize("aaa", "") == 0);
+		K__VERIFY(K::pathGetCommonSize("", "") == 0);
 	}
 	{
-		K__Verify(K::pathGetRelative("aa/bb/cc", "aa")       == "bb/cc");
-		K__Verify(K::pathGetRelative("aa/bb/cc", "aa/bb")    == "cc");
-		K__Verify(K::pathGetRelative("aa/bb/cc", "aa/bb/ee") == "../cc");
-		K__Verify(K::pathGetRelative("aa/bb/cc", "ee/ff")    == "../../aa/bb/cc");
-		K__Verify(K::pathGetRelative("", "aa")               == "..");
-		K__Verify(K::pathGetRelative("aa", "")               == "aa");
-		K__Verify(K::pathGetRelative("", "")                 == "");
+		K__VERIFY(K::pathGetRelative("aa/bb/cc", "aa")       == "bb/cc");
+		K__VERIFY(K::pathGetRelative("aa/bb/cc", "aa/bb")    == "cc");
+		K__VERIFY(K::pathGetRelative("aa/bb/cc", "aa/bb/ee") == "../cc");
+		K__VERIFY(K::pathGetRelative("aa/bb/cc", "ee/ff")    == "../../aa/bb/cc");
+		K__VERIFY(K::pathGetRelative("", "aa")               == "..");
+		K__VERIFY(K::pathGetRelative("aa", "")               == "aa");
+		K__VERIFY(K::pathGetRelative("", "")                 == "");
 	}
 	{
-		K__Verify(K::pathGlob("abc", "*") == true);
-		K__Verify(K::pathGlob("abc", "a*") == true);
-		K__Verify(K::pathGlob("abc", "ab*") == true);
-		K__Verify(K::pathGlob("abc", "abc*") == true);
-		K__Verify(K::pathGlob("abc", "a*c") == true);
-		K__Verify(K::pathGlob("abc", "*abc") == true);
-		K__Verify(K::pathGlob("abc", "*bc") == true);
-		K__Verify(K::pathGlob("abc", "*c") == true);
-		K__Verify(K::pathGlob("abc", "*a*b*c*") == true);
-		K__Verify(K::pathGlob("abc", "*bc*") == true);
-		K__Verify(K::pathGlob("abc", "*c*") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "a*.ext") == false); // ワイルドカード * はパス区切り文字を含まない
-		K__Verify(K::pathGlob("aaa/bbb.ext", "a*/*.ext") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "a*/*.*t") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa/*.ext") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa/bbb*ext") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa*bbb*ext") == false);
-		K__Verify(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") == true);
-		K__Verify(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") == false);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "*.aaa") == false);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "aaa*bbb") == false);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.ext") == true);
-		K__Verify(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
+		K__VERIFY(K::pathGlob("abc", "*") == true);
+		K__VERIFY(K::pathGlob("abc", "a*") == true);
+		K__VERIFY(K::pathGlob("abc", "ab*") == true);
+		K__VERIFY(K::pathGlob("abc", "abc*") == true);
+		K__VERIFY(K::pathGlob("abc", "a*c") == true);
+		K__VERIFY(K::pathGlob("abc", "*abc") == true);
+		K__VERIFY(K::pathGlob("abc", "*bc") == true);
+		K__VERIFY(K::pathGlob("abc", "*c") == true);
+		K__VERIFY(K::pathGlob("abc", "*a*b*c*") == true);
+		K__VERIFY(K::pathGlob("abc", "*bc*") == true);
+		K__VERIFY(K::pathGlob("abc", "*c*") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "a*.ext") == false); // ワイルドカード * はパス区切り文字を含まない
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "a*/*.ext") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "a*/*.*t") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "aaa/*.ext") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "aaa/bbb*ext") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "aaa*bbb*ext") == false);
+		K__VERIFY(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*/ccc.ext") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb/ccc.ext", "aaa/*.ext") == false);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "*.aaa") == false);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "aaa*bbb") == false);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "*/*.ext") == true);
+		K__VERIFY(K::pathGlob("aaa/bbb.ext", "*/*.*") == true);
 	}
 	{
 		std::string s;
-		s="abc";    K::strReplace(s, "a", "");   K__Verify(s=="bc");
-		s="abcabc"; K::strReplace(s, "a", "");   K__Verify(s=="bcbc");
-		s="abcabc"; K::strReplace(s, "a", "ax"); K__Verify(s=="axbcaxbc");
-		s="abc";    K::strReplace(s, "", "x");   K__Verify(s=="abc");
-		s="abc";    K::strReplace(s, "", "");    K__Verify(s=="abc");
+		s="abc";    K::strReplace(s, "a", "");   K__VERIFY(s=="bc");
+		s="abcabc"; K::strReplace(s, "a", "");   K__VERIFY(s=="bcbc");
+		s="abcabc"; K::strReplace(s, "a", "ax"); K__VERIFY(s=="axbcaxbc");
+		s="abc";    K::strReplace(s, "", "x");   K__VERIFY(s=="abc");
+		s="abc";    K::strReplace(s, "", "");    K__VERIFY(s=="abc");
 
-		s="   aaabbb "; K::strTrim(s); K__Verify(s=="aaabbb");
-		s="aaabbb ";    K::strTrim(s); K__Verify(s=="aaabbb");
-		s="   aaabbb";  K::strTrim(s); K__Verify(s=="aaabbb");
-		s="aaabbb";     K::strTrim(s); K__Verify(s=="aaabbb");
-		s="";           K::strTrim(s); K__Verify(s=="");
+		s="   aaabbb "; K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="aaabbb ";    K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="   aaabbb";  K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="aaabbb";     K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="";           K::strTrim(s); K__VERIFY(s=="");
 
-		K__Verify(K::strStartsWith("abc", "ab") == true);
-		K__Verify(K::strStartsWith("", "abc") == false);
-		K__Verify(K::strStartsWith("abc", "") == true);
-		K__Verify(K::strStartsWith("", "") == true);
-		K__Verify(K::strStartsWith(" abc", "ab") == false);
-		K__Verify(K::strStartsWith("abc", "abcd") == false);
+		K__VERIFY(K::strStartsWith("abc", "ab") == true);
+		K__VERIFY(K::strStartsWith("", "abc") == false);
+		K__VERIFY(K::strStartsWith("abc", "") == true);
+		K__VERIFY(K::strStartsWith("", "") == true);
+		K__VERIFY(K::strStartsWith(" abc", "ab") == false);
+		K__VERIFY(K::strStartsWith("abc", "abcd") == false);
 
-		K__Verify(K::strEndsWith("abc", "bc") == true);
-		K__Verify(K::strEndsWith("", "abc") == false);
-		K__Verify(K::strEndsWith("abc", "") == true);
-		K__Verify(K::strEndsWith("", "") == true);
-		K__Verify(K::strEndsWith("abc ", "bc") == false);
-		K__Verify(K::strEndsWith("abc", "xabc") == false);
+		K__VERIFY(K::strEndsWith("abc", "bc") == true);
+		K__VERIFY(K::strEndsWith("", "abc") == false);
+		K__VERIFY(K::strEndsWith("abc", "") == true);
+		K__VERIFY(K::strEndsWith("", "") == true);
+		K__VERIFY(K::strEndsWith("abc ", "bc") == false);
+		K__VERIFY(K::strEndsWith("abc", "xabc") == false);
 
-		K__Verify(K::strFind("aaa x", "x") == 4);
-		K__Verify(K::strFind("aaa x", "a") == 0);
-		K__Verify(K::strFind("aaa x", "aaa") == 0);
-		K__Verify(K::strFind("aaa x", " ") == 3);
-		K__Verify(K::strFind("aa", "aaaa") == -1);
+		K__VERIFY(K::strFind("aaa x", "x") == 4);
+		K__VERIFY(K::strFind("aaa x", "a") == 0);
+		K__VERIFY(K::strFind("aaa x", "aaa") == 0);
+		K__VERIFY(K::strFind("aaa x", " ") == 3);
+		K__VERIFY(K::strFind("aa", "aaaa") == -1);
 	}
 	{
 		auto tok = K::strSplit("aaa=bbb=ccc", "=", 0);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok[0] == "aaa");
-		K__Verify(tok[1] == "bbb");
-		K__Verify(tok[2] == "ccc");
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok[0] == "aaa");
+		K__VERIFY(tok[1] == "bbb");
+		K__VERIFY(tok[2] == "ccc");
 	}
 	{
 		auto tok = K::strSplit("aaa=bbb=ccc", "=", 1);
-		K__Verify(tok.size() == 1);
-		K__Verify(tok[0] == "aaa=bbb=ccc");
+		K__VERIFY(tok.size() == 1);
+		K__VERIFY(tok[0] == "aaa=bbb=ccc");
 	}
 	{
 		auto tok = K::strSplit("aaa=bbb=ccc", "=", 2);
-		K__Verify(tok.size() == 2);
-		K__Verify(tok[0] == "aaa");
-		K__Verify(tok[1] == "bbb=ccc");
+		K__VERIFY(tok.size() == 2);
+		K__VERIFY(tok[0] == "aaa");
+		K__VERIFY(tok[1] == "bbb=ccc");
 	}
 	{
 		auto tok = K::strSplit("aaa=bbb=ccc", "=", 3);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok[0] == "aaa");
-		K__Verify(tok[1] == "bbb");
-		K__Verify(tok[2] == "ccc");
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok[0] == "aaa");
+		K__VERIFY(tok[1] == "bbb");
+		K__VERIFY(tok[2] == "ccc");
 	}
 	{
 		auto tok = K::strSplit("aaa/bbb ccc/ddd", "/", 0);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok[0] == "aaa");
-		K__Verify(tok[1] == "bbb ccc");
-		K__Verify(tok[2] == "ddd");
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok[0] == "aaa");
+		K__VERIFY(tok[1] == "bbb ccc");
+		K__VERIFY(tok[2] == "ddd");
 	}
 	{
 		auto tok = K::strSplit("aa,bb,cc,dd", "/", 3);
-		K__Verify(tok.size() == 1);
-		K__Verify(tok[0].compare("aa,bb,cc,dd") == 0);
+		K__VERIFY(tok.size() == 1);
+		K__VERIFY(tok[0].compare("aa,bb,cc,dd") == 0);
 	}
 	{
 		auto tok = K::strSplit("aa,bb,cc,dd", ",", 3);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare("bb") == 0);
-		K__Verify(tok[2].compare("cc,dd") == 0);
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare("bb") == 0);
+		K__VERIFY(tok[2].compare("cc,dd") == 0);
 	}
 	{
 		auto tok = K::strSplit("aa,,bb,,cc,,dd", ",", 3, true);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare("bb") == 0);
-		K__Verify(tok[2].compare("cc,,dd") == 0);
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare("bb") == 0);
+		K__VERIFY(tok[2].compare("cc,,dd") == 0);
 	}
 	{
 		auto tok = K::strSplit("aa,,bb,,cc,,dd", ",", 5, false);
-		K__Verify(tok.size() == 5);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare(""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
-		K__Verify(tok[2].compare("bb") == 0);
-		K__Verify(tok[3].compare(""  ) == 0);
-		K__Verify(tok[4].compare("cc,,dd") == 0);
+		K__VERIFY(tok.size() == 5);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare(""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
+		K__VERIFY(tok[2].compare("bb") == 0);
+		K__VERIFY(tok[3].compare(""  ) == 0);
+		K__VERIFY(tok[4].compare("cc,,dd") == 0);
 	}
 	{
-		{ std::string s="abc"; K::strReplace(s, 1, 0, "xx");   K__Verify(s == "axxbc");   }
-		{ std::string s="abc"; K::strReplace(s, 1, 2, "xx");   K__Verify(s == "axx");     }
-		{ std::string s="abc"; K::strReplace(s, 1, 2, "xxyy"); K__Verify(s == "axxyy") ;  }
-		{ std::string s="abc"; K::strReplace(s, 1, 2, "");     K__Verify(s == "a");       }
-		K__Verify(K::strStartsWith("abc", ""));
-		K__Verify(K::strStartsWith("abc", "a"));
-		K__Verify(K::strStartsWith("abc", "ab"));
-		K__Verify(K::strStartsWith("abc", "abc"));
-		K__Verify(K::strEndsWith("abc", "abc"));
-		K__Verify(K::strEndsWith("abc", "bc"));
-		K__Verify(K::strEndsWith("abc", "c"));
-		K__Verify(K::strEndsWith("abc", ""));
+		{ std::string s="abc"; K::strReplace(s, 1, 0, "xx");   K__VERIFY(s == "axxbc");   }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "xx");   K__VERIFY(s == "axx");     }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "xxyy"); K__VERIFY(s == "axxyy") ;  }
+		{ std::string s="abc"; K::strReplace(s, 1, 2, "");     K__VERIFY(s == "a");       }
+		K__VERIFY(K::strStartsWith("abc", ""));
+		K__VERIFY(K::strStartsWith("abc", "a"));
+		K__VERIFY(K::strStartsWith("abc", "ab"));
+		K__VERIFY(K::strStartsWith("abc", "abc"));
+		K__VERIFY(K::strEndsWith("abc", "abc"));
+		K__VERIFY(K::strEndsWith("abc", "bc"));
+		K__VERIFY(K::strEndsWith("abc", "c"));
+		K__VERIFY(K::strEndsWith("abc", ""));
 	}
 	if (0) {
 		std::string dir = K::sysGetCurrentDir();
 		K::sysSetCurrentDir(K::sysGetCurrentExecDir());
-		K__Verify(K::fileMakeDir("__dirtest__"));
-		K__Verify(K::fileMakeDir("__dirtest__/111"));
-		K__Verify(K::fileMakeDir("__dirtest__/222"));
-		K__Verify(K::pathExists("__dirtest__"));
+		K__VERIFY(K::fileMakeDir("__dirtest__"));
+		K__VERIFY(K::fileMakeDir("__dirtest__/111"));
+		K__VERIFY(K::fileMakeDir("__dirtest__/222"));
+		K__VERIFY(K::pathExists("__dirtest__"));
 		fclose(K::fileOpen("__dirtest__/aaa.txt", "w"));
 		fclose(K::fileOpen("__dirtest__/bbb.txt", "w"));
 		fclose(K::fileOpen("__dirtest__/ccc.txt", "w"));
@@ -2422,9 +2422,9 @@ void Test_internal_path() {
 		fclose(K::fileOpen("__dirtest__/222/aaa.txt", "w"));
 		fclose(K::fileOpen("__dirtest__/222/xxx.txt", "w"));
 		fclose(K::fileOpen("__dirtest__/222/yyy.txt", "w"));
-		K__Verify(K::fileRemoveFilesInDirTree("__dirtest__"));
-		K__Verify(K::fileRemoveEmptyDirTree("__dirtest__"));
-		K__Verify(K::pathExists("__dirtest__") == false);
+		K__VERIFY(K::fileRemoveFilesInDirTree("__dirtest__"));
+		K__VERIFY(K::fileRemoveEmptyDirTree("__dirtest__"));
+		K__VERIFY(K::pathExists("__dirtest__") == false);
 		K::sysSetCurrentDir(dir);
 	}
 	{

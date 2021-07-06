@@ -1255,13 +1255,13 @@ void Test_zip(const char *output_dir) {
 		KUnzipper zr(file);
 		std::string bin;
 		std::string name;
-		zr.getEntryName(0, &name); zr.getEntryData(0, nullptr, &bin); K__Verify(name.compare("file1.txt")==0); K__Verify(bin.compare("This is file1.\n") == 0);
-		zr.getEntryName(1, &name); zr.getEntryData(1, nullptr, &bin); K__Verify(name.compare("file2.txt")==0); K__Verify(bin.compare("This is file2.\n") == 0);
-		zr.getEntryName(2, &name); zr.getEntryData(2, nullptr, &bin); K__Verify(name.compare("file3.txt")==0); K__Verify(bin.compare("This is file3.\n") == 0);
-		zr.getEntryName(3, &name); zr.getEntryData(3, nullptr, &bin); K__Verify(name.compare(u8"日本語ファイル名.txt")==0); K__Verify(bin.compare(jptest1) == 0); // フォルダ名まで含めて検索
-		zr.getEntryName(4, &name); zr.getEntryData(4, nullptr, &bin); K__Verify(name.compare(u8"日本語ソ連表\\ファイル.txt")==0); K__Verify(bin.compare(jptest2) == 0); // フォルダ部分を無視して検索
-		zr.getEntryName(5, &name); zr.getEntryData(5, nullptr, &bin); K__Verify(name.compare("sub/file4.txt")==0); K__Verify(bin.compare("This is file4 in a subdirectory.\n") == 0);
-		zr.getComment(&bin); K__Verify(bin.compare("COMMENT") == 0);
+		zr.getEntryName(0, &name); zr.getEntryData(0, nullptr, &bin); K__VERIFY(name.compare("file1.txt")==0); K__VERIFY(bin.compare("This is file1.\n") == 0);
+		zr.getEntryName(1, &name); zr.getEntryData(1, nullptr, &bin); K__VERIFY(name.compare("file2.txt")==0); K__VERIFY(bin.compare("This is file2.\n") == 0);
+		zr.getEntryName(2, &name); zr.getEntryData(2, nullptr, &bin); K__VERIFY(name.compare("file3.txt")==0); K__VERIFY(bin.compare("This is file3.\n") == 0);
+		zr.getEntryName(3, &name); zr.getEntryData(3, nullptr, &bin); K__VERIFY(name.compare(u8"日本語ファイル名.txt")==0); K__VERIFY(bin.compare(jptest1) == 0); // フォルダ名まで含めて検索
+		zr.getEntryName(4, &name); zr.getEntryData(4, nullptr, &bin); K__VERIFY(name.compare(u8"日本語ソ連表\\ファイル.txt")==0); K__VERIFY(bin.compare(jptest2) == 0); // フォルダ部分を無視して検索
+		zr.getEntryName(5, &name); zr.getEntryData(5, nullptr, &bin); K__VERIFY(name.compare("sub/file4.txt")==0); K__VERIFY(bin.compare("This is file4 in a subdirectory.\n") == 0);
+		zr.getComment(&bin); K__VERIFY(bin.compare("COMMENT") == 0);
 	}
 
 	// 復元（パスワード付き）
@@ -1269,9 +1269,9 @@ void Test_zip(const char *output_dir) {
 		KInputStream file = KInputStream::fromFileName(name2.c_str());
 		KUnzipper zr(file);
 		std::string bin;
-		zr.getEntryData(0, "helloworld", &bin); K__Verify(bin.compare("This is file1.\n") == 0);
-		zr.getEntryData(1, "helloworld", &bin); K__Verify(bin.compare("This is file2.\n") == 0);
-		zr.getEntryData(2, "helloworld", &bin); K__Verify(bin.compare("This is file3.\n") == 0);
+		zr.getEntryData(0, "helloworld", &bin); K__VERIFY(bin.compare("This is file1.\n") == 0);
+		zr.getEntryData(1, "helloworld", &bin); K__VERIFY(bin.compare("This is file2.\n") == 0);
+		zr.getEntryData(2, "helloworld", &bin); K__VERIFY(bin.compare("This is file3.\n") == 0);
 	}
 
 	// 復元（個別のパスワード）
@@ -1279,9 +1279,9 @@ void Test_zip(const char *output_dir) {
 		KInputStream file = KInputStream::fromFileName(name3.c_str());
 		KUnzipper zr(file);
 		std::string bin;
-		zr.getEntryData(0, "helloworld", &bin); K__Verify(bin.compare("This is file1.\n") == 0);
-		zr.getEntryData(1, "deadbeef", &bin);   K__Verify(bin.compare("This is file2.\n") == 0);
-		zr.getEntryData(2, "am1242", &bin);     K__Verify(bin.compare("This is file3.\n") == 0);
+		zr.getEntryData(0, "helloworld", &bin); K__VERIFY(bin.compare("This is file1.\n") == 0);
+		zr.getEntryData(1, "deadbeef", &bin);   K__VERIFY(bin.compare("This is file2.\n") == 0);
+		zr.getEntryData(2, "am1242", &bin);     K__VERIFY(bin.compare("This is file3.\n") == 0);
 	}
 }
 

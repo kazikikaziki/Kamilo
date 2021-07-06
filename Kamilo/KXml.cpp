@@ -503,25 +503,25 @@ void Test_xml() {
 		"</node2>"
 		, ""
 	);
-	K__Verify(elm);
-	K__Verify(elm->hasTag(""));
-	K__Verify(elm->getChildCount() == 2);
+	K__VERIFY(elm);
+	K__VERIFY(elm->hasTag(""));
+	K__VERIFY(elm->getChildCount() == 2);
 
 	KXmlElement *node1 = elm->getChild(0);
-	K__Verify(node1);
-	K__Verify(node1 == elm->findNode("node1"));
-	K__Verify(node1->hasTag("node1"));
-	K__Verify(node1->getChildCount() == 3); // aaa, bbb, ccc
-	K__Verify(node1->getAttrCount() == 1);
-	K__Verify(strcmp(node1->getAttrName(0), "pi")==0);
-	K__Verify(strcmp(node1->getAttrValue(0), "314")==0);
-	K__Verify(node1->getAttrInt("pi") == 314);
+	K__VERIFY(node1);
+	K__VERIFY(node1 == elm->findNode("node1"));
+	K__VERIFY(node1->hasTag("node1"));
+	K__VERIFY(node1->getChildCount() == 3); // aaa, bbb, ccc
+	K__VERIFY(node1->getAttrCount() == 1);
+	K__VERIFY(strcmp(node1->getAttrName(0), "pi")==0);
+	K__VERIFY(strcmp(node1->getAttrValue(0), "314")==0);
+	K__VERIFY(node1->getAttrInt("pi") == 314);
 
 	KXmlElement *node2 = elm->getChild(1);
-	K__Verify(node2);
-	K__Verify(node2 == elm->findNode("node2"));
-	K__Verify(node2->hasTag("node2"));
-	K__Verify(strcmp(node2->findNode("ddd")->getText(""), "Hello world!") == 0);
+	K__VERIFY(node2);
+	K__VERIFY(node2 == elm->findNode("node2"));
+	K__VERIFY(node2->hasTag("node2"));
+	K__VERIFY(strcmp(node2->findNode("ddd")->getText(""), "Hello world!") == 0);
 
 	elm->drop();
 }

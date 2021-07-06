@@ -1,9 +1,12 @@
-﻿#include <Kamilo.h>
+﻿#include "Kamilo.h"
 
 using namespace Kamilo;
 
+namespace KTools {
+
+
 /// Pac ファイル情報を書き出す
-bool ez_ExportPacFileInfo(const std::string &pac_filename_u8) {
+bool exportPacFileInfo(const std::string &pac_filename_u8) {
 	if (K::pathHasExtension(pac_filename_u8, ".pac")) {
 		std::string text;
 		KPacFileReader pac = KPacFileReader::fromFileName(pac_filename_u8);
@@ -24,7 +27,7 @@ bool ez_ExportPacFileInfo(const std::string &pac_filename_u8) {
 }
 
 /// XLSX 内のテキストを抜き出す
-bool ez_ExportTextFromXLSX(const std::string &xlsx_filename_u8) {
+bool exportTextFromXLSX(const std::string &xlsx_filename_u8) {
 	if (K::pathHasExtension(xlsx_filename_u8, ".xlsx")) {
 		KInputStream input = KInputStream::fromFileName(xlsx_filename_u8);
 		KExcelFile ef;
@@ -41,7 +44,7 @@ bool ez_ExportTextFromXLSX(const std::string &xlsx_filename_u8) {
 }
 
 /// EDGE2 で出力した PAL ファイルを XML でエクスポートする
-bool ez_ExportPalXmlFromEdge2(const std::string &edg_filename_u8) {
+bool exportPalXmlFromEdge2(const std::string &edg_filename_u8) {
 	if (K::pathHasExtension(edg_filename_u8, ".pal")) {
 
 		// パレットを開く
@@ -71,7 +74,7 @@ bool ez_ExportPalXmlFromEdge2(const std::string &edg_filename_u8) {
 }
 
 /// EDGE2 ファイルの中身をエクスポートする
-bool ez_ExportEdge2(const std::string &edg_filename_u8) {
+bool exportEdge2(const std::string &edg_filename_u8) {
 	if (K::pathHasExtension(edg_filename_u8, ".edg")) {
 		// バイナリをエクスポート
 		{
@@ -100,7 +103,7 @@ bool ez_ExportEdge2(const std::string &edg_filename_u8) {
 }
 
 
-static bool ez_PackPngInDirEx(const std::string &dir, int cellsize, bool exclude_dup_cells) {
+static bool _PackPngInDirEx(const std::string &dir, int cellsize, bool exclude_dup_cells) {
 	bool packed = false;
 	KImgPackW packW(cellsize, exclude_dup_cells);
 	{
@@ -152,12 +155,15 @@ static bool ez_PackPngInDirEx(const std::string &dir, int cellsize, bool exclude
 }
 
 
-bool ez_PackPngInDir(const std::string &dir) {
-	if (!ez_PackPngInDirEx(dir, 16, false)) { // 重複除外なし
+bool packPngInDir(const std::string &dir) {
+	if (!_PackPngInDirEx(dir, 16, false)) { // 重複除外なし
 		return false;
 	}
-	if (!ez_PackPngInDirEx(dir, 16, true)) { // 重複除外アリ
+	if (!_PackPngInDirEx(dir, 16, true)) { // 重複除外アリ
 		return false;
 	}
 	return true;
 }
+
+
+} // KTools

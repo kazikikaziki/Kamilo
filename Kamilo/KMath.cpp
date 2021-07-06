@@ -1986,87 +1986,87 @@ float KCapsule::distance(const KVec3 &p) const {
 
 namespace Test {
 void Test_num() {
-	K__Verify(KMath::max(0,  0) == 0);
-	K__Verify(KMath::max(0, 10) == 10);
-	K__Verify(KMath::max(10, 0) == 10);
+	K__VERIFY(KMath::max(0,  0) == 0);
+	K__VERIFY(KMath::max(0, 10) == 10);
+	K__VERIFY(KMath::max(10, 0) == 10);
 
-	K__Verify(KMath::min(0,  0) == 0);
-	K__Verify(KMath::min(0, 10) == 0);
-	K__Verify(KMath::min(10, 0) == 0);
+	K__VERIFY(KMath::min(0,  0) == 0);
+	K__VERIFY(KMath::min(0, 10) == 0);
+	K__VERIFY(KMath::min(10, 0) == 0);
 
-	K__Verify(KMath::clamp01(-1.0f) == 0.0f);
-	K__Verify(KMath::clamp01( 0.0f) == 0.0f);
-	K__Verify(KMath::clamp01( 0.5f) == 0.5f);
-	K__Verify(KMath::clamp01( 1.0f) == 1.0f);
-	K__Verify(KMath::clamp01( 2.0f) == 1.0f);
+	K__VERIFY(KMath::clamp01(-1.0f) == 0.0f);
+	K__VERIFY(KMath::clamp01( 0.0f) == 0.0f);
+	K__VERIFY(KMath::clamp01( 0.5f) == 0.5f);
+	K__VERIFY(KMath::clamp01( 1.0f) == 1.0f);
+	K__VERIFY(KMath::clamp01( 2.0f) == 1.0f);
 
-	K__Verify(KMath::lerp(10, 20,-0.5f) == 10);
-	K__Verify(KMath::lerp(10, 20, 0.0f) == 10);
-	K__Verify(KMath::lerp(10, 20, 0.5f) == 15);
-	K__Verify(KMath::lerp(10, 20, 1.0f) == 20);
-	K__Verify(KMath::lerp(10, 20, 1.5f) == 20);
+	K__VERIFY(KMath::lerp(10, 20,-0.5f) == 10);
+	K__VERIFY(KMath::lerp(10, 20, 0.0f) == 10);
+	K__VERIFY(KMath::lerp(10, 20, 0.5f) == 15);
+	K__VERIFY(KMath::lerp(10, 20, 1.0f) == 20);
+	K__VERIFY(KMath::lerp(10, 20, 1.5f) == 20);
 
-	K__Verify(KMath::lerp(20, 10,-0.5f) == 20);
-	K__Verify(KMath::lerp(20, 10, 0.0f) == 20);
-	K__Verify(KMath::lerp(20, 10, 0.5f) == 15);
-	K__Verify(KMath::lerp(20, 10, 1.0f) == 10);
-	K__Verify(KMath::lerp(20, 10, 1.5f) == 10);
+	K__VERIFY(KMath::lerp(20, 10,-0.5f) == 20);
+	K__VERIFY(KMath::lerp(20, 10, 0.0f) == 20);
+	K__VERIFY(KMath::lerp(20, 10, 0.5f) == 15);
+	K__VERIFY(KMath::lerp(20, 10, 1.0f) == 10);
+	K__VERIFY(KMath::lerp(20, 10, 1.5f) == 10);
 
-	K__Verify(KMath::linearStep(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::linearStep(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::linearStep(-10, 10,  0) == 0.5f);
-	K__Verify(KMath::linearStep(-10, 10, 10) == 1.0f);
-	K__Verify(KMath::linearStep(-10, 10, 20) == 1.0f);
+	K__VERIFY(KMath::linearStep(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::linearStep(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::linearStep(-10, 10,  0) == 0.5f);
+	K__VERIFY(KMath::linearStep(-10, 10, 10) == 1.0f);
+	K__VERIFY(KMath::linearStep(-10, 10, 20) == 1.0f);
 
-	K__Verify(KMath::linearStepBumped(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::linearStepBumped(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::linearStepBumped(-10, 10, -5) == 0.5f);
-	K__Verify(KMath::linearStepBumped(-10, 10,  0) == 1.0f);
-	K__Verify(KMath::linearStepBumped(-10, 10,  5) == 0.5f);
-	K__Verify(KMath::linearStepBumped(-10, 10, 10) == 0.0f);
-	K__Verify(KMath::linearStepBumped(-10, 10, 20) == 0.0f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10, -5) == 0.5f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10,  0) == 1.0f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10,  5) == 0.5f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10, 10) == 0.0f);
+	K__VERIFY(KMath::linearStepBumped(-10, 10, 20) == 0.0f);
 
-	K__Verify(KMath::smoothStep(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::smoothStep(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::smoothStep(-10, 10,  0) == 0.5f);
-	K__Verify(KMath::smoothStep(-10, 10, 10) == 1.0f);
-	K__Verify(KMath::smoothStep(-10, 10, 20) == 1.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,  0) == 0.5f);
+	K__VERIFY(KMath::smoothStep(-10, 10, 10) == 1.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10, 20) == 1.0f);
 
-	K__Verify(KMath::smoothStep(10, -10,-20) == 1.0f);
-	K__Verify(KMath::smoothStep(10, -10,-10) == 1.0f);
-	K__Verify(KMath::smoothStep(10, -10,  0) == 0.5f);
-	K__Verify(KMath::smoothStep(10, -10, 10) == 0.0f);
-	K__Verify(KMath::smoothStep(10, -10, 20) == 0.0f);
+	K__VERIFY(KMath::smoothStep(10, -10,-20) == 1.0f);
+	K__VERIFY(KMath::smoothStep(10, -10,-10) == 1.0f);
+	K__VERIFY(KMath::smoothStep(10, -10,  0) == 0.5f);
+	K__VERIFY(KMath::smoothStep(10, -10, 10) == 0.0f);
+	K__VERIFY(KMath::smoothStep(10, -10, 20) == 0.0f);
 
-	K__Verify(KMath::smoothStepBumped(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(-10, 10, -5) == 0.5f);
-	K__Verify(KMath::smoothStepBumped(-10, 10,  0) == 1.0f);
-	K__Verify(KMath::smoothStepBumped(-10, 10,  5) == 0.5f);
-	K__Verify(KMath::smoothStepBumped(-10, 10, 10) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(-10, 10, 20) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10, -5) == 0.5f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10,  0) == 1.0f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10,  5) == 0.5f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10, 10) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(-10, 10, 20) == 0.0f);
 
-	K__Verify(KMath::smoothStepBumped(10, -10,-20) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(10, -10,-10) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(10, -10, -5) == 0.5f);
-	K__Verify(KMath::smoothStepBumped(10, -10,  0) == 1.0f);
-	K__Verify(KMath::smoothStepBumped(10, -10,  5) == 0.5f);
-	K__Verify(KMath::smoothStepBumped(10, -10, 10) == 0.0f);
-	K__Verify(KMath::smoothStepBumped(10, -10, 20) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10,-20) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10,-10) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10, -5) == 0.5f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10,  0) == 1.0f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10,  5) == 0.5f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10, 10) == 0.0f);
+	K__VERIFY(KMath::smoothStepBumped(10, -10, 20) == 0.0f);
 
-	K__Verify(KMath::smoothStep(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::smoothStep(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::smoothStep(-10, 10,  0) == 0.5f);
-	K__Verify(KMath::smoothStep(-10, 10, 10) == 1.0f);
-	K__Verify(KMath::smoothStep(-10, 10, 20) == 1.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10,  0) == 0.5f);
+	K__VERIFY(KMath::smoothStep(-10, 10, 10) == 1.0f);
+	K__VERIFY(KMath::smoothStep(-10, 10, 20) == 1.0f);
 
-	K__Verify(KMath::smootherStepBumped(-10, 10,-20) == 0.0f);
-	K__Verify(KMath::smootherStepBumped(-10, 10,-10) == 0.0f);
-	K__Verify(KMath::smootherStepBumped(-10, 10, -5) == 0.5f);
-	K__Verify(KMath::smootherStepBumped(-10, 10,  0) == 1.0f);
-	K__Verify(KMath::smootherStepBumped(-10, 10,  5) == 0.5f);
-	K__Verify(KMath::smootherStepBumped(-10, 10, 10) == 0.0f);
-	K__Verify(KMath::smootherStepBumped(-10, 10, 20) == 0.0f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10,-20) == 0.0f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10,-10) == 0.0f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10, -5) == 0.5f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10,  0) == 1.0f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10,  5) == 0.5f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10, 10) == 0.0f);
+	K__VERIFY(KMath::smootherStepBumped(-10, 10, 20) == 0.0f);
 }
 void Test_bezier() {
 	#define RND (100 + rand() % 400)

@@ -12,11 +12,8 @@
 
 
 // ログの書き出し用スレッドを使う
-#ifdef NO_LOG_THREAD
-#	define USE_LOG_THREAD 0
-#else
-#	define USE_LOG_THREAD 1
-#endif
+// ※実際にスレッドを使うかどうかは g_UseThread の値による
+#define USE_LOG_THREAD 1
 
 
 #if USE_LOG_THREAD
@@ -51,8 +48,9 @@
 
 
 
-
 namespace Kamilo {
+
+bool g_UseThread = false;
 
 #pragma region KLogFile
 KLogFile::KLogFile() {
@@ -488,15 +486,10 @@ public:
 		m_DialogEnabled = true;
 		m_DialogMuted = 0;
 		m_TraceDepth = 0;
-
-	#if USE_LOG_THREAD
 		g_LogThread.start();
-	#endif
 	}
 	~CLogContext() {
-	#if USE_LOG_THREAD
 		g_LogThread.stop();
-	#endif
 	}
 	bool isLevelEnabled(KLog::Level lv) const {
 		if (lv==KLog::LEVEL_VRB && !m_VerboseEnabled) return false;
@@ -560,34 +553,40 @@ public:
 			rec.text_u8 = u8;
 		}
 
-	#if USE_LOG_THREAD
-		g_LogThread.post_emit(rec);
-	#else
-		printRecord_unsafe(rec);
-	#endif
+		if (g_UseThread) {
+			g_LogThread.post_emit(rec);
+		} else {
+			printRecord_unsafe(rec);
+		}
 		K__LOGLOG_END();
 	}
 
 	void threadLock() {
-	#if USE_LOG_THREAD
-		// 現在処理中のメッセージキューが終わっても、
-		// 新しいメッセージを処理し始めないようにロックしておく
-		g_LogThread.lock();
+		#if USE_LOG_THREAD
+		if (g_UseThread) {
+			// 現在処理中のメッセージキューが終わっても、
+			// 新しいメッセージを処理し始めないようにロックしておく
+			g_LogThread.lock();
 
-		// 処理中のメッセージキューが終わるまで待つ
-		g_LogThread.wait_for_idle();
-	#endif
+			// 処理中のメッセージキューが終わるまで待つ
+			g_LogThread.wait_for_idle();
+		}
+		#endif
 	}
 	void threadUnlock() {
-	#if USE_LOG_THREAD
-		g_LogThread.unlock();
-	#endif
+		#if USE_LOG_THREAD
+		if (g_UseThread) {
+			g_LogThread.unlock();
+		}
+		#endif
 	}
 
 	void threadWait() {
-	#if USE_LOG_THREAD
-		g_LogThread.wait_for_idle();
-	#endif
+		#if USE_LOG_THREAD
+		if (g_UseThread) {
+			g_LogThread.wait_for_idle();
+		}
+		#endif
 	}
 
 	// テキストを出力する。
@@ -784,6 +783,9 @@ static CLogContext g_Log;
 
 
 #pragma region KLog
+void KLog::setThreadEnabled(bool value) {
+	g_UseThread = value;
+}
 void KLog::setDialogEnabled(bool value) {
 	g_Log.setDialogEnabled(value);
 }

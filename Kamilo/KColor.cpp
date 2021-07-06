@@ -652,9 +652,9 @@ uint8_t KColor32::grayscale() const {
 
 namespace Test {
 void Test_color() {
-	K__Verify(K_Color32FromRgba(0x22, 0x44, 0x66, 0xFF) == 0xFF224466);
-	K__Verify(K_Color32BlendAdd(0xFF223399, 0xFF224499) == 0xFF4477FF);
-//	K__Verify(K_Color32BlendAdd(0xFF223399, 0x7F224488) == 0xFF3355DD);
+	K__VERIFY(K_Color32FromRgba(0x22, 0x44, 0x66, 0xFF) == 0xFF224466);
+	K__VERIFY(K_Color32BlendAdd(0xFF223399, 0xFF224499) == 0xFF4477FF);
+//	K__VERIFY(K_Color32BlendAdd(0xFF223399, 0x7F224488) == 0xFF3355DD);
 }
 } // Test
 

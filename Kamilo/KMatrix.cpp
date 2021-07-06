@@ -707,8 +707,8 @@ void Test_matrix() {
 	float E[16];
 	float inv_E[16];
 	K_Matrix4Identity(E); // 単位行列
-	K__Verify(K_Matrix4Inverse(inv_E, E)); // 単位行列の逆行列
-	K__Verify(K_Matrix4Equals(inv_E, E, MAXERR)); // 単位行列の逆行列は単位行列
+	K__VERIFY(K_Matrix4Inverse(inv_E, E)); // 単位行列の逆行列
+	K__VERIFY(K_Matrix4Equals(inv_E, E, MAXERR)); // 単位行列の逆行列は単位行列
 
 	// 平行移動
 	float tr[16];
@@ -720,8 +720,8 @@ void Test_matrix() {
 
 	// 平行移動の逆行列は、平行移動の打ち消しと同じになる
 	float inv_tr2[16];
-	K__Verify(K_Matrix4Inverse(inv_tr2, tr));
-	K__Verify(K_Matrix4Equals(inv_tr2, inv_tr, MAXERR));
+	K__VERIFY(K_Matrix4Inverse(inv_tr2, tr));
+	K__VERIFY(K_Matrix4Equals(inv_tr2, inv_tr, MAXERR));
 
 	// スケーリング
 	float sc[16];
@@ -736,7 +736,7 @@ void Test_matrix() {
 	float p1[] = {(100+12)*2, (100-17)*1, (0-79)*2};
 	float p2[3];
 	K_Matrix4MulVec3(p2, mm, p0);
-	K__Verify(_vec3_equals(p2, p1, MAXERR));
+	K__VERIFY(_vec3_equals(p2, p1, MAXERR));
 }
 }
 

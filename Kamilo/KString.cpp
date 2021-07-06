@@ -993,30 +993,30 @@ void Test_str() {
 
 		// Wide --> Utf8
 		K::strWideToUtf8(u8, sizeof(u8), test_ws); // 変換する
-		K__Verify(strcmp(test_u8, u8) == 0);
+		K__VERIFY(strcmp(test_u8, u8) == 0);
 
 		// Utf8 --> Wide
 		K::strUtf8ToWide(ws, sizeof(ws)/sizeof(wchar_t), test_u8, 0); // 変換する
-		K__Verify(wcscmp(test_ws, ws) == 0);
+		K__VERIFY(wcscmp(test_ws, ws) == 0);
 
 		// Wide --> Ansi (SJIS)
 		K::strWideToAnsi(mb, sizeof(mb), test_ws, "jpn"); // 変換する
-		K__Verify(strcmp(test_mb, mb) == 0);
+		K__VERIFY(strcmp(test_mb, mb) == 0);
 
 		// Wide --> Ansi (SJIS)
 		K::strWideToAnsi(mb, sizeof(mb), test_ws, "japanese"); // 変換する
-		K__Verify(strcmp(test_mb, mb) == 0);
+		K__VERIFY(strcmp(test_mb, mb) == 0);
 
 		// Wide --> Ansi (SJIS)
 		K::strWideToAnsi(mb, sizeof(mb), test_ws, "japanese_japan.932"); // 変換する
-		K__Verify(strcmp(test_mb, mb) == 0);
+		K__VERIFY(strcmp(test_mb, mb) == 0);
 
 		// バッファ長さを超えた場合でも必ず終端文字が入る
-		K__Verify(K::strWideToUtf8(nullptr, 0, L"ABCD_") >= 5+1); // 終端文字を含めたサイズ以上の値を返す
-		K__Verify(K::strWideToUtf8(nullptr, 0, L"") >= 0+1); // 終端文字を含めたサイズ以上の値を返す
+		K__VERIFY(K::strWideToUtf8(nullptr, 0, L"ABCD_") >= 5+1); // 終端文字を含めたサイズ以上の値を返す
+		K__VERIFY(K::strWideToUtf8(nullptr, 0, L"") >= 0+1); // 終端文字を含めたサイズ以上の値を返す
 		{
 			char s[4] = {'\xff', '\xff', '\xff', '\xff'};
-			K__Verify(K::strWideToUtf8(s, 4, L"ABCD") == 0); // バッファが足りないのでエラーになる
+			K__VERIFY(K::strWideToUtf8(s, 4, L"ABCD") == 0); // バッファが足りないのでエラーになる
 		}
 
 		char lc[256];
@@ -1026,189 +1026,189 @@ void Test_str() {
 
 			// Wide --> Ansi (Current Locale)
 			K::strAnsiToWide(ws, sizeof(ws)/sizeof(wchar_t), test_mb, "");
-			K__Verify(wcscmp(test_ws, ws) == 0);
+			K__VERIFY(wcscmp(test_ws, ws) == 0);
 		}
 		setlocale(LC_CTYPE, lc);
 	}
 	{
 		std::string s;
-		s="abc";    K::strReplace(s, "a", "");   K__Verify(s=="bc");
-		s="abcabc"; K::strReplace(s, "a", "");   K__Verify(s=="bcbc");
-		s="abcabc"; K::strReplace(s, "a", "ax"); K__Verify(s=="axbcaxbc");
-		s="abc";    K::strReplace(s, "", "x");   K__Verify(s=="abc");
-		s="abc";    K::strReplace(s, "", "");    K__Verify(s=="abc");
+		s="abc";    K::strReplace(s, "a", "");   K__VERIFY(s=="bc");
+		s="abcabc"; K::strReplace(s, "a", "");   K__VERIFY(s=="bcbc");
+		s="abcabc"; K::strReplace(s, "a", "ax"); K__VERIFY(s=="axbcaxbc");
+		s="abc";    K::strReplace(s, "", "x");   K__VERIFY(s=="abc");
+		s="abc";    K::strReplace(s, "", "");    K__VERIFY(s=="abc");
 
-		s="   aaabbb "; K::strTrim(s); K__Verify(s=="aaabbb");
-		s="aaabbb ";    K::strTrim(s); K__Verify(s=="aaabbb");
-		s="   aaabbb";  K::strTrim(s); K__Verify(s=="aaabbb");
-		s="aaabbb";     K::strTrim(s); K__Verify(s=="aaabbb");
-		s="";           K::strTrim(s); K__Verify(s=="");
+		s="   aaabbb "; K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="aaabbb ";    K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="   aaabbb";  K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="aaabbb";     K::strTrim(s); K__VERIFY(s=="aaabbb");
+		s="";           K::strTrim(s); K__VERIFY(s=="");
 
-		K__Verify(K::strStartsWith("abc", "ab") == true);
-		K__Verify(K::strStartsWith("", "abc") == false);
-		K__Verify(K::strStartsWith("abc", "") == true);
-		K__Verify(K::strStartsWith("", "") == true);
-		K__Verify(K::strStartsWith(" abc", "ab") == false);
-		K__Verify(K::strStartsWith("abc", "abcd") == false);
+		K__VERIFY(K::strStartsWith("abc", "ab") == true);
+		K__VERIFY(K::strStartsWith("", "abc") == false);
+		K__VERIFY(K::strStartsWith("abc", "") == true);
+		K__VERIFY(K::strStartsWith("", "") == true);
+		K__VERIFY(K::strStartsWith(" abc", "ab") == false);
+		K__VERIFY(K::strStartsWith("abc", "abcd") == false);
 
-		K__Verify(K::strEndsWith("abc", "bc") == true);
-		K__Verify(K::strEndsWith("", "abc") == false);
-		K__Verify(K::strEndsWith("abc", "") == true);
-		K__Verify(K::strEndsWith("", "") == true);
-		K__Verify(K::strEndsWith("abc ", "bc") == false);
-		K__Verify(K::strEndsWith("abc", "xabc") == false);
+		K__VERIFY(K::strEndsWith("abc", "bc") == true);
+		K__VERIFY(K::strEndsWith("", "abc") == false);
+		K__VERIFY(K::strEndsWith("abc", "") == true);
+		K__VERIFY(K::strEndsWith("", "") == true);
+		K__VERIFY(K::strEndsWith("abc ", "bc") == false);
+		K__VERIFY(K::strEndsWith("abc", "xabc") == false);
 
-		K__Verify(K::strFind("aaa x", "x") == 4);
-		K__Verify(K::strFind("aaa x", "a") == 0);
-		K__Verify(K::strFind("aaa x", "aaa") == 0);
-		K__Verify(K::strFind("aaa x", " ") == 3);
-		K__Verify(K::strFind("aa", "aaaa") == -1);
+		K__VERIFY(K::strFind("aaa x", "x") == 4);
+		K__VERIFY(K::strFind("aaa x", "a") == 0);
+		K__VERIFY(K::strFind("aaa x", "aaa") == 0);
+		K__VERIFY(K::strFind("aaa x", " ") == 3);
+		K__VERIFY(K::strFind("aa", "aaaa") == -1);
 
-		K__Verify(KStringUtils::toInt("12") == 12);
-		K__Verify(KStringUtils::toInt("+12") == 12);
-		K__Verify(KStringUtils::toInt("-12") == -12);
-		K__Verify(KStringUtils::toInt("012") == 10); // 先頭の0は8進数
-		K__Verify(KStringUtils::toInt("0x12") == 18); // hex ok
-		K__Verify(KStringUtils::toInt("0x012") == 18);
-		K__Verify(KStringUtils::toInt("12.0") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("12.0f") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("0.12e2") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("0.12e-2") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("0x0FFFFFFF") == 0x0FFFFFFF);
-		K__Verify(KStringUtils::toInt("0xFFFFFFFF") == 0x7FFFFFFF); // int32 max
-		K__Verify(KStringUtils::toInt("") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("  12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toInt(" +12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toInt(" -12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toInt("- 12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("12") == 12);
+		K__VERIFY(KStringUtils::toInt("+12") == 12);
+		K__VERIFY(KStringUtils::toInt("-12") == -12);
+		K__VERIFY(KStringUtils::toInt("012") == 10); // 先頭の0は8進数
+		K__VERIFY(KStringUtils::toInt("0x12") == 18); // hex ok
+		K__VERIFY(KStringUtils::toInt("0x012") == 18);
+		K__VERIFY(KStringUtils::toInt("12.0") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("12.0f") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("0.12e2") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("0.12e-2") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("0x0FFFFFFF") == 0x0FFFFFFF);
+		K__VERIFY(KStringUtils::toInt("0xFFFFFFFF") == 0x7FFFFFFF); // int32 max
+		K__VERIFY(KStringUtils::toInt("") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("  12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt(" +12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt(" -12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toInt("- 12 ") == 0); // FAIL
 
-		K__Verify(KStringUtils::toFloat("12") == 12);
-		K__Verify(KStringUtils::toFloat("+12") == 12);
-		K__Verify(KStringUtils::toFloat("-12") == -12);
-		K__Verify(KStringUtils::toFloat("012") == 12); // strtod は先頭の 0 を無視する。8進数とは見なさない
-		K__Verify(KStringUtils::toFloat("0x12") == 18); // hex ok
-		K__Verify(KStringUtils::toFloat("0x012") == 18);
-		K__Verify(KStringUtils::toFloat("12.5") == 12.5f);
-		K__Verify(KStringUtils::toFloat("12.5f") == 0); // FAIL: No C-style suffix
-		K__Verify(KStringUtils::toFloat("0.12e2") == 12);
-		K__Verify(KStringUtils::toFloat("0.12e-2") == 0.0012f);
-		K__Verify(KStringUtils::toFloat("0x0FFFFFFF") == 0x0FFFFFFF);
-		K__Verify(KStringUtils::toFloat("0xFFFFFFFF") == 4.29496730e+09f); // 有効桁で切り捨てされる (正しい値は 4294967295)
-		K__Verify(KStringUtils::toFloat("") == 0); // FAIL
-		K__Verify(KStringUtils::toFloat("  12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toFloat(" +12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toFloat(" -12 ") == 0); // FAIL
-		K__Verify(KStringUtils::toFloat("- 12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toFloat("12") == 12);
+		K__VERIFY(KStringUtils::toFloat("+12") == 12);
+		K__VERIFY(KStringUtils::toFloat("-12") == -12);
+		K__VERIFY(KStringUtils::toFloat("012") == 12); // strtod は先頭の 0 を無視する。8進数とは見なさない
+		K__VERIFY(KStringUtils::toFloat("0x12") == 18); // hex ok
+		K__VERIFY(KStringUtils::toFloat("0x012") == 18);
+		K__VERIFY(KStringUtils::toFloat("12.5") == 12.5f);
+		K__VERIFY(KStringUtils::toFloat("12.5f") == 0); // FAIL: No C-style suffix
+		K__VERIFY(KStringUtils::toFloat("0.12e2") == 12);
+		K__VERIFY(KStringUtils::toFloat("0.12e-2") == 0.0012f);
+		K__VERIFY(KStringUtils::toFloat("0x0FFFFFFF") == 0x0FFFFFFF);
+		K__VERIFY(KStringUtils::toFloat("0xFFFFFFFF") == 4.29496730e+09f); // 有効桁で切り捨てされる (正しい値は 4294967295)
+		K__VERIFY(KStringUtils::toFloat("") == 0); // FAIL
+		K__VERIFY(KStringUtils::toFloat("  12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toFloat(" +12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toFloat(" -12 ") == 0); // FAIL
+		K__VERIFY(KStringUtils::toFloat("- 12 ") == 0); // FAIL
 
-		K__Verify(KStringUtils::toUint("-12") == 0xFFFFFFF4); // 桁あふれ発生
-		K__Verify(KStringUtils::toUint("12") == 12);
-		K__Verify(KStringUtils::toUint("0x10") == 16);
-		K__Verify(KStringUtils::toUint("") == 0); // FAIL
-		K__Verify(KStringUtils::toUint("12.3") == 0); // FAIL
-		K__Verify(KStringUtils::toUint("0xFFFFFFFF") == 0xFFFFFFFF);
+		K__VERIFY(KStringUtils::toUint("-12") == 0xFFFFFFF4); // 桁あふれ発生
+		K__VERIFY(KStringUtils::toUint("12") == 12);
+		K__VERIFY(KStringUtils::toUint("0x10") == 16);
+		K__VERIFY(KStringUtils::toUint("") == 0); // FAIL
+		K__VERIFY(KStringUtils::toUint("12.3") == 0); // FAIL
+		K__VERIFY(KStringUtils::toUint("0xFFFFFFFF") == 0xFFFFFFFF);
 	}
 	{
 		KStringView rest;
 		auto tok = KStringView("aa,bb,cc,dd").split(",", true, true, 2, &rest);
-		K__Verify(tok.size() == 2);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare("bb") == 0);
-		K__Verify(rest.compare("cc,dd") == 0);
+		K__VERIFY(tok.size() == 2);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare("bb") == 0);
+		K__VERIFY(rest.compare("cc,dd") == 0);
 	}
 	{
 		KStringView rest;
 		auto tok = KStringView("aa,,bb,,cc,,dd").split(",", true, true, 2, &rest);
-		K__Verify(tok.size() == 2);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare("bb") == 0);
-		K__Verify(rest.compare("cc,,dd") == 0);
+		K__VERIFY(tok.size() == 2);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare("bb") == 0);
+		K__VERIFY(rest.compare("cc,,dd") == 0);
 	}
 	{
 		KStringView rest;
 		auto tok = KStringView("aa,,bb,,cc,,dd").split(",", false, true, 4, &rest);
-		K__Verify(tok.size() == 4);
-		K__Verify(tok[0].compare("aa") == 0);
-		K__Verify(tok[1].compare(""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
-		K__Verify(tok[2].compare("bb") == 0);
-		K__Verify(tok[3].compare(""  ) == 0);
-		K__Verify(rest.compare("cc,,dd") == 0);
+		K__VERIFY(tok.size() == 4);
+		K__VERIFY(tok[0].compare("aa") == 0);
+		K__VERIFY(tok[1].compare(""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
+		K__VERIFY(tok[2].compare("bb") == 0);
+		K__VERIFY(tok[3].compare(""  ) == 0);
+		K__VERIFY(rest.compare("cc,,dd") == 0);
 	}
 
 	{
 		KString a;
-		K__Verify(a == "");
-		K__Verify(a.empty());
-		K__Verify(a.c_str());
-		K__Verify(strlen(a.c_str()) == 0);
+		K__VERIFY(a == "");
+		K__VERIFY(a.empty());
+		K__VERIFY(a.c_str());
+		K__VERIFY(strlen(a.c_str()) == 0);
 
 		KString b = "abc";
-		K__Verify(b == "abc");
-		K__Verify(b.empty() == false);
-		K__Verify(b.subString(0, 0) == "");
-		K__Verify(b.subString(1, 2) == "bc");
-		K__Verify(b.subString(1, -1) == "bc");
-		K__Verify(b.subString(0, -1) == "abc");
-		K__Verify(b.subString(10, -1) == "");
-		K__Verify(b.subString(-9, -1) == "");
+		K__VERIFY(b == "abc");
+		K__VERIFY(b.empty() == false);
+		K__VERIFY(b.subString(0, 0) == "");
+		K__VERIFY(b.subString(1, 2) == "bc");
+		K__VERIFY(b.subString(1, -1) == "bc");
+		K__VERIFY(b.subString(0, -1) == "abc");
+		K__VERIFY(b.subString(10, -1) == "");
+		K__VERIFY(b.subString(-9, -1) == "");
 
-		K__Verify(b.remove(0, 0) == b);
-		K__Verify(b.remove(1, 2) == "a");
-		K__Verify(b.remove(1, -1) == "a");
-		K__Verify(b.remove(0, -1) == "");
-		K__Verify(b.remove(10, -1) == "");
-		K__Verify(b.remove(-9, -1) == "");
+		K__VERIFY(b.remove(0, 0) == b);
+		K__VERIFY(b.remove(1, 2) == "a");
+		K__VERIFY(b.remove(1, -1) == "a");
+		K__VERIFY(b.remove(0, -1) == "");
+		K__VERIFY(b.remove(10, -1) == "");
+		K__VERIFY(b.remove(-9, -1) == "");
 
-		K__Verify(b.toWide() == L"abc");
-		K__Verify(b.replace(1, 0, "xx") == "axxbc");
-		K__Verify(b.replace(1, 2, "xx") == "axx");
-		K__Verify(b.replace(1, 2, "xxyy") == "axxyy");
-		K__Verify(b.replace(1, 2, "") == "a");
-		K__Verify(b.startsWith(""));
-		K__Verify(b.startsWith("a"));
-		K__Verify(b.startsWith("ab"));
-		K__Verify(b.startsWith("abc"));
-		K__Verify(b.endsWith("abc"));
-		K__Verify(b.endsWith("bc"));
-		K__Verify(b.endsWith("c"));
-		K__Verify(b.endsWith(""));
+		K__VERIFY(b.toWide() == L"abc");
+		K__VERIFY(b.replace(1, 0, "xx") == "axxbc");
+		K__VERIFY(b.replace(1, 2, "xx") == "axx");
+		K__VERIFY(b.replace(1, 2, "xxyy") == "axxyy");
+		K__VERIFY(b.replace(1, 2, "") == "a");
+		K__VERIFY(b.startsWith(""));
+		K__VERIFY(b.startsWith("a"));
+		K__VERIFY(b.startsWith("ab"));
+		K__VERIFY(b.startsWith("abc"));
+		K__VERIFY(b.endsWith("abc"));
+		K__VERIFY(b.endsWith("bc"));
+		K__VERIFY(b.endsWith("c"));
+		K__VERIFY(b.endsWith(""));
 
 		KString c = " xyz ";
-		K__Verify(c.trim() == "xyz");
-		K__Verify(c.findChar(' ') == 0);
-		K__Verify(c.findChar('a') == -1);
-		K__Verify(c.findChar(' ', 1) == 4);
-		K__Verify(c.findChar(' ', 5) == -1);
-		K__Verify(c.remove(0, 1) == "xyz ");
+		K__VERIFY(c.trim() == "xyz");
+		K__VERIFY(c.findChar(' ') == 0);
+		K__VERIFY(c.findChar('a') == -1);
+		K__VERIFY(c.findChar(' ', 1) == 4);
+		K__VERIFY(c.findChar(' ', 5) == -1);
+		K__VERIFY(c.remove(0, 1) == "xyz ");
 	}
 
 
 	{
 		KToken tok("aa,bb,cc,dd", "/", true, 3);
-		K__Verify(tok.size() == 1);
-		K__Verify(tok.compare(0, "aa,bb,cc,dd") == 0);
+		K__VERIFY(tok.size() == 1);
+		K__VERIFY(tok.compare(0, "aa,bb,cc,dd") == 0);
 	}
 	{
 		KToken tok("aa,bb,cc,dd", ",", true, 3);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok.compare(0, "aa") == 0);
-		K__Verify(tok.compare(1, "bb") == 0);
-		K__Verify(tok.compare(2, "cc,dd") == 0);
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok.compare(0, "aa") == 0);
+		K__VERIFY(tok.compare(1, "bb") == 0);
+		K__VERIFY(tok.compare(2, "cc,dd") == 0);
 	}
 	{
 		KToken tok("aa,,bb,,cc,,dd", ",", true, 3);
-		K__Verify(tok.size() == 3);
-		K__Verify(tok.compare(0, "aa") == 0);
-		K__Verify(tok.compare(1, "bb") == 0);
-		K__Verify(tok.compare(2, "cc,,dd") == 0);
+		K__VERIFY(tok.size() == 3);
+		K__VERIFY(tok.compare(0, "aa") == 0);
+		K__VERIFY(tok.compare(1, "bb") == 0);
+		K__VERIFY(tok.compare(2, "cc,,dd") == 0);
 	}
 	{
 		KToken tok("aa,,bb,,cc,,dd", ",", false, 5);
-		K__Verify(tok.size() == 5);
-		K__Verify(tok.compare(0, "aa") == 0);
-		K__Verify(tok.compare(1, ""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
-		K__Verify(tok.compare(2, "bb") == 0);
-		K__Verify(tok.compare(3, ""  ) == 0);
-		K__Verify(tok.compare(4, "cc,,dd") == 0);
+		K__VERIFY(tok.size() == 5);
+		K__VERIFY(tok.compare(0, "aa") == 0);
+		K__VERIFY(tok.compare(1, ""  ) == 0); // ".." の部分は . と . の間に空文字列が挟まっているとみなす
+		K__VERIFY(tok.compare(2, "bb") == 0);
+		K__VERIFY(tok.compare(3, ""  ) == 0);
+		K__VERIFY(tok.compare(4, "cc,,dd") == 0);
 	}
 }
 } // Test
@@ -1544,68 +1544,68 @@ void Test_path() {
 		KName A("aaa");
 		KName b("bbb");
 		KName c("ccc");
-		K__Verify(e.empty());
-		K__Verify(strcmp(a.c_str(), "aaa") == 0);
-		K__Verify(strcmp(b.c_str(), "bbb") == 0);
-		K__Verify(strcmp(c.c_str(), "ccc") == 0);
-		K__Verify(e != a);
-		K__Verify(a == a);
-		K__Verify(a == A);
-		K__Verify(b != c);
+		K__VERIFY(e.empty());
+		K__VERIFY(strcmp(a.c_str(), "aaa") == 0);
+		K__VERIFY(strcmp(b.c_str(), "bbb") == 0);
+		K__VERIFY(strcmp(c.c_str(), "ccc") == 0);
+		K__VERIFY(e != a);
+		K__VERIFY(a == a);
+		K__VERIFY(a == A);
+		K__VERIFY(b != c);
 	}
 	{
 		char s[256] = {0};
-		KPathUtils::K_PathPushLast(s, sizeof(s), "aaa"); K__Verify(strcmp(s, "aaa") == 0);
-		KPathUtils::K_PathPushLast(s, sizeof(s), "bbb"); K__Verify(strcmp(s, "aaa/bbb") == 0);
-		KPathUtils::K_PathPushLast(s, sizeof(s), "ccc"); K__Verify(strcmp(s, "aaa/bbb/ccc") == 0);
-		KPathUtils::K_PathPopLast(s); K__Verify(strcmp(s, "aaa/bbb") == 0);
-		KPathUtils::K_PathPushExt(s, sizeof(s), ".exe"); K__Verify(strcmp(s, "aaa/bbb.exe")==0);
-		KPathUtils::K_PathPopExt(s); K__Verify(strcmp(s, "aaa/bbb")==0);
-		KPathUtils::K_PathPopExt(s); K__Verify(strcmp(s, "aaa/bbb")==0); // 変化なし
+		KPathUtils::K_PathPushLast(s, sizeof(s), "aaa"); K__VERIFY(strcmp(s, "aaa") == 0);
+		KPathUtils::K_PathPushLast(s, sizeof(s), "bbb"); K__VERIFY(strcmp(s, "aaa/bbb") == 0);
+		KPathUtils::K_PathPushLast(s, sizeof(s), "ccc"); K__VERIFY(strcmp(s, "aaa/bbb/ccc") == 0);
+		KPathUtils::K_PathPopLast(s); K__VERIFY(strcmp(s, "aaa/bbb") == 0);
+		KPathUtils::K_PathPushExt(s, sizeof(s), ".exe"); K__VERIFY(strcmp(s, "aaa/bbb.exe")==0);
+		KPathUtils::K_PathPopExt(s); K__VERIFY(strcmp(s, "aaa/bbb")==0);
+		KPathUtils::K_PathPopExt(s); K__VERIFY(strcmp(s, "aaa/bbb")==0); // 変化なし
 
 		strcpy_s(s, sizeof(s), "bbb/aaa.exe");
-		K__Verify(strcmp(KPathUtils::K_PathGetExt(s), ".exe") == 0);
+		K__VERIFY(strcmp(KPathUtils::K_PathGetExt(s), ".exe") == 0);
 
 		strcpy_s(s, sizeof(s), "bbb/aaa.exe.zip");
-		K__Verify(strcmp(KPathUtils::K_PathGetExt(s), ".zip") == 0);
+		K__VERIFY(strcmp(KPathUtils::K_PathGetExt(s), ".zip") == 0);
 
 		strcpy_s(s, sizeof(s), "bbb/aaa.zip/ccc.bmp");
-		K__Verify(strcmp(KPathUtils::K_PathGetExt(s), ".bmp") == 0);
+		K__VERIFY(strcmp(KPathUtils::K_PathGetExt(s), ".bmp") == 0);
 
 		strcpy_s(s, sizeof(s), "bbb/aaa.zip/ccc");
-		K__Verify(KStringUtils::isEmpty(KPathUtils::K_PathGetExt(s)));
+		K__VERIFY(KStringUtils::isEmpty(KPathUtils::K_PathGetExt(s)));
 
 		strcpy_s(s, sizeof(s), "bbb/aaa");
-		K__Verify(KStringUtils::isEmpty(KPathUtils::K_PathGetExt(s)));
+		K__VERIFY(KStringUtils::isEmpty(KPathUtils::K_PathGetExt(s)));
 
 		strcpy_s(s, sizeof(s), "bbb/aaa.exe");
-		K__Verify(strcmp(KPathUtils::K_PathGetLast(s), "aaa.exe") == 0);
+		K__VERIFY(strcmp(KPathUtils::K_PathGetLast(s), "aaa.exe") == 0);
 
 		strcpy_s(s, sizeof(s), "aaa.exe");
-		K__Verify(strcmp(KPathUtils::K_PathGetLast(s), "aaa.exe") == 0);
+		K__VERIFY(strcmp(KPathUtils::K_PathGetLast(s), "aaa.exe") == 0);
 
 		strcpy_s(s, sizeof(s), "");
-		KPathUtils::K_PathPushLast(s, sizeof(s), "aaa/"); K__Verify(strcmp(s, "aaa") == 0); // 末尾の区切りは消える
+		KPathUtils::K_PathPushLast(s, sizeof(s), "aaa/"); K__VERIFY(strcmp(s, "aaa") == 0); // 末尾の区切りは消える
 		
 		strcpy_s(s, sizeof(s), "aaa/");
-		KPathUtils::K_PathPushLast(s, sizeof(s), "bbb"); K__Verify(strcmp(s, "aaa/bbb") == 0); // aaa//bbb にはならない
+		KPathUtils::K_PathPushLast(s, sizeof(s), "bbb"); K__VERIFY(strcmp(s, "aaa/bbb") == 0); // aaa//bbb にはならない
 	}
 	{
-		K__Verify(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
-		K__Verify(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ddd") == 8);
-		K__Verify(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb_ccc") == 4);
-		K__Verify(KPathUtils::K_PathGetCommonSize("aaa", "") == 0);
-		K__Verify(KPathUtils::K_PathGetCommonSize("", "") == 0);
+		K__VERIFY(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ccc") == 11);
+		K__VERIFY(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb/ddd") == 8);
+		K__VERIFY(KPathUtils::K_PathGetCommonSize("aaa/bbb/ccc", "aaa/bbb_ccc") == 4);
+		K__VERIFY(KPathUtils::K_PathGetCommonSize("aaa", "") == 0);
+		K__VERIFY(KPathUtils::K_PathGetCommonSize("", "") == 0);
 	}
 	{
 		char s[256];
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa");        K__Verify(strcmp(s, "bb/cc") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa/bb");     K__Verify(strcmp(s, "cc") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa/bb/ee");  K__Verify(strcmp(s, "../cc") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "ee/ff");     K__Verify(strcmp(s, "../../aa/bb/cc") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "aa");  K__Verify(strcmp(s, "..") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa", "");  K__Verify(strcmp(s, "aa") == 0);
-		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "");    K__Verify(strcmp(s, "") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa");        K__VERIFY(strcmp(s, "bb/cc") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa/bb");     K__VERIFY(strcmp(s, "cc") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "aa/bb/ee");  K__VERIFY(strcmp(s, "../cc") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa/bb/cc", "ee/ff");     K__VERIFY(strcmp(s, "../../aa/bb/cc") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "aa");  K__VERIFY(strcmp(s, "..") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "aa", "");  K__VERIFY(strcmp(s, "aa") == 0);
+		KPathUtils::K_PathGetRelative(s, sizeof(s), "", "");    K__VERIFY(strcmp(s, "") == 0);
 	}
 }
 } // Test

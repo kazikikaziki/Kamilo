@@ -315,17 +315,17 @@ void Test_quat() {
 		KQuat rot_z30 = KQuat::fromAxisDeg(axis_z, 30); // Z軸30度
 		KQuat rot_z15 = KQuat::fromAxisDeg(axis_z, 15); // Z軸15度
 		KQuat rot_z45_test = rot_z30.rotate(rot_z15); // 30+15
-		K__Verify(rot_z45_test.equals(rot_z45, MAXERR));
+		K__VERIFY(rot_z45_test.equals(rot_z45, MAXERR));
 	}
 	KVec3 point45;
 	{
 		point45 = rot_z45.rotate(point0); // point0 をZ軸で45度回転
-		K__Verify(point45.equals(point45_ref, MAXERR));
+		K__VERIFY(point45.equals(point45_ref, MAXERR));
 	}
 	KVec3 point90;
 	{
 		point90 = rot_z45.rotate(point45); // point45 をZ軸で45度回転
-		K__Verify(point90.equals(point90_ref, MAXERR));
+		K__VERIFY(point90.equals(point90_ref, MAXERR));
 	}
 }
 

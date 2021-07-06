@@ -5,6 +5,8 @@ namespace Kamilo {
 
 class KLog {
 public:
+	static void setThreadEnabled(bool value);
+
 	enum Level {
 		LEVEL_AST = 'A',
 
