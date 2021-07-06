@@ -9,7 +9,8 @@ namespace Kamilo {
 
 class KNode;
 
-#define K_DECL_SIGNAL(X)  static const char *X = #X;
+#define K_DECL_STRING(X)  static const char *X = #X;
+#define K_DECL_SIGNAL(X)  K_DECL_STRING(X)
 
 class KSig {
 public:
