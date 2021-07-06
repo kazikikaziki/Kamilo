@@ -100,6 +100,7 @@ public:
 	/// @param row データ行インデックス（ゼロ起算）
 	/// @retval utf8文字列またはnullptr
 	const char * getDataString(int col, int row) const;
+	std::string getDataStringStd(int col, int row) const;
 
 	/// このテーブルのデータ整数を得る
 	/// @param col データ列インデックス（ゼロ起算）

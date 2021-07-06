@@ -347,6 +347,13 @@ const char * KTable::getDataString(int col, int row) const {
 	}
 	return nullptr;
 }
+std::string KTable::getDataStringStd(int col, int row) const {
+	const char *s = getDataString(col, row);
+	if (s && s[0]) {
+		return s;
+	}
+	return "";
+}
 int KTable::getDataInt(int col, int row, int def) const {
 	int val = def;
 	getDataIntTry(col, row, &val);
