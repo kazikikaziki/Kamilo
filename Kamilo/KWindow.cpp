@@ -19,6 +19,11 @@ static bool _streq(const char *s, const char *t) {
 	return s && t && strcmp(s, t)==0;
 }
 
+#if 0
+#	define DEBUG_PRINT(fmt, ...) K::print(fmt, ##__VA_ARGS__)
+#else
+#	define DEBUG_PRINT(fmt, ...)
+#endif
 
 
 #pragma region KIcon
@@ -373,11 +378,11 @@ public:
 			// https://gamedev.stackexchange.com/questions/20446/does-vk-snapshot-not-send-a-wm-keydown-only-wm-keyup
 			RegisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_DESKTOP, 0, VK_SNAPSHOT);
 			RegisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_CLIENT, KKeyboard::MODIF_ALT, VK_SNAPSHOT);
-			K::print(u8"[PrtScr] を占有しました: HWND=0x%X", m_hWnd);
+			DEBUG_PRINT(u8"[PrtScr] を占有しました: HWND=0x%X", m_hWnd);
 		} else {
 			UnregisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_DESKTOP);
 			UnregisterHotKey(m_hWnd, HOTKEY_SNAPSHOT_CLIENT);
-			K::print(u8"[PrtScr] を解放しました: HWND=0x%X", m_hWnd);
+			DEBUG_PRINT(u8"[PrtScr] を解放しました: HWND=0x%X", m_hWnd);
 		}
 	}
 	void command(const char *cmd, void *data) {
