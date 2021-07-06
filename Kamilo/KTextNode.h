@@ -407,7 +407,9 @@ public:
 	// テキストは書式付きの物を指定することができる。
 	// 例えば "<<Hello>> {World}" など。
 	// マークダウンテキストの書式については内部クラスの CTalkScriptParser を参照すること
-	void setText2(const wchar_t *source_text);
+	void setText(const std::string &text_u8);
+	void setText(const std::wstring &text_w);
+//	void setText(const std::wstring &text_w) { setText(text_w); }
 
 	// テキストボックスの大きさを指定する
 	void setSize(int w, int h);
@@ -514,9 +516,8 @@ public:
 	void setText(const char *text_u8);
 	void setText(const wchar_t *text);
 	void setText(const std::string &text_u8);
-	void setText(const KPath &text);
 	void setFont(KFont &font);
-	void setFont(const char *alias); // alias = KTextMeshManager に登録したフォント名
+	void setFont(const std::string &alias); // alias = KTextMeshManager に登録したフォント名
 	void setFontSize(float value);
 	void setFontStyle(KFont::Style value);
 	void setFontPitch(float value);

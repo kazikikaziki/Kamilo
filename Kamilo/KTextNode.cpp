@@ -1030,11 +1030,15 @@ void KTextLayout::setSize(int w, int h) {
 	m_textarea_w = m_talkbox_w - m_margin_left - m_margin_right;
 	m_textarea_h = m_talkbox_h - m_margin_top - m_margin_bottom;
 }
-void KTextLayout::setText2(const wchar_t *source_text) {
+void KTextLayout::setText(const std::string &text_u8) {
+	std::wstring ws = K::strUtf8ToWide(text_u8);
+	setText(ws);
+}
+void KTextLayout::setText(const std::wstring &text_w) {
 	K__ASSERT(m_textbox);
 	K__ASSERT(m_default_style.fontsize >= 1);
 
-	m_source_text = source_text;
+	m_source_text = text_w;
 
 	// 自動調整なしのスタイルにリセットする
 	m_real_pitch = m_default_style.pitch;
@@ -1600,9 +1604,6 @@ void KTextDrawable::onDrawable_inspector() {
 		}
 	}
 }
-void KTextDrawable::setText(const KPath &text) {
-	setText(text.c_str());
-}
 void KTextDrawable::setText(const std::string &text_u8) {
 	std::wstring ws = K::strUtf8ToWide(text_u8);
 	setText(ws.c_str());
@@ -1620,11 +1621,10 @@ void KTextDrawable::setFont(KFont &font) {
 	m_tb_font = font;
 	m_should_update_mesh = true;
 }
-void KTextDrawable::setFont(const char *alias) {
-	K__ASSERT(alias);
+void KTextDrawable::setFont(const std::string &alias) {
 	KFont font = KBank::getFontBank()->getFont(alias, false);
 	if (!font.isOpen()) {
-		KLog::printError("E_FONT: NO FONT ALIASED '%s", alias);
+		KLog::printError("E_FONT: NO FONT ALIASED '%s", alias.c_str());
 	}
 	setFont(font);
 }
