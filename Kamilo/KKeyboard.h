@@ -110,11 +110,11 @@ public:
 	};
 	/// 修飾キー
 	enum Modifier {
-		MODIF_NONE     = 0x0000, ///< どの修飾キーも押されていない
-		MODIF_SHIFT    = 0x0001, ///< Shift との同時押し
-		MODIF_CTRL     = 0x0002, ///< Ctrl との同時押し
-		MODIF_ALT      = 0x0004, ///< Alt との同時押し
-		MODIF_DONTCARE = 0x8000, ///< 修飾キーをチェックしない
+		MODIF_NONE     = 0x00, ///< どの修飾キーも押されていない
+		MODIF_SHIFT    = 0x01, ///< Shift との同時押し
+		MODIF_CTRL     = 0x02, ///< Ctrl との同時押し
+		MODIF_ALT      = 0x04, ///< Alt との同時押し
+		MODIF_DONTCARE = 0x10, ///< 修飾キーをチェックしない
 	};
 	typedef int Modifiers; ///< #Modifier の組み合わせ
 
