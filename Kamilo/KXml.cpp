@@ -338,18 +338,25 @@ std::string KXmlElement::toString(int indent) const {
 		}
 	}
 
-	// Text
-	const char *text = getText();
-	if (text && text[0]) {
-		s += "<![CDATA[";
-		s += text;
-		s += "]]>";
-	}
-
-	// Sub nodes
+	// Text or Sub nodes
 	if (getChildCount() == 0) {
-		s += "/>\n";
+
+		// Text
+		const char *text = getText();
+		if (text && text[0]) {
+			s += ">\n"; // タグ閉じる
+
+			// CDATA部
+			s += "<![CDATA[";
+			s += text;
+			s += "]]>\n";
+			s += K::str_sprintf("%*s</%s>\n", indent*2, "", getTag());
+		} else {
+			s += "/>\n"; // タグ閉じる
+		}
+
 	} else {
+		const char *text = getText();
 		if (text && text[0]) {
 			// テキスト属性と子ノードは両立しない。
 			K__ERROR(u8"Xml element cannot have both Text Element and Child Elements");
