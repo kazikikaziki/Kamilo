@@ -310,7 +310,7 @@ public:
 		for (auto it=cameras.begin(); it!=cameras.end(); ++it) {
 			KNode *camera = *it;
 			if (camera == nullptr) continue;
-			std::string texname = K::str_sprintf("_ViewTexture_%s.tex", camera->getName()); // カメラ固有のレンダーターゲット名
+			std::string texname = K::str_sprintf("_ViewTexture_%s.tex", camera->getName().c_str()); // カメラ固有のレンダーターゲット名
 			KTEXID rentex = KBank::getTextureBank()->addRenderTexture(texname, game_w, game_h, KTextureBank::F_OVERWRITE_SIZE_NOT_MATCHED|KTextureBank::F_PROTECT);
 			KCamera::of(camera)->setRenderTarget(rentex);
 		}

@@ -377,12 +377,12 @@ public:
 					if (hitpair->m_Object1.hitbox == hitbox) {
 						const std::string &label = getGroupOfHitbox(hitpair->m_Object2.hitbox)->m_NameForInspector;
 						const KNode *node = hitpair->m_Object2.node;
-						ImGui::BulletText("%s.%s", node->getName(), label.c_str());
+						ImGui::BulletText("%s.%s", node->getName().c_str(), label.c_str());
 					}
 					if (hitpair->m_Object2.hitbox == hitbox) {
 						const std::string &label = getGroupOfHitbox(hitpair->m_Object1.hitbox)->m_NameForInspector;
 						const KNode *node = hitpair->m_Object1.node;
-						ImGui::BulletText("%s.%s", node->getName(), label.c_str());
+						ImGui::BulletText("%s.%s", node->getName().c_str(), label.c_str());
 					}
 				}
 				ImGui::Unindent();

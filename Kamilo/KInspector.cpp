@@ -1629,12 +1629,12 @@ void KDebugGui::K_DebugGui_NodeParent(KNode *node, KDebugTree *tree) {
 		return;
 	}
 
-	ImGui::Text("Parent: #0x%X '%s'", parent->getId(), parent->getName());
+	ImGui::Text("Parent: #0x%X '%s'", parent->getId(), parent->getName().c_str());
 	
 	if (ImGui::BeginPopupContextItem(__FUNCTION__)) {
 		char s[256] = {0};
 		ImGui::Text("Parent:");
-		sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(parent->getId()), parent->getName());
+		sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(parent->getId()), parent->getName().c_str());
 		if (ImGui::MenuItem(s)) {
 			if (tree) {
 				tree->clear_selection(true);
@@ -1656,7 +1656,7 @@ void KDebugGui::K_DebugGui_NodeChildren(KNode *node, KDebugTree *tree) {
 			for (int i=0; i<num; i++) {
 				char s[256] = {0};
 				KNode *child = node->getChild(i);
-				sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(child->getId()), child->getName());
+				sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(child->getId()), child->getName().c_str());
 				if (ImGui::MenuItem(s)) {
 					if (tree) {
 						tree->clear_selection(true);
@@ -1681,7 +1681,7 @@ void KDebugGui::K_DebugGui_NodeCamera(KNode *node, KNode *camera, KDebugTree *tr
 	if (ImGui::BeginPopupContextItem(__FUNCTION__)) {
 		char s[256] = {0};
 		ImGui::Text("Camera:");
-		sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(camera->getId()), camera->getName());
+		sprintf_s(s, sizeof(s), "#0x%x: %s", EID_toint(camera->getId()), camera->getName().c_str());
 		if (ImGui::MenuItem(s)) {
 			if (tree) {
 				tree->clear_selection(true);
@@ -2379,9 +2379,9 @@ void KDebugTree::gui_tree(KNode *node) {
 	// エンティティ名と子エンティティ数を表示させる
 	char label[256] = {0};
 	if (child_count > 0) {
-		sprintf_s(label, sizeof(label), "%s (0x%x) [%d]", node->getName(), EID_toint(node->getId()), child_count);
+		sprintf_s(label, sizeof(label), "%s (0x%x) [%d]", node->getName().c_str(), EID_toint(node->getId()), child_count);
 	} else {
-		sprintf_s(label, sizeof(label), "%s (0x%x)", node->getName(), EID_toint(node->getId()));
+		sprintf_s(label, sizeof(label), "%s (0x%x)", node->getName().c_str(), EID_toint(node->getId()));
 	}
 
 	// ノードボタン（Enabled, Paused, Visible)

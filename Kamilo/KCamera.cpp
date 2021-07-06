@@ -486,7 +486,7 @@ void KCamera::on_inspector() {
 		KDebugGui::K_DebugGui_Image(m_Data.render_target, 256, 256);
 		if (1) {
 			// テクスチャ画像を png でエクスポートする
-			std::string filename = K::str_sprintf("__export__%s.png", getNode()->getName());
+			std::string filename = K::str_sprintf("__export__%s.png", getNode()->getName().c_str());
 			_EscapeFilename(filename);
 			KDebugGui::K_DebugGui_ImageExportButton("Export", m_Data.render_target, filename.c_str(), false);
 		}
