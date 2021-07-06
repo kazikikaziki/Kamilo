@@ -715,6 +715,7 @@ public:
 		if (m_SoloGroup >= 0 && group_id != m_SoloGroup) return 0.0f;
 
 		// グループタインでミュートが設定されていればミュート
+		if (group_id < 0 || m_Groups.size() <= group_id) return 0.0f;
 		const SSndGroup &group = m_Groups[group_id];
 		if (group.flags & KAudioFlag_MUTE) return 0.0f;
 
