@@ -19,10 +19,18 @@
 // マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
 #define K__ERROR(fmt, ...) Kamilo::K::error(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
 
+
 // ファイル名と行番号付きで警告を出力する
 // ※fmt はリテラルでないといけない。
 // マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
 #define K__WARNING(fmt, ...) Kamilo::K::warning(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
+
+
+// ファイル名と行番号付きでテキストを出力する
+// ※fmt はリテラルでないといけない。
+// マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
+#define K__PRINT(fmt, ...) Kamilo::K::print(("%s(%d): " fmt), __FILE__, __LINE__, ##__VA_ARGS__)
+
 
 // ファイル名と行番号付きで詳細を出力する
 // ※verbose は KAMILO_VERBOSE が定義されているときのみ動作する
@@ -261,6 +269,8 @@ public:
 	static bool strEndsWith(const char *s, const char *sub);
 	static bool strEndsWith(const std::string &s, const std::string &sub);
 	static void strTrim(std::string &s);
+	static std::string strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
+	static std::string strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
 	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, int maxcount=0, bool condense_delims=true, bool _trim=true);
 	static std::vector<std::string> strSplitLines(const std::string &s, bool skip_empty_lines=true, bool _trim=true);
 	static bool strToFloat(const std::string &s, float *p_val);

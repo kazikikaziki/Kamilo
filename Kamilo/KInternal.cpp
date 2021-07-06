@@ -1585,6 +1585,34 @@ void K::strTrim(std::string &s) {
 		s.pop_back();
 	}
 }
+std::string K::strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator) {
+	// 文字列 s が区切り文字列 separator_substr を含んでいるなら、その左側の文字列を返す。
+	// 含んでいない場合は全文字列を返すが empty_if_no_separator が設定されて入れば空文字列を返す
+	size_t pos = s.find(separator_substr);
+	if (pos != std::string::npos) {
+		return s.substr(0, pos);
+	}
+	if (empty_if_no_separator) {
+		return "";
+	} else {
+		return s;
+	}
+}
+
+std::string K::strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator) {
+	// 文字列 s が区切り文字列 separator_substr を含んでいるなら、その右側の文字列を返す。
+	// 含んでいない場合は全文字列を返すが empty_if_no_separator が設定されて入れば空文字列を返す
+	size_t pos = s.find(separator_substr);
+	if (pos != std::string::npos) {
+		return s.substr(pos + separator_substr.size());
+	}
+	if (empty_if_no_separator) {
+		return "";
+	} else {
+		return s;
+	}
+}
+
 
 
 // delim 分割のために使う文字。複数指定できる。
