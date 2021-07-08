@@ -218,6 +218,8 @@ KMatrix4 KCamera::getTargetLocal2ViewUVMatrix(KNode *target) {
 void KCamera::update_projection_matrix()  {
 	float w = m_Data.size_w / m_Data.zoom;
 	float h = m_Data.size_h / m_Data.zoom;
+	if (w <= 0.0001f) w = 0.0001f;
+	if (h <= 0.0001f) h = 0.0001f;
 	switch (m_Data.projection_type) {
 	case PROJ_ORTHO:
 		m_Data.projection_matrix = KMatrix4::fromOrtho(
