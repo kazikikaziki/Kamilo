@@ -81,6 +81,8 @@ public:
 		if (params) {
 			w = params->resolution_x;
 			h = params->resolution_y;
+			K__ASSERT(w > 0);
+			K__ASSERT(h > 0);
 		}
 
 		// ウィンドウ
