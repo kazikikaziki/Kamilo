@@ -104,7 +104,13 @@ public:
 	void setZFar(float z);
 	void setZNear(float z);
 	void setRenderTarget(KTEXID tex);
+
+	// このカメラでの描画結果を格納しているテクスチャを得る
+	// ※このカメラよりも前に別の画像が描画されている場合は、
+	// その画像にこのカメラで上書きした結果を得る
+	// カメラ単位ではなくパス単位での取得結果を得るには KScreen::getPerPassRenderTarget を使う
 	KTEXID getRenderTarget() const;
+
 	void setProjectionType(Proj type);
 	Proj getProjectionType() const;
 	void setCabinetDxDz(float dx_dz);
