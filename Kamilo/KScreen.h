@@ -36,7 +36,11 @@ public:
 	static void set_call_renderdebug(KManager *mgr, bool value);
 	static void set_call_rendertop(KManager *mgr, bool value);
 	static bool command(const char *s, void *n, int *retval);
+
+	/// 描画パス単位での描画結果を格納しているテクスチャを得る
+	/// カメラ単位での描画結果を取得する場合は KCamera::getRenderTarget を使う
 	static KTEXID getPerPassRenderTarget(int pass);
+
 	static void setPerPassRenderTargetSize(int pass, int w, int h);
 
 	/// 単位座標系（画面中央原点、-1.0～1.0、Y軸上向き）の座標を、

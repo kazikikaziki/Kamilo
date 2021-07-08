@@ -535,7 +535,9 @@ private:
 		for (auto it=m_tmp_cameralist.begin(); it!=m_tmp_cameralist.end(); ++it) {
 			KNode *camera = *it;
 			int pass = KCamera::of(camera)->getPass();
-			m_tmp_pass_cameras[pass].push_back(camera);
+			if (0 <= pass && pass < m_tmp_pass_cameras.size()) {
+				m_tmp_pass_cameras[pass].push_back(camera);
+			}
 		}
 
 		// パスごとにゲーム画面を描画
