@@ -277,6 +277,7 @@ public:
 	static bool strToFloat(const char *s, float *p_val);
 	static bool strToInt(const std::string &s, int *p_val);
 	static bool strToInt(const char *s, int *p_val);
+	static int strToInt(const std::string &s);
 	static bool strToUInt32(const std::string &s, uint32_t *p_val);
 	static bool strToUInt32(const char *s, uint32_t *p_val);
 	static bool strToUInt64(const std::string &s, uint64_t *p_val);

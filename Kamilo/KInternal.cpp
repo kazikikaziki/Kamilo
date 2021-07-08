@@ -1746,6 +1746,11 @@ bool K::strToInt(const char *s, int *p_val) {
 	if (p_val) *p_val = result;
 	return true;
 }
+int K::strToInt(const std::string &s) {
+	int val = 0;
+	K::strToInt(s, &val);
+	return val;
+}
 bool K::strToUInt32(const char *s, uint32_t *p_val) {
 	if (s == nullptr) return false;
 	char *err = 0;
