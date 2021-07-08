@@ -363,27 +363,35 @@ void K::setErrorHook(void (*hook)(const char *u8)) {
 	g_ErrorHook = hook;
 }
 void K::print(const char *fmt_u8, ...) {
+	static int s_RecursiveGuard = 0; // 再帰呼び出し防止
+
 	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, fmt_u8);
 	vsnprintf(u8, sizeof(u8), fmt_u8, args);
 	va_end(args);
-	if (g_PrintHook) {
+	if (g_PrintHook && s_RecursiveGuard==0) {
+		s_RecursiveGuard++;
 		g_PrintHook(u8);
+		s_RecursiveGuard--;
 	} else {
 		std::wstring ws = K::strUtf8ToWide(u8);
 		outputDebugStringW(ws);
 	}
 }
 void K::printW(const wchar_t *wfmt, ...) {
+	static int s_RecursiveGuard = 0; // 再帰呼び出し防止
+
 	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
 	va_start(args, wfmt);
 	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
 	va_end(args);
-	if (g_PrintHook) {
+	if (g_PrintHook && s_RecursiveGuard==0) {
+		s_RecursiveGuard++;
 		std::string u8 = K::strWideToUtf8(ws);
 		g_PrintHook(u8.c_str());
+		s_RecursiveGuard--;
 	} else {
 		outputDebugStringW(ws);
 	}
