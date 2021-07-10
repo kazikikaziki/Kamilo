@@ -9,6 +9,7 @@ public:
 	static KQuat fromYDeg(float deg);
 	static KQuat fromZDeg(float deg);
 	static KQuat fromAxisDeg(const KVec3 &axis, float deg); ///< 軸ベクトルと回転角度（度）からクォターニオンを作成
+	static KQuat fromAxisRad(const KVec3 &axis, float rad); ///< 軸ベクトルと回転角度（ラジアン）からクォターニオンを作成
 
 	KQuat();
 	KQuat(const KQuat &q);

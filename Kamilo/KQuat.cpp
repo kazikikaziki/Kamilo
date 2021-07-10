@@ -18,9 +18,12 @@ KQuat KQuat::fromZDeg(float deg) {
 	return KQuat::fromAxisDeg(KVec3(0, 0, 1), deg);
 }
 KQuat KQuat::fromAxisDeg(const KVec3 &axis, float deg) {
+	float rad = K::degToRad(deg);
+	return fromAxisRad(axis, rad);
+}
+KQuat KQuat::fromAxisRad(const KVec3 &axis, float rad) {
 	// http://marupeke296.com/DXG_No10_Quaternion.html
 	// https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
-	float rad = K::degToRad(deg);
 	float len = axis.getLength();
 	if (len > 0) {
 		float s = sinf(rad / 2.0f) / len;
