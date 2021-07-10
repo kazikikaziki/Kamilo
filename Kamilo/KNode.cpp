@@ -652,6 +652,21 @@ KMatrix4 KNode::getLocal2WorldMatrix() const {
 	getLocal2WorldMatrix(&mat);
 	return mat;
 }
+void KNode::getLocal2WorldRotation(KQuat *p_rot) const {
+	KNode *parent = getParent();
+	if (parent) {
+		KQuat parent_rot;
+		parent->getLocal2WorldRotation(&parent_rot);
+		*p_rot = parent_rot * getRotation();
+	} else {
+		*p_rot = getRotation();
+	}
+}
+KQuat KNode::getLocal2WorldRotation() const {
+	KQuat rot;
+	getLocal2WorldRotation(&rot);
+	return rot;
+}
 void KNode::setTransformInherit(bool value) {
 	m_TransformData.inherit_transform = value;
 	_SetDirtyWorldMatrix();

@@ -201,6 +201,8 @@ public:
 	KMatrix4 getWorld2LocalMatrix() const;
 	void getLocal2WorldMatrix(KMatrix4 *out) const; ///< ローカル座標からワールド座標へ変換するための行列
 	KMatrix4 getLocal2WorldMatrix() const;
+	void getLocal2WorldRotation(KQuat *out) const; ///< ローカル回転からワールド回転へ変換するためのクォータニオン
+	KQuat getLocal2WorldRotation() const;
 	void setTransformInherit(bool value);
 	bool getTransformInherit() const;
 	KVec3 getWorldPosition() const;
