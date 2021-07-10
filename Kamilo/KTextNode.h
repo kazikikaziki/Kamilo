@@ -412,7 +412,8 @@ public:
 //	void setText(const std::wstring &text_w) { setText(text_w); }
 
 	// テキストボックスの大きさを指定する
-	void setSize(int w, int h);
+	void setSize(int w, int h) { setBoxSize(w, h); }
+	void setBoxSize(int w, int h);
 
 	// 現在の設定に従って文字をレイアウトする
 	// auto_adjust が true の場合は必要に応じて自動補正する。
@@ -449,10 +450,18 @@ public:
 	KVec3 getOffset() const;
 
 	void setFont(KFont &font);
+
+	// 自動調整なしの場合に適用する書式（フォントサイズ、文字ピッチ）
 	void setDefaultStyle(const Style &s);
 	const Style & getDefaultStyle() const;
 
+	// 自動調整によって変化した書式を元に戻す（setDefaultStyle で設定した書式に戻す）
+	void resetToDefaultStyle();
+
 	void setMargin(int left, int right, int top, int bottom);
+	void getMargin(int *p_left, int *p_right, int *p_top, int *p_bottom) const;
+	void getTextArea(int *p_left, int *p_right, int *p_top, int *p_bottom) const;
+	const std::wstring & getTextW() const { return m_source_text; }
 
 	// < 0  自動改行しない
 	// ==0  テキストボックスの幅に合わせて自動改行

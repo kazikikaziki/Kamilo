@@ -1024,7 +1024,19 @@ void KTextLayout::setMargin(int left, int right, int top, int bottom) {
 	m_textarea_w = m_talkbox_w - m_margin_left - m_margin_right;
 	m_textarea_h = m_talkbox_h - m_margin_top - m_margin_bottom;
 }
-void KTextLayout::setSize(int w, int h) {
+void KTextLayout::getMargin(int *p_left, int *p_right, int *p_top, int *p_bottom) const {
+	if (p_left)   *p_left   = m_margin_left;
+	if (p_right)  *p_right  = m_margin_right;
+	if (p_top)    *p_top    = m_margin_top;
+	if (p_bottom) *p_bottom = m_margin_bottom;
+}
+void KTextLayout::getTextArea(int *p_left, int *p_right, int *p_top, int *p_bottom) const {
+	if (p_left)   *p_left   = m_margin_left;
+	if (p_right)  *p_right  = m_talkbox_w - m_margin_right;
+	if (p_top)    *p_top    = m_margin_top;
+	if (p_bottom) *p_bottom = m_textarea_h - m_margin_bottom;
+}
+void KTextLayout::setBoxSize(int w, int h) {
 	m_talkbox_w = w;
 	m_talkbox_h = h;
 	m_textarea_w = m_talkbox_w - m_margin_left - m_margin_right;
@@ -1041,6 +1053,9 @@ void KTextLayout::setText(const std::wstring &text_w) {
 	m_source_text = text_w;
 
 	// 自動調整なしのスタイルにリセットする
+	resetToDefaultStyle();
+}
+void KTextLayout::resetToDefaultStyle() { // 自動調整なしのスタイルにリセットする
 	m_real_pitch = m_default_style.pitch;
 	m_real_fontsize = m_default_style.fontsize;
 	m_real_linepitch = m_default_style.linepitch;
