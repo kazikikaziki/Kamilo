@@ -1107,19 +1107,19 @@ static void _UpdateButtonGui(CButtonMgrImpl *mgr) {
 		if (mgr->isButtonDown(name, nullptr)) {
 			// 入力確定
 			KImGui::PushTextColor(KImGui::COLOR_DEFAULT());
-			ImGui::Text("[%s]", name);
+			ImGui::Text("[%s]", name.c_str());
 			KImGui::PopTextColor();
 
 		} else if (mgr->isButtonDownByPoll(name, nullptr)) {
 			// 受付済み
 			KImGui::PushTextColor(KImGui::COLOR_WARNING);
-			ImGui::Text("[%s]", name);
+			ImGui::Text("[%s]", name.c_str());
 			KImGui::PopTextColor();
 
 		} else {
 			// 入力なし
 			KImGui::PushTextColor(KImGui::COLOR_DISABLED());
-			ImGui::Text("[%s]", name);
+			ImGui::Text("[%s]", name.c_str());
 			KImGui::PopTextColor();
 		}
 	}
