@@ -139,7 +139,7 @@ template <class T> void _EraseT(std::vector<T> &list, T value) {
 		list.erase(it);
 	}
 }
-class CScreenImpl {
+class CScreenImpl: public KInspectorCallback {
 	static const int MAX_PASS = 4;
 	KTEXID m_pass_tex[MAX_PASS]; // パスごとの描画結果
 	KGizmo *m_gizmo;
@@ -219,7 +219,21 @@ public:
 		m_alpha_filling = true;
 	}
 
-	#pragma region KScreen
+	// KInspectorCallback
+	virtual void onInspectorGui() {
+		ImGui::Checkbox("Show node debug", &m_show_debug);
+		if (ImGui::IsItemHovered()) { ImGui::SetTooltip(u8"ノードによるデバッグ描画"); }
+
+		ImGui::Checkbox("Show manager debug", &m_show_debug2);
+		if (ImGui::IsItemHovered()) { ImGui::SetTooltip(u8"ノードマネージャによるデバッグ描画"); }
+
+		ImGui::ColorEdit4("BgColor", m_bgcolor.floats());
+		if (ImGui::IsItemHovered()) { ImGui::SetTooltip(u8"ゲーム画面のクリア色（ノードを全く描画しなかった部分の色"); }
+
+		ImGui::ColorEdit4("MarginColor", m_margin_color.floats());
+		if (ImGui::IsItemHovered()) { ImGui::SetTooltip(u8"ウィンドウとゲーム画面の縦横比率が一致しない場合の余白の色"); }
+	}
+
 	bool command(const char *s, void *n, int *retval) {
 		if (K_StrEq(s, "set_filter")) {
 			m_use_filter = (int)n != 0;
@@ -765,7 +779,8 @@ private:
 		if (node->getLayerInTree() == layer) {
 			KAction *act = node->getAction();
 			if (act) {
-				act->onDebugDraw(tr);
+				KMatrix4 node_tr = node->getLocal2WorldMatrix(); 
+				act->onDebugDraw(tr * node_tr);
 			}
 		}
 		for (int i=0; i<node->getChildCount(); i++) {
@@ -825,8 +840,12 @@ void KScreen::uninstall() {
 void KScreen::startVideo(KTextureBank *texbank) {
 	K__ASSERT(g_Screen);
 	g_Screen->startVideo(texbank);
+
+	KEngine::addInspectorCallback(g_Screen);
 }
 void KScreen::endVideo() {
+	KEngine::removeInspectorCallback(g_Screen);
+
 	K__ASSERT(g_Screen);
 	g_Screen->endVideo();
 }
