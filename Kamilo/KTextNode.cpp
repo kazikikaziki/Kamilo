@@ -1031,10 +1031,11 @@ void KTextLayout::getMargin(int *p_left, int *p_right, int *p_top, int *p_bottom
 	if (p_bottom) *p_bottom = m_margin_bottom;
 }
 void KTextLayout::getTextArea(int *p_left, int *p_right, int *p_top, int *p_bottom) const {
+	// ベースポイント（１行１文字目の左下）を原点としたときのテキスト配置可能エリア
 	if (p_left)   *p_left   = m_margin_left;
 	if (p_right)  *p_right  = m_talkbox_w - m_margin_right;
-	if (p_top)    *p_top    = m_margin_top;
-	if (p_bottom) *p_bottom = m_textarea_h - m_margin_bottom;
+	if (p_top)    *p_top    = -(m_real_fontsize + m_real_linepitch) - m_margin_top;
+	if (p_bottom) *p_bottom = -(m_real_fontsize + m_real_linepitch) + m_textarea_h;
 }
 void KTextLayout::setBoxSize(int w, int h) {
 	m_talkbox_w = w;
@@ -1102,9 +1103,9 @@ void KTextLayout::layout_raw() {
 	m_parser->parse(m_textbox, m_source_text.c_str());
 
 	// テキスト表示範囲を得る
-	int numchar = m_textbox->getCharCount();
+	int numchars = m_textbox->getCharCount();
 	KVec2 topleft, bottomright;
-	m_textbox->getBoundRect(0, numchar, &topleft, &bottomright);
+	m_textbox->getBoundRect(0, numchars, &topleft, &bottomright);
 	m_textboundsize.x = bottomright.x - topleft.x;
 	m_textboundsize.y = bottomright.y - topleft.y;
 }
@@ -1119,8 +1120,18 @@ bool KTextLayout::isOverBottom() const {
 
 	// バウンドボックスを得る。
 	// このボックスは、文字が置いてある最初の行（ルビではなく、その元のテキストのほう）のベースライン左端を原点としている
+	int numchars = m_textbox->getCharCount();
 	KVec2 topleft, bottomright;
-	m_textbox->getBoundRect(0, m_textbox->getCharCount(), &topleft, &bottomright);
+	m_textbox->getBoundRect(0, numchars, &topleft, &bottomright);
+
+#if 1
+	int t, b;
+	getTextArea(nullptr, nullptr, &t, &b);
+	if (bottomright.y >= b + m_margin_bottom/2) { // 下側余白へのはみだしをチェック。半分ぐらいなら許す
+		return true; // 下側がはみ出ている
+	}
+	return false;
+#endif
 
 	// 実際にテキストボックス内に置いたときの座標を得る
 	float top = baseY + topleft.y;
@@ -1142,8 +1153,8 @@ void KTextLayout::adjust() {
 
 	// １回の調整量。小さいと細かい調整ができるが、その分試行回数も増えて時間がかかる
 //	const float LINEPITCH_STEP = 0.5f;
-	const float LINEPITCH_STEP = 1.0f;
-	const float PITCH_STEP = 0.5f;
+	const float LINEPITCH_STEP = 0.2f;
+	const float PITCH_STEP = 0.2f;
 //	const float PITCH_STEP = 1.0f;
 	const float SIZE_STEP = 1.0f;
 
