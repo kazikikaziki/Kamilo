@@ -81,6 +81,7 @@ public:
 
 	/// 自動改行幅。0だと改行しない
 	void setAutoWrapWidth(int w);
+	int getAutoWrapWidth() const { return auto_wrap_width_; }
 
 	/// 自動改行設定
 	void setAutoWrapFlags(KAutoWrapFlags flags) {
@@ -194,6 +195,9 @@ public:
 
 	/// このボックスが含んでいる文字数を得る
 	int getCharCount() const;
+
+	/// 行数
+	int getLineCount() const { return rowcount_; }
 
 	/// 指定した範囲にあるテキストのバウンドボックスを得る
 	bool getBoundRect(int start, int count, KVec2 *out_topleft, KVec2 *out_bottomright) const;

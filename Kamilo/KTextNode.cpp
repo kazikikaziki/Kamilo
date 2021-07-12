@@ -492,7 +492,7 @@ KImage KTextBox::exportImage(const ExportDesc *pDesc) {
 	#define TEXT2BMP_Y(y) origin_y + (int)(y)
 
 	// 全テキストのバウンドボックスを求める
-	// バウンドボックスの原点は、１行目１文字目のベースライン始点になる。
+	// バウンドボックスの原点は、１行目１文字目のベースライン始点にある。
 	// 1行目に文字が存在するなら、ほとんどの場合バウンドボックスの topleft.y は
 	// 負の値（１行目のベースラインより上）になる
 	int numchars = getCharCount();
@@ -514,7 +514,7 @@ KImage KTextBox::exportImage(const ExportDesc *pDesc) {
 	// 正しくビットマップ内に収めるためには、テキスト全体を1行分下に下げないといけない。
 
 	// 今回の場合は、テキスト全体バウンドボックスの左上が
-	// ビットマップ左上よりもマージン分内側になるように重ねる
+	// ビットマップ左上よりもマージン分だけ内側になるように重ねる
 	int origin_x = desc.margin_l - (int)topleft.x;
 	int origin_y = desc.margin_top - (int)topleft.y;
 //	int origin_y = desc.margin_top + lineheight_;
@@ -1143,8 +1143,8 @@ void KTextLayout::adjust() {
 	// １回の調整量。小さいと細かい調整ができるが、その分試行回数も増えて時間がかかる
 //	const float LINEPITCH_STEP = 0.5f;
 	const float LINEPITCH_STEP = 1.0f;
-//	const float PITCH_STEP = 0.5f;
-	const float PITCH_STEP = 1.0f;
+	const float PITCH_STEP = 0.5f;
+//	const float PITCH_STEP = 1.0f;
 	const float SIZE_STEP = 1.0f;
 
 	// 文字範囲をチェック
