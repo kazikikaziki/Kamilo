@@ -841,7 +841,7 @@ void KScreen::startVideo(KTextureBank *texbank) {
 	K__ASSERT(g_Screen);
 	g_Screen->startVideo(texbank);
 
-	KEngine::addInspectorCallback(g_Screen);
+	KEngine::addInspectorCallback(g_Screen, u8"画面描画");
 }
 void KScreen::endVideo() {
 	KEngine::removeInspectorCallback(g_Screen);

@@ -31,7 +31,7 @@ public:
 		m_BaseOutputName = "__snapshot";
 		m_DoShot = false;
 		KEngine::addManager(this);
-		KEngine::addInspectorCallback(this); // KInspectorCallback
+		KEngine::addInspectorCallback(this, u8"スクリーンショット"); // KInspectorCallback
 
 		// 独自の PtrScr を使う（＝Windows標準の PrtScr を無効化する）
 		KWindow::setAttribute(KWindow::ATTR_KILL_SNAPSHOT, true);

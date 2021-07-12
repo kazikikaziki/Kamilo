@@ -53,7 +53,7 @@ public:
 		m_AlwaysShowHitboxes  = false;
 
 		KEngine::addManager(this);
-		KEngine::addInspectorCallback(this, u8"判定"); // KInspectorCallback
+		KEngine::addInspectorCallback(this, u8"ヒットボックス"); // KInspectorCallback
 		KEngine::setManagerRenderDebugEnabled(this, true); // on_manager_renderdebug
 	}
 	virtual ~CHitboxManagerImpl() {

@@ -1134,7 +1134,7 @@ public:
 		m_GameButtons = new CButtonMgrImpl();
 		m_AppButtons = new CButtonMgrImpl();
 		KEngine::addManager(this);
-		KEngine::addInspectorCallback(this); // KInspectorCallback
+		KEngine::addInspectorCallback(this, u8"入力"); // KInspectorCallback
 	}
 	virtual ~CInputMap() {
 		K_Drop(m_GameButtons);

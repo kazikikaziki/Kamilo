@@ -473,7 +473,7 @@ public:
 		m_Groups.push_back(def_group);
 
 		KEngine::addManager(this);
-		KEngine::addInspectorCallback(this); // KInspectorCallback
+		KEngine::addInspectorCallback(this, u8"オーディオ"); // KInspectorCallback
 	}
 	virtual void on_manager_start() override {
 		m_SndImpl.init();
