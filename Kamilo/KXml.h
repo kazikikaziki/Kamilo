@@ -28,31 +28,40 @@ public:
 	static KXmlElement * createFromFileName(const std::string &filename);
 
 public:
+	// タグ
 	virtual const char * getTag() const = 0;
 	virtual void setTag(const char *tag) = 0;
 	bool hasTag(const char *tag) const;
 
+	// 属性
 	virtual int getAttrCount() const = 0;
 	virtual const char * getAttrName(int index) const = 0;
 	virtual const char * getAttrValue(int index) const = 0;
+	virtual void removeAttr(const char *name) = 0;
 
 	const char * getAttrString(const char *name, const char *def=nullptr) const;
-	float getAttrFloat(const char *name, float def=0.0f) const;
-	int getAttrInt(const char *name, int def=0) const;
-
+	std::string getAttrStringStd(const char *name) const {
+		return getAttrString(""); // nullptr を返さないように！
+	}
 	virtual void setAttrString(const char *name, const char *value) = 0;
-
 	void setAttrString(const std::string &name, const std::string &value) {
 		setAttrString(name.c_str(), value.c_str());
 	}
 
-	void setAttrInt(const char *name, int value);
+	// Float属性
+	float getAttrFloat(const char *name, float def=0.0f) const;
 	void setAttrFloat(const char *name, float value);
+	
+	// Int属性
+	int getAttrInt(const char *name, int def=0) const;
+	void setAttrInt(const char *name, int value);
 
-	virtual void removeAttr(const char *name) = 0;
-
+	// テキスト
 	virtual const char * getText(const char *def=nullptr) const = 0;
 	virtual void setText(const char *text) = 0;
+	std::string getTextStd() const {
+		return getText(""); // nullptr を返さないように！
+	}
 
 	virtual int getChildCount() const = 0;
 	virtual const KXmlElement * getChild(int index) const = 0;
@@ -72,7 +81,6 @@ public:
 	int indexOf(const KXmlElement *child) const;
 	int findAttrByName(const char *name, int start=0) const;
 	int findChildByTag(const char *tag, int start=0) const;
-
 
 	const KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr) const;
 	KXmlElement * findNode(const char *tag, const KXmlElement *start=nullptr);
