@@ -269,6 +269,8 @@ public:
 	static bool strEndsWith(const char *s, const char *sub);
 	static bool strEndsWith(const std::string &s, const std::string &sub);
 	static void strTrim(std::string &s);
+	static void strJoin(std::string &s, const std::string &more, const std::string &sep="");
+	static std::string strJoin(const std::vector<std::string> &strings, const std::string &sep="", bool skip_empty=true);
 	static std::string strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
 	static std::string strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
 	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, int maxcount=0, bool condense_delims=true, bool _trim=true);

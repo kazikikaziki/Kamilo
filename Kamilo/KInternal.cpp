@@ -1593,6 +1593,36 @@ void K::strTrim(std::string &s) {
 		s.pop_back();
 	}
 }
+void K::strJoin(std::string &s, const std::string &more, const std::string &sep) {
+	if (s.empty()) {
+		s = more;
+		return;
+	}
+	if (more.empty()) {
+		return;
+	}
+	if (!sep.empty()) {
+		s += sep;
+	}
+	s += more;
+}
+std::string K::strJoin(const std::vector<std::string> &strings, const std::string &sep, bool skip_empty) {
+	std::string s;
+	bool with_sep = false;
+	for (int i=0; i<strings.size(); i++) {
+		if (skip_empty && strings[i].empty()) {
+			continue;
+		}
+		if (with_sep) {
+			s += sep;
+		}
+		s += strings[i];
+		with_sep = true;
+	}
+	return s;
+}
+
+
 std::string K::strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator) {
 	// 文字列 s が区切り文字列 separator_substr を含んでいるなら、その左側の文字列を返す。
 	// 含んでいない場合は全文字列を返すが empty_if_no_separator が設定されて入れば空文字列を返す
