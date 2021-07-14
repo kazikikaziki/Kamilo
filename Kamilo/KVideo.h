@@ -566,32 +566,32 @@ struct KSubMesh {
 };
 
 class KVertexArray {
-	std::vector<KVertex> mVec;
-	int mSize;
+	std::vector<KVertex> m_Vec;
+	int m_Size;
 public:
 	KVertexArray() {
-		mSize = 0;
+		m_Size = 0;
 	}
 	void clear() {
-		mSize = 0;
+		m_Size = 0;
 	}
 	void resize(int cnt) {
 		// vecotor::resize を使って reserve と似たようなことをやる。
 		// vecotor::resize すると KVertex のコンストラクタが走ってしまうため、
 		// 極力 resize を呼ばないように実装する
-		mSize = cnt;
-		if ((int)mVec.size() < mSize) {
-			mVec.resize(mSize);
+		m_Size = cnt;
+		if ((int)m_Vec.size() < m_Size) {
+			m_Vec.resize(m_Size);
 		}
 	}
 	int size() const {
-		return mSize;
+		return m_Size;
 	}
 	const KVertex * data() const {
-		return mVec.data();
+		return m_Vec.data();
 	}
 	KVertex * data() {
-		return mVec.data();
+		return m_Vec.data();
 	}
 };
 
@@ -922,23 +922,23 @@ public:
 	KSubMesh * addToMesh(KMesh *mesh, KPrimitive prim, const KMaterial *material=NULL) const;
 
 private:
-	KMesh *mesh_;
-	KVertex *v_;
-	int vstart_;
-	int vcount_;
-	int *i_;
-	int istart_;
-	int icount_;
-	mutable bool locked_;
+	KMesh *m_Mesh;
+	KVertex *m_Vertices;
+	int m_VStart;
+	int m_VCount;
+	int *m_Indices;
+	int m_IStart;
+	int m_ICount;
+	mutable bool m_Locked;
 };
 
 
 class CPathDraw {
-	std::vector<KVec2> mPoints;
-	CMeshBuf mMeshBuf;
+	std::vector<KVec2> m_Points;
+	CMeshBuf m_MeshBuf;
 public:
-	float mZ;
-	float mAutoLength;
+	float m_Z;
+	float m_AutoLength;
 
 	CPathDraw();
 	void pathClear();

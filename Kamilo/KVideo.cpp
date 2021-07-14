@@ -4210,81 +4210,81 @@ CMeshBuf::CMeshBuf() {
 	clear();
 }
 void CMeshBuf::clear() {
-	v_ = nullptr;
-	vstart_ = 0;
-	vcount_ = 0;
-	i_ = nullptr;
-	istart_ = 0;
-	icount_ = 0;
-	mesh_ = nullptr;
-	locked_ = false;
+	m_Vertices = nullptr;
+	m_VStart = 0;
+	m_VCount = 0;
+	m_Indices = nullptr;
+	m_IStart = 0;
+	m_ICount = 0;
+	m_Mesh = nullptr;
+	m_Locked = false;
 }
 size_t CMeshBuf::size() const {
-	return vcount_;
+	return m_VCount;
 }
 void CMeshBuf::resize2(KMesh *mesh, int vertexcount, int indexcount) {
 	clear();
 	if (mesh == nullptr) return;
 
 	if (vertexcount > 0) {
-		vstart_ = mesh->getVertexCount();
-		vcount_ = vertexcount;
-		v_ = mesh->lock(vstart_, vcount_);
+		m_VStart = mesh->getVertexCount();
+		m_VCount = vertexcount;
+		m_Vertices = mesh->lock(m_VStart, m_VCount);
 	}
 	if (indexcount > 0) {
-		istart_ = 0;
-		icount_ = indexcount;
-		i_ = mesh->lockIndices(istart_, icount_);
+		m_IStart = 0;
+		m_ICount = indexcount;
+		m_Indices = mesh->lockIndices(m_IStart, m_ICount);
 	}
-	locked_ = true;
-	mesh_ = mesh;
+	m_Locked = true;
+	m_Mesh = mesh;
 }
 void CMeshBuf::setIndex(int index, int vertex) {
-	i_[index] = vertex;
+	m_Indices[index] = vertex;
 }
 void CMeshBuf::setPosition(int index, const KVec3 &pos) {
-	v_[index].pos = pos;
+	m_Vertices[index].pos = pos;
 }
 void CMeshBuf::setColor32(int index, const KColor32 &color) {
-	v_[index].dif32 = color;
+	m_Vertices[index].dif32 = color;
 }
 void CMeshBuf::setSpecular32(int index, const KColor32 &color) {
-	v_[index].spe32 = color;
+	m_Vertices[index].spe32 = color;
 }
 void CMeshBuf::setTexCoord(int index, const KVec2 &uv) {
-	v_[index].tex = uv;
+	m_Vertices[index].tex = uv;
 }
 void CMeshBuf::setTexCoord2(int index, const KVec2 &uv) {
-	v_[index].tex2 = uv;
+	m_Vertices[index].tex2 = uv;
 }
 void CMeshBuf::copyVertex(int dest, int src) {
-	v_[dest] = v_[src];
+	m_Vertices[dest] = m_Vertices[src];
 }
 KSubMesh * CMeshBuf::addToMesh(KMesh *mesh, KPrimitive prim, const KMaterial *material) const {
-	if (mesh_) {
+	if (m_Mesh) {
 		// resize2 で初期化されている
-		// v_, i_ には頂点バッファを lock した値がそのまま入っているものとする
+		// m_Vertices, m_Indices には頂点バッファを lock した値がそのまま入っているものとする
 		// addToMesh は連続で呼ばれることがあるため、lock と unlock の整合性に注意
-		if (locked_) {
-			if (v_) mesh_->unlock();
-			if (i_) mesh_->unlockIndices();
-			locked_ = false; 
+		if (m_Locked) {
+			if (m_Vertices) m_Mesh->unlock();
+			if (m_Indices) m_Mesh->unlockIndices();
+			m_Locked = false; 
 		}
 
 		KSubMesh sub;
-		if (i_) { // with index buffer
-			sub.start = istart_;
-			sub.count = icount_;
+		if (m_Indices) { // with index buffer
+			sub.start = m_IStart;
+			sub.count = m_ICount;
 		} else { // vertex only
-			sub.start = vstart_;
-			sub.count = vcount_;
+			sub.start = m_VStart;
+			sub.count = m_VCount;
 		}
 		sub.primitive = prim;
 		if (material) {
 			sub.material = *material;
 		}
-		if (mesh_->addSubMesh(sub)) {
-			return mesh_->getSubMesh(mesh_->getSubMeshCount() - 1);
+		if (m_Mesh->addSubMesh(sub)) {
+			return m_Mesh->getSubMesh(m_Mesh->getSubMeshCount() - 1);
 		}
 		return nullptr;
 	}
@@ -4325,18 +4325,18 @@ static KVec2 _QuinticBezier(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, c
 }
 
 CPathDraw::CPathDraw() {
-	mZ = 0;
-	mAutoLength = 4.0f;
+	m_Z = 0;
+	m_AutoLength = 4.0f;
 }
 void CPathDraw::pathClear() {
-	mPoints.clear();
+	m_Points.clear();
 }
 void CPathDraw::pathInit(const KVec2 &p) {
-	mPoints.clear();
-	mPoints.push_back(p);
+	m_Points.clear();
+	m_Points.push_back(p);
 }
 void CPathDraw::pathLineTo(const KVec2 &p) {
-	mPoints.push_back(p);
+	m_Points.push_back(p);
 }
 
 // center を中心とした半径 radius の弧を追加する
@@ -4345,7 +4345,7 @@ void CPathDraw::pathArcTo(const KVec2 &center, float radius, float rad_start, fl
 		for (int i=1; i<=segments; i++) {
 			float t = (float)i / segments;
 			float rad = KMath::lerp(rad_start, rad_end, t);
-			mPoints.push_back(KVec2(center.x + radius * cosf(rad), center.y + radius * sinf(rad)));
+			m_Points.push_back(KVec2(center.x + radius * cosf(rad), center.y + radius * sinf(rad)));
 		}
 	} else {
 		pathArcToAuto(center, radius, rad_start, rad_end, 8);
@@ -4357,8 +4357,8 @@ void CPathDraw::pathArcToAuto(const KVec2 &center, float radius, float rad_start
 	KVec2 d01 = p1 - p0;
 	float lenx = fabs(d01.x);
 	float leny = fabs(d01.y);
-	if (lenx+leny < mAutoLength) {
-		mPoints.push_back(p1);
+	if (lenx+leny < m_AutoLength) {
+		m_Points.push_back(p1);
 	} else if (maxlevel > 0) {
 		float rad_mid = (rad_start + rad_end) * 0.5f;
 		pathArcToAuto(center, radius, rad_start, rad_mid, maxlevel-1);
@@ -4369,16 +4369,16 @@ void CPathDraw::pathArcToAuto(const KVec2 &center, float radius, float rad_start
 // ２次のベジェ補間を行う
 // p1, p2   追加の制御点。既存のパスの終端を始点として、３個の点で補間を行う
 // segments 線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する。
-//          その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
+//          その場合に線分長さ（の近似）が m_AutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathQuadricBezierTo(const KVec2 &p1, const KVec2 &p2, int segments) {
-	K__ASSERT(!mPoints.empty());
-	KVec2 p0 = mPoints.back();
+	K__ASSERT(!m_Points.empty());
+	KVec2 p0 = m_Points.back();
 	if (segments == 0) {
 		segments = 8;
 	}
 	for (int i=1; i<=segments; i++) {
 		float t = (float)i / segments;
-		mPoints.push_back(_QuadricBezier(p0, p1, p2, t));
+		m_Points.push_back(_QuadricBezier(p0, p1, p2, t));
 	}
 }
 void CPathDraw::pathQuadricBezierToAuto(const KVec2 &p0, const KVec2 &p1, const KVec2 &p2, int maxlevel) {
@@ -4386,8 +4386,8 @@ void CPathDraw::pathQuadricBezierToAuto(const KVec2 &p0, const KVec2 &p1, const 
 	KVec2 d12 = p2 - p1;
 	float lenx = fabs(d01.x) + fabsf(d12.x);
 	float leny = fabs(d01.y) + fabsf(d12.y);
-	if (lenx+leny < mAutoLength) {
-		mPoints.push_back(p2);
+	if (lenx+leny < m_AutoLength) {
+		m_Points.push_back(p2);
 	} else if (maxlevel > 0) {
 		KVec2 p01 = (p0 + p1) * 0.5f;
 		KVec2 p12 = (p1 + p2) * 0.5f;
@@ -4400,14 +4400,14 @@ void CPathDraw::pathQuadricBezierToAuto(const KVec2 &p0, const KVec2 &p1, const 
 // ３次のベジェ補間を行う
 // p1, p2, p3  追加の制御点。既存のパスの終端を始点として、４個の点で補間を行う
 // segments    線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する。
-//             その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
+//             その場合に線分長さ（の近似）が m_AutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathCubicBezierTo(const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, int segments) {
-	K__ASSERT(!mPoints.empty());
-	KVec2 p0 = mPoints.back();
+	K__ASSERT(!m_Points.empty());
+	KVec2 p0 = m_Points.back();
 	if (segments > 0) {
 		for (int i=1; i<=segments; i++) {
 			float t = (float)i / segments;
-			mPoints.push_back(_CubicBezier(p0, p1, p2, p3, t));
+			m_Points.push_back(_CubicBezier(p0, p1, p2, p3, t));
 		}
 	} else {
 		pathCubicBezierToAuto(p0, p1, p2, p3, 8);
@@ -4419,8 +4419,8 @@ void CPathDraw::pathCubicBezierToAuto(const KVec2 &p0, const KVec2 &p1, const KV
 	KVec2 d23 = p3 - p2;
 	float lenx = fabs(d01.x) + fabsf(d12.x) + fabsf(d23.x);
 	float leny = fabs(d01.y) + fabsf(d12.y) + fabsf(d23.y);
-	if (lenx+leny < mAutoLength) {
-		mPoints.push_back(p3);
+	if (lenx+leny < m_AutoLength) {
+		m_Points.push_back(p3);
 	} else if (maxlevel > 0) {
 		KVec2 p01 = (p0 + p1) * 0.5f;
 		KVec2 p12 = (p1 + p2) * 0.5f;
@@ -4436,14 +4436,14 @@ void CPathDraw::pathCubicBezierToAuto(const KVec2 &p0, const KVec2 &p1, const KV
 // ４次のベジェ補間を行う
 // p1, p2, p3, p4  追加の制御点。既存のパスの終端を始点として、５個の点で補間を行う
 // segments        線分個数. 0 を指定すると De Casteljau のアルゴリズムにより自動分割する
-//                 その場合に線分長さ（の近似）が mAutoLength 未満になったら計算を打ち切る
+//                 その場合に線分長さ（の近似）が m_AutoLength 未満になったら計算を打ち切る
 void CPathDraw::pathQuinticBezierTo(const KVec2 &p1, const KVec2 &p2, const KVec2 &p3, const KVec2 &p4, int segments) {
-	K__ASSERT(!mPoints.empty());
-	KVec2 p0 = mPoints.back();
+	K__ASSERT(!m_Points.empty());
+	KVec2 p0 = m_Points.back();
 	if (segments > 0) {
 		for (int i=1; i<=segments; i++) {
 			float t = (float)i / segments;
-			mPoints.push_back(_QuinticBezier(p0, p1, p2, p3, p4, t));
+			m_Points.push_back(_QuinticBezier(p0, p1, p2, p3, p4, t));
 		}
 	} else {
 		pathQuinticBezierToAuto(p0, p1, p2, p3, p4, 8);
@@ -4456,8 +4456,8 @@ void CPathDraw::pathQuinticBezierToAuto(const KVec2 &p0, const KVec2 &p1, const 
 	KVec2 d34 = p4 - p3;
 	float lenx = fabs(d01.x) + fabsf(d12.x) + fabsf(d23.x) + fabsf(d34.x);
 	float leny = fabs(d01.y) + fabsf(d12.y) + fabsf(d23.y) + fabsf(d34.y);
-	if (lenx+leny < mAutoLength) {
-		mPoints.push_back(p3);
+	if (lenx+leny < m_AutoLength) {
+		m_Points.push_back(p3);
 	} else if (maxlevel > 0) {
 		KVec2 p01 = (p0 + p1) * 0.5f;
 		KVec2 p12 = (p1 + p2) * 0.5f;
@@ -4483,7 +4483,7 @@ void CPathDraw::pathNthBezierToAuto(const KVec2 *p, int n, int maxlevel) {
 		return;
 	}
 	if (n == 1) {
-		mPoints.push_back(p[0]);
+		m_Points.push_back(p[0]);
 		return;
 	}
 	float lenx = 0;
@@ -4492,8 +4492,8 @@ void CPathDraw::pathNthBezierToAuto(const KVec2 *p, int n, int maxlevel) {
 		lenx += fabsf(p[i+1].x - p[i].x);
 		leny += fabsf(p[i+1].y - p[i].y);
 	}
-	if (lenx+leny < mAutoLength) {
-		mPoints.push_back(p[n-1]);
+	if (lenx+leny < m_AutoLength) {
+		m_Points.push_back(p[n-1]);
 	} else if (maxlevel > 0) {
 		KVec2 tmp0[16];
 		KVec2 tmp1[16];
@@ -4592,20 +4592,20 @@ void CPathDraw::stroke(KMesh *mesh, float thickness, const KColor &color, const 
 
 // パスに従って線を引く。始点と終点の頂点色をそれぞれ指定し、グラデーションさせる
 void CPathDraw::strokeGradient(KMesh *mesh, float thickness, const KColor &color1, const KColor &color2, const KMaterial *material) {
-	if (mPoints.size() < 2) return;
+	if (m_Points.size() < 2) return;
 
 	if (thickness > 0) {
-		mMeshBuf.clear();
-		mMeshBuf.resize2(mesh, mPoints.size() * 2, 0);
-		int N = mPoints.size();
+		m_MeshBuf.clear();
+		m_MeshBuf.resize2(mesh, m_Points.size() * 2, 0);
+		int N = m_Points.size();
 		KVec2 nor0 = KVec2(1, 0);
 		for (int i=0; i<N; i++) {
 			float t = (float)i / (N - 1);
-			const KVec2 &p0 = mPoints[i];
+			const KVec2 &p0 = m_Points[i];
 
 			KVec2 nor1 = nor0;
 			if (i+1 < N) {
-				const KVec2 &p1 = mPoints[i+1];
+				const KVec2 &p1 = m_Points[i+1];
 				KVec2 tang = p1 - p0;
 				float tanglen = hypotf(tang.x, tang.y);
 				if (tanglen > 0) {
@@ -4614,109 +4614,112 @@ void CPathDraw::strokeGradient(KMesh *mesh, float thickness, const KColor &color
 			}
 
 			KVec2 nor01 = (nor0 + nor1) * 0.5f;
-			KVec3 pos(p0.x, p0.y, mZ);
+			KVec3 pos(p0.x, p0.y, m_Z);
 			KVec3 half(nor01.x*thickness*0.5f, nor01.y*thickness*0.5f, 0.0f);
-			mMeshBuf.setPosition(i*2+0, pos-half);
-			mMeshBuf.setPosition(i*2+1, pos+half);
+			m_MeshBuf.setPosition(i*2+0, pos-half);
+			m_MeshBuf.setPosition(i*2+1, pos+half);
 
 			KColor32 color = KColor32::lerp(color1, color2, t);
 			KColor32 col32(color);
-			mMeshBuf.setColor32(i*2+0, col32);
-			mMeshBuf.setColor32(i*2+1, col32);
+			m_MeshBuf.setColor32(i*2+0, col32);
+			m_MeshBuf.setColor32(i*2+1, col32);
 
 			nor0 = nor1;
 		}
-		mMeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_STRIP, material);
-		mPoints.clear();
+		m_MeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_STRIP, material);
+		m_Points.clear();
 
 	} else {
-		mMeshBuf.clear();
-		mMeshBuf.resize2(mesh, mPoints.size(), 0);
-		int N = mPoints.size();
+		m_MeshBuf.clear();
+		m_MeshBuf.resize2(mesh, m_Points.size(), 0);
+		int N = m_Points.size();
 		for (int i=0; i<N; i++) {
 			float t = (float)i / (N - 1);
 
-			const KVec2 &p = mPoints[i];
-			KVec3 pos(p.x, p.y, mZ);
-			mMeshBuf.setPosition(i, pos);
+			const KVec2 &p = m_Points[i];
+			KVec3 pos(p.x, p.y, m_Z);
+			m_MeshBuf.setPosition(i, pos);
 
 			KColor32 color = KColor32::lerp(color1, color2, t);
 			KColor32 col32(color);
-			mMeshBuf.setColor32(i, col32);
+			m_MeshBuf.setColor32(i, col32);
 		}
-		mMeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, material);
-		mPoints.clear();
+		m_MeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, material);
+		m_Points.clear();
 	}
 }
 
 void CPathDraw::addCross(KMesh *mesh, const KVec2 &pos, float size, const KColor &color) {
 	float half = size / 2;
-	mMeshBuf.clear();
-	mMeshBuf.resize2(mesh, 4, 0);
-	mMeshBuf.setPosition(0, KVec3(pos.x-half, pos.y, 0.0f));
-	mMeshBuf.setPosition(1, KVec3(pos.x+half, pos.y, 0.0f));
-	mMeshBuf.setPosition(2, KVec3(pos.x, pos.y-half, 0.0f));
-	mMeshBuf.setPosition(3, KVec3(pos.x, pos.y+half, 0.0f));
-	mMeshBuf.setColor32(0, KColor32::WHITE);
-	mMeshBuf.setColor32(1, KColor32::WHITE);
-	mMeshBuf.setColor32(2, KColor32::WHITE);
-	mMeshBuf.setColor32(3, KColor32::WHITE);
+	m_MeshBuf.clear();
+	m_MeshBuf.resize2(mesh, 4, 0);
+	m_MeshBuf.setPosition(0, KVec3(pos.x-half, pos.y, 0.0f));
+	m_MeshBuf.setPosition(1, KVec3(pos.x+half, pos.y, 0.0f));
+	m_MeshBuf.setPosition(2, KVec3(pos.x, pos.y-half, 0.0f));
+	m_MeshBuf.setPosition(3, KVec3(pos.x, pos.y+half, 0.0f));
+	m_MeshBuf.setColor32(0, KColor32::WHITE);
+	m_MeshBuf.setColor32(1, KColor32::WHITE);
+	m_MeshBuf.setColor32(2, KColor32::WHITE);
+	m_MeshBuf.setColor32(3, KColor32::WHITE);
 	KMaterial m;
 	m.color = color;
-	mMeshBuf.addToMesh(mesh, KPrimitive_LINES, &m);
+	m_MeshBuf.addToMesh(mesh, KPrimitive_LINES, &m);
 }
 
 void CPathDraw::addLine(KMesh *mesh, const KVec2 &a, const KVec2 &b, const KColor &color) {
-	mMeshBuf.clear();
+	m_MeshBuf.clear();
 	if (color.a > 0) {
-		mMeshBuf.resize2(mesh, 2, 0);
-		mMeshBuf.setPosition(0, KVec3(a.x, a.y, 0.0f));
-		mMeshBuf.setPosition(1, KVec3(b.x, b.y, 0.0f));
-		mMeshBuf.setColor32(0, KColor32::WHITE);
-		mMeshBuf.setColor32(1, KColor32::WHITE);
-		mMeshBuf.setColor32(2, KColor32::WHITE);
-		mMeshBuf.setColor32(3, KColor32::WHITE);
+		m_MeshBuf.resize2(mesh, 2, 0);
+		m_MeshBuf.setPosition(0, KVec3(a.x, a.y, 0.0f));
+		m_MeshBuf.setPosition(1, KVec3(b.x, b.y, 0.0f));
+		m_MeshBuf.setColor32(0, KColor32::WHITE);
+		m_MeshBuf.setColor32(1, KColor32::WHITE);
+		m_MeshBuf.setColor32(2, KColor32::WHITE);
+		m_MeshBuf.setColor32(3, KColor32::WHITE);
 		KMaterial m;
 		m.color = color;
-		mMeshBuf.addToMesh(mesh, KPrimitive_LINES, &m);
+		m_MeshBuf.addToMesh(mesh, KPrimitive_LINES, &m);
 	}
 }
 
 void CPathDraw::addBox(KMesh *mesh, const KVec2 &pos, const KVec2 &halfsize, const KColor &fill_color, const KColor &stroke_color) {
-	mMeshBuf.clear();
+	m_MeshBuf.clear();
 	if (fill_color.a > 0) {
-		mMeshBuf.resize2(mesh, 4, 0);
-		mMeshBuf.setPosition(0, KVec3(pos.x-halfsize.x, pos.y-halfsize.y, 0.0f));
-		mMeshBuf.setPosition(1, KVec3(pos.x+halfsize.x, pos.y-halfsize.y, 0.0f));
-		mMeshBuf.setPosition(2, KVec3(pos.x+halfsize.x, pos.y+halfsize.y, 0.0f));
-		mMeshBuf.setPosition(3, KVec3(pos.x-halfsize.x, pos.y+halfsize.y, 0.0f));
-		mMeshBuf.setColor32(0, KColor32::WHITE);
-		mMeshBuf.setColor32(1, KColor32::WHITE);
-		mMeshBuf.setColor32(2, KColor32::WHITE);
-		mMeshBuf.setColor32(3, KColor32::WHITE);
+		m_MeshBuf.resize2(mesh, 4, 0);
+		m_MeshBuf.setPosition(0, KVec3(pos.x-halfsize.x, pos.y-halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(1, KVec3(pos.x+halfsize.x, pos.y-halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(2, KVec3(pos.x+halfsize.x, pos.y+halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(3, KVec3(pos.x-halfsize.x, pos.y+halfsize.y, 0.0f));
+		m_MeshBuf.setColor32(0, KColor32::WHITE);
+		m_MeshBuf.setColor32(1, KColor32::WHITE);
+		m_MeshBuf.setColor32(2, KColor32::WHITE);
+		m_MeshBuf.setColor32(3, KColor32::WHITE);
 		KMaterial m;
 		m.color = fill_color;
-		mMeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
+		m_MeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
 	}
 	if (stroke_color.a > 0) {
-		mMeshBuf.resize2(mesh, 5, 0);
-		mMeshBuf.setPosition(0, KVec3(pos.x-halfsize.x, pos.y-halfsize.y, 0.0f));
-		mMeshBuf.setPosition(1, KVec3(pos.x+halfsize.x, pos.y-halfsize.y, 0.0f));
-		mMeshBuf.setPosition(2, KVec3(pos.x+halfsize.x, pos.y+halfsize.y, 0.0f));
-		mMeshBuf.setPosition(3, KVec3(pos.x-halfsize.x, pos.y+halfsize.y, 0.0f));
-		mMeshBuf.setColor32(0, KColor32::WHITE);
-		mMeshBuf.setColor32(1, KColor32::WHITE);
-		mMeshBuf.setColor32(2, KColor32::WHITE);
-		mMeshBuf.setColor32(3, KColor32::WHITE);
-		mMeshBuf.copyVertex(4, 0);
+		m_MeshBuf.resize2(mesh, 5, 0);
+		m_MeshBuf.setPosition(0, KVec3(pos.x-halfsize.x, pos.y-halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(1, KVec3(pos.x+halfsize.x, pos.y-halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(2, KVec3(pos.x+halfsize.x, pos.y+halfsize.y, 0.0f));
+		m_MeshBuf.setPosition(3, KVec3(pos.x-halfsize.x, pos.y+halfsize.y, 0.0f));
+		m_MeshBuf.setColor32(0, KColor32::WHITE);
+		m_MeshBuf.setColor32(1, KColor32::WHITE);
+		m_MeshBuf.setColor32(2, KColor32::WHITE);
+		m_MeshBuf.setColor32(3, KColor32::WHITE);
+		m_MeshBuf.copyVertex(4, 0);
 		KMaterial m;
 		m.color = stroke_color;
-		mMeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
+		m_MeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
 	}
 }
 
 void CPathDraw::addEllipse(KMesh *mesh, const KVec2 &pos, const KVec2 &r, const KColor &fill_color, const KColor &stroke_color) {
-	mMeshBuf.clear();
+	m_MeshBuf.clear();
+	if (r.isZero()) {
+		return;
+	}
 #if 0
 	int num_points = 32;
 #else
@@ -4731,27 +4734,27 @@ void CPathDraw::addEllipse(KMesh *mesh, const KVec2 &pos, const KVec2 &r, const 
 	}
 #endif
 	if (fill_color.a > 0) {
-		mMeshBuf.resize2(mesh, num_points, 0);
+		m_MeshBuf.resize2(mesh, num_points, 0);
 		for (int i=0; i<num_points; i++) {
 			float t = KMath::PI * 2 * i / num_points;
-			mMeshBuf.setPosition(i, KVec3(pos.x + r.x * cosf(t), pos.y + r.y * sinf(t), 0.0f));
-			mMeshBuf.setColor32(i, KColor32::WHITE);
+			m_MeshBuf.setPosition(i, KVec3(pos.x + r.x * cosf(t), pos.y + r.y * sinf(t), 0.0f));
+			m_MeshBuf.setColor32(i, KColor32::WHITE);
 		}
 		KMaterial m;
 		m.color = fill_color;
-		mMeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
+		m_MeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
 	}
 	if (stroke_color.a > 0) {
-		mMeshBuf.resize2(mesh, num_points + 1, 0);
+		m_MeshBuf.resize2(mesh, num_points + 1, 0);
 		for (int i=0; i<num_points; i++) {
 			float t = KMath::PI * 2 * i / num_points;
-			mMeshBuf.setPosition(i, KVec3(pos.x + r.x * cosf(t), pos.y + r.y * sinf(t), 0.0f));
-			mMeshBuf.setColor32(i, KColor32::WHITE);
+			m_MeshBuf.setPosition(i, KVec3(pos.x + r.x * cosf(t), pos.y + r.y * sinf(t), 0.0f));
+			m_MeshBuf.setColor32(i, KColor32::WHITE);
 		}
-		mMeshBuf.copyVertex(num_points, 0);
+		m_MeshBuf.copyVertex(num_points, 0);
 		KMaterial m;
 		m.color = stroke_color;
-		mMeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
+		m_MeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
 	}
 }
 #pragma endregion // CPathDraw
