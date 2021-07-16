@@ -76,6 +76,8 @@ public:
 		virtual void on_log_output(Level level, const char *text_u8, bool *no_emit, bool *no_dialog) = 0;
 	};
 
+	static void init();
+
 	/// エラーレベルのメッセージが発生したとき、既定のダイアログを出すかどうか。
 	/// エラーが起きた時にすぐに気が付くよう、デフォルトでは true になっている。
 	static void setDialogEnabled(bool value);

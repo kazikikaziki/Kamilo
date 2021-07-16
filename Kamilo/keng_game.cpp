@@ -67,7 +67,7 @@ public:
 
 		// コンソール
 		if (params && params->use_console) {
-			K_log_hook_internal_messages();
+			KLog::init();
 			KLog::setOutputConsole(true);
 		}
 

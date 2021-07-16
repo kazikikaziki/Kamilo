@@ -783,6 +783,37 @@ static CLogContext g_Log;
 
 
 #pragma region KLog
+
+static void Log_emit_dbg(const char *u8) {
+	K__LOGLOG_BEGIN(KLog::LEVEL_NUL, u8);
+	K__LOGLOG_ASSERT(u8);
+	KLog::emit(KLog::LEVEL_VRB, u8);
+	K__LOGLOG_END();
+}
+static void Log_emit_msg(const char *u8) {
+	K__LOGLOG_BEGIN(KLog::LEVEL_NUL, u8);
+	K__LOGLOG_ASSERT(u8);
+	KLog::emit(KLog::LEVEL_NUL, u8);
+	K__LOGLOG_END();
+}
+static void Log_emit_warn(const char *u8) {
+	K__LOGLOG_BEGIN(KLog::LEVEL_WRN, u8);
+	K__LOGLOG_ASSERT(u8);
+	KLog::emit(KLog::LEVEL_WRN, u8);
+	K__LOGLOG_END();
+}
+static void Log_emit_err(const char *u8) {
+	K__LOGLOG_BEGIN(KLog::LEVEL_ERR, u8);
+	K__LOGLOG_ASSERT(u8);
+	KLog::emit(KLog::LEVEL_ERR, u8);
+	K__LOGLOG_END();
+}
+void KLog::init() {
+	K::setDebugPrintHook(Log_emit_dbg); // K::debug   の出力先を KLog にする
+	K::setPrintHook(Log_emit_msg);      // K::print   の出力先を KLog にする
+	K::setWarningHook(Log_emit_warn);   // K::warning の出力先を KLog にする
+	K::setErrorHook(Log_emit_err);      // K::error   の出力先を KLog にする
+}
 void KLog::setThreadEnabled(bool value) {
 	g_UseThread = value;
 }
@@ -973,36 +1004,6 @@ void KLog::printFatal(const char *msg) {
 
 
 
-static void dbg_hook(const char *u8) {
-	K__LOGLOG_BEGIN(KLog::LEVEL_NUL, u8);
-	K__LOGLOG_ASSERT(u8);
-	KLog::emit(KLog::LEVEL_VRB, u8);
-	K__LOGLOG_END();
-}
-static void msg_hook(const char *u8) {
-	K__LOGLOG_BEGIN(KLog::LEVEL_NUL, u8);
-	K__LOGLOG_ASSERT(u8);
-	KLog::emit(KLog::LEVEL_NUL, u8);
-	K__LOGLOG_END();
-}
-static void warn_hook(const char *u8) {
-	K__LOGLOG_BEGIN(KLog::LEVEL_WRN, u8);
-	K__LOGLOG_ASSERT(u8);
-	KLog::emit(KLog::LEVEL_WRN, u8);
-	K__LOGLOG_END();
-}
-static void err_hook(const char *u8) {
-	K__LOGLOG_BEGIN(KLog::LEVEL_ERR, u8);
-	K__LOGLOG_ASSERT(u8);
-	KLog::emit(KLog::LEVEL_ERR, u8);
-	K__LOGLOG_END();
-}
-void K_log_hook_internal_messages() {
-	K::setDebugPrintHook(dbg_hook);
-	K::setPrintHook(msg_hook);
-	K::setWarningHook(warn_hook);
-	K::setErrorHook(err_hook);
-}
 
 
 
