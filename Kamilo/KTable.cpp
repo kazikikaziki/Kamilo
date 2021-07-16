@@ -390,13 +390,16 @@ int KTable::findRowByIntData(int col, int value) const {
 	}
 	return -1;
 }
-int KTable::findRowByStringData(int col, const std::string &value) const {
+int KTable::findRowByStringData(int col, const std::string &value, bool trim) const {
 	int numcols = getDataColCount();
 	int numrows = getDataRowCount();
 	if (col < 0 || numcols <= col) return -1;
 	for (int i=0; i<numrows; i++) {
-		const char *s = getDataString(col, i);
-		if (s && value.compare(s) == 0) {
+		std::string s = getDataStringStd(col, i);
+		if (trim) {
+			K::strTrim(s);
+		}
+		if (s.compare(value) == 0) {
 			return i;
 		}
 	}

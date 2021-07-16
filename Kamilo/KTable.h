@@ -120,7 +120,10 @@ public:
 	bool getDataSource(int col, int row, int *col_in_file, int *row_in_file) const;
 
 	int findRowByIntData(int col, int value) const;
-	int findRowByStringData(int col, const std::string &value) const;
+
+	// value に一致する文字列を探す
+	// trim 先頭と末尾の空白を取り除いて比較する？
+	int findRowByStringData(int col, const std::string &value, bool trim=true) const;
 
 private:
 	class Impl;
