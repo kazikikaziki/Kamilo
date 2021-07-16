@@ -389,7 +389,7 @@ public:
 	}
 	KInputStream getInputStream(const std::string &filename, bool should_exists) {
 		if (filename.empty()) {
-			K__ERROR("Emptry filename");
+			K__ERROR("Empry filename");
 			return KInputStream();
 		}
 
