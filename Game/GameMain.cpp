@@ -21,6 +21,7 @@ public:
 	virtual void on_manager_endframe() override {
 	}
 	virtual void on_manager_gui() override {
+	// ImGui::Text("Hello World!");
 	}
 	virtual void on_manager_signal(KSig &sig) override {
 	//	if (sig.check(K_SIG_WINDOW_KEY_DOWN) {}
