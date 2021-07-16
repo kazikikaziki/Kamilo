@@ -84,7 +84,7 @@ K_DECL_SIGNAL(K_SIG_WINDOW_MOUSE_UP);
 K_DECL_SIGNAL(K_SIG_WINDOW_KEY_DOWN);
 K_DECL_SIGNAL(K_SIG_WINDOW_KEY_UP);
 
-// chr: wchar_t (int)
+// "chr": wchar_t (int)
 K_DECL_SIGNAL(K_SIG_WINDOW_KEY_CHAR);
 
 // "file_u8": file name in utf8 (string)

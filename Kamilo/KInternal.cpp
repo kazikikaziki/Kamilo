@@ -422,8 +422,6 @@ void K::debugW(const wchar_t *wfmt, ...) {
 		outputDebugStringW(ws);
 	}
 }
-
-
 void K::warning(const char *fmt_u8, ...) {
 	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
