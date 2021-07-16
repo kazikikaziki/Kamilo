@@ -81,7 +81,7 @@ public:
 
 	/// 自動改行幅。0だと改行しない
 	void setAutoWrapWidth(int w);
-	int getAutoWrapWidth() const { return auto_wrap_width_; }
+	int getAutoWrapWidth() const { return (int)auto_wrap_width_; }
 
 	/// 自動改行設定
 	void setAutoWrapFlags(KAutoWrapFlags flags) {
