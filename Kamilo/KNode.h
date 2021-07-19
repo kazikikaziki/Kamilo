@@ -245,7 +245,7 @@ public:
 	Flags getFlagBitsInTreeAll() const;
 	Flags getFlagBitsInTreeAny() const;
 	void setFlag(Flag flag, bool value);
-	void setFlagsDirty();
+	void _updateFlagBits();
 	#pragma endregion // Flags
 
 
@@ -400,15 +400,11 @@ private:
 		uint32_t bits; // 自分自身のフラグ
 		uint32_t bitsInTreeAll; // 自分と親ツリーのフラグビットを AND 結合したもの
 		uint32_t bitsInTreeAny; // 自分と親ツリーのフラグビットを OR 結合したもの
-		bool dirtyAll; // bitsInTreeAll を更新する必要あり
-		bool dirtyAny; // bitsInTreeAny を更新する必要あり
 
 		FlagData() {
 			bits = 0;
 			bitsInTreeAll = 0;
 			bitsInTreeAny = 0;
-			dirtyAll = true;
-			dirtyAny = true;
 		}
 	};
 	mutable FlagData m_FlagData;

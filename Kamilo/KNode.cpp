@@ -184,10 +184,10 @@ void KNode::setParent(KNode *new_parent) {
 		return;
 	}
 
-	// 親が変化するので、このノード以下のすべてのノードのワールド行列は無効になる
+	// 親が変化した。親に影響を受けるパラメータ類も更新する
 	_SetDirtyWorldMatrix();
-	setFlagsDirty();
 	setTagsDirty();
+	_updateFlagBits();
 
 	grab();
 	{
@@ -813,35 +813,21 @@ bool KNode::getViewCullingInTree() const {
 
 #pragma region Flags
 bool KNode::hasFlag(Flag flag) const {
-	return getFlagBits() & flag;
+	return m_FlagData.bits & flag;
 }
 bool KNode::hasFlagInTreeAll(Flag flag) const {
-	return getFlagBitsInTreeAll() & flag;
+	return m_FlagData.bitsInTreeAll & flag;
 }
 bool KNode::hasFlagInTreeAny(Flag flag) const {
-	return getFlagBitsInTreeAny() & flag;
+	return m_FlagData.bitsInTreeAny & flag;
 }
 KNode::Flags KNode::getFlagBits() const {
 	return m_FlagData.bits;
 }
 KNode::Flags KNode::getFlagBitsInTreeAll() const {
-	if (m_FlagData.dirtyAll) {
-		m_FlagData.dirtyAll = false;
-		m_FlagData.bitsInTreeAll = m_FlagData.bits;
-		if (m_NodeData.parent) {
-			m_FlagData.bitsInTreeAll &= m_NodeData.parent->getFlagBitsInTreeAll(); // 親のフラグと AND 結合する
-		}
-	}
 	return m_FlagData.bitsInTreeAll;
 }
 KNode::Flags KNode::getFlagBitsInTreeAny() const {
-	if (m_FlagData.dirtyAny) {
-		m_FlagData.dirtyAny = false;
-		m_FlagData.bitsInTreeAny = m_FlagData.bits;
-		if (m_NodeData.parent) {
-			m_FlagData.bitsInTreeAny |= m_NodeData.parent->getFlagBitsInTreeAny(); // 親のフラグと OR 結合する
-		}
-	}
 	return m_FlagData.bitsInTreeAny;
 }
 void KNode::setFlag(Flag flag, bool value) {
@@ -852,14 +838,19 @@ void KNode::setFlag(Flag flag, bool value) {
 		} else {
 			m_FlagData.bits &= ~flag;
 		}
-		setFlagsDirty();
+		_updateFlagBits();
 	}
 }
-void KNode::setFlagsDirty() {
-	m_FlagData.dirtyAll = true;
-	m_FlagData.dirtyAny = true;
-	for (size_t i=0; i<m_NodeData.children.size(); i++) {
-		m_NodeData.children[i]->setFlagsDirty();
+void KNode::_updateFlagBits() {
+	if (m_NodeData.parent) {
+		m_FlagData.bitsInTreeAll = m_FlagData.bits & m_NodeData.parent->m_FlagData.bitsInTreeAll;
+		m_FlagData.bitsInTreeAny = m_FlagData.bits | m_NodeData.parent->m_FlagData.bitsInTreeAny;
+	} else {
+		m_FlagData.bitsInTreeAll = m_FlagData.bits;
+		m_FlagData.bitsInTreeAny = m_FlagData.bits;
+	}
+	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
+		(*it)->_updateFlagBits();
 	}
 }
 #pragma endregion // Flags
