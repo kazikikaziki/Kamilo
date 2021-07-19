@@ -364,6 +364,7 @@ private:
 		bool dirty_local_matrix;
 		bool dirty_world_matrix;
 		bool using_euler;
+		bool using_custom;
 		bool inherit_transform;
 
 		TransformData() {
@@ -371,6 +372,7 @@ private:
 			dirty_local_matrix = true;
 			dirty_world_matrix = true;
 			using_euler = true;
+			using_custom = false;
 			inherit_transform = true;
 		}
 	};

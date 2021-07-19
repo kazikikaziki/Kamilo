@@ -10,6 +10,7 @@
 
 
 #define IGNORE_REMOVING_NODES 1
+#define TEST_MATRIX 1
 
 namespace Kamilo {
 
@@ -600,13 +601,22 @@ const KMatrix4 & KNode::getLocalMatrixInversed() const {
 /// この行列は 移動、拡大、回転 に追加で適用される
 /// あらかじめ逆行列が分かっている場合は matrix_inv を指定する。これが nullptr の場合は自動的に逆行列を計算する
 void KNode::setCustomTransform(const KMatrix4 &matrix, const KMatrix4 *p_matrix_inv) {
-	m_TransformData.custom_transform = matrix;
-	if (p_matrix_inv) {
-		m_TransformData.custom_transform_inv = *p_matrix_inv;
+	if (matrix.equals(KMatrix4(), FLT_MIN)) { // is identity?
+		// 単位行列を指定した（カスタム行列使用しない設定にした）
+		m_TransformData.custom_transform = KMatrix4();
+		m_TransformData.custom_transform_inv = KMatrix4();
+		m_TransformData.using_custom = false;
+		m_TransformData.dirty_local_matrix = true;
 	} else {
-		m_TransformData.custom_transform_inv = matrix.inverse();
+		m_TransformData.custom_transform = matrix;
+		if (p_matrix_inv) {
+			m_TransformData.custom_transform_inv = *p_matrix_inv;
+		} else {
+			m_TransformData.custom_transform_inv = matrix.inverse();
+		}
+		m_TransformData.using_custom = true;
+		m_TransformData.dirty_local_matrix = true;
 	}
-	m_TransformData.dirty_local_matrix = true;
 	_SetDirtyWorldMatrix();
 }
 void KNode::getCustomTransform(KMatrix4 *out_matrix, KMatrix4 *out_matrix_inv) const {
@@ -701,7 +711,71 @@ void KNode::copyTransform(const KNode *other, bool copy_independent_flag) {
 		setTransformInherit(other->getTransformInherit());
 	}
 }
+
+// スケーリング * 並行移動
+static KMatrix4 _MakeMatrix_Sc_Tr(const KVec3 &sc, const KVec3 &tr) {
+//	KMatrix4 T = KMatrix4::fromTranslation(tr);
+//	KMatrix4 S = KMatrix4::fromScale(sc);
+//	KMatrix4 ST = S * T; で得られる行列 ST と同じ
+	float tmp[] = {
+		sc.x, 0.0f, 0.0f, 0.0f,
+		0.0f, sc.y, 0.0f, 0.0f,
+		0.0f, 0.0f, sc.z, 0.0f,
+		tr.x, tr.y, tr.z, 1.0f,
+	};
+	return KMatrix4(tmp);
+}
+
+// 並行移動 * スケーリング の逆行列。
+// 逆平行移動 * 逆スケーリングで求める
+static KMatrix4 _MakeMatrix_Inv_Tr_Sc(const KVec3 &tr, const KVec3 &sc) {
+	// KMatrix4 inv_T = KMatrix4::fromTranslation(-tr);
+	// KMatrix4 inv_S = KMatrix4::fromScale(sc);
+	// KMatrix4 inv_TS = inv_T * inv_S; で得られる行列 inv_TS と同じ
+	float tmp[] = {
+		 1.0f/sc.x,        0.0f,        0.0f, 0.0f,
+		      0.0f,   1.0f/sc.y,        0.0f, 0.0f,
+		      0.0f,        0.0f,   1.0f/sc.z, 0.0f,
+		-tr.x/sc.x,  -tr.y/sc.y,  -tr.z/sc.z, 1.0f,
+	};
+	return KMatrix4(tmp);
+}
+
 void KNode::_UpdateMatrix() const {
+#if TEST_MATRIX
+	m_TransformData.dirty_local_matrix = false;
+
+	// 基本変形行列
+	KMatrix4 sc_ro_tr;
+	KMatrix4 inv_tr_ro_sc;
+	if (m_TransformData.rotation.equals(KQuat(), FLT_MIN)) {
+		// 回転なし
+		sc_ro_tr = _MakeMatrix_Sc_Tr(m_TransformData.scale, m_TransformData.position);
+		inv_tr_ro_sc = _MakeMatrix_Inv_Tr_Sc(m_TransformData.position, m_TransformData.scale);
+	} else {
+		// 回転あり
+		KMatrix4 Tr = KMatrix4::fromTranslation(m_TransformData.position);
+		KMatrix4 Ro = KMatrix4::fromRotation(m_TransformData.rotation);
+		KMatrix4 Sc = KMatrix4::fromScale(m_TransformData.scale);
+		sc_ro_tr = Sc * Ro * Tr;
+
+		KMatrix4 inv_Tr = KMatrix4::fromTranslation(-m_TransformData.position);
+		KMatrix4 inv_Ro = KMatrix4::fromRotation(m_TransformData.rotation.inverse());
+		KMatrix4 inv_Sc = KMatrix4::fromScale(1.0f / m_TransformData.scale.x, 1.0f / m_TransformData.scale.y, 1.0f / m_TransformData.scale.z);
+		inv_tr_ro_sc = inv_Tr * inv_Ro * inv_Sc;
+	}
+	
+	// カスタム変形行列
+	// スケーリングと回転の中心は Pv で表される。
+	// 拡大回転 Sc * Ro を Pivot の平行移動 inv_P, P で挟む事に注意
+	if (m_TransformData.using_custom) {
+		m_TransformData.local_matrix = m_TransformData.custom_transform * sc_ro_tr;
+		m_TransformData.local_matrix_inv = inv_tr_ro_sc * m_TransformData.custom_transform_inv;
+	} else {
+		m_TransformData.local_matrix = sc_ro_tr;
+		m_TransformData.local_matrix_inv = inv_tr_ro_sc;
+	}
+#else
 	m_TransformData.dirty_local_matrix = false;
 	KMatrix4 Tr = KMatrix4::fromTranslation(m_TransformData.position);
 	KMatrix4 Ro = KMatrix4::fromRotation(m_TransformData.rotation);
@@ -719,6 +793,8 @@ void KNode::_UpdateMatrix() const {
 	// 真面目に m_local_matrix から逆行列を計算するのは大変なので
 	// 平行移動や回転から直接逆行列を得る
 	m_TransformData.local_matrix_inv = inv_Tr * inv_Ro * inv_Sc * m_TransformData.custom_transform_inv; // 拡大回転 inv_Ro * inv_Sc を Pivot の平行移動 inv_P, P で挟む事に注意
+
+#endif
 }
 void KNode::_SetDirtyWorldMatrix() {
 //	if (!m_TransformData.m_dirty_world_matrix) {
