@@ -185,11 +185,6 @@ void KNode::setParent(KNode *new_parent) {
 		return;
 	}
 
-	// 親が変化した。親に影響を受けるパラメータ類も更新する
-	_SetDirtyWorldMatrix();
-	setTagsDirty();
-	_updateFlagBits();
-
 	grab();
 	{
 		// 古い親から切り離す
@@ -206,6 +201,12 @@ void KNode::setParent(KNode *new_parent) {
 	}
 	drop();
 
+	// 親が変化した。親に影響を受けるパラメータ類も更新する
+	_SetDirtyWorldMatrix();
+	setTagsDirty();
+	_updateFlagBits();
+	_updateNames();
+
 	K__ASSERT(m_NodeData.parent == new_parent);
 }
 KNode * KNode::getChild(int index) const {
@@ -213,6 +214,9 @@ KNode * KNode::getChild(int index) const {
 		return m_NodeData.children[index];
 	}
 	return nullptr;
+}
+KNode * KNode::getChildFast(int index) const {
+	return m_NodeData.children[index];
 }
 int KNode::getChildCount() const {
 	return (int)m_NodeData.children.size();
@@ -339,7 +343,7 @@ void KNode::remove() {
 void KNode::remove_children() {
 	int num = getChildCount();
 	for (int i=0; i<num; i++) {
-		KNode *node = getChild(i);
+		KNode *node = getChildFast(i);
 		node->markAsRemove();
 	}
 }
@@ -471,6 +475,20 @@ KNode * KNode::findChildInTree_unsafe(const std::string &name, const KTag &tag) 
 	}
 	return nullptr;
 }
+
+// node の子から、node からの相対パスが child_path に一致する子を探す
+// 例えば "aaa/bbb" を指定した場合、node の子である "aaa", その子である "bbb" を探す
+KNode * KNode::findChildPath(const std::string &subpath) const {
+	std::string path = subpath;
+	std::string name;
+	KNode *child = const_cast<KNode*>(this);
+	while (child && !path.empty()) {
+		name = K::pathPopLeft(path);
+		child = child->findChild(name);
+	}
+	return child;
+}
+
 #pragma endregion // Find
 
 
@@ -487,33 +505,30 @@ void KNode::setName(const std::string &name) {
 		char s[256] = {0};
 		sprintf_s(s, sizeof(s), "__%p", m_NodeData.uuid);
 		m_NodeData.name = s;
-		return;
+	} else {
+		// 名前を適用
+		m_NodeData.name = name;
 	}
-#ifdef _DEBUG
-	// パス区切りを含んでいてはいけない。
-	if (K::strFindChar(name.c_str(), '/') >= 0) {
-		K__ERROR("E_INVALID_ENTITY_NAME: %s", name.c_str());
-		return;
-	}
-#endif
-	// 名前を適用
-	m_NodeData.name = name;
+	_updateNames();
 }
 bool KNode::hasName(const std::string &name) const {
 	return m_NodeData.name.compare(name) == 0;
 }
-std::string KNode::getNameInTree() const {
-	std::string parent_path;
-
-	// 親のフルパスを得る
-	if (getParent()) {
-		parent_path = getParent()->getNameInTree();
-	}
-	// 末尾に自分の名前を追加する
-	return K::pathJoin(parent_path, m_NodeData.name);
+const std::string & KNode::getNameInTree() const {
+	return m_NodeData.nameInTree;
 }
 EID KNode::getId() const {
 	return m_NodeData.uuid;
+}
+void KNode::_updateNames() {
+	if (m_NodeData.parent) {
+		m_NodeData.nameInTree = m_NodeData.parent->m_NodeData.nameInTree + "/" + m_NodeData.name;
+	} else {
+		m_NodeData.nameInTree = m_NodeData.name;
+	}
+	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
+		(*it)->_updateNames();
+	}
 }
 #pragma endregion // Name and ID
 
@@ -1580,7 +1595,7 @@ public:
 		m_tmp_nodes.clear();
 		int num = m_root->getChildCount();
 		for (int i=0; i<num; i++) {
-			KNode *child = m_root->getChild(i);
+			KNode *child = m_root->getChildFast(i);
 			child->_RegisterForDelete(m_tmp_nodes, false); 
 		}
 
@@ -1631,6 +1646,7 @@ public:
 		}
 		return nullptr;
 	}
+
 	KNode * findNodeByPath(const KNode *start, const std::string &path) const {
 		#if IGNORE_REMOVING_NODES
 		// start が削除マーク付きツリー内にある場合は、もう削除済みとして扱う
@@ -1650,8 +1666,20 @@ public:
 		if (start == nullptr) {
 			start = getRoot();
 		}
+#if 1
+		KNode *ret = start->findChildPath(path);
+		if (ret) {
+			return ret;
+		} else {
+			for (int i=0; i<start->getChildCount(); i++) {
+				KNode *node = start->getChildFast(i);
+				KNode *ret = find_namepath_in_tree_unsafe(node, path);
+				if (ret) return ret;
+			}
+		}
+#else
 		for (int i=0; i<start->getChildCount(); i++) {
-			KNode *node = start->getChild(i);
+			KNode *node = start->getChildFast(i);
 			if (has_name_in_tree_unsafe(node, path)) {
 				return node;
 			}
@@ -1660,6 +1688,7 @@ public:
 				return sub;
 			}
 		}
+#endif
 		return nullptr;
 	}
 	bool has_name_in_tree_unsafe(const KNode *node, const std::string &path) const {
@@ -1793,7 +1822,7 @@ public:
 	void tick_system_nodes() {
 		int num = m_root->getChildCount();
 		for (int i=0; i<num; i++) {
-			KNode *node = m_root->getChild(i);
+			KNode *node = m_root->getChildFast(i);
 			// ルート直下で KNode::FLAG_SYSTEM が付いているノードならば、そのノードと子ノードすべての
 			// sys_tick メソッドを呼ぶ
 		//	if (node->hasFlag(KNode::FLAG_SYSTEM)) {

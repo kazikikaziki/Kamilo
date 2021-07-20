@@ -142,11 +142,12 @@ public:
 	void sendActionCommand(KSig &cmd);
 
 	// Name and ID
-	const std::string & getName() const;
 	void setName(const std::string &name);
 	bool hasName(const std::string &name) const;
-	std::string getNameInTree() const;
+	const std::string & getName() const;
+	const std::string & getNameInTree() const;
 	EID getId() const;
+	void _updateNames();
 
 	#pragma region Tree
 	CNodeTreeImpl * get_tree() const;
@@ -163,6 +164,7 @@ public:
 	KNode * getRoot();
 	KNode * getParent() const;
 	KNode * getChild(int index) const;
+	KNode * getChildFast(int index) const;
 	int getChildCount() const;
 	void setChildIndex(KNode *child, int new_index);
 	int getChildIndex(const KNode *child) const;
@@ -271,6 +273,9 @@ public:
 	KNode * findChild(const std::string &name, const KTag &tag=nullptr) const;
 	KNode * findChildInTree(const std::string &name, const KTag &tag=nullptr) const;
 	KNode * findChildInTree_unsafe(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildPath(const std::string &subpath) const;
+
+
 
 	// Traverse
 	void traverse_parents(KTraverseCallback *cb);
@@ -333,6 +338,7 @@ private:
 		EID uuid;
 		KNode *parent;
 		std::string name;
+		std::string nameInTree;
 		std::vector<KNode *> children;
 		CNodeTreeImpl *tree;
 		int blocked;
