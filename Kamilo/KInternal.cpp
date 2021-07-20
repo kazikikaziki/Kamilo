@@ -1151,28 +1151,97 @@ std::string K::pathAppendLastDelim(const std::string &path) {
 	return s;
 }
 
-static int _FindLastDelim(const std::string &path) {
-	int sl = path.find_last_of(K__PATH_SLASH);
-	int bs = path.find_last_of(K__PATH_BACKSLASH);
-	return (sl > bs) ? sl : bs; // max(sl, bs)
+static int _FindLeftDelim(const std::string &path) {
+	for (int i=0; i<(int)path.size(); i++) {
+		if (path[i] == K__PATH_SLASH) return i;
+		if (path[i] == K__PATH_BACKSLASH) return i;
+	}
+	return -1;
 }
 
+static int _FindRightDelim(const std::string &path) {
+	for (int i=(int)path.size()-1; i>=0; i--) {
+		if (path[i] == K__PATH_SLASH) return i;
+		if (path[i] == K__PATH_BACKSLASH) return i;
+	}
+	return -1;
+}
+
+/// 最も左側のパス区切りで文字列を分割する。パス区切りの左側を p_left, 右側を p_right にセットして true を返す
+/// パス区切りが無い場合は何もせずに false を返す
+/// "aaa/bbb/ccc" ==> "aaa", "bbb/ccc"
+bool K::pathSplitLeft(const std::string &path, std::string *p_left, std::string *p_right) {
+	int pos = _FindLeftDelim(path);
+	if (pos >= 0) {
+		if (p_left) * p_left  = path.substr(0, pos);
+		if (p_right) *p_right = path.substr(pos+1);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/// 最も右側のパス区切りで文字列を分割する。パス区切りの左側を p_left, 右側を p_right にセットして true を返す
+/// "aaa/bbb/ccc" ==> "aaa/bbb", "ccc"
+bool K::pathSplitRight(const std::string &path, std::string *p_left, std::string *p_right) {
+	int pos = _FindRightDelim(path);
+	if (pos >= 0) {
+		if (p_left) * p_left  = path.substr(0, pos);
+		if (p_right) *p_right = path.substr(pos+1);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/// 親パスを返す。パス区切りが無い場合は親なしとして空文字列を返す
+/// "aaa/bbb/ccc" ==> "aaa/bbb"
+/// "aaa" ==> ""
 std::string K::pathGetParent(const std::string &path) {
-	int pos = _FindLastDelim(path);
-	if (pos >= 0) {
-		return path.substr(0, pos);
-	} else {
-		return "";
+	std::string left;
+	if (pathSplitRight(path, &left, nullptr)) {
+		return left;
 	}
+	return "";
 }
+
+/// 終端パスを返す。パス区切りが無い場合は自分自身が終端であるとして、引数をそのまま返す
+/// "aaa/bbb/ccc" ==> "aaa/bbb" + "ccc"
+/// "aaa" ==> "aaa"
 std::string K::pathGetLast(const std::string &path) {
-	int pos = _FindLastDelim(path);
-	if (pos >= 0) {
-		return path.substr(pos+1);
-	} else {
-		return path;
+	std::string right;
+	if (pathSplitRight(path, nullptr, &right)) {
+		return right;
 	}
+	return path;
 }
+
+std::string K::pathPopLeft(std::string &path) {
+	std::string ret;
+	int pos = _FindLeftDelim(path);
+	if (pos >= 0) {
+		ret = path.substr(0, pos);
+		path.erase(0, pos+1);
+	} else {
+		ret = path;
+		path.clear();
+	}
+	return ret;
+}
+
+std::string K::pathPopRight(std::string &path) {
+	std::string ret;
+	int pos = _FindRightDelim(path);
+	if (pos >= 0) {
+		ret = path.substr(pos+1);
+		path.erase(path.begin() + pos, path.end());
+	} else {
+		ret = path;
+		path.clear();
+	}
+	return ret;
+}
+
 
 bool K::pathHasDelim(const std::string &path) {
 	if ((int)path.find(K__PATH_SLASH) >= 0) {
@@ -2286,7 +2355,20 @@ void Test_internal_path() {
 		K__VERIFY(K::pathGetExt("bbb/aaa.zip/ccc.bmp") == ".bmp");
 		K__VERIFY(K::pathGetExt("bbb/aaa.zip/ccc")     == "");
 		K__VERIFY(K::pathGetExt("bbb/aaa")             == "");
-
+		{
+			std::string s = "aaa/bbb/ccc"; 
+			K__VERIFY(K::pathPopLeft(s) == "aaa");
+			K__VERIFY(K::pathPopLeft(s) == "bbb");
+			K__VERIFY(K::pathPopLeft(s) == "ccc");
+			K__VERIFY(K::pathPopLeft(s) == "");
+		}
+		{
+			std::string s = "aaa/bbb/ccc"; 
+			K__VERIFY(K::pathPopRight(s) == "ccc");
+			K__VERIFY(K::pathPopRight(s) == "bbb");
+			K__VERIFY(K::pathPopRight(s) == "aaa");
+			K__VERIFY(K::pathPopRight(s) == "");
+		}
 		K__VERIFY(K::pathStartsWith("aaa/bbb", "aa") == false);
 		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa") == true);
 		K__VERIFY(K::pathStartsWith("aaa/bbb", "aaa/") == true);

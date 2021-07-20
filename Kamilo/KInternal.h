@@ -249,6 +249,10 @@ public:
 	static std::vector<std::string> pathSplit(const std::string &s);
 	static bool pathStartsWith(const std::string &path, const std::string &sub);
 	static bool pathEndsWith(const std::string &path, const std::string &sub);
+	static bool pathSplitLeft(const std::string &path, std::string *p_left, std::string *p_right);
+	static bool pathSplitRight(const std::string &path, std::string *p_left, std::string *p_right);
+	static std::string pathPopLeft(std::string &path);
+	static std::string pathPopRight(std::string &path);
 	#pragma endregion // path
 
 	#pragma region string
