@@ -5,14 +5,6 @@
 // Use stb_perlin.h
 #define K_USE_STB_PERLIN
 
-// Use SIMD
-#define K_USE_SIMD
-
-
-
-#ifdef K_USE_SIMD
-#	include <xmmintrin.h> // 128bit simd
-#endif
 
 #ifdef K_USE_STB_PERLIN
 	// stb_image

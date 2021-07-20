@@ -6,6 +6,16 @@
 #include "KInternal.h"
 #include "KQuat.h"
 
+
+// Use SIMD
+#define K_USE_SIMD
+
+
+#ifdef K_USE_SIMD
+#	include <xmmintrin.h> // 128bit simd
+#endif
+
+
 namespace Kamilo {
 
 
