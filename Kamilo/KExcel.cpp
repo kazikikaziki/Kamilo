@@ -771,9 +771,9 @@ std::string KExcelFile::exportText() {
 		s += sheet_name + "\n";
 		s += "============================================================================\n";
 		int blank_lines = 0;
-		for (int r=0; r<nRow; r++) {
+		for (int r=row; r<row+nRow; r++) {
 			bool has_cell = false;
-			for (int c=0; c<nCol; c++) {
+			for (int c=col; c<col+nCol; c++) {
 				const char *str = getDataString(iSheet, c, r);
 				if (str && str[0]) {
 					if (blank_lines >= 1) {
