@@ -1036,16 +1036,14 @@ void KNode::_setTagEx(const KTag &tag, bool is_inherited) {
 	K__ASSERT(!tag.empty());
 	if (is_inherited) {
 		// 継承タグリストに追加
-		if (KNameList_contains(m_TagData.tags_inherited, tag) == false) {
-			m_TagData.tags_inherited.push_back(tag);
-		//	if (get_tree()) {
-		//		KNodeTree_add_tag(get_tree(), this, tag);
-		//	}
+		if (KNameList_pushback_unique(m_TagData.tags_inherited, tag)) {
+			//	if (get_tree()) {
+			//		KNodeTree_add_tag(get_tree(), this, tag);
+			//	}
 		}
 	} else {
 		// 自身のタグリストに追加
-		if (KNameList_contains(m_TagData.tags_self, tag) == false) {
-			m_TagData.tags_self.push_back(tag);
+		if (KNameList_pushback_unique(m_TagData.tags_self, tag)) {
 			if (get_tree()) {
 				KNodeTree_add_tag(get_tree(), this, tag);
 			}
@@ -1053,13 +1051,21 @@ void KNode::_setTagEx(const KTag &tag, bool is_inherited) {
 	}
 
 	// ツリー内タグリストを更新
-	m_TagData.tags_in_tree = m_TagData.tags_self;
-	KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+	{
+		m_TagData.tags_in_tree = m_TagData.tags_self;
+		KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+	}
 
 	// 子に伝番
-	for (int i=0; i<getChildCount(); i++) {
-		KNode *node = getChildFast(i);
-		node->_setTagEx(tag, true);
+	if (is_inherited && KNameList_contains(m_TagData.tags_self, tag)) {
+		// 親から継承したタグを追加しているが、自分自身も同じタグを持っている。
+		// 子ツリーは自分のタグを継承していることになるので、
+		// これ以上子をたどって追加する必要はない
+	} else {
+		for (int i=0; i<getChildCount(); i++) {
+			KNode *node = getChildFast(i);
+			node->_setTagEx(tag, true);
+		}
 	}
 }
 
@@ -1098,13 +1104,21 @@ void KNode::_removeTagEx(const KTag &tag, bool is_inherited) {
 	}
 
 	// ツリー内タグリストを更新
-	m_TagData.tags_in_tree = m_TagData.tags_self;
-	KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+	{
+		m_TagData.tags_in_tree = m_TagData.tags_self;
+		KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+	}
 
 	// 子に伝番
-	for (int i=0; i<getChildCount(); i++) {
-		KNode *node = getChildFast(i);
-		node->_removeTagEx(tag, true);
+	if (is_inherited && KNameList_contains(m_TagData.tags_self, tag)) {
+		// 親から継承したタグを削除しているが、自分自身も同じタグを持っている。
+		// 子ツリーは自分のタグを継承していることになるので、
+		// これ以上子をたどって削除する必要はない
+	} else {
+		for (int i=0; i<getChildCount(); i++) {
+			KNode *node = getChildFast(i);
+			node->_removeTagEx(tag, true);
+		}
 	}
 }
 void KNode::_updateNodeTreeTags(bool add) {
