@@ -1704,22 +1704,41 @@ void KDebugGui::K_DebugGui_NodeNameId(KNode *node) {
 }
 void KDebugGui::K_DebugGui_NodeTag(KNode *node) {
 	if (node == nullptr) return;
-	const KNameList &tags = node->getTagList();
-	if (tags.size() > 0) {
-		ImGui::Text("Tags: "); ImGui::SameLine();
-		for (size_t i=0; i<tags.size(); i++) {
-			const char *name = tags[i].c_str();
-			ImGui::Text("[%s]", name);
-			ImGui::SameLine();
+
+	{
+		const KNameList &tags = node->getTagList();
+		if (tags.size() > 0) {
+			ImGui::Text("Tags: "); ImGui::SameLine();
+			for (size_t i=0; i<tags.size(); i++) {
+				const char *name = tags[i].c_str();
+				ImGui::Text("[%s]", name);
+				ImGui::SameLine();
+			}
+			ImGui::NewLine();
+		} else {
+			ImGui::Text("Tags: (NO TAGS)");
 		}
-		ImGui::NewLine();
-	} else {
-		ImGui::Text("Tag: (NO TAGS)");
 	}
+
+	{
+		const KNameList &tags = node->getTagListInherited();
+		if (tags.size() > 0) {
+			ImGui::Text("Tags Inherited: "); ImGui::SameLine();
+			for (size_t i=0; i<tags.size(); i++) {
+				const char *name = tags[i].c_str();
+				ImGui::Text("[%s]", name);
+				ImGui::SameLine();
+			}
+			ImGui::NewLine();
+		} else {
+			ImGui::Text("Tags Inherited: (NO TAGS)");
+		}
+	}
+
+
 	if (ImGui::IsItemHovered()) {
 		ImGui::SetTooltip(
-			u8"このエンティティにつけられたタグ番号と、その名前。\n"
-			u8"[in tree] と表示されている場合は、親のタグを表示していることを示す。\n"
+			u8"このエンティティにつけられたタグ番号と、その名前\n"
 		);
 	}
 }

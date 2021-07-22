@@ -11,6 +11,7 @@
 
 #define IGNORE_REMOVING_NODES 1
 #define TEST_MATRIX 1
+#define TEST_TAG    1
 
 namespace Kamilo {
 
@@ -184,6 +185,20 @@ void KNode::setParent(KNode *new_parent) {
 		K__ERROR("Parent node can not have itself as a child");
 		return;
 	}
+#if TEST_TAG
+	if (get_tree()) {
+		// 自分の（および子の）タグをノードツリーから外す
+		_updateNodeTreeTags(false);
+
+		// 古い親から継承したタグを外す
+		if (m_NodeData.parent) {
+			const KNameList &parent_tags = m_NodeData.parent->getTagListInTree();
+			for (auto it=parent_tags.begin(); it!=parent_tags.end(); ++it) {
+				_removeTagEx(*it, true);
+			}
+		}
+	}
+#endif
 
 	grab();
 	{
@@ -203,7 +218,22 @@ void KNode::setParent(KNode *new_parent) {
 
 	// 親が変化した。親に影響を受けるパラメータ類も更新する
 	_SetDirtyWorldMatrix();
+#if TEST_TAG
+	if (get_tree()) {
+		// 自分の（および子の）タグをノードツリーに追加する
+		_updateNodeTreeTags(true);
+
+		// 新しい親から継承したタグを追加する
+		if (m_NodeData.parent) {
+			const KNameList &parent_tags = m_NodeData.parent->getTagListInTree();
+			for (auto it=parent_tags.begin(); it!=parent_tags.end(); ++it) {
+				_setTagEx(*it, true);
+			}
+		}
+	}
+#else
 	setTagsDirty();
+#endif
 	_updateFlagBits();
 	_updateNames();
 
@@ -951,37 +981,46 @@ void KNode::_updateFlagBits() {
 
 #pragma region Tags
 bool KNode::hasTag(const KTag &tag) const {
-	return KNameList_contains(m_TagData.tags, tag);
+	return KNameList_contains(m_TagData.tags_self, tag);
 }
 bool KNode::hasTagInTree(const KTag &tag) const {
-	const KNameList &treetags = getTagListInTree();
-	return KNameList_contains(treetags, tag);
+	return KNameList_contains(getTagListInTree(), tag);
 }
 const KNameList & KNode::getTagList() const {
-	return m_TagData.tags;
+	return m_TagData.tags_self;
+}
+const KNameList & KNode::getTagListInherited() const {
+	return m_TagData.tags_inherited;
 }
 const KNameList & KNode::getTagListInTree() const {
+#if TEST_TAG
+	return m_TagData.tags_in_tree;
+#else
 	if (m_TagData.dirty) {
 		m_TagData.dirty = false;
-		m_TagData.tagsInTree = m_TagData.tags; // copy
+		m_TagData.tags_in_tree = m_TagData.tags_self; // copy
 		if (m_NodeData.parent) {
 			// 親の継承タグを追加する
 			// ※ unorderd_set で処理した方が速そうだが、タグはせいぜい数個しかつけないので配列で処理した方が早い
 			const KNameList &parent_tags = m_NodeData.parent->getTagListInTree(); // 親の継承タグ
 			for (auto pit=parent_tags.begin(); pit!=parent_tags.end(); pit++) {
 				KName ptag = *pit;
-				KNameList_pushback_unique(m_TagData.tagsInTree, ptag);
+				KNameList_pushback_unique(m_TagData.tags_in_tree, ptag);
 			}
 		}
 	}
-	return m_TagData.tagsInTree;
+	return m_TagData.tags_in_tree;
+#endif
 }
 void KNode::setTag(const KTag &tag) {
+#if TEST_TAG
+	_setTagEx(tag, false);
+#else
 	if (!hasTag(tag)) { // 重複登録防止
 
 		// 自身のタグテーブルを更新
-		m_TagData.tags.push_back(tag);
-		std::sort(m_TagData.tags.begin(), m_TagData.tags.end());
+		m_TagData.tags_self.push_back(tag);
+		std::sort(m_TagData.tags_self.begin(), m_TagData.tags_self.end());
 
 		// ノードツリーのテーブルを更新
 		// ※まだノードツリーの管理下でない場合は
@@ -991,17 +1030,102 @@ void KNode::setTag(const KTag &tag) {
 		}
 		setTagsDirty();
 	}
+#endif
 }
+void KNode::_setTagEx(const KTag &tag, bool is_inherited) {
+	K__ASSERT(!tag.empty());
+	if (is_inherited) {
+		// 継承タグリストに追加
+		if (KNameList_contains(m_TagData.tags_inherited, tag) == false) {
+			m_TagData.tags_inherited.push_back(tag);
+		//	if (get_tree()) {
+		//		KNodeTree_add_tag(get_tree(), this, tag);
+		//	}
+		}
+	} else {
+		// 自身のタグリストに追加
+		if (KNameList_contains(m_TagData.tags_self, tag) == false) {
+			m_TagData.tags_self.push_back(tag);
+			if (get_tree()) {
+				KNodeTree_add_tag(get_tree(), this, tag);
+			}
+		}
+	}
+
+	// ツリー内タグリストを更新
+	m_TagData.tags_in_tree = m_TagData.tags_self;
+	KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+
+	// 子に伝番
+	for (int i=0; i<getChildCount(); i++) {
+		KNode *node = getChildFast(i);
+		node->_setTagEx(tag, true);
+	}
+}
+
 void KNode::removeTag(const KTag &tag) {
+#if TEST_TAG
+	_removeTagEx(tag, false);
+#else
 	if (hasTag(tag)) { // tag がある場合のみ削除処理＋Dirty処理する
-		m_TagData.tags.erase(
-			std::remove(m_TagData.tags.begin(), m_TagData.tags.end(), tag),
-			m_TagData.tags.end()
+		m_TagData.tags_self.erase(
+			std::remove(m_TagData.tags_self.begin(), m_TagData.tags_self.end(), tag),
+			m_TagData.tags_self.end()
 		);
 		if (get_tree()) {
 			KNodeTree_del_tag(get_tree(), this, tag);
 		}
 		setTagsDirty();
+	}
+#endif
+}
+void KNode::_removeTagEx(const KTag &tag, bool is_inherited) {
+	K__ASSERT(!tag.empty());
+	if (is_inherited) {
+		// 継承タグリストから削除
+		if (KNameList_erase(m_TagData.tags_inherited, tag)) {
+		//	if (get_tree()) {
+		//		KNodeTree_del_tag(get_tree(), this, tag);
+		//	}
+		}
+	} else {
+		// 自身のタグリストから削除
+		if (KNameList_erase(m_TagData.tags_self, tag)) {
+			if (get_tree()) {
+				KNodeTree_del_tag(get_tree(), this, tag);
+			}
+		}
+	}
+
+	// ツリー内タグリストを更新
+	m_TagData.tags_in_tree = m_TagData.tags_self;
+	KNameList_merge_unique(m_TagData.tags_in_tree, m_TagData.tags_inherited);
+
+	// 子に伝番
+	for (int i=0; i<getChildCount(); i++) {
+		KNode *node = getChildFast(i);
+		node->_removeTagEx(tag, true);
+	}
+}
+void KNode::_updateNodeTreeTags(bool add) {
+	K__ASSERT(get_tree());
+	if (add) {
+		// ノードツリー側に自分のタグを追加する
+		for (auto it=m_TagData.tags_self.begin(); it!=m_TagData.tags_self.end(); ++it) {
+			KNodeTree_add_tag(get_tree(), this, *it);
+		}
+
+	} else {
+		// ノードツリー側から自分のタグを削除する
+		for (auto it=m_TagData.tags_self.begin(); it!=m_TagData.tags_self.end(); ++it) {
+			KNodeTree_del_tag(get_tree(), this, *it);
+		}
+	}
+
+	// 子に伝番
+	for (int i=0; i<getChildCount(); i++) {
+		KNode *node = getChildFast(i);
+		node->_updateNodeTreeTags(add);
 	}
 }
 void KNode::copyTags(KNode *src) {

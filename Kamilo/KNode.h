@@ -256,10 +256,14 @@ public:
 	bool hasTagInTree(const KTag &tag) const;
 	const KNameList & getTagList() const;
 	const KNameList & getTagListInTree() const;
+	const KNameList & getTagListInherited() const;
 	void setTag(const KTag &tag);
 	void removeTag(const KTag &tag);
 	void copyTags(KNode *src);
 	void setTagsDirty();
+	void _setTagEx(const KTag &tag, bool is_inherited); 
+	void _removeTagEx(const KTag &tag, bool is_inherited);
+	void _updateNodeTreeTags(bool add);
 	#pragma endregion // Tags
 
 	// Group
@@ -418,8 +422,9 @@ private:
 	mutable FlagData m_FlagData;
 
 	struct TagData {
-		KNameList tags;
-		KNameList tagsInTree;
+		KNameList tags_self; // 自分自身のタグ
+		KNameList tags_inherited; // 親から継承したタグ
+		KNameList tags_in_tree; // 自分自身のタグと継承したタグを合成したもの
 		bool dirty;
 
 		TagData() {
