@@ -350,9 +350,9 @@ public:
 		KDebugGui::K_DebugGui_NodeAtomic(node);
 		KDebugGui::K_DebugGui_NodeRenderAfterChildren(node);
 		{
-			bool b = node->m_LocalRenderOrder == KNode::LRO_TREE;
+			bool b = node->getLocalRenderOrder() == KLocalRenderOrder_TREE;
 			if (ImGui::Checkbox("Use Local Render Order", &b)) {
-				node->m_LocalRenderOrder = b ? KNode::LRO_TREE : KNode::LRO_DEFAULT;
+				node->setLocalRenderOrder(b ? KLocalRenderOrder_TREE : KLocalRenderOrder_DEFAULT);
 			}
 			if (ImGui::IsItemHovered()) {
 				ImGui::SetTooltip(
