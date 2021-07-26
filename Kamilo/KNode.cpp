@@ -505,46 +505,61 @@ const KColor & SRenderData::getColor() const {
 const KColor & SRenderData::getSpecular() const {
 	return this->specular;
 }
-KColor SRenderData::getColorInTree() const {
-	if (m_node->getParent() && this->inheritDiffuse) {
-		const SRenderData &parent_ren = m_node->getParent()->_getRenderData();
-		return this->diffuse * parent_ren.getColorInTree(); // 乗算合成
-	} else {
-		return this->diffuse;
-	}
+const KColor & SRenderData::getColorInTree() const {
+	return this->diffuseInTree;
 }
-KColor SRenderData::getSpecularInTree() const {
-	if (m_node->getParent() && this->inheritSpecular) {
-		const SRenderData &parent_ren = m_node->getParent()->_getRenderData();
-		return this->specular + parent_ren.getSpecularInTree(); // 加算合成
-	} else {
-		return this->specular;
-	}
+const KColor & SRenderData::getSpecularInTree() const {
+	return this->specularInTree;
 }
 void SRenderData::setColorInherit(bool value) {
 	this->inheritDiffuse = value;
+	_updateColorsInTree();
 }
 bool SRenderData::getColorInherit() const {
 	return this->inheritDiffuse;
 }
 void SRenderData::setSpecularInherit(bool value) {
 	this->inheritSpecular = value;
+	_updateColorsInTree();
 }
 bool SRenderData::getSpecularInherit() const {
 	return this->inheritSpecular;
 }
 void SRenderData::setColor(const KColor &value) {
 	this->diffuse = value;
+	_updateColorsInTree();
 }
 void SRenderData::setSpecular(const KColor &value) {
 	this->specular = value;
+	_updateColorsInTree();
 }
 void SRenderData::setAlpha(float alpha) {
 	this->diffuse.a = KMath::clampf(alpha, 0.0f, 1.0f);
+	_updateColorsInTree();
 }
 float SRenderData::getAlpha() const {
 	return this->diffuse.a;
 }
+void SRenderData::_updateColorsInTree() {
+	if (m_node->getParent() && this->inheritDiffuse) {
+		const SRenderData &parent_render = m_node->getParent()->_getRenderData();
+		this->diffuseInTree = this->diffuse * parent_render.diffuseInTree; // 乗算合成
+	} else {
+		this->diffuseInTree = this->diffuse;
+	}
+	if (m_node->getParent() && this->inheritSpecular) {
+		const SRenderData &parent_render = m_node->getParent()->_getRenderData();
+		this->specularInTree = this->specular + parent_render.specularInTree; // 加算合成
+	} else {
+		this->specularInTree = this->specular;
+	}
+	for (int i=0; i<m_node->getChildCount(); i++) {
+		KNode *child = m_node->getChildFast(i);
+		child->_getRenderData()._updateColorsInTree();
+	}
+}
+
+
 void SRenderData::setRenderAtomic(bool value) {
 	this->render_atomic = value;
 }
@@ -796,6 +811,7 @@ void KNode::setParent(KNode *new_parent) {
 	_updateFlagBits();
 	_updateNames();
 	_updateGroupsInTree();
+	_updateColorsInTree();
 
 	K__ASSERT(m_NodeData.parent == new_parent);
 }
@@ -1392,41 +1408,56 @@ const KColor & KNode::getColor() const {
 const KColor & KNode::getSpecular() const {
 	return m_RenderData.specular;
 }
-KColor KNode::getColorInTree() const {
-	if (m_NodeData.parent && m_RenderData.inheritDiffuse) {
-		return m_RenderData.diffuse * m_NodeData.parent->getColorInTree(); // 乗算合成
-	} else {
-		return m_RenderData.diffuse;
-	}
+const KColor & KNode::getColorInTree() const {
+	return m_RenderData.diffuseInTree;
 }
-KColor KNode::getSpecularInTree() const {
-	if (m_NodeData.parent && m_RenderData.inheritSpecular) {
-		return m_RenderData.specular + m_NodeData.parent->getSpecularInTree(); // 加算合成
+const KColor & KNode::getSpecularInTree() const {
+	return m_RenderData.specularInTree;
+}
+void KNode::_updateColorsInTree() {
+	if (m_NodeData.parent && m_RenderData.inheritDiffuse) {
+		m_RenderData.diffuseInTree = m_RenderData.diffuse * m_NodeData.parent->m_RenderData.diffuseInTree; // 乗算合成
 	} else {
-		return m_RenderData.specular;
+		m_RenderData.diffuseInTree = m_RenderData.diffuse;
+	}
+	if (m_NodeData.parent && m_RenderData.inheritSpecular) {
+		m_RenderData.specularInTree = m_RenderData.specular + m_NodeData.parent->m_RenderData.specularInTree; // 加算合成
+	} else {
+		m_RenderData.specularInTree = m_RenderData.specular;
+	}
+	for (int i=0; i<getChildCount(); i++) {
+		KNode *node = getChildFast(i);
+		node->_updateColorsInTree();
 	}
 }
 void KNode::setColorInherit(bool value) {
 	m_RenderData.inheritDiffuse = value;
+	_updateColorsInTree();
 }
 bool KNode::getColorInherit() const {
 	return m_RenderData.inheritDiffuse;
 }
 void KNode::setSpecularInherit(bool value) {
 	m_RenderData.inheritSpecular = value;
+	_updateColorsInTree();
 }
 bool KNode::getSpecularInherit() const {
 	return m_RenderData.inheritSpecular;
 }
 void KNode::setColor(const KColor &value) {
 	m_RenderData.diffuse = value;
+	_updateColorsInTree();
 }
 void KNode::setSpecular(const KColor &value) {
 	m_RenderData.specular = value;
+	_updateColorsInTree();
 }
 void KNode::setAlpha(float alpha) {
 	m_RenderData.diffuse.a = KMath::clampf(alpha, 0.0f, 1.0f);
+	_updateColorsInTree();
 }
+
+
 float KNode::getAlpha() const {
 	return m_RenderData.diffuse.a;
 }

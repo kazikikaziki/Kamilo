@@ -202,6 +202,8 @@ enum KLocalRenderOrder {
 struct SRenderData {
 	KColor diffuse;
 	KColor specular;
+	KColor diffuseInTree;
+	KColor specularInTree;
 	bool inheritDiffuse;
 	bool inheritSpecular;
 	bool render_atomic;
@@ -213,6 +215,8 @@ struct SRenderData {
 	SRenderData() {
 		diffuse = KColor::WHITE;
 		specular = KColor::ZERO;
+		diffuseInTree = KColor::WHITE;
+		specularInTree = KColor::ZERO;
 		inheritDiffuse = true;
 		inheritSpecular = true;
 		render_atomic = false;
@@ -223,8 +227,8 @@ struct SRenderData {
 	}
 	const KColor & getColor() const;
 	const KColor & getSpecular() const;
-	KColor getColorInTree() const;
-	KColor getSpecularInTree() const;
+	const KColor & getColorInTree() const;
+	const KColor & getSpecularInTree() const;
 	float getAlpha() const;
 	void setColor(const KColor &color);
 	void setSpecular(const KColor &specular);
@@ -242,6 +246,7 @@ struct SRenderData {
 	bool getViewCullingInTree() const;
 	KLocalRenderOrder getLocalRenderOrder() const;
 	void setLocalRenderOrder(KLocalRenderOrder lro);
+	void _updateColorsInTree();
 };
 
 
@@ -376,8 +381,8 @@ public:
 	#pragma region Render
 	const KColor & getColor() const;
 	const KColor & getSpecular() const;
-	KColor getColorInTree() const;
-	KColor getSpecularInTree() const;
+	const KColor & getColorInTree() const;
+	const KColor & getSpecularInTree() const;
 	float getAlpha() const;
 	void setColor(const KColor &color);
 	void setSpecular(const KColor &specular);
@@ -395,6 +400,7 @@ public:
 	bool getViewCullingInTree() const;
 	KLocalRenderOrder getLocalRenderOrder() const;
 	void setLocalRenderOrder(KLocalRenderOrder lro);
+	void _updateColorsInTree();
 	#pragma endregion // Render
 
 
