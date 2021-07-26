@@ -374,7 +374,6 @@ public:
 	KVec3 worldToLocalPoint(const KVec3 &world) const; ///< ワールド座標をローカル座標にする @see getWorld2LocalMatrix
 	void copyTransform(const KNode *other, bool copy_independent_flag);
 	void _SetDirtyWorldMatrix();
-	void _UpdateMatrix() const; // mutable 変数を扱うので const 属性にしてある
 	#pragma endregion // Transform
 
 
@@ -425,8 +424,6 @@ public:
 	void setTag(const KTag &tag);
 	void removeTag(const KTag &tag);
 	void copyTags(KNode *src);
-	void _setTagEx(const KTag &tag, bool is_inherited); 
-	void _removeTagEx(const KTag &tag, bool is_inherited);
 	void _updateNodeTreeTags(bool add);
 	#pragma endregion // Tags
 
