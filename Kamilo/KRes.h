@@ -176,7 +176,7 @@ public:
 			xml_data = NULL;
 		}
 		~SPRITE_KEY() {
-		//	K_Drop(xml_data);
+		//	K__DROP(xml_data);
 		}
 
 		int time; // キー時刻（トラック先頭からの経過時間）

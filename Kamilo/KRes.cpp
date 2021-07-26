@@ -386,11 +386,11 @@ KClipRes::~KClipRes() {
 void KClipRes::clear() {
 	mFlags = 0;
 	for (int i=0; i<(int)mKeys.size(); i++) {
-		K_Drop(mKeys[i].xml_data);
+		K__DROP(mKeys[i].xml_data);
 	}
 	mLength = 0;
 	mKeys.clear();
-	K_Drop(mEditInfoXml);
+	K__DROP(mEditInfoXml);
 }
 const char * KClipRes::getName() const {
 	return mName.u8();
@@ -714,7 +714,7 @@ void KClipRes::addKey(const KClipRes::SPRITE_KEY &key, int pos) {
 }
 void KClipRes::deleteKey(int index) {
 	if (0 <= index && index < (int)mKeys.size()) {
-		K_Drop(mKeys[index].xml_data);
+		K__DROP(mKeys[index].xml_data);
 		mKeys.erase(mKeys.begin() + index);
 		recalculateKeyTimes();
 	}
@@ -2501,7 +2501,7 @@ public:
 		m_mutex.lock();
 		{
 			for (auto it=m_clips.begin(); it!=m_clips.end(); ++it) {
-				K_Drop(it->second);
+				K__DROP(it->second);
 			}
 			m_clips.clear();
 		}
@@ -3369,7 +3369,7 @@ public:
 	}
 	~CLayeredSpriteClipBuilder() {
 		for (int i=0; i<(int)mKeys.size(); i++) {
-			K_Drop(mKeys[i].xml_data);
+			K__DROP(mKeys[i].xml_data);
 		}
 	}
 	void setLoop(bool value) {
@@ -3456,7 +3456,7 @@ public:
 		clip->setFlag(KClipRes::FLAG_LOOP, mLoop);
 		clip->setFlag(KClipRes::FLAG_KILL_SELF, mAutoKill);
 		for (auto it=mKeys.begin(); it!=mKeys.end(); ++it) {
-			K_Grab(it->xml_data);
+			K__GRAB(it->xml_data);
 			clip->addKey(*it);
 		}
 		return clip;
@@ -4143,7 +4143,7 @@ public:
 			KOutputStream file = KOutputStream::fromFileName(xmlBankName);
 			xDoc->writeDoc(file);
 		}
-		K_Drop(xDoc);
+		K__DROP(xDoc);
 		KLog::printInfo("Bank updated (%d msec)", K::clockMsec32() - starttime);
 		mFlags = 0;
 		return true;
@@ -4641,9 +4641,9 @@ public:
 				defaultUserParams.loadFromXml(xElm, true);
 			}
 			if (xElm->hasTag("EditInfo")) {
-				K_Drop(xEditInfo);
+				K__DROP(xEditInfo);
 				xEditInfo = xElm;
-				K_Grab(xEditInfo);
+				K__GRAB(xEditInfo);
 			}
 		}
 
@@ -4750,10 +4750,10 @@ public:
 			KClipRes *new_clip = builder.createClip(clipName.u8());
 			new_clip->setTag(xml_name); // 作成元の .xres ファイル名タグを追加
 			new_clip->mEditInfoXml = xEditInfo;
-			K_Grab(new_clip->mEditInfoXml);
+			K__GRAB(new_clip->mEditInfoXml);
 			KBank::getAnimationBank()->addClipResource(clipName.u8(), new_clip);
-			K_Drop(new_clip);
-			K_Drop(xEditInfo);
+			K__DROP(new_clip);
+			K__DROP(xEditInfo);
 			if (out_clip) {
 				*out_clip = KBank::getAnimationBank()->find_clip(clipName.u8());
 			}
@@ -4986,9 +4986,9 @@ public:
 			if (xElm->hasTag("EditInfo")) {
 				// <EdgeAnimation> 直下に <EditInfo> がある
 				// このクリップに対するエディタ用の情報
-				K_Drop(xEditInfo);
+				K__DROP(xEditInfo);
 				xEditInfo = xElm;
-				K_Grab(xEditInfo);
+				K__GRAB(xEditInfo);
 			}
 		}
 
@@ -5181,10 +5181,10 @@ public:
 			new_clip->setTag(edge_name.c_str()); // 作成元の .edg ファイル名タグを追加
 			new_clip->mEdgeFile = edge_name;
 			new_clip->mEditInfoXml = xEditInfo;
-			K_Grab(new_clip->mEditInfoXml);
+			K__GRAB(new_clip->mEditInfoXml);
 			KBank::getAnimationBank()->addClipResource(clipName.u8(), new_clip);
-			K_Drop(new_clip);
-			K_Drop(xEditInfo);
+			K__DROP(new_clip);
+			K__DROP(xEditInfo);
 			if (out_clip) {
 				*out_clip = KBank::getAnimationBank()->find_clip(clipName.u8());
 			}

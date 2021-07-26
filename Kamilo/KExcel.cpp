@@ -100,12 +100,12 @@ public:
 	}
 	void clear() {
 		for (size_t i=0; i<m_WorkSheets.size(); i++) {
-			K_Drop(m_WorkSheets[i]);
+			K__DROP(m_WorkSheets[i]);
 		}
 		m_WorkSheets.clear();
 		m_Strings.clear();
 		m_RowElements.clear();
-		K_Drop(m_WorkBookDoc);
+		K__DROP(m_WorkBookDoc);
 		m_FileName.clear();
 	}
 	bool empty() const {

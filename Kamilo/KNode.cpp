@@ -1883,11 +1883,11 @@ void KNode::_ExitAction() {
 }
 void KNode::_DeleteAction() {
 	if (m_ActionCurr) {
-		K_Drop(m_ActionCurr);
+		K__DROP(m_ActionCurr);
 		m_ActionCurr = nullptr;
 	}
 	if (m_ActionNext) {
-		K_Drop(m_ActionNext);
+		K__DROP(m_ActionNext);
 		m_ActionNext = nullptr;
 	}
 }
@@ -2017,7 +2017,7 @@ public:
 	}
 	void clear() {
 		for (auto it=m_map.begin(); it!=m_map.end(); ++it) {
-			K_Drop(it->second);
+			K__DROP(it->second);
 		}
 		m_map.clear();
 	}
@@ -2043,7 +2043,7 @@ public:
 		if (contains(node)) return;
 		EID uuid = node->getId();
 		m_map[uuid] = node;
-		K_Grab(node);
+		K__GRAB(node);
 	}
 	// node があればその要素を削除する。参照カウンタを減らす
 	void remove(KNode *node) {
@@ -2051,7 +2051,7 @@ public:
 		EID uuid = node->getId();
 		auto it = m_map.find(uuid);
 		if (it != m_map.end()) {
-			K_Drop(node);
+			K__DROP(node);
 			m_map.erase(it);
 		}
 	}
@@ -2060,7 +2060,7 @@ public:
 		for (auto it=m_map.begin(); it!=m_map.end(); /*NO EXPR*/) {
 			KNode *node = it->second;
 			if (node->isInvalid()) {
-				K_Drop(node);
+				K__DROP(node);
 				it = m_map.erase(it);
 			} else {
 				it++;
@@ -2129,7 +2129,7 @@ public:
 		{
 			m_id2node_map.clear();
 			m_root->_set_tree(nullptr);
-			K_Drop(m_root); // ルート要素を削除
+			K__DROP(m_root); // ルート要素を削除
 		}
 		unlock();
 	}

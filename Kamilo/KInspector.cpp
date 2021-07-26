@@ -948,7 +948,7 @@ public:
 		m_font_index = 0;
 	}
 	~CInspectorImpl() {
-		K_Drop(m_tree_inspector);
+		K__DROP(m_tree_inspector);
 	}
 	void onGameStart() {
 		m_tree_inspector->start();

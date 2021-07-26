@@ -1137,8 +1137,8 @@ public:
 		KEngine::addInspectorCallback(this, u8"入力"); // KInspectorCallback
 	}
 	virtual ~CInputMap() {
-		K_Drop(m_GameButtons);
-		K_Drop(m_AppButtons);
+		K__DROP(m_GameButtons);
+		K__DROP(m_AppButtons);
 	}
 	virtual void onInspectorGui() override { // KInspectorCallback
 		ImGui::Text("App buttons");

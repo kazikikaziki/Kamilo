@@ -1957,7 +1957,7 @@ KSolidBody::KSolidBody() {
 	m_Shape = nullptr;
 }
 KSolidBody::~KSolidBody() {
-	K_Drop(m_Shape);
+	K__DROP(m_Shape);
 }
 void KSolidBody::_setNode(KNode *node) {
 	m_Node = node;
