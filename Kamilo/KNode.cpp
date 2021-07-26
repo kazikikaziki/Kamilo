@@ -795,6 +795,7 @@ void KNode::setParent(KNode *new_parent) {
 	}
 	_updateFlagBits();
 	_updateNames();
+	_updateGroupsInTree();
 
 	K__ASSERT(m_NodeData.parent == new_parent);
 }
@@ -1674,37 +1675,32 @@ void KNode::copyTags(KNode *src) {
 
 #pragma region Grouping
 void KNode::set_group(Category category, int group) {
-	lock();
-	{
-		m_GroupNumbers[category] = group;
-	}
-	unlock();
+	m_GroupNumbers[category].value = group;
+	_updateGroupsInTree();
 }
 int KNode::get_group(Category category) const {
-	int ret = 0;
-	lock();
-	{
-		ret = m_GroupNumbers[category];
-	}
-	unlock();
-	return ret;
+	return m_GroupNumbers[category].value;
 }
 int KNode::get_group_in_tree(Category category) const {
-	// 自分自身からルートまで親をさかのぼり、最初に見つかった非ゼロな値を返す
-	int ret = 0;
-	lock();
-	{
-		const KNode *tmp = this;
-		while (tmp) {
-			int value = tmp->m_GroupNumbers[category];
-			if (value != 0) {
-				ret = value;
-				break;
-			}
-			tmp = tmp->m_NodeData.parent;
+	return m_GroupNumbers[category].valueInTree;
+}
+void KNode::_updateGroupsInTree() {
+	
+	KNode *parent = getParent();
+	for (int i=0; i<Category_ENUM_MAX; i++) {
+		// 自分のグループが 0 ならば親の値を継承する
+		if (m_GroupNumbers[i].value == 0 && parent) {
+			m_GroupNumbers[i].valueInTree = parent->m_GroupNumbers[i].valueInTree;
+		} else {
+			m_GroupNumbers[i].valueInTree = m_GroupNumbers[i].value;
 		}
 	}
-	return ret;
+
+	// 子に伝搬
+	for (int i=0; i<getChildCount(); i++) {
+		KNode *node = getChildFast(i);
+		node->_updateGroupsInTree();
+	}
 }
 #pragma endregion // Flag/Grouping
 

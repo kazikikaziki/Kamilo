@@ -428,6 +428,7 @@ public:
 	void set_group(Category category, int group);
 	int get_group(Category category) const;
 	int get_group_in_tree(Category category) const;
+	void _updateGroupsInTree();
 
 	// Find
 	// 指定された名前のノードを探す。tag を指定した場合は名前とタグの両方で探す
@@ -530,7 +531,18 @@ private:
 	mutable SRenderData m_RenderData;
 	mutable SFlagData m_FlagData;
 	mutable STagData m_TagData;
-	int m_GroupNumbers[Category_ENUM_MAX]; // KNodeCategory
+
+
+	struct Grp {
+		int value;
+		int valueInTree;
+
+		Grp() {
+			value = 0;
+			valueInTree = 0;
+		}
+	};
+	Grp m_GroupNumbers[Category_ENUM_MAX]; // KNodeCategory
 
 public:
 	mutable std::recursive_mutex m_Mutex;

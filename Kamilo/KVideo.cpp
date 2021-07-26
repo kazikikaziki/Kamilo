@@ -2113,7 +2113,7 @@ public:
 		CD3DShader *sh = findShader(sid);
 		if (sh) {
 			m_curr_shader = sh;
-			K_Grab(m_curr_shader);
+			K__GRAB(m_curr_shader);
 		} else {
 			m_curr_shader = nullptr;
 		}
