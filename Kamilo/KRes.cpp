@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include "keng_game.h"
-#include "KFile.h"
 #include "KImGui.h"
 #include "KInternal.h"
 #include "KInspector.h"

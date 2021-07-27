@@ -1,6 +1,5 @@
 ﻿#include "KNode.h"
 #include "KInternal.h"
-#include "keng_ext.h" // KImGui_XXX
 #include "KCamera.h"
 #include "KDrawable.h"
 #include "KAction.h"
