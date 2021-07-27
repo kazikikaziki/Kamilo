@@ -11,9 +11,6 @@
 #include <vector>
 
 
-#define TEST 1
-
-
 // ファイル名と行番号付きでエラーメッセージを出力する
 // ※fmt はリテラルでないといけない。
 // マクロ内の "TEXT" fmt のようなリテラル文字列結合で fmt が変数だとコンパイルエラーが発生する
@@ -64,7 +61,6 @@ typedef int K_LCID;
 
 
 
-#if TEST
 #define K__Break()                 Kamilo::K::_break()
 #define K__Exit()                  Kamilo::K::_exit()
 #define K__IsDebuggerPresent()     Kamilo::K::_IsDebuggerPresent()
@@ -82,28 +78,6 @@ typedef int K_LCID;
 #define K__SetPrintHook(hook)      Kamilo::K::setPrintHook(hook)
 #define K__SetWarningHook(hook)    Kamilo::K::setWarningHook(hook)
 #define K__SetErrorHook(hook)      Kamilo::K::setErrorHook(hook)
-#else
-void K__Break();
-void K__Exit();
-bool K__IsDebuggerPresent();
-void K__Dialog(const char *u8);
-void K__Notify(const char *u8);
-void K__DebugPrint(const char *fmt_u8, ...);
-void K__Print(const char *fmt_u8, ...);
-void K__PrintW(const wchar_t *wfmt, ...);
-void K__Error(const char *fmt_u8, ...);
-void K__ErrorW(const wchar_t *wfmt, ...);
-void K__Warning(const char *fmt_u8, ...);
-void K__WarningW(const wchar_t *wfmt, ...);
-void K__Verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
-void K__SetDebugPrintHook(void (*hook)(const char *u8));
-void K__SetPrintHook(void (*hook)(const char *u8));
-void K__SetWarningHook(void (*hook)(const char *u8));
-void K__SetErrorHook(void (*hook)(const char *u8));
-#endif
-
-
-
 
 
 struct _StrW {
