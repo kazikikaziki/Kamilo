@@ -94,7 +94,6 @@ class CNodeTreeImpl; // internal
 struct STransformData {
 	KVec3 position; // ノード座標。independent_ の値により絶対座標か相対座標かが異なる
 	KVec3 scale;    // ノードのローカルスケール
-	KVec3 pivot;    // 回転やスケーリングの中心座標。ローカル座標
 	KQuat rotation; // 回転
 	KVec3 rotation_euler;
 	KMatrix4 custom_transform;     // pos, scale, rotation に加えて、独自に行う変形行列。
@@ -145,7 +144,7 @@ struct STransformData {
 	KVec3 worldToLocalPoint(const KVec3 &world) const; ///< ワールド座標をローカル座標にする @see getWorld2LocalMatrix
 	void copyTransform(const KNode *other, bool copy_independent_flag);
 	void _SetDirtyWorldMatrix();
-	void _UpdateMatrix() const; // mutable 変数を扱うので const 属性にしてある
+	void _UpdateLocalMatrix() const; // mutable 変数を扱うので const 属性にしてある
 };
 
 

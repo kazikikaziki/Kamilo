@@ -9,7 +9,6 @@
 
 
 #define IGNORE_REMOVING_NODES 1
-#define TEST_MATRIX 1
 #define TEST_TAG    1
 
 namespace Kamilo {
@@ -114,7 +113,15 @@ void STransformData::setRotation(const KQuat &value) {
 /// 角度の適用順序は X --> Y --> Z である。
 /// オイラー角を適用するとクォータニオンも連動して変化する（その逆はできない）
 void STransformData::setRotationEuler(const KVec3 &euler_degrees) {
+#if 1
+	KQuat q;
+	q = KQuat::mul_xrot(q, KMath::degToRad(euler_degrees.x));
+	q = KQuat::mul_yrot(q, KMath::degToRad(euler_degrees.y));
+	q = KQuat::mul_zrot(q, KMath::degToRad(euler_degrees.z));
+	this->rotation = q;
+#else
 	this->rotation = KQuat::fromXDeg(euler_degrees.x) * KQuat::fromYDeg(euler_degrees.y) * KQuat::fromZDeg(euler_degrees.z);
+#endif
 	this->rotation_euler = euler_degrees;
 	this->using_euler = true;
 	this->dirty_local_matrix = true;
@@ -122,13 +129,13 @@ void STransformData::setRotationEuler(const KVec3 &euler_degrees) {
 }
 const KMatrix4 & STransformData::getLocalMatrix() const {
 	if (this->dirty_local_matrix) {
-		_UpdateMatrix();
+		_UpdateLocalMatrix();
 	}
 	return this->local_matrix;
 }
 const KMatrix4 & STransformData::getLocalMatrixInversed() const {
 	if (this->dirty_local_matrix) {
-		_UpdateMatrix();
+		_UpdateLocalMatrix();
 	}
 	return this->local_matrix_inv;
 }
@@ -249,8 +256,7 @@ void STransformData::copyTransform(const KNode *other, bool copy_independent_fla
 		setTransformInherit(other_tr.getTransformInherit());
 	}
 }
-void STransformData::_UpdateMatrix() const {
-#if TEST_MATRIX
+void STransformData::_UpdateLocalMatrix() const {
 	this->dirty_local_matrix = false;
 
 	// 基本変形行列
@@ -274,8 +280,6 @@ void STransformData::_UpdateMatrix() const {
 	}
 	
 	// カスタム変形行列
-	// スケーリングと回転の中心は Pv で表される。
-	// 拡大回転 Sc * Ro を Pivot の平行移動 inv_P, P で挟む事に注意
 	if (this->using_custom) {
 		this->local_matrix = this->custom_transform * sc_ro_tr;
 		this->local_matrix_inv = inv_tr_ro_sc * this->custom_transform_inv;
@@ -283,26 +287,6 @@ void STransformData::_UpdateMatrix() const {
 		this->local_matrix = sc_ro_tr;
 		this->local_matrix_inv = inv_tr_ro_sc;
 	}
-#else
-	this->dirty_local_matrix = false;
-	KMatrix4 Tr = KMatrix4::fromTranslation(this->position);
-	KMatrix4 Ro = KMatrix4::fromRotation(this->rotation);
-	KMatrix4 Sc = KMatrix4::fromScale(this->scale);
-
-	KMatrix4 inv_Tr = KMatrix4::fromTranslation(-this->position);
-	KMatrix4 inv_Ro = KMatrix4::fromRotation(this->rotation.inverse());
-	KMatrix4 inv_Sc = KMatrix4::fromScale(1.0f / this->scale.x, 1.0f / this->scale.y, 1.0f / this->scale.z);
-
-	// スケーリングと回転の中心は Pv で表される。
-	// 拡大回転 Sc * Ro を Pivot の平行移動 inv_P, P で挟む事に注意
-	this->local_matrix = this->custom_transform * Sc * Ro * Tr;
-
-	// 変形の逆行列を求める。
-	// 真面目に m_local_matrix から逆行列を計算するのは大変なので
-	// 平行移動や回転から直接逆行列を得る
-	this->local_matrix_inv = inv_Tr * inv_Ro * inv_Sc * this->custom_transform_inv; // 拡大回転 inv_Ro * inv_Sc を Pivot の平行移動 inv_P, P で挟む事に注意
-
-#endif
 }
 void STransformData::_SetDirtyWorldMatrix() {
 //	if (!this->m_dirty_world_matrix) {
