@@ -275,8 +275,8 @@ public:
 	static void strTrim(std::string &s);
 	static void strJoin(std::string &s, const std::string &more, const std::string &sep="");
 	static std::string strJoin(const std::vector<std::string> &strings, const std::string &sep="", bool skip_empty=true);
-	static std::string strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
-	static std::string strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator);
+	static std::string strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator=true, bool trim=true);
+	static std::string strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separatorr=true, bool trim=true);
 	static std::vector<std::string> strSplit(const std::string &s, const std::string &delims, int maxcount=0, bool condense_delims=true, bool _trim=true);
 	static std::vector<std::string> strSplitLines(const std::string &s, bool skip_empty_lines=true, bool _trim=true);
 	static bool strToFloat(const char *s, float *p_val);

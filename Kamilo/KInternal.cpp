@@ -1690,31 +1690,39 @@ std::string K::strJoin(const std::vector<std::string> &strings, const std::strin
 }
 
 
-std::string K::strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator) {
+std::string K::strGetLeft(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator, bool trim) {
 	// 文字列 s が区切り文字列 separator_substr を含んでいるなら、その左側の文字列を返す。
 	// 含んでいない場合は全文字列を返すが empty_if_no_separator が設定されて入れば空文字列を返す
 	size_t pos = s.find(separator_substr);
 	if (pos != std::string::npos) {
-		return s.substr(0, pos);
+		std::string val = s.substr(0, pos);
+		if (trim) K::strTrim(val);
+		return val;
 	}
 	if (empty_if_no_separator) {
 		return "";
 	} else {
-		return s;
+		std::string val = s;
+		if (trim) K::strTrim(val);
+		return val;
 	}
 }
 
-std::string K::strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator) {
+std::string K::strGetRight(const std::string &s, const std::string &separator_substr, bool empty_if_no_separator, bool trim) {
 	// 文字列 s が区切り文字列 separator_substr を含んでいるなら、その右側の文字列を返す。
 	// 含んでいない場合は全文字列を返すが empty_if_no_separator が設定されて入れば空文字列を返す
 	size_t pos = s.find(separator_substr);
 	if (pos != std::string::npos) {
-		return s.substr(pos + separator_substr.size());
+		std::string val = s.substr(pos + separator_substr.size());
+		if (trim) K::strTrim(val);
+		return val;
 	}
 	if (empty_if_no_separator) {
 		return "";
 	} else {
-		return s;
+		std::string val = s;
+		if (trim) K::strTrim(val);
+		return val;
 	}
 }
 

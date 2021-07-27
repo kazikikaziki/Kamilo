@@ -1249,12 +1249,12 @@ public:
 	int isConflict(const std::string &button1, const std::string &button2) const {
 		return m_GameButtons->isConflict(button1, button2);
 	}
-	void unbindByTag(const std::string &button, int tag) {
+	void unbindByTag(const std::string &button, const std::string &tag) {
 		CActionButtonKeyElm *btn = m_GameButtons->findButtonItem(button);
 		if (btn) {
 			for (int i=0; i<btn->get_key_count(); i++) {
 				IKeyElm *key = btn->get_key(i);
-				if (key->getTag() == tag) {
+				if (key->hasTag(tag)) {
 					btn->del_key(i);
 					return;
 				}
@@ -1268,7 +1268,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods, int tag) {
+	void bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods, const std::string &tag) {
 		IKeyElm *elm = m_GameButtons->createKeyboardKey(key, mods);
 		if (elm) {
 			elm->setTag(tag);
@@ -1276,7 +1276,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindJoystickKey(const std::string &button, KJoystick::Button joybtn, int tag) {
+	void bindJoystickKey(const std::string &button, KJoystick::Button joybtn, const std::string &tag) {
 		IKeyElm *elm = m_GameButtons->createJoystickKey(joybtn);
 		if (elm) {
 			elm->setTag(tag);
@@ -1284,7 +1284,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag, float threshold) {
+	void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, const std::string &tag, float threshold) {
 		IKeyElm *elm = m_GameButtons->createJoystickAxis(axis, halfrange, threshold);
 		if (elm) {
 			elm->setTag(tag);
@@ -1292,7 +1292,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindJoystickPov(const std::string &button, int xsign, int ysign, int tag) {
+	void bindJoystickPov(const std::string &button, int xsign, int ysign, const std::string &tag) {
 		IKeyElm *elm = m_GameButtons->createJoystickPov(xsign, ysign);
 		if (elm) {
 			elm->setTag(tag);
@@ -1300,7 +1300,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindMouseKey(const std::string &button, KMouse::Button mouse_btn, int tag) {
+	void bindMouseKey(const std::string &button, KMouse::Button mouse_btn, const std::string &tag) {
 		IKeyElm *elm = m_GameButtons->createMouseKey(mouse_btn);
 		if (elm) {
 			elm->setTag(tag);
@@ -1308,7 +1308,7 @@ public:
 			elm->drop();
 		}
 	}
-	void bindKeySequence(const std::string &button, const char *keys[], int tag) {
+	void bindKeySequence(const std::string &button, const char *keys[], const std::string &tag) {
 		IKeyElm *elm = m_GameButtons->createCommand(keys);
 		if (elm) {
 			elm->setTag(tag);
@@ -1316,13 +1316,13 @@ public:
 			elm->drop();
 		}
 	}
-	IKeyboardKeyElm * findKeyboardByTag(const std::string &button, int tag) {
+	IKeyboardKeyElm * findKeyboardByTag(const std::string &button, const std::string &tag) {
 		CActionButtonKeyElm *btn = m_GameButtons->findButtonItem(button);
 		if (btn == nullptr) return nullptr;
 
 		for (int i=0; i<btn->get_key_count(); i++) {
 			IKeyElm *key = btn->get_key(i);
-			if (key->getTag() == tag) {
+			if (key->hasTag(tag)) {
 				IKeyboardKeyElm *kbkey = dynamic_cast<IKeyboardKeyElm*>(key);
 				if (kbkey) {
 					return kbkey;
@@ -1331,13 +1331,13 @@ public:
 		}
 		return nullptr;
 	}
-	IJoystickKeyElm * findJoystickByTag(const std::string &button, int tag) {
+	IJoystickKeyElm * findJoystickByTag(const std::string &button, const std::string &tag) {
 		CActionButtonKeyElm *btn = m_GameButtons->findButtonItem(button);
 		if (btn == nullptr) return nullptr;
 
 		for (int i=0; i<btn->get_key_count(); i++) {
 			IKeyElm *key = btn->get_key(i);
-			if (key->getTag() == tag) {
+			if (key->hasTag(tag)) {
 				IJoystickKeyElm *jskey = dynamic_cast<IJoystickKeyElm*>(key);
 				if (jskey) {
 					return jskey;
@@ -1467,31 +1467,31 @@ void KInputMap::bindAppKey(const std::string &button, KKeyboard::Key key, KKeybo
 /// @note tag に適当な整数値を指定した場合、後でその値を検索キーとして特定のキーバインドを探すことができる。
 /// /
 /// @see unbindByTag, findKeyboardByTag, findJoystickByTag
-void KInputMap::bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods, int tag) {
+void KInputMap::bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindKeyboardKey(button, key, mods, tag);
 }
-void KInputMap::bindJoystickKey(const std::string &button, KJoystick::Button joybtn, int tag) {
+void KInputMap::bindJoystickKey(const std::string &button, KJoystick::Button joybtn, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickKey(button, joybtn, tag);
 }
-void KInputMap::bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag, float threshold) {
+void KInputMap::bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, const std::string &tag, float threshold) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickAxis(button, axis, halfrange, tag, threshold);
 }
-void KInputMap::bindJoystickPov(const std::string &button, int xsign, int ysign, int tag) {
+void KInputMap::bindJoystickPov(const std::string &button, int xsign, int ysign, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickPov(button, xsign, ysign, tag);
 }
-void KInputMap::bindMouseKey(const std::string &button, KMouse::Button mousebtn, int tag) {
+void KInputMap::bindMouseKey(const std::string &button, KMouse::Button mousebtn, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindMouseKey(button, mousebtn, tag);
 }
-void KInputMap::bindKeySequence(const std::string &button, const char *keys[], int tag) {
+void KInputMap::bindKeySequence(const std::string &button, const char *keys[], const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindKeySequence(button, keys, tag);
 }
-void KInputMap::unbindByTag(const std::string &button, int tag) {
+void KInputMap::unbindByTag(const std::string &button, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->unbindByTag(button, tag);
 }
@@ -1503,11 +1503,11 @@ void KInputMap::resetAllButtonStates() {
 	K__ASSERT(g_InputMap);
 	g_InputMap->resetAllButtonStates();
 }
-IKeyboardKeyElm * KInputMap::findKeyboardByTag(const std::string &button, int tag) {
+IKeyboardKeyElm * KInputMap::findKeyboardByTag(const std::string &button, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	return g_InputMap->findKeyboardByTag(button, tag);
 }
-IJoystickKeyElm * KInputMap::findJoystickByTag(const std::string &button, int tag) {
+IJoystickKeyElm * KInputMap::findJoystickByTag(const std::string &button, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	return g_InputMap->findJoystickByTag(button, tag);
 }
