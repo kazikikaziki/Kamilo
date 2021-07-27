@@ -30,16 +30,16 @@ typedef int KPollFlags;
 class IKeyElm: public KRef {
 public:
 	IKeyElm() { 
-		m_tag = 0;
+		m_Tag = 0;
 	}
 	virtual ~IKeyElm() {}
 	virtual bool isPressed(float *val, KPollFlags flags) const = 0;
 	virtual bool isConflictWith(const IKeyElm *k) const = 0;
-	int getTag() { return m_tag; }
-	void setTag(int value) { m_tag = value; }
+	int getTag() { return m_Tag; }
+	void setTag(int value) { m_Tag = value; }
 
 private:
-	int m_tag;
+	int m_Tag;
 };
 
 class IKeyboardKeyElm: public IKeyElm {
@@ -96,7 +96,7 @@ public:
 	static void bindAppKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE);
 	static void bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE, int tag=0);
 	static void bindJoystickKey(const std::string &button, KJoystick::Button joybtn, int tag=0);
-	static void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag=0);
+	static void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag=0, float threshold=0.2f);
 	static void bindJoystickPov(const std::string &button, int xsign, int ysign, int tag=0);
 	static void bindMouseKey(const std::string &button, KMouse::Button mousebtn, int tag=0);
 	static void bindKeySequence(const std::string &button, const char *keys[], int tag=0);

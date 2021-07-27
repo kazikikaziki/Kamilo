@@ -52,11 +52,9 @@ public:
 	/// 接続中のジョイスティックについているボタンの数
 	static int getButtonCount(int index);
 
-	/// 軸入力の閾値。この値未満の入力量は無視する
-	static void setThreshold(float value);
-
 	/// 軸の入力値を -1.0 以上 1.0 以下の値で返す
-	static float getAxis(int index, int axis);
+	/// threshold には入力感度を指定する
+	static float getAxis(int index, int axis, float threshold=0.2f);
 
 	/// ボタンが押されているかどうか
 	static bool getButton(int index, int btn);

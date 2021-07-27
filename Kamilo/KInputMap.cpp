@@ -172,15 +172,25 @@ class CJoyAxisKeyElm: public IKeyElm {
 	// このボタンに割り当てられたジョイスティック軸。
 	// 割り当てなしの場合は KJoyAxis_NONE
 	KJoystick::Axis m_Axis;
+
+	// このクラスは正負どちらかの入力を使う。
+	// 軸入力は [-1 .. 1] のうち、
+	// 負の入力 [-1..0] に反応するなら -1 を指定する
+	// 正の入力 [0..1] に反応するなら 1 を指定する
+	// 仕様上、[-1..1] 全体には反応しない。かならずどちらか一方である
 	int m_HalfRange;
+
+	float m_Threshold;
 public:
 	CJoyAxisKeyElm() {
 		m_Axis = KJoystick::AXIS_NONE;
 		m_HalfRange = 0;
+		m_Threshold = 0;
 	}
-	CJoyAxisKeyElm(KJoystick::Axis axis, int halfrange) {
+	CJoyAxisKeyElm(KJoystick::Axis axis, int halfrange, float threshold) {
 		m_Axis = axis;
 		m_HalfRange = halfrange;
+		m_Threshold = threshold;
 	}
 	// IKeyElm
 	virtual bool isConflictWith(const IKeyElm *k) const override {
@@ -190,11 +200,13 @@ public:
 	virtual bool isPressed(float *val, KPollFlags flags) const override {
 		if (flags & POLLFLAG_NO_JOYSTICK) return false;
 		if (m_Axis == KJoystick::AXIS_NONE) return false;
+
+		// 傾きの絶対値が最も大きい軸の値を得る
 		float axisval = 0.0f;
 		for (int i=0; i<KJoystick::MAX_CONNECT; i++) {
 			if (KJoystick::isConnected(i)) {
-				float val = KJoystick::getAxis(i, m_Axis);
-				if (fabsf(axisval) < fabsf(val)) {
+				float val = KJoystick::getAxis(i, m_Axis, m_Threshold);
+				if (fabsf(val) > fabsf(axisval)) {
 					axisval = val;
 				}
 			}
@@ -785,12 +797,12 @@ public:
 
 	// 仮想ボタンにジョイスティックの軸を割り当てる
 	// @param axis 割り当てる軸 (@K_JOYAXIS_X など)
-	IKeyElm * createJoystickAxis(KJoystick::Axis axis, int halfrange) {
+	IKeyElm * createJoystickAxis(KJoystick::Axis axis, int halfrange, float threshold) {
 		if (!KJoystick::isInit()) {
 			K__ERROR("no joystick support");
 			return nullptr;
 		}
-		return new CJoyAxisKeyElm(axis, halfrange);
+		return new CJoyAxisKeyElm(axis, halfrange, threshold);
 	}
 
 	// 仮想ボタンにジョイスティックのハットボタン(POV)を割り当てる
@@ -1272,8 +1284,8 @@ public:
 			elm->drop();
 		}
 	}
-	void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag) {
-		IKeyElm *elm = m_GameButtons->createJoystickAxis(axis, halfrange);
+	void bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag, float threshold) {
+		IKeyElm *elm = m_GameButtons->createJoystickAxis(axis, halfrange, threshold);
 		if (elm) {
 			elm->setTag(tag);
 			m_GameButtons->bindKey(button, elm);
@@ -1463,9 +1475,9 @@ void KInputMap::bindJoystickKey(const std::string &button, KJoystick::Button joy
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickKey(button, joybtn, tag);
 }
-void KInputMap::bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag) {
+void KInputMap::bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, int tag, float threshold) {
 	K__ASSERT(g_InputMap);
-	g_InputMap->bindJoystickAxis(button, axis, halfrange, tag);
+	g_InputMap->bindJoystickAxis(button, axis, halfrange, tag, threshold);
 }
 void KInputMap::bindJoystickPov(const std::string &button, int xsign, int ysign, int tag) {
 	K__ASSERT(g_InputMap);
