@@ -9,7 +9,8 @@
 
 
 #define IGNORE_REMOVING_NODES 1
-#define TEST_TAG    1
+#define TEST_TAG         1
+#define TEST_WORLDMATRIX 1
 
 namespace Kamilo {
 
@@ -83,8 +84,13 @@ bool STransformData::getRotationEuler(KVec3 *out_euler) const {
 /// @note 座標、スケール、回転を親から継承したくない場合は setTransformInherit を使って継承フラグを外す
 void STransformData::setPosition(const KVec3 &value) {
 	this->position = value;
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	this->dirty_local_matrix = true;
 	_SetDirtyWorldMatrix();
+	#endif
 }
 void STransformData::setPositionDelta(const KVec3 &delta) {
 	KVec3 pos = getPosition();
@@ -96,8 +102,13 @@ void STransformData::setPositionDelta(const KVec3 &delta) {
 /// @note 座標、スケール、回転を親から継承したくない場合は setTransformInherit を使って継承フラグを外す
 void STransformData::setScale(const KVec3 &value) {
 	this->scale = value;
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	this->dirty_local_matrix = true;
 	_SetDirtyWorldMatrix();
+	#endif
 }
 /// 回転をクォータニオンで設定する。
 /// クォータニオンからオイラー角への変換は一意に定まらないため、
@@ -106,8 +117,13 @@ void STransformData::setRotation(const KQuat &value) {
 	this->rotation = value;
 	this->rotation_euler = KVec3();
 	this->using_euler = false;
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	this->dirty_local_matrix = true;
 	_SetDirtyWorldMatrix();
+	#endif
 }
 /// 回転をオイラー角で設定する。
 /// 角度の適用順序は X --> Y --> Z である。
@@ -124,8 +140,13 @@ void STransformData::setRotationEuler(const KVec3 &euler_degrees) {
 #endif
 	this->rotation_euler = euler_degrees;
 	this->using_euler = true;
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	this->dirty_local_matrix = true;
 	_SetDirtyWorldMatrix();
+	#endif
 }
 const KMatrix4 & STransformData::getLocalMatrix() const {
 	if (this->dirty_local_matrix) {
@@ -159,7 +180,12 @@ void STransformData::setCustomTransform(const KMatrix4 &matrix, const KMatrix4 *
 		this->using_custom = true;
 		this->dirty_local_matrix = true;
 	}
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	_SetDirtyWorldMatrix();
+	#endif
 }
 void STransformData::getCustomTransform(KMatrix4 *out_matrix, KMatrix4 *out_matrix_inv) const {
 	if (out_matrix) *out_matrix = this->custom_transform;
@@ -223,7 +249,12 @@ KQuat STransformData::getLocal2WorldRotation() const {
 }
 void STransformData::setTransformInherit(bool value) {
 	this->inherit_transform = value;
+	#if TEST_WORLDMATRIX
+	_UpdateLocalMatrix();
+	_UpdateWorldMatrix();
+	#else
 	_SetDirtyWorldMatrix();
+	#endif
 }
 bool STransformData::getTransformInherit() const {
 	return this->inherit_transform;
@@ -286,6 +317,19 @@ void STransformData::_UpdateLocalMatrix() const {
 	} else {
 		this->local_matrix = sc_ro_tr;
 		this->local_matrix_inv = inv_tr_ro_sc;
+	}
+}
+void STransformData::_UpdateWorldMatrix() const {
+	if (this->inherit_transform && m_node->getParent()) {
+		STransformData &parent_tr = m_node->getParent()->_getTransformData();
+		this->world_matrix = this->local_matrix * parent_tr.world_matrix;
+	} else {
+		this->world_matrix = this->local_matrix;
+	}
+	for (size_t i=0; i<m_node->getChildCount(); i++) {
+		KNode *child = m_node->getChildFast(i);
+		STransformData &child_tr = child->_getTransformData();
+		child_tr._UpdateWorldMatrix();
 	}
 }
 void STransformData::_SetDirtyWorldMatrix() {
@@ -778,7 +822,12 @@ void KNode::setParent(KNode *new_parent) {
 	drop();
 
 	// 親が変化した。親に影響を受けるパラメータ類も更新する
+	#if TEST_WORLDMATRIX
+	m_TransformData._UpdateWorldMatrix();
+	#else
 	_SetDirtyWorldMatrix();
+	#endif
+
 	if (get_tree()) {
 		// 自分の（および子の）タグをノードツリーに追加する
 		_updateNodeTreeTags(true);

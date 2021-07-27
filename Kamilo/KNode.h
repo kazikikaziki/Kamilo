@@ -145,6 +145,7 @@ struct STransformData {
 	void copyTransform(const KNode *other, bool copy_independent_flag);
 	void _SetDirtyWorldMatrix();
 	void _UpdateLocalMatrix() const; // mutable 変数を扱うので const 属性にしてある
+	void _UpdateWorldMatrix() const; // mutable 変数を扱うので const 属性にしてある
 };
 
 
