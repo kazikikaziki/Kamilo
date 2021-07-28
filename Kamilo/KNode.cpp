@@ -9,7 +9,6 @@
 
 
 #define IGNORE_REMOVING_NODES 1
-#define TEST_TAG         1
 #define TEST_WORLDMATRIX 1
 
 namespace Kamilo {
@@ -93,7 +92,7 @@ bool STransformData::getRotationEuler(KVec3 *out_euler) const {
 /// @note 座標、スケール、回転を親から継承したくない場合は setTransformInherit を使って継承フラグを外す
 void STransformData::setPosition(const KVec3 &value) {
 	m_Position = value;
-	_updateMatrix();
+	_updateTree();
 }
 void STransformData::setPositionDelta(const KVec3 &delta) {
 	KVec3 pos = getPosition();
@@ -105,7 +104,7 @@ void STransformData::setPositionDelta(const KVec3 &delta) {
 /// @note 座標、スケール、回転を親から継承したくない場合は setTransformInherit を使って継承フラグを外す
 void STransformData::setScale(const KVec3 &value) {
 	m_Scale = value;
-	_updateMatrix();
+	_updateTree();
 }
 /// 回転をクォータニオンで設定する。
 /// クォータニオンからオイラー角への変換は一意に定まらないため、
@@ -114,7 +113,7 @@ void STransformData::setRotation(const KQuat &value) {
 	m_Rotation = value;
 	m_RotationEuler = KVec3();
 	m_UsingEuler = false;
-	_updateMatrix();
+	_updateTree();
 }
 /// 回転をオイラー角で設定する。
 /// 角度の適用順序は X --> Y --> Z である。
@@ -131,7 +130,7 @@ void STransformData::setRotationEuler(const KVec3 &euler_degrees) {
 #endif
 	m_RotationEuler = euler_degrees;
 	m_UsingEuler = true;
-	_updateMatrix();
+	_updateTree();
 }
 const KMatrix4 & STransformData::getLocalMatrix() const {
 	if (m_DirtyLocalMatrix) {
@@ -165,7 +164,7 @@ void STransformData::setCustomTransform(const KMatrix4 &matrix, const KMatrix4 *
 		m_UsingCustom = true;
 		m_DirtyLocalMatrix = true;
 	}
-	_updateMatrix();
+	_updateTree();
 }
 void STransformData::getCustomTransform(KMatrix4 *out_matrix, KMatrix4 *out_matrix_inv) const {
 	if (out_matrix) *out_matrix = m_CustomMatrix;
@@ -229,7 +228,7 @@ KQuat STransformData::getLocal2WorldRotation() const {
 }
 void STransformData::setTransformInherit(bool value) {
 	m_InheritTransform = value;
-	_updateMatrix();
+	_updateTree();
 }
 bool STransformData::getTransformInherit() const {
 	return m_InheritTransform;
@@ -294,17 +293,16 @@ void STransformData::_updateLocalMatrix() const {
 		m_LocalMatrixInv = inv_tr_ro_sc;
 	}
 }
-void STransformData::_updateWorldMatrix() const {
-	if (m_InheritTransform && m_Node->getParent()) {
-		STransformData &parent_tr = m_Node->getParent()->_getTransformData();
-		m_WorldMatrix = m_LocalMatrix * parent_tr.m_WorldMatrix;
+void STransformData::_updateWorldMatrix(const KMatrix4 &parent) const {
+	if (m_InheritTransform) {
+		m_WorldMatrix = m_LocalMatrix * parent;
 	} else {
 		m_WorldMatrix = m_LocalMatrix;
 	}
 	for (size_t i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChildFast(i);
 		STransformData &child_tr = child->_getTransformData();
-		child_tr._updateWorldMatrix();
+		child_tr._updateWorldMatrix(m_WorldMatrix);
 	}
 }
 void STransformData::_setDirtyWorldMatrix() {
@@ -315,10 +313,15 @@ void STransformData::_setDirtyWorldMatrix() {
 		child_tr._setDirtyWorldMatrix();
 	}
 }
-void STransformData::_updateMatrix() {
+void STransformData::_updateTree() {
 	#if TEST_WORLDMATRIX
 	_updateLocalMatrix();
-	_updateWorldMatrix();
+	if (m_Node->getParent()) {
+		STransformData &parent_tr = m_Node->getParent()->_getTransformData();
+		_updateWorldMatrix(parent_tr.m_WorldMatrix);
+	} else {
+		_updateWorldMatrix(m_LocalMatrix);
+	}
 	#else
 	m_DirtyLocalMatrix = true;
 	_setDirtyWorldMatrix();
@@ -522,14 +525,22 @@ void SFlagData::setFlag(uint32_t flag, bool value) {
 		} else {
 			m_Bits &= ~flag;
 		}
-		_updateFlagBits();
+		_updateTree();
 	}
 }
-void SFlagData::_updateFlagBits() {
-	if (m_Node->getParent()) {
-		const SFlagData &parent_flags = m_Node->getParent()->_getFlagData();
-		m_BitsInTreeAll = m_Bits & parent_flags.m_BitsInTreeAll;
-		m_BitsInTreeAny = m_Bits | parent_flags.m_BitsInTreeAny;
+void SFlagData::_updateTree() {
+	KNode *parent = m_Node->getParent();
+	if (parent) {
+		const SFlagData &data = parent->_getFlagData();
+		_updateTree(&data);
+	} else {
+		_updateTree(this);
+	}
+}
+void SFlagData::_updateTree(const SFlagData *parent) {
+	if (parent) {
+		m_BitsInTreeAll = m_Bits & parent->m_BitsInTreeAll;
+		m_BitsInTreeAny = m_Bits | parent->m_BitsInTreeAny;
 	} else {
 		m_BitsInTreeAll = m_Bits;
 		m_BitsInTreeAny = m_Bits;
@@ -537,12 +548,57 @@ void SFlagData::_updateFlagBits() {
 	for (int i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChild(i);
 		SFlagData &child_flags = child->_getFlagData();
-		child_flags._updateFlagBits();
+		child_flags._updateTree(this);
 	}
 }
 #pragma endregion // SFlagData
 
 
+
+#pragma region SIntData
+SIntData::SIntData() {
+	memset(m_Values, 0, sizeof(m_Values));
+	memset(m_ValuesInTree, 0, sizeof(m_ValuesInTree));
+	m_Node = nullptr;
+}
+void SIntData::setValue(int index, int value) {
+	m_Values[index] = value;
+	_updateTree();
+}
+int SIntData::getValue(int index) const {
+	return m_Values[index];
+}
+int SIntData::getValueInTree(int index) const {
+	return m_ValuesInTree[index];
+}
+void SIntData::_updateTree() {
+	KNode *parent = m_Node->getParent();
+	if (parent) {
+		const SIntData &data = parent->_getIntData();
+		_updateTree(&data);
+	} else {
+		_updateTree(this);
+	}
+}
+void SIntData::_updateTree(const SIntData *parent) {
+	// 自分のグループが 0 ならば親の値を継承する
+	if (parent) {
+		for (int i=0; i<SIZE; i++) {
+			if (m_Values[i] == 0) {
+				m_ValuesInTree[i] = parent->m_ValuesInTree[i];
+			} else {
+				m_ValuesInTree[i] = m_Values[i];
+			}
+		}
+	}
+	// 子に伝搬
+	for (int i=0; i<m_Node->getChildCount(); i++) {
+		KNode *node = m_Node->getChildFast(i);
+		SIntData &data = node->_getIntData();
+		data._updateTree(this);
+	}
+}
+#pragma endregion // SIntData
 
 
 
@@ -620,8 +676,6 @@ void SRenderData::_updateColorsInTree() {
 		child->_getRenderData()._updateColorsInTree();
 	}
 }
-
-
 void SRenderData::setRenderAtomic(bool value) {
 	m_RenderAtomic = value;
 }
@@ -664,6 +718,7 @@ void SRenderData::setLocalRenderOrder(KLocalRenderOrder lro) {
 
 
 
+
 #pragma region KNode
 static int g_KNode_unique_id = 0;
 
@@ -683,9 +738,10 @@ KNode::KNode() {
 	m_TagData.m_Node = this;
 	m_FlagData = SFlagData();
 	m_FlagData.m_Node = this;
+	m_IntData = SIntData();
+	m_IntData.m_Node = this;
 	m_RenderData = SRenderData();
 	m_RenderData.m_Node = this;
-	memset(m_GroupNumbers, 0, sizeof(m_GroupNumbers));
 	m_ActionNext = nullptr;
 	m_ActionCurr = nullptr;
 	m_NodeData.uuid = (EID)(++g_KNode_unique_id);
@@ -825,9 +881,7 @@ void KNode::setParent(KNode *new_parent) {
 		K__ERROR("Parent node can not have itself as a child");
 		return;
 	}
-#if TEST_TAG
 	m_TagData._beginParentChange();
-#endif
 
 	grab();
 	{
@@ -846,15 +900,12 @@ void KNode::setParent(KNode *new_parent) {
 	drop();
 
 	// 親が変化した。親に影響を受けるパラメータ類も更新する
-	m_TransformData._updateMatrix();
-
-#if TEST_TAG
-	m_TagData._endParentChange();
-#endif
-	_updateFlagBits();
 	_updateNames();
-	_updateGroupsInTree();
-	_updateColorsInTree();
+	m_IntData._updateTree();
+	m_TransformData._updateTree();
+	m_FlagData._updateTree();
+	m_RenderData._updateColorsInTree();
+	m_TagData._endParentChange();
 
 	K__ASSERT(m_NodeData.parent == new_parent);
 }
@@ -1299,9 +1350,6 @@ const KColor & KNode::getColorInTree() const {
 const KColor & KNode::getSpecularInTree() const {
 	return m_RenderData.getSpecularInTree();
 }
-void KNode::_updateColorsInTree() {
-	m_RenderData._updateColorsInTree();
-}
 void KNode::setColorInherit(bool value) {
 	m_RenderData.setColorInherit(value);
 }
@@ -1380,9 +1428,6 @@ KNode::Flags KNode::getFlagBitsInTreeAny() const {
 void KNode::setFlag(Flag flag, bool value) {
 	m_FlagData.setFlag(flag, value);
 }
-void KNode::_updateFlagBits() {
-	m_FlagData._updateFlagBits();
-}
 #pragma endregion // Flags
 
 
@@ -1427,32 +1472,13 @@ void KNode::copyTags(KNode *src) {
 
 #pragma region Grouping
 void KNode::set_group(Category category, int group) {
-	m_GroupNumbers[category].value = group;
-	_updateGroupsInTree();
+	m_IntData.setValue(category, group);
 }
 int KNode::get_group(Category category) const {
-	return m_GroupNumbers[category].value;
+	return m_IntData.getValue(category);
 }
 int KNode::get_group_in_tree(Category category) const {
-	return m_GroupNumbers[category].valueInTree;
-}
-void KNode::_updateGroupsInTree() {
-	
-	KNode *parent = getParent();
-	for (int i=0; i<Category_ENUM_MAX; i++) {
-		// 自分のグループが 0 ならば親の値を継承する
-		if (m_GroupNumbers[i].value == 0 && parent) {
-			m_GroupNumbers[i].valueInTree = parent->m_GroupNumbers[i].valueInTree;
-		} else {
-			m_GroupNumbers[i].valueInTree = m_GroupNumbers[i].value;
-		}
-	}
-
-	// 子に伝搬
-	for (int i=0; i<getChildCount(); i++) {
-		KNode *node = getChildFast(i);
-		node->_updateGroupsInTree();
-	}
+	return m_IntData.getValueInTree(category);
 }
 #pragma endregion // Flag/Grouping
 

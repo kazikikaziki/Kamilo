@@ -137,8 +137,8 @@ struct STransformData {
 	void copyTransform(const KNode *other, bool copy_independent_flag);
 	void _setDirtyWorldMatrix();
 	void _updateLocalMatrix() const; // mutable 変数を扱うので const 属性にしてある
-	void _updateWorldMatrix() const; // mutable 変数を扱うので const 属性にしてある
-	void _updateMatrix();
+	void _updateWorldMatrix(const KMatrix4 &parent) const; // mutable 変数を扱うので const 属性にしてある
+	void _updateTree();
 };
 
 
@@ -164,6 +164,7 @@ struct STagData {
 };
 
 
+// 継承可能な論理値
 struct SFlagData {
 	uint32_t m_Bits; // 自分自身のフラグ
 	uint32_t m_BitsInTreeAll; // 自分と親ツリーのフラグビットを AND 結合したもの
@@ -178,8 +179,28 @@ struct SFlagData {
 	uint32_t getFlagBitsInTreeAll() const;
 	uint32_t getFlagBitsInTreeAny() const;
 	void setFlag(uint32_t flag, bool value);
-	void _updateFlagBits();
+	void _updateTree();
+	void _updateTree(const SFlagData *parent);
 };
+
+
+// 継承可能な整数値
+struct SIntData {
+	static const int SIZE = 8;
+	int m_Values[SIZE];
+	int m_ValuesInTree[SIZE];
+	KNode *m_Node;
+
+	SIntData();
+	void setValue(int index, int value);
+	int getValue(int index) const;
+	int getValueInTree(int index) const;
+	void _updateTree();
+	void _updateTree(const SIntData *parent);
+};
+
+
+
 
 
 enum KLocalRenderOrder {
@@ -318,6 +339,36 @@ public:
 	}
 	#pragma endregion // Parent/Children/Sibling
 
+	// Find
+	// 指定された名前のノードを探す。tag を指定した場合は名前とタグの両方で探す
+	// 名前に nullptr を指定した場合はタグだけで探す。
+	KNode * findChild(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildInTree(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildInTree_unsafe(const std::string &name, const KTag &tag=nullptr) const;
+	KNode * findChildPath(const std::string &subpath) const;
+
+	// Traverse
+	void traverse_parents(KTraverseCallback *cb);
+	void traverse_children(KTraverseCallback *cb, bool recurse=true);
+
+	// Action
+	void setAction(KAction *act, bool update_now=true);
+	KAction * getAction() const;
+	template <class T> T getActionT() const {
+		return dynamic_cast<T>(getAction());
+	}
+
+	void tick(KNodeTickFlags flags); // ゲーム用の更新。デバッグ用のポーズ中は呼ばれない
+	void tick2(KNodeTickFlags flags);
+
+	void sys_tick(); // システム用の更新。デバッグ用のポーズ中でも関係なく呼ばれる
+
+	// Removing
+	void remove();
+	void remove_children();
+	void _remove_all();
+
+
 
 	#pragma region Transform
 	const KVec3 & getPosition() const;
@@ -374,7 +425,6 @@ public:
 	bool getViewCullingInTree() const;
 	KLocalRenderOrder getLocalRenderOrder() const;
 	void setLocalRenderOrder(KLocalRenderOrder lro);
-	void _updateColorsInTree();
 	#pragma endregion // Render
 
 
@@ -386,8 +436,14 @@ public:
 	Flags getFlagBitsInTreeAll() const;
 	Flags getFlagBitsInTreeAny() const;
 	void setFlag(Flag flag, bool value);
-	void _updateFlagBits();
 	#pragma endregion // Flags
+
+
+	#pragma region Group
+	void set_group(Category category, int group);
+	int get_group(Category category) const;
+	int get_group_in_tree(Category category) const;
+	#pragma endregion // Group
 
 
 	#pragma region Tags
@@ -402,45 +458,8 @@ public:
 	void _updateNodeTreeTags(bool add);
 	#pragma endregion // Tags
 
-	// Group
-	void set_group(Category category, int group);
-	int get_group(Category category) const;
-	int get_group_in_tree(Category category) const;
-	void _updateGroupsInTree();
 
-	// Find
-	// 指定された名前のノードを探す。tag を指定した場合は名前とタグの両方で探す
-	// 名前に nullptr を指定した場合はタグだけで探す。
-	KNode * findChild(const std::string &name, const KTag &tag=nullptr) const;
-	KNode * findChildInTree(const std::string &name, const KTag &tag=nullptr) const;
-	KNode * findChildInTree_unsafe(const std::string &name, const KTag &tag=nullptr) const;
-	KNode * findChildPath(const std::string &subpath) const;
-
-
-
-	// Traverse
-	void traverse_parents(KTraverseCallback *cb);
-	void traverse_children(KTraverseCallback *cb, bool recurse=true);
-
-	// Action
-	void setAction(KAction *act, bool update_now=true);
-	KAction * getAction() const;
-	template <class T> T getActionT() const {
-		return dynamic_cast<T>(getAction());
-	}
-
-	void tick(KNodeTickFlags flags); // ゲーム用の更新。デバッグ用のポーズ中は呼ばれない
-	void tick2(KNodeTickFlags flags);
-
-	void sys_tick(); // システム用の更新。デバッグ用のポーズ中でも関係なく呼ばれる
-
-	// Removing
-	void remove();
-	void remove_children();
-	void _remove_all();
-
-	// Helper
-#if 1
+	#pragma region Helper
 	bool isInvalid() const;
 	void setPause(bool value);
 	bool getPause() const;
@@ -457,7 +476,8 @@ public:
 	void setPriority(int value);
 	int getPriority() const;
 	int getPriorityInTree() const;
-#endif
+	#pragma endregion // Helper
+
 public:
 	void _RegisterForDelete(std::vector<KNode*> &list, bool all);
 	void _ExitAction();
@@ -472,6 +492,8 @@ public:
 	const STagData & _getTagData() const { return m_TagData; }
 	SFlagData & _getFlagData() { return m_FlagData; }
 	const SFlagData & _getFlagData() const { return m_FlagData; }
+	SIntData & _getIntData() { return m_IntData; }
+	const SIntData & _getIntData() const { return m_IntData; }
 	SRenderData & _getRenderData() { return m_RenderData; }
 	const SRenderData & _getRenderData() const { return m_RenderData; }
 
@@ -509,18 +531,7 @@ private:
 	mutable SRenderData m_RenderData;
 	mutable SFlagData m_FlagData;
 	mutable STagData m_TagData;
-
-
-	struct Grp {
-		int value;
-		int valueInTree;
-
-		Grp() {
-			value = 0;
-			valueInTree = 0;
-		}
-	};
-	Grp m_GroupNumbers[Category_ENUM_MAX]; // KNodeCategory
+	mutable SIntData m_IntData;
 
 public:
 	mutable std::recursive_mutex m_Mutex;
