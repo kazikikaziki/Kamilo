@@ -92,31 +92,23 @@ class CNodeTreeImpl; // internal
 
 
 struct STransformData {
-	KVec3 position; // ノード座標。independent_ の値により絶対座標か相対座標かが異なる
-	KVec3 scale;    // ノードのローカルスケール
-	KQuat rotation; // 回転
-	KVec3 rotation_euler;
-	KMatrix4 custom_transform;     // pos, scale, rotation に加えて、独自に行う変形行列。
-	KMatrix4 custom_transform_inv; // m_local_transform の逆行列
-	mutable KMatrix4 local_matrix;         // pos, scale, rotation, m_more_transform によって決まる変形行列
-	mutable KMatrix4 local_matrix_inv;     // local_matrix の逆行列
-	mutable KMatrix4 world_matrix;
-	mutable bool dirty_local_matrix;
-	mutable bool dirty_world_matrix;
-	bool using_euler;
-	bool using_custom;
-	bool inherit_transform;
-	KNode *m_node;
+	KVec3 m_Position; // ノード座標。independent_ の値により絶対座標か相対座標かが異なる
+	KVec3 m_Scale;    // ノードのローカルスケール
+	KQuat m_Rotation; // 回転
+	KVec3 m_RotationEuler;
+	KMatrix4 m_CustomMatrix;    // pos, scale, rotation に加えて、独自に行う変形行列。
+	KMatrix4 m_CustomMatrixInv; // m_CustomTransform の逆行列
+	mutable KMatrix4 m_LocalMatrix;    // pos, scale, rotation, m_more_transform によって決まる変形行列
+	mutable KMatrix4 m_LocalMatrixInv; // m_LocalMatrix の逆行列
+	mutable KMatrix4 m_WorldMatrix;    // ワールド内での行列
+	mutable bool m_DirtyLocalMatrix;
+	mutable bool m_DirtyWorldMatrix;
+	bool m_UsingEuler;
+	bool m_UsingCustom;
+	bool m_InheritTransform;
+	KNode *m_Node;
 
-	STransformData() {
-		scale = KVec3(1.0f, 1.0f, 1.0f);
-		dirty_local_matrix = true;
-		dirty_world_matrix = true;
-		using_euler = true;
-		using_custom = false;
-		inherit_transform = true;
-		m_node = nullptr;
-	}
+	STransformData();
 	const KVec3 & getPosition() const;
 	const KVec3 & getScale() const;
 	const KQuat & getRotation() const;
@@ -143,21 +135,20 @@ struct STransformData {
 	KVec3 localToWorldPoint(const KVec3 &local) const; ///< ローカル座標をワールド座標にする @see getLocal2WorldMatrix
 	KVec3 worldToLocalPoint(const KVec3 &world) const; ///< ワールド座標をローカル座標にする @see getWorld2LocalMatrix
 	void copyTransform(const KNode *other, bool copy_independent_flag);
-	void _SetDirtyWorldMatrix();
-	void _UpdateLocalMatrix() const; // mutable 変数を扱うので const 属性にしてある
-	void _UpdateWorldMatrix() const; // mutable 変数を扱うので const 属性にしてある
+	void _setDirtyWorldMatrix();
+	void _updateLocalMatrix() const; // mutable 変数を扱うので const 属性にしてある
+	void _updateWorldMatrix() const; // mutable 変数を扱うので const 属性にしてある
+	void _updateMatrix();
 };
 
 
 struct STagData {
-	KNameList tags_self; // 自分自身のタグ
-	KNameList tags_inherited; // 親から継承したタグ
-	KNameList tags_in_tree; // 自分自身のタグと継承したタグを合成したもの
-	KNode *m_node;
+	KNameList m_SelfTags; // 自分自身のタグ
+	KNameList m_ParentTags; // 親から継承したタグ
+	KNameList m_TagsInTree; // 自分自身のタグと継承したタグを合成したもの
+	KNode *m_Node;
 
-	STagData() {
-		m_node = nullptr;
-	}
+	STagData();
 	bool hasTag(const KTag &tag) const;
 	bool hasTagInTree(const KTag &tag) const;
 	const KNameList & getTagList() const;
@@ -168,21 +159,18 @@ struct STagData {
 	void _setTagEx(const KTag &tag, bool is_inherited); 
 	void _removeTagEx(const KTag &tag, bool is_inherited);
 	void _updateNodeTreeTags(bool add);
+	void _beginParentChange();
+	void _endParentChange();
 };
 
 
 struct SFlagData {
-	uint32_t bits; // 自分自身のフラグ
-	uint32_t bitsInTreeAll; // 自分と親ツリーのフラグビットを AND 結合したもの
-	uint32_t bitsInTreeAny; // 自分と親ツリーのフラグビットを OR 結合したもの
-	KNode *m_node;
+	uint32_t m_Bits; // 自分自身のフラグ
+	uint32_t m_BitsInTreeAll; // 自分と親ツリーのフラグビットを AND 結合したもの
+	uint32_t m_BitsInTreeAny; // 自分と親ツリーのフラグビットを OR 結合したもの
+	KNode *m_Node;
 
-	SFlagData() {
-		bits = 0;
-		bitsInTreeAll = 0;
-		bitsInTreeAny = 0;
-		m_node = nullptr;
-	}
+	SFlagData();
 	bool hasFlag(uint32_t flag) const;
 	bool hasFlagInTreeAll(uint32_t flag) const;
 	bool hasFlagInTreeAny(uint32_t flag) const;
@@ -200,31 +188,19 @@ enum KLocalRenderOrder {
 };
 
 struct SRenderData {
-	KColor diffuse;
-	KColor specular;
-	KColor diffuseInTree;
-	KColor specularInTree;
-	bool inheritDiffuse;
-	bool inheritSpecular;
-	bool render_atomic;
-	bool render_after_children;
-	bool view_culling;
-	KNode *m_node;
+	KColor m_Diffuse;
+	KColor m_Specular;
+	KColor m_DiffuseInTree;
+	KColor m_SpecularInTree;
+	bool m_InheritDiffuse;
+	bool m_InheritSpecular;
+	bool m_RenderAtomic;
+	bool m_RenderAfterChildren;
+	bool m_ViewCulling;
+	KNode *m_Node;
 	KLocalRenderOrder m_LocalRenderOrder;
 
-	SRenderData() {
-		diffuse = KColor::WHITE;
-		specular = KColor::ZERO;
-		diffuseInTree = KColor::WHITE;
-		specularInTree = KColor::ZERO;
-		inheritDiffuse = true;
-		inheritSpecular = true;
-		render_atomic = false;
-		render_after_children = false;
-		view_culling = true;
-		m_LocalRenderOrder = KLocalRenderOrder_DEFAULT;
-		m_node = nullptr;
-	}
+	SRenderData();
 	const KColor & getColor() const;
 	const KColor & getSpecular() const;
 	const KColor & getColorInTree() const;
@@ -373,7 +349,6 @@ public:
 	KVec3 localToWorldPoint(const KVec3 &local) const; ///< ローカル座標をワールド座標にする @see getLocal2WorldMatrix
 	KVec3 worldToLocalPoint(const KVec3 &world) const; ///< ワールド座標をローカル座標にする @see getWorld2LocalMatrix
 	void copyTransform(const KNode *other, bool copy_independent_flag);
-	void _SetDirtyWorldMatrix();
 	#pragma endregion // Transform
 
 
