@@ -184,24 +184,6 @@ struct SFlagData {
 };
 
 
-// 継承可能な整数値
-struct SIntData {
-	static const int SIZE = 8;
-	int m_Values[SIZE];
-	int m_ValuesInTree[SIZE];
-	KNode *m_Node;
-
-	SIntData();
-	void setValue(int index, int value);
-	int getValue(int index) const;
-	int getValueInTree(int index) const;
-	void _updateTree();
-	void _updateTree(const SIntData *parent);
-};
-
-
-
-
 
 enum KLocalRenderOrder {
 	KLocalRenderOrder_DEFAULT,
@@ -218,6 +200,10 @@ struct SRenderData {
 	bool m_RenderAtomic;
 	bool m_RenderAfterChildren;
 	bool m_ViewCulling;
+	int m_Layer; // 描画単位によるグループ化。同じレイヤー番号を持つエンティティがまとめて描画される
+	int m_LayerInTree;
+	int m_Priority; // 描画の優先順位。番号が若いほど手前になる
+	int m_PriorityInTree;
 	KNode *m_Node;
 	KLocalRenderOrder m_LocalRenderOrder;
 
@@ -243,7 +229,14 @@ struct SRenderData {
 	bool getViewCullingInTree() const;
 	KLocalRenderOrder getLocalRenderOrder() const;
 	void setLocalRenderOrder(KLocalRenderOrder lro);
-	void _updateColorsInTree();
+	void setLayer(int value);
+	int  getLayer() const;
+	int  getLayerInTree() const;
+	void setPriority(int value);
+	int  getPriority() const;
+	int  getPriorityInTree() const;
+	void _updateTree();
+	void _updateTree(const SRenderData *parent);
 };
 
 
@@ -439,13 +432,6 @@ public:
 	#pragma endregion // Flags
 
 
-	#pragma region Group
-	void set_group(Category category, int group);
-	int get_group(Category category) const;
-	int get_group_in_tree(Category category) const;
-	#pragma endregion // Group
-
-
 	#pragma region Tags
 	bool hasTag(const KTag &tag) const;
 	bool hasTagInTree(const KTag &tag) const;
@@ -492,8 +478,6 @@ public:
 	const STagData & _getTagData() const { return m_TagData; }
 	SFlagData & _getFlagData() { return m_FlagData; }
 	const SFlagData & _getFlagData() const { return m_FlagData; }
-	SIntData & _getIntData() { return m_IntData; }
-	const SIntData & _getIntData() const { return m_IntData; }
 	SRenderData & _getRenderData() { return m_RenderData; }
 	const SRenderData & _getRenderData() const { return m_RenderData; }
 
@@ -531,7 +515,6 @@ private:
 	mutable SRenderData m_RenderData;
 	mutable SFlagData m_FlagData;
 	mutable STagData m_TagData;
-	mutable SIntData m_IntData;
 
 public:
 	mutable std::recursive_mutex m_Mutex;

@@ -301,16 +301,16 @@ void STransformData::_updateWorldMatrix(const KMatrix4 &parent) const {
 	}
 	for (size_t i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChildFast(i);
-		STransformData &child_tr = child->_getTransformData();
-		child_tr._updateWorldMatrix(m_WorldMatrix);
+		STransformData &data = child->_getTransformData();
+		data._updateWorldMatrix(m_WorldMatrix);
 	}
 }
 void STransformData::_setDirtyWorldMatrix() {
 	m_DirtyWorldMatrix = true;
 	for (size_t i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChildFast(i);
-		STransformData &child_tr = child->_getTransformData();
-		child_tr._setDirtyWorldMatrix();
+		STransformData &data = child->_getTransformData();
+		data._setDirtyWorldMatrix();
 	}
 }
 void STransformData::_updateTree() {
@@ -389,8 +389,8 @@ void STagData::_setTagEx(const KTag &tag, bool is_inherited) {
 	} else {
 		for (int i=0; i<m_Node->getChildCount(); i++) {
 			KNode *child = m_Node->getChildFast(i);
-			STagData &child_tag = child->_getTagData();
-			child_tag._setTagEx(tag, true);
+			STagData &data = child->_getTagData();
+			data._setTagEx(tag, true);
 		}
 	}
 }
@@ -430,8 +430,8 @@ void STagData::_removeTagEx(const KTag &tag, bool is_inherited) {
 	} else {
 		for (int i=0; i<m_Node->getChildCount(); i++) {
 			KNode *child = m_Node->getChildFast(i);
-			STagData &child_tag = child->_getTagData();
-			child_tag._removeTagEx(tag, true);
+			STagData &data = child->_getTagData();
+			data._removeTagEx(tag, true);
 		}
 	}
 }
@@ -453,8 +453,8 @@ void STagData::_updateNodeTreeTags(bool add) {
 	// 子に伝番
 	for (int i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChildFast(i);
-		STagData &child_tag = child->_getTagData();
-		child_tag._updateNodeTreeTags(add);
+		STagData &data = child->_getTagData();
+		data._updateNodeTreeTags(add);
 	}
 }
 
@@ -534,7 +534,7 @@ void SFlagData::_updateTree() {
 		const SFlagData &data = parent->_getFlagData();
 		_updateTree(&data);
 	} else {
-		_updateTree(this);
+		_updateTree(nullptr);
 	}
 }
 void SFlagData::_updateTree(const SFlagData *parent) {
@@ -545,60 +545,15 @@ void SFlagData::_updateTree(const SFlagData *parent) {
 		m_BitsInTreeAll = m_Bits;
 		m_BitsInTreeAny = m_Bits;
 	}
-	for (int i=0; i<m_Node->getChildCount(); i++) {
-		KNode *child = m_Node->getChild(i);
-		SFlagData &child_flags = child->_getFlagData();
-		child_flags._updateTree(this);
-	}
-}
-#pragma endregion // SFlagData
 
-
-
-#pragma region SIntData
-SIntData::SIntData() {
-	memset(m_Values, 0, sizeof(m_Values));
-	memset(m_ValuesInTree, 0, sizeof(m_ValuesInTree));
-	m_Node = nullptr;
-}
-void SIntData::setValue(int index, int value) {
-	m_Values[index] = value;
-	_updateTree();
-}
-int SIntData::getValue(int index) const {
-	return m_Values[index];
-}
-int SIntData::getValueInTree(int index) const {
-	return m_ValuesInTree[index];
-}
-void SIntData::_updateTree() {
-	KNode *parent = m_Node->getParent();
-	if (parent) {
-		const SIntData &data = parent->_getIntData();
-		_updateTree(&data);
-	} else {
-		_updateTree(this);
-	}
-}
-void SIntData::_updateTree(const SIntData *parent) {
-	// 自分のグループが 0 ならば親の値を継承する
-	if (parent) {
-		for (int i=0; i<SIZE; i++) {
-			if (m_Values[i] == 0) {
-				m_ValuesInTree[i] = parent->m_ValuesInTree[i];
-			} else {
-				m_ValuesInTree[i] = m_Values[i];
-			}
-		}
-	}
 	// 子に伝搬
 	for (int i=0; i<m_Node->getChildCount(); i++) {
-		KNode *node = m_Node->getChildFast(i);
-		SIntData &data = node->_getIntData();
+		KNode *child = m_Node->getChild(i);
+		SFlagData &data = child->_getFlagData();
 		data._updateTree(this);
 	}
 }
-#pragma endregion // SIntData
+#pragma endregion // SFlagData
 
 
 
@@ -615,6 +570,10 @@ SRenderData::SRenderData() {
 	m_RenderAfterChildren = false;
 	m_ViewCulling = true;
 	m_LocalRenderOrder = KLocalRenderOrder_DEFAULT;
+	m_Layer = 0;
+	m_LayerInTree = 0;
+	m_Priority = 0;
+	m_PriorityInTree = 0;
 	m_Node = nullptr;
 }
 const KColor & SRenderData::getColor() const {
@@ -631,49 +590,76 @@ const KColor & SRenderData::getSpecularInTree() const {
 }
 void SRenderData::setColorInherit(bool value) {
 	m_InheritDiffuse = value;
-	_updateColorsInTree();
+	_updateTree();
 }
 bool SRenderData::getColorInherit() const {
 	return m_InheritDiffuse;
 }
 void SRenderData::setSpecularInherit(bool value) {
 	m_InheritSpecular = value;
-	_updateColorsInTree();
+	_updateTree();
 }
 bool SRenderData::getSpecularInherit() const {
 	return m_InheritSpecular;
 }
 void SRenderData::setColor(const KColor &value) {
 	m_Diffuse = value;
-	_updateColorsInTree();
+	_updateTree();
 }
 void SRenderData::setSpecular(const KColor &value) {
 	m_Specular = value;
-	_updateColorsInTree();
+	_updateTree();
 }
 void SRenderData::setAlpha(float alpha) {
 	m_Diffuse.a = KMath::clampf(alpha, 0.0f, 1.0f);
-	_updateColorsInTree();
+	_updateTree();
 }
 float SRenderData::getAlpha() const {
 	return m_Diffuse.a;
 }
-void SRenderData::_updateColorsInTree() {
-	if (m_Node->getParent() && m_InheritDiffuse) {
-		const SRenderData &parent_render = m_Node->getParent()->_getRenderData();
-		m_DiffuseInTree = m_Diffuse * parent_render.m_DiffuseInTree; // 乗算合成
+void SRenderData::_updateTree() {
+	KNode *parent = m_Node->getParent();
+	if (parent) {
+		const SRenderData &data = parent->_getRenderData();
+		_updateTree(&data);
+	} else {
+		_updateTree(nullptr);
+	}
+}
+void SRenderData::_updateTree(const SRenderData *parent) {
+	// Diffuse
+	if (parent && m_InheritDiffuse) {
+		m_DiffuseInTree = m_Diffuse * parent->m_DiffuseInTree; // 乗算合成
 	} else {
 		m_DiffuseInTree = m_Diffuse;
 	}
-	if (m_Node->getParent() && m_InheritSpecular) {
-		const SRenderData &parent_render = m_Node->getParent()->_getRenderData();
-		m_SpecularInTree = m_Specular + parent_render.m_SpecularInTree; // 加算合成
+
+	// Specular
+	if (parent && m_InheritSpecular) {
+		m_SpecularInTree = m_Specular + parent->m_SpecularInTree; // 加算合成
 	} else {
 		m_SpecularInTree = m_Specular;
 	}
+
+	// Layer
+	if (parent && m_Layer == 0) {
+		m_LayerInTree = parent->m_LayerInTree;
+	} else {
+		m_LayerInTree = m_Layer;
+	}
+
+	// Priority
+	if (parent && m_Priority == 0) {
+		m_PriorityInTree = parent->m_PriorityInTree;
+	} else {
+		m_PriorityInTree = m_Priority;
+	}
+
+	// 子に伝搬
 	for (int i=0; i<m_Node->getChildCount(); i++) {
 		KNode *child = m_Node->getChildFast(i);
-		child->_getRenderData()._updateColorsInTree();
+		SRenderData &data = child->_getRenderData();
+		data._updateTree(this);
 	}
 }
 void SRenderData::setRenderAtomic(bool value) {
@@ -710,6 +696,26 @@ KLocalRenderOrder SRenderData::getLocalRenderOrder() const {
 void SRenderData::setLocalRenderOrder(KLocalRenderOrder lro) {
 	m_LocalRenderOrder = lro;
 }
+void SRenderData::setLayer(int value) {
+	m_Layer = value;
+	_updateTree();
+}
+int SRenderData::getLayer() const {
+	return m_Layer;
+}
+int SRenderData::getLayerInTree() const {
+	return m_LayerInTree;
+}
+void SRenderData::setPriority(int value) {
+	m_Priority = value;
+	_updateTree();
+}
+int SRenderData::getPriority() const {
+	return m_Priority;
+}
+int SRenderData::getPriorityInTree() const {
+	return m_PriorityInTree;
+}
 #pragma endregion // SRenderData
 
 
@@ -738,8 +744,6 @@ KNode::KNode() {
 	m_TagData.m_Node = this;
 	m_FlagData = SFlagData();
 	m_FlagData.m_Node = this;
-	m_IntData = SIntData();
-	m_IntData.m_Node = this;
 	m_RenderData = SRenderData();
 	m_RenderData.m_Node = this;
 	m_ActionNext = nullptr;
@@ -901,10 +905,9 @@ void KNode::setParent(KNode *new_parent) {
 
 	// 親が変化した。親に影響を受けるパラメータ類も更新する
 	_updateNames();
-	m_IntData._updateTree();
 	m_TransformData._updateTree();
 	m_FlagData._updateTree();
-	m_RenderData._updateColorsInTree();
+	m_RenderData._updateTree();
 	m_TagData._endParentChange();
 
 	K__ASSERT(m_NodeData.parent == new_parent);
@@ -1469,21 +1472,6 @@ void KNode::copyTags(KNode *src) {
 
 
 
-
-#pragma region Grouping
-void KNode::set_group(Category category, int group) {
-	m_IntData.setValue(category, group);
-}
-int KNode::get_group(Category category) const {
-	return m_IntData.getValue(category);
-}
-int KNode::get_group_in_tree(Category category) const {
-	return m_IntData.getValueInTree(category);
-}
-#pragma endregion // Flag/Grouping
-
-
-
 #pragma region Traverse
 void KNode::traverse_parents(KTraverseCallback *cb) {
 	lock();
@@ -1751,23 +1739,23 @@ bool KNode::getVisibleInTree() const {
 }
 
 void KNode::setLayer(int value) {
-	set_group(Category_LAYER, value);
+	m_RenderData.setLayer(value);
 }
 int KNode::getLayer() const {
-	return get_group(Category_LAYER);
+	return m_RenderData.getLayer();
 }
 int KNode::getLayerInTree() const {
-	return get_group_in_tree(Category_LAYER);
+	return m_RenderData.getLayerInTree();
 }
 
 void KNode::setPriority(int value) {
-	set_group(Category_PRIORITY, value);
+	m_RenderData.setPriority(value);
 }
 int KNode::getPriority() const {
-	return get_group(Category_PRIORITY);
+	return m_RenderData.getPriority();
 }
 int KNode::getPriorityInTree() const {
-	return get_group_in_tree(Category_PRIORITY);
+	return m_RenderData.getPriorityInTree();
 }
 #pragma endregion // Helper
 
