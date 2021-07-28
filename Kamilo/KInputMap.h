@@ -45,6 +45,7 @@ public:
 	virtual void set_key(KKeyboard::Key key) = 0;
 	virtual KKeyboard::Key get_key() const = 0;
 	virtual KKeyboard::Modifiers get_modifiers() const = 0;
+	virtual const char * get_key_name() const = 0;
 };
 
 class IJoystickKeyElm: public IKeyElm {

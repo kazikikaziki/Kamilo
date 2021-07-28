@@ -78,6 +78,9 @@ public:
 	virtual KKeyboard::Modifiers get_modifiers() const override {
 		return m_Modifiers;
 	}
+	virtual const char * get_key_name() const override {
+		return KKeyboard::getKeyName(m_Key);
+	}
 
 	// IKeyElm
 	virtual bool isConflictWith(const IKeyElm *k) const override {
