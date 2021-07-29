@@ -69,7 +69,7 @@ public:
 	bool seekMainClipToMark(int mark); ///< マーカーを指定して移動
 	int findPageByMark(int mark) const; ///< 指定したマーカーがついているページを返す
 	int getMainClipPage(int *out_pageframe=nullptr) const; ///< アニメクリップを再生中の場合、そのページ番号を返す
-	bool isMainClipPlaying(const std::string &name_or_alias, std::string *p_post_next_clip=nullptr, int *p_post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
+	bool isMainClipPlaying(const std::string &name_or_alias="", std::string *p_post_next_clip=nullptr, int *p_post_next_page=nullptr) const; ///< アニメクリップを再生中かどうか
 	bool setMainClipName(const std::string &name, bool keep=false); ///< クリップ名を指定してアニメをセットする
 	bool setMainClipAlias(const std::string &alias, bool keep=false); ///< クリップのエイリアスを指定してアニメをセットする
 	bool setMainClip(KClipRes *clip, bool keep=false); ///< クリップオブジェクトを指定してアニメをセットする
