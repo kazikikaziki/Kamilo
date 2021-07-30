@@ -4154,19 +4154,19 @@ private:
 	class ScanFiles: public KDirectoryWalker::Callback {
 	public:
 		KPathList mFiles;
-		virtual void onDir(const char *name_u8, const char *parent_u8, bool *enter) override {
-			*enter = true; // 再帰処理する
+		virtual void onDir(const std::string &name_u8, const std::string &parent_u8, bool *p_enter) override {
+			*p_enter = true; // 再帰処理する
 		}
-		virtual void onFile(const char *name_u8, const char *parent_u8) override {
+		virtual void onFile(const std::string &name_u8, const std::string &parent_u8) override {
 			mFiles.push_back(KPath(parent_u8).join(name_u8));
 		}
 	};
 	class ScanDir: public KDirectoryWalker::Callback {
 	public:
 		KPathList mDirs;
-		virtual void onDir(const char *name_u8, const char *parent_u8, bool *enter) override {
+		virtual void onDir(const std::string &name_u8, const std::string &parent_u8, bool *p_enter) override {
 			mDirs.push_back(KPath(parent_u8).join(name_u8));
-			*enter = true; // 再帰処理する
+			*p_enter = true; // 再帰処理する
 		}
 	};
 

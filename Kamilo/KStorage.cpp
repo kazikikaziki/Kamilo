@@ -58,7 +58,7 @@ public:
 		}
 	}
 
-	virtual void onFile(const char *name_u8, const char *parent_u8) override {
+	virtual void onFile(const std::string &name_u8, const std::string &parent_u8) override {
 		// KDirectoryWalker::walk でファイル（ディレクトリではない）を列挙するたびに呼ばれる。ファイルリストに登録する
 		std::string path = K::pathJoin(parent_u8, name_u8);
 		m_Names.push_back(path);
