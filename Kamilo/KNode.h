@@ -232,7 +232,7 @@ struct SRenderData {
 	void setLayer(int value);
 	int  getLayer() const;
 	int  getLayerInTree() const;
-	void setPriority(int value);
+	void setPriority(int value); // 描画の優先順位。番号が若いほど手前になる
 	int  getPriority() const;
 	int  getPriorityInTree() const;
 	void _updateTree();

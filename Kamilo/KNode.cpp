@@ -13,6 +13,8 @@
 
 namespace Kamilo {
 
+#define PATH_DELIM "/"
+
 static void KNodeTree_on_node_enter(CNodeTreeImpl *tree, KNode *node);
 static void KNodeTree_on_node_exit(CNodeTreeImpl *tree, KNode *node);
 static void KNodeTree_on_node_removing(CNodeTreeImpl *tree, KNode *node);
@@ -1225,12 +1227,14 @@ EID KNode::getId() const {
 }
 void KNode::_updateNames() {
 	if (m_NodeData.parent) {
-		m_NodeData.nameInTree = m_NodeData.parent->m_NodeData.nameInTree + "/" + m_NodeData.name;
+		m_NodeData.nameInTree = m_NodeData.parent->m_NodeData.nameInTree + PATH_DELIM + m_NodeData.name;
 	} else {
 		m_NodeData.nameInTree = m_NodeData.name;
 	}
+
 	for (auto it=m_NodeData.children.begin(); it!=m_NodeData.children.end(); ++it) {
-		(*it)->_updateNames();
+		KNode *child = *it;
+		child->_updateNames();
 	}
 }
 #pragma endregion // Name and ID
@@ -2059,13 +2063,37 @@ public:
 		return nullptr;
 	}
 
-	KNode * findNodeByPath(const KNode *start, const std::string &path) const {
+	KNode * findNodeByPath(const KNode *_start, const std::string &_path) const {
 		#if IGNORE_REMOVING_NODES
 		// start が削除マーク付きツリー内にある場合は、もう削除済みとして扱う
-		if (start && start->hasFlagInTreeAny(KNode::FLAG__MARK_REMOVE)) {
+		if (_start && _start->hasFlagInTreeAny(KNode::FLAG__MARK_REMOVE)) {
 			return nullptr;
 		}
 		#endif
+
+		// パスが / から始まっている場合は絶対パスなので、 start は必ずルート要素になる
+		const KNode *start = nullptr;
+		std::string path = _path;
+		if (K::strStartsWith(_path, PATH_DELIM)) {
+			if (_start == nullptr || _start == getRoot()) {
+				start = getRoot();
+			} else {
+				// start が指定されているモノの、絶対パスの検索なのでルートからの検索に変更
+				K__WARNING("start param is overwriten with Root node");
+				start = getRoot();
+			}
+			path = _path.substr(1); // 先頭の PATH_DELIM を取り除く
+
+		} else {
+			if (_start == nullptr) {
+				start = getRoot();
+			} else {
+				start = _start;
+			}
+		}
+		if (path.empty()) {
+			return nullptr;
+		}
 
 		KNode *ret = nullptr;
 		lock();
@@ -2074,10 +2102,8 @@ public:
 		return ret;
 	}
 	KNode * find_namepath_in_tree_unsafe(const KNode *start, const std::string &path) const {
-		if (path.empty()) return nullptr; // 空文字列では検索できない
-		if (start == nullptr) {
-			start = getRoot();
-		}
+		K__ASSERT(start);
+		K__ASSERT(!path.empty());
 #if 1
 		KNode *ret = start->findChildPath(path);
 		if (ret) {
