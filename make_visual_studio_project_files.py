@@ -1,15 +1,18 @@
 # coding: utf-8
-import os
-import subprocess
-import shutil
 
 #
-# CMake を利用してソリューションファイルを作るための Python スクリプト
-# ※cmake を環境パスに追加しておくこと。CMake インストール時に「環境変数に CMake を追加する」にチェックをつければ良い
+# カレントフォルダ内にある【CMakeLists.txt】を CMake に渡して .sln ファイルを作り、ついでにビルドする
+#
+# ※あらかじめ CMake をインストールしておくこと
+# CMake インストール時に「環境変数に CMake を追加する」にチェックをつけて、パスを通しておくこと
 #
 # https://cmake.org/cmake/help/v3.1/manual/cmake.1.html
 # https://stackoverflow.com/questions/31148943/option-to-force-either-32-bit-or-64-bit-build-with-cmake
+#
 
+import os
+import subprocess
+import shutil
 
 # cmake 用の作業フォルダ名
 output_dir = "__cmake"
