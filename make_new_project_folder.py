@@ -10,15 +10,44 @@ import os
 import shutil
 import codecs
 
+
+
+
 # ディレクトリ <name> を <proj>/<name> にコピーする
-def copy_dir(proj, name):
+def copy_dir(out_dir, name):
 	print("copy:", name)
-	shutil.copytree(name, os.path.join(proj, name))
+	shutil.copytree(name, os.path.join(out_dir, name))
+
+
+
 
 # ファイル <name> を <proj>/<name> にコピーする
-def copy_file(proj, name):
+def copy_file(out_dir, name):
 	print("copy:", name)
-	shutil.copyfile(name, os.path.join(proj, name))
+	shutil.copyfile(name, os.path.join(out_dir, name))
+
+
+
+
+# ファイルの中身を置換してコピー
+def copy_file_replacing_strings(out_dir, filename, before, after):
+	print("copy:", filename)
+	s = ""
+	with codecs.open(filename, "r", "utf8") as f:
+		s = f.read()
+	if not before in s:
+		print(u"■")
+		print(u"■", filename, u"は文字列 ", before, u"を含んでいません")
+		print(u"■ファイル内容を置換できませんでした")
+		print(u"■")
+		raise RuntimeError
+
+	s = s.replace(before, after) # プロジェクト名部分を置換
+	with codecs.open(os.path.join(out_dir, filename), "w", "utf8") as f:
+		f.write(s)
+
+
+
 
 def make_project(proj):
 
@@ -55,26 +84,29 @@ def make_project(proj):
 	copy_file(proj, "make_visual_studio_project_files.py")
 
 
-	# CMakeList の中身を書き換えてコピー
-	if True:
-		print("copy:", "CMakeLists.txt")
-		s = ""
-		with codecs.open("CMakeLists.txt", "r", "utf8") as f:
-			s = f.read()
-		if not "MySampleProject" in s:
-			print(u"■")
-			print(u"■ CMakeLists.txt は文字列 \"MySampleProject\" を含んでいません")
-			print(u"■ プロジェクト名を置換できませんでした")
-			print(u"■ 出来上がったフォルダ", proj, u"は不完全です。削除してください")
-			print(u"■")
+	# make_archive.py の中身を書き換えてコピー
+	try:
+		copy_file_replacing_strings(proj, "make_archive.py", "MySampleProject", proj)
+	except RuntimeError:
+		print(u"■ プロジェクト名を置換できませんでした")
+		print(u"■ 出来上がったフォルダ", proj, u"は不完全です。削除してください")
+		print(u"■")
+		raise
+		
+	try:
+		copy_file_replacing_strings(proj, "CMakeLists.txt", "MySampleProject", proj)
+	except RuntimeError:
+		print(u"■ プロジェクト名を置換できませんでした")
+		print(u"■ 出来上がったフォルダ", proj, u"は不完全です。削除してください")
+		print(u"■")
+		raise
 
-		else:
-			s = s.replace("MySampleProject", proj) # プロジェクト名部分を置換
-			with codecs.open(os.path.join(proj, "CMakeLists.txt"), "w", "utf8") as f:
-				f.write(s)
-			print(u"■")
-			print(u"■プロジェクトフォルダ", proj, u"を作成しました")
-			print(u"■")
+	print(u"■")
+	print(u"■プロジェクトフォルダ", proj, u"を作成しました")
+	print(u"■")
+
+
+
 
 def main():
 	try:
@@ -85,6 +117,8 @@ def main():
 	except:
 		traceback.print_exc()
 		return False
+
+	input(u"[エンターキーを押してください]")
 
 
 if __name__ == "__main__":
