@@ -24,6 +24,14 @@ def call(cmd):
 
 # cmake 用の作業フォルダをいったん削除しておく（ビルドテストの時にキャッシュを使わせないため）
 if os.path.isdir(output_dir):
+	# 安全のため、絶対パスでの指定は拒否する
+	if os.path.isabs(output_dir):
+		raise RuntimeError
+	
+	# 安全のため、上方向へのパスを含む相対パスを拒否する
+	if ".." in output_dir: # ..を含むフォルダ名も弾くことになるが、良い名前とは言えないので、それで良しとする
+		raise RuntimeError
+	
 	shutil.rmtree(output_dir)
 
 
