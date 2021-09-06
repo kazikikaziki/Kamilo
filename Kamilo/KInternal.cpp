@@ -1594,6 +1594,29 @@ std::string K::strGetRight(const std::string &s, const std::string &separator_su
 	}
 }
 
+// strSplit と似ているが、1バイトの区切り文字ではなく、複数バイトの区切り単語で分割する。
+std::vector<std::string> K::strSplitByWord(const std::string &str, const std::string &sep_word) {
+	std::vector<std::string> result;
+	int s = 0;
+	int p = strFind(str, sep_word, s);
+	while (s < p) {
+		std::string tok = str.substr(s, p-s);
+		strTrim(tok);
+		if (tok.size() > 0) {
+			result.push_back(tok);
+		}
+		s = p + sep_word.size();
+		p = strFind(str, sep_word, s);
+	}
+	if (s < str.size()) {
+		std::string tok = str.substr(s);
+		strTrim(tok);
+		if (tok.size() > 0) {
+			result.push_back(tok);
+		}
+	}
+	return result;
+}
 
 
 // delim 分割のために使う文字。複数指定できる。
@@ -1601,7 +1624,7 @@ std::string K::strGetRight(const std::string &s, const std::string &separator_su
 //		カンマと改行で区切る場合 ",\r\n"
 //		空白で区切る場合 " "
 //		空白とタブで区切る場合 " \t"
-// maxcount 分割後の最大要素数。0だと上限なし。1だと分割しない＝元の文字列そのまま。2以上を指定した場合は先頭から順番に分割しき、残った文字列は最後の要素に入る
+// maxcount 分割後の最大要素数。0だと上限なし。1だと分割しない＝元の文字列そのまま。2以上を指定した場合は先頭から順番に分割していき、残った文字列は最後の要素に入る
 //      "aaa=bbb=ccc" を '=' で分割すると以下のようになる
 //      maxcount=0 ==> returns: {"aaa", "bbb", "ccc"}
 //      maxcount=1 ==> returns: {"aaa=bbb=ccc"}
