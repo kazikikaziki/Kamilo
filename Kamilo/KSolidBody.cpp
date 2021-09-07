@@ -1519,7 +1519,7 @@ private:
 		dyNode->m_Desc._prev_pos = pos;
 
 		// 座標変更
-		KVec3 newpos = pos += spd;
+		KVec3 newpos = pos + spd;
 		KVec3 newspd = spd;
 		if (dyNode && dyNode->getShape()) {
 			newspd.y -= dyNode->m_Desc.get_gravity();
