@@ -59,16 +59,13 @@ void CController::clearTriggers() {
 	m_Peeked.clear();
 }
 void CController::setInputAxisX(int i) {
-	K__ASSERT(abs(i) <= 1);
-	m_AxisX = (float)i;
+	setInputAxisX_Analog((float)i);
 }
 void CController::setInputAxisY(int i) {
-	K__ASSERT(abs(i) <= 1);
-	m_AxisY = (float)i;
+	setInputAxisY_Analog((float)i);
 }
 void CController::setInputAxisZ(int i) {
-	K__ASSERT(abs(i) <= 1);
-	m_AxisZ = (float)i;
+	setInputAxisZ_Analog((float)i);
 }
 void CController::setInputAxisX_Analog(float value) {
 	K__ASSERT(fabsf(value) <= 1);
