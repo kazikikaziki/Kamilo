@@ -113,6 +113,50 @@ public:
 	static bool getKeyboardFromName(const std::string &s, KKeyboard::Key *key);
 	static bool getJoystickFromName(const std::string &s, KJoystick::Button *btn);
 	static void setPollFlags(KPollFlags flags);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	// ノードごとに独立した入力
+	static void attach(KNode *node);
+	static bool isAttached(KNode *node);
+
+	// トリガー入力をリセットする
+	// なお beginReadTrigger/endReadTrigger で読み取りモードにしている場合でも clearTrighgers は関係なく動作する
+	static void clearTriggers(KNode *node);
+	static void clearInputs(KNode *node);
+	static void setTriggerTimeout(KNode *node, int value);
+
+	static void setInputAxisX(KNode *node, int value);
+	static void setInputAxisY(KNode *node, int value);
+	static void setInputAxisZ(KNode *node, int value);
+	static void setInputAxisAnalogX(KNode *node, float value);
+	static void setInputAxisAnalogY(KNode *node, float value);
+	static void setInputAxisAnalogZ(KNode *node, float value);
+	static int getInputAxisX(KNode *node);
+	static int getInputAxisY(KNode *node);
+	static int getInputAxisZ(KNode *node);
+	static float getInputAxisAnalogX(KNode *node);
+	static float getInputAxisAnalogY(KNode *node);
+	static float getInputAxisAnalogZ(KNode *node);
+	static void setInputTrigger(KNode *node, const std::string &node_button);
+	static void setInputBool(KNode *node, const std::string &node_button, bool pressed);
+	static bool getInputBool(KNode *node, const std::string &node_button);
+
+	/// トリガーボタンの状態を得て、トリガー状態を false に戻す。
+	/// トリガーをリセットしたくない場合は peekInputTrigger を使う。
+	/// また、即座にリセットするのではなく特定の時点までトリガーのリセットを
+	/// 先延ばしにしたい場合は beginReadTrigger() / endReadTrigger() を使う
+	static bool getInputTrigger(KNode *node, const std::string &node_button);
+	
+	/// トリガーの読み取りモードを開始する
+	/// endReadTrigger が呼ばれるまでの間は getInputTrigger を呼んでもトリガー状態が false に戻らない
+	static void beginReadTrigger(KNode *node);
+
+	/// トリガーの読み取りモードを終了する。
+	/// beginReadTrigger が呼ばれた後に getInputTrigger されたトリガーをすべて false に戻す
+	static void endReadTrigger(KNode *node);
+
+
 };
 
 

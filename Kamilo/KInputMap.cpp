@@ -1141,10 +1141,239 @@ static void _UpdateButtonGui(CButtonMgrImpl *mgr) {
 }
 
 
+
+#pragma region CNodeController
+
+static float _Reduce(float val, float delta) {
+	if (val > 0) {
+		val = KMath::max(val - delta, 0.0f);
+	}
+	if (val < 0) {
+		val = KMath::min(val + delta, 0.0f);
+	}
+	return val;
+}
+
+#pragma region Decl
+class CNodeController: public KComp {
+public:
+	CNodeController();
+	void setTriggerTimeout(int val);
+	void clearInputs();
+
+	// トリガー入力をリセットする
+	// なお beginReadTrigger/endReadTrigger で読み取りモードにしている場合でも clearTrighgers は関係なく動作する
+	void clearTriggers();
+	void setInputAxisX(int i);
+	void setInputAxisY(int i);
+	void setInputAxisZ(int i);
+	void setInputAxisAnalogX(float value);
+	void setInputAxisAnalogY(float value);
+	void setInputAxisAnalogZ(float value);
+	int getInputAxisX();
+	int getInputAxisY();
+	int getInputAxisZ();
+	float getInputAxisAnalogX();
+	float getInputAxisAnalogY();
+	float getInputAxisAnalogZ();
+	void setInputTrigger(const std::string &button);
+	void setInputBool(const std::string &button, bool pressed);
+	bool getInputBool(const std::string &button);
+
+	/// トリガーボタンの状態を得て、トリガー状態を false に戻す。
+	/// トリガーをリセットしたくない場合は peekInputTrigger を使う。
+	/// また、即座にリセットするのではなく特定の時点までトリガーのリセットを
+	/// 先延ばしにしたい場合は beginReadTrigger() / endReadTrigger() を使う
+	bool getInputTrigger(const std::string &button);
+	
+	/// トリガーの読み取りモードを開始する
+	/// endReadTrigger が呼ばれるまでの間は getInputTrigger を呼んでもトリガー状態が false に戻らない
+	void beginReadTrigger();
+
+	/// トリガーの読み取りモードを終了する。
+	/// beginReadTrigger が呼ばれた後に getInputTrigger されたトリガーをすべて false に戻す
+	void endReadTrigger();
+	void tickInput();
+
+private:
+	std::unordered_map<std::string, int> m_Buttons;
+	std::unordered_set<std::string> m_Peeked;
+	float m_AxisX;
+	float m_AxisY;
+	float m_AxisZ;
+	float m_AxisReduce;
+	int m_TriggerTimeout;
+	int m_ReadTrigger;
+};
+#pragma endregion // Decl
+
+
+#pragma region Impl
+CNodeController::CNodeController() {
+	m_AxisX = 0;
+	m_AxisY = 0;
+	m_AxisZ = 0;
+	m_AxisReduce = 0.2f; // 1フレーム当たりの軸入力の消失値（正の値を指定）
+	m_Peeked.clear();
+	m_Buttons.clear();
+	m_TriggerTimeout = 10;
+	m_ReadTrigger = 0;
+}
+void CNodeController::setTriggerTimeout(int val) {
+	m_TriggerTimeout = val;
+}
+void CNodeController::clearInputs() {
+	m_AxisX = 0;
+	m_AxisY = 0;
+	m_AxisZ = 0;
+	m_Buttons.clear();
+	m_Peeked.clear();
+}
+
+// トリガー入力をリセットする
+// なお beginReadTrigger/endReadTrigger で読み取りモードにしている場合でも clearTrighgers は関係なく動作する
+void CNodeController::clearTriggers() {
+	for (auto it=m_Buttons.begin(); it!=m_Buttons.end(); /*++it*/) {
+		if (it->second >= 0) {
+			it = m_Buttons.erase(it);
+		} else {
+			it++;
+		}
+	}
+	m_Peeked.clear();
+}
+void CNodeController::setInputAxisX(int i) {
+	setInputAxisAnalogX((float)i);
+}
+void CNodeController::setInputAxisY(int i) {
+	setInputAxisAnalogY((float)i);
+}
+void CNodeController::setInputAxisZ(int i) {
+	setInputAxisAnalogZ((float)i);
+}
+void CNodeController::setInputAxisAnalogX(float value) {
+	K__ASSERT(fabsf(value) <= 1);
+	m_AxisX = value;
+}
+void CNodeController::setInputAxisAnalogY(float value) {
+	K__ASSERT(fabsf(value) <= 1);
+	m_AxisY = value;
+}
+void CNodeController::setInputAxisAnalogZ(float value) {
+	K__ASSERT(fabsf(value) <= 1);
+	m_AxisZ = value;
+}
+int CNodeController::getInputAxisX() {
+	return (int)KMath::signf(m_AxisX); // returns -1, 0, 1
+}
+int CNodeController::getInputAxisY() {
+	return (int)KMath::signf(m_AxisY); // returns -1, 0, 1
+}
+int CNodeController::getInputAxisZ() {
+	return (int)KMath::signf(m_AxisZ); // returns -1, 0, 1
+}
+float CNodeController::getInputAxisAnalogX() {
+	return KMath::clampf(m_AxisX, -1.0f, 1.0f);
+}
+float CNodeController::getInputAxisAnalogY() {
+	return KMath::clampf(m_AxisY, -1.0f, 1.0f);
+}
+float CNodeController::getInputAxisAnalogZ() {
+	return KMath::clampf(m_AxisZ, -1.0f, 1.0f);
+}
+
+void CNodeController::setInputTrigger(const std::string &button) {
+	if (button.empty()) return;
+	m_Buttons[button] = m_TriggerTimeout;
+}
+void CNodeController::setInputBool(const std::string &button, bool pressed) {
+	if (button.empty()) return;
+	if (pressed) {
+		m_Buttons[button] = -1;
+	} else {
+		m_Buttons.erase(button);
+	}
+}
+bool CNodeController::getInputBool(const std::string &button) {
+	if (button.empty()) return false;
+	return m_Buttons.find(button) != m_Buttons.end();
+}
+
+/// トリガーボタンの状態を得て、トリガー状態を false に戻す。
+/// トリガーをリセットしたくない場合は peekInputTrigger を使う。
+/// また、即座にリセットするのではなく特定の時点までトリガーのリセットを
+/// 先延ばしにしたい場合は beginReadTrigger() / endReadTrigger() を使う
+bool CNodeController::getInputTrigger(const std::string &button) {
+	if (button.empty()) return false;
+	auto it = m_Buttons.find(button);
+	if (it != m_Buttons.end()) {
+		if (m_ReadTrigger > 0) {
+			// PEEKモード中。
+			// トリガーを false に戻さず、参照されたことだけを記録しておく
+			m_Peeked.insert(button);
+		} else {
+			// トリガー状態を false に戻す
+			m_Buttons.erase(it);
+		}
+		return true;
+	}
+	return false;
+}
+	
+/// トリガーの読み取りモードを開始する
+/// endReadTrigger が呼ばれるまでの間は getInputTrigger を呼んでもトリガー状態が false に戻らない
+void CNodeController::beginReadTrigger() {
+	m_ReadTrigger++;
+}
+
+/// トリガーの読み取りモードを終了する。
+/// beginReadTrigger が呼ばれた後に getInputTrigger されたトリガーをすべて false に戻す
+void CNodeController::endReadTrigger() { 
+	m_ReadTrigger--;
+	if (m_ReadTrigger == 0) {
+		for (auto it=m_Peeked.begin(); it!=m_Peeked.end(); ++it) {
+			const std::string &btn = *it;
+			m_Buttons.erase(btn);
+		}
+		m_Peeked.clear();
+	}
+}
+void CNodeController::tickInput() {
+	// 入力状態を徐々に消失させる
+	m_AxisX = _Reduce(m_AxisX, m_AxisReduce);
+	m_AxisY = _Reduce(m_AxisY, m_AxisReduce);
+	m_AxisZ = _Reduce(m_AxisZ, m_AxisReduce);
+
+	// トリガー入力のタイムアウトを処理する
+	for (auto it=m_Buttons.begin(); it!=m_Buttons.end(); /*EMPTY*/) {
+		if (it->second > 0) {
+			it->second--;
+			it++;
+		} else if (it->second == 0) {
+			it = m_Buttons.erase(it);
+		} else {
+			it++; // タイムアウトが負の値の場合なら何もしない
+		}
+	}
+}
+#pragma endregion // Impl
+
+
+#pragma endregion // CNodeController
+
+
+
+
+
+
+
+
 class CInputMap: public KManager, public KInspectorCallback {
 	CButtonMgrImpl *m_GameButtons; // ゲーム内入力用のボタンマネージャ
 	CButtonMgrImpl *m_AppButtons; // アプリ操作用のボタンマネージャ
 public:
+	KCompNodes<CNodeController> m_Nodes;
+
 	CInputMap() {
 		m_GameButtons = new CButtonMgrImpl();
 		m_AppButtons = new CButtonMgrImpl();
@@ -1176,6 +1405,12 @@ public:
 		m_GameButtons->updateGui();
 		ImGui::Unindent();
 		KImGui::VSpace();
+	}
+	virtual bool on_manager_isattached(KNode *node) override {
+		return m_Nodes.contains(node);
+	}
+	virtual void on_manager_detach(KNode *node) override {
+		m_Nodes.detach(node);
 	}
 	virtual void on_manager_appframe() override {
 		{
@@ -1212,6 +1447,15 @@ public:
 	virtual void on_manager_frame() override {
 		m_GameButtons->newFrame();
 		m_GameButtons->poll();
+
+		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
+			CNodeController *co = it->second;
+			co->tickInput();
+		}
+	}
+	virtual void on_manager_nodeinspector(KNode *node) override {
+	//	CNodeController *comp = m_Nodes.get(node);
+	//	comp->_Inspector();
 	}
 	void setPollFlags(KPollFlags flags) {
 		m_AppButtons->setPollFlags(flags);
@@ -1534,6 +1778,143 @@ void KInputMap::setPollFlags(KPollFlags flags) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->setPollFlags(flags);
 }
+
+
+
+
+
+
+
+
+#pragma region Per Node Input
+void KInputMap::attach(KNode *node) {
+	K__ASSERT(g_InputMap);
+	if (node && !isAttached(node)) {
+		CNodeController *co = new CNodeController();
+		g_InputMap->m_Nodes.attach(node, co);
+		co->drop();
+	}
+}
+bool KInputMap::isAttached(KNode *node) {
+	K__ASSERT(g_InputMap);
+	return g_InputMap->m_Nodes.get(node) != nullptr;
+}
+void KInputMap::clearTriggers(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->clearTriggers();
+}
+void KInputMap::clearInputs(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->clearInputs();
+}
+void KInputMap::setTriggerTimeout(KNode *node, int value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setTriggerTimeout(value);
+}
+void KInputMap::setInputAxisX(KNode *node, int value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisX(value);
+}
+void KInputMap::setInputAxisY(KNode *node, int value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisY(value);
+}
+void KInputMap::setInputAxisZ(KNode *node, int value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisZ(value);
+}
+void KInputMap::setInputAxisAnalogX(KNode *node, float value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisAnalogX(value);
+}
+void KInputMap::setInputAxisAnalogY(KNode *node, float value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisAnalogY(value);
+}
+void KInputMap::setInputAxisAnalogZ(KNode *node, float value) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputAxisAnalogZ(value);
+}
+int KInputMap::getInputAxisX(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisX() : 0;
+}
+int KInputMap::getInputAxisY(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisY() : 0;
+}
+int KInputMap::getInputAxisZ(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisZ() : 0;
+}
+float KInputMap::getInputAxisAnalogX(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisAnalogX() : 0.0f;
+}
+float KInputMap::getInputAxisAnalogY(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisAnalogY() : 0.0f;
+}
+float KInputMap::getInputAxisAnalogZ(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	return co ? co->getInputAxisAnalogZ() : 0.0f;
+}
+void KInputMap::setInputTrigger(KNode *node, const std::string &node_button) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputTrigger(node_button);
+}
+void KInputMap::setInputBool(KNode *node, const std::string &node_button, bool pressed) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->setInputBool(node_button, pressed);
+}
+bool KInputMap::getInputBool(KNode *node, const std::string &node_button) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co && co->getInputBool(node_button)) {
+		return true;
+	}
+	return false;
+}
+bool KInputMap::getInputTrigger(KNode *node, const std::string &node_button) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co && co->getInputTrigger(node_button)) {
+		return true;
+	}
+	return false;
+}
+void KInputMap::beginReadTrigger(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->beginReadTrigger();
+}
+void KInputMap::endReadTrigger(KNode *node) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) co->endReadTrigger();
+}
+#pragma endregion // Per Node Input
+
+
+
+
 #pragma endregion // KInputMapAct
 
 } // namespace
