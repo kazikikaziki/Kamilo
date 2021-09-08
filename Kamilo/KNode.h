@@ -542,7 +542,7 @@ public:
 		return m_Node;
 	}
 	void _setNode(KNode *node) {
-		// CComp は KNode によって保持される可能性がある。
+		// KComp は KNode によって保持される可能性がある。
 		// 循環ロック防止のために KNode の参照カウンタは変更しないでおく
 		if (node) {
 			// アタッチしようとしている
@@ -559,7 +559,7 @@ private:
 };
 
 
-// TComp は CComp の継承であること!!!
+// TComp は KComp の継承であること!!!
 template <class TComp> class KCompNodes {
 	std::unordered_map<KNode*, TComp*> m_Nodes;
 public:
@@ -583,7 +583,7 @@ public:
 	void clear() {
 		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
 			TComp *comp = it->second;
-			comp->_setNode(nullptr);
+			comp->_setNode(nullptr); // ここでエラーが起きる場合、KComp を継承していない可能性がある
 			comp->drop();
 			KNode *node = it->first;
 			node->drop();
@@ -596,14 +596,14 @@ public:
 		detach(node);
 		m_Nodes[node] = comp;
 		node->grab();
-		comp->_setNode(node);
+		comp->_setNode(node); // ここでエラーが起きる場合、KComp を継承していない可能性がある
 		comp->grab();
 	}
 	void detach(KNode *node) {
 		auto it = m_Nodes.find(node);
 		if (it != m_Nodes.end()) {
 			TComp *comp = it->second;
-			comp->_setNode(nullptr);
+			comp->_setNode(nullptr); // ここでエラーが起きる場合、KComp を継承していない可能性がある
 			comp->drop();
 			node->drop();
 			m_Nodes.erase(it);

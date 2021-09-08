@@ -73,15 +73,18 @@ public:
 	static void install();
 	static void uninstall();
 
+	// システムボタン（ポーズ中でも使える）
 	static void addAppButton(const std::string &button, KButtonFlags flags=0);
 	static bool isAppButtonDown(const std::string &button);
 	static bool getAppButtonDown(const std::string &button);
 
+	// ゲームボタン（ポーズ中には使えない）
 	static void addGameButton(const std::string &button, KButtonFlags flags=0);
 	static bool isGameButtonDown(const std::string &button);
 	static bool getGameButtonDown(const std::string &button);
 	static float getGameButtonAnalog(const std::string &button);
 
+	// ボタン（システム、ゲーム統合）
 	static bool isButtonDown(const std::string &button);
 	static bool getButtonDown(const std::string &button);
 	static void postButtonDown(const std::string &button);
@@ -92,6 +95,7 @@ public:
 		addGameButton(button, flags);
 	}
 
+	// キーボードやゲームパッドにボタンを関連付ける
 	static void bindAppKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE);
 	static void bindKeyboardKey(const std::string &button, KKeyboard::Key key, KKeyboard::Modifiers mods=KKeyboard::MODIF_DONTCARE, const std::string &tag="");
 	static void bindJoystickKey(const std::string &button, KJoystick::Button joybtn, const std::string &tag="");
