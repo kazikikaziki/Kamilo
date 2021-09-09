@@ -8,12 +8,11 @@
 #include "KJoystick.h"
 #include "KMouse.h"
 #include "KKeyboard.h"
-#include "KAction.h"
 
 namespace Kamilo {
 
 class KEngine;
-
+class KNode;
 
 enum PollFlag {
 	POLLFLAG_NO_KEYBOARD = 1,
@@ -61,9 +60,6 @@ typedef int KButtonFlags;
 
 
 
-namespace Test {
-void Test_button();
-}
 #pragma endregion // Buttons
 
 
