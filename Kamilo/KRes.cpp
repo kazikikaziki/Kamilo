@@ -3968,8 +3968,8 @@ private:
 			KLog::printError("File does not exist: %s", nameInDataDir.c_str());
 			return false;
 		}
-		KInputStream file = KInputStream::fromFileName(nameInDataDir);
-		if (!file.isOpen()) {
+		KInputStream file;
+		if (!file.openFileName(nameInDataDir)) {
 			KLog::printError("Failed to open file: %s", nameInDataDir.c_str());
 			return false;
 		}
