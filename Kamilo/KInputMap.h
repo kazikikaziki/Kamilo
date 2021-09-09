@@ -62,6 +62,14 @@ typedef int KButtonFlags;
 
 #pragma endregion // Buttons
 
+class KInputCallback {
+public:
+	virtual void on_input_tick(KNode *node) {}
+	virtual void on_input_button(KNode *node, const std::string &btn, float *p_value) {}
+	virtual void on_input_axisX(KNode *node, float *p_value) {}
+	virtual void on_input_axisY(KNode *node, float *p_value) {}
+	virtual void on_input_axisZ(KNode *node, float *p_value) {}
+};
 
 
 class KInputMap {
@@ -115,6 +123,7 @@ public:
 	// ノードごとに独立した入力
 	static void attach(KNode *node);
 	static bool isAttached(KNode *node);
+	static void setNodeInputCallback(KNode *node, KInputCallback *cb);
 
 	// トリガー入力をリセットする
 	// なお beginReadTrigger/endReadTrigger で読み取りモードにしている場合でも clearTrighgers は関係なく動作する

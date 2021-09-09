@@ -1195,6 +1195,9 @@ public:
 	void endReadTrigger();
 	void tickInput();
 
+	KNode *m_Node;
+	KInputCallback *m_CB;
+
 private:
 	std::unordered_map<std::string, int> m_Buttons;
 	std::unordered_set<std::string> m_Peeked;
@@ -1218,6 +1221,8 @@ CNodeController::CNodeController() {
 	m_Buttons.clear();
 	m_TriggerTimeout = 10;
 	m_ReadTrigger = 0;
+	m_Node = nullptr;
+	m_CB = nullptr;
 }
 void CNodeController::setTriggerTimeout(int val) {
 	m_TriggerTimeout = val;
@@ -1242,14 +1247,14 @@ void CNodeController::clearTriggers() {
 	}
 	m_Peeked.clear();
 }
-void CNodeController::setInputAxisX(int i) {
-	setInputAxisAnalogX((float)i);
+void CNodeController::setInputAxisX(int value) {
+	setInputAxisAnalogX((float)value);
 }
-void CNodeController::setInputAxisY(int i) {
-	setInputAxisAnalogY((float)i);
+void CNodeController::setInputAxisY(int value) {
+	setInputAxisAnalogY((float)value);
 }
-void CNodeController::setInputAxisZ(int i) {
-	setInputAxisAnalogZ((float)i);
+void CNodeController::setInputAxisZ(int value) {
+	setInputAxisAnalogZ((float)value);
 }
 void CNodeController::setInputAxisAnalogX(float value) {
 	K__ASSERT(fabsf(value) <= 1);
@@ -1264,22 +1269,37 @@ void CNodeController::setInputAxisAnalogZ(float value) {
 	m_AxisZ = value;
 }
 int CNodeController::getInputAxisX() {
-	return (int)KMath::signf(m_AxisX); // returns -1, 0, 1
+	float val = getInputAxisAnalogX();
+	return (int)KMath::signf(val); // returns -1, 0, 1
 }
 int CNodeController::getInputAxisY() {
-	return (int)KMath::signf(m_AxisY); // returns -1, 0, 1
+	float val = getInputAxisAnalogY();
+	return (int)KMath::signf(val); // returns -1, 0, 1
 }
 int CNodeController::getInputAxisZ() {
-	return (int)KMath::signf(m_AxisZ); // returns -1, 0, 1
+	float val = getInputAxisAnalogZ();
+	return (int)KMath::signf(val); // returns -1, 0, 1
 }
 float CNodeController::getInputAxisAnalogX() {
-	return KMath::clampf(m_AxisX, -1.0f, 1.0f);
+	float result = KMath::clampf(m_AxisX, -1.0f, 1.0f);
+	if (m_CB) {
+		m_CB->on_input_axisX(m_Node, &result);
+	}
+	return result;
 }
 float CNodeController::getInputAxisAnalogY() {
-	return KMath::clampf(m_AxisY, -1.0f, 1.0f);
+	float result = KMath::clampf(m_AxisY, -1.0f, 1.0f);
+	if (m_CB) {
+		m_CB->on_input_axisY(m_Node, &result);
+	}
+	return result;
 }
 float CNodeController::getInputAxisAnalogZ() {
-	return KMath::clampf(m_AxisZ, -1.0f, 1.0f);
+	float result = KMath::clampf(m_AxisZ, -1.0f, 1.0f);
+	if (m_CB) {
+		m_CB->on_input_axisZ(m_Node, &result);
+	}
+	return result;
 }
 
 void CNodeController::setInputTrigger(const std::string &button) {
@@ -1305,6 +1325,9 @@ bool CNodeController::getInputBool(const std::string &button) {
 /// 先延ばしにしたい場合は beginReadTrigger() / endReadTrigger() を使う
 bool CNodeController::getInputTrigger(const std::string &button) {
 	if (button.empty()) return false;
+
+	float result = 0;
+
 	auto it = m_Buttons.find(button);
 	if (it != m_Buttons.end()) {
 		if (m_ReadTrigger > 0) {
@@ -1315,9 +1338,14 @@ bool CNodeController::getInputTrigger(const std::string &button) {
 			// トリガー状態を false に戻す
 			m_Buttons.erase(it);
 		}
-		return true;
+		result = 1;
 	}
-	return false;
+
+	if (m_CB) {
+		m_CB->on_input_button(m_Node, button, &result);
+	}
+
+	return result != 0;
 }
 	
 /// トリガーの読み取りモードを開始する
@@ -1354,6 +1382,11 @@ void CNodeController::tickInput() {
 		} else {
 			it++; // タイムアウトが負の値の場合なら何もしない
 		}
+	}
+
+	// 入力への介入
+	if (m_CB) {
+		m_CB->on_input_tick(m_Node);
 	}
 }
 #pragma endregion // Impl
@@ -1791,6 +1824,7 @@ void KInputMap::attach(KNode *node) {
 	K__ASSERT(g_InputMap);
 	if (node && !isAttached(node)) {
 		CNodeController *co = new CNodeController();
+		co->m_Node = node;
 		g_InputMap->m_Nodes.attach(node, co);
 		co->drop();
 	}
@@ -1798,6 +1832,14 @@ void KInputMap::attach(KNode *node) {
 bool KInputMap::isAttached(KNode *node) {
 	K__ASSERT(g_InputMap);
 	return g_InputMap->m_Nodes.get(node) != nullptr;
+}
+
+void KInputMap::setNodeInputCallback(KNode *node, KInputCallback *cb) {
+	K__ASSERT(g_InputMap);
+	auto co = g_InputMap->m_Nodes.get(node);
+	if (co) {
+		co->m_CB = cb;
+	}
 }
 void KInputMap::clearTriggers(KNode *node) {
 	K__ASSERT(g_InputMap);
