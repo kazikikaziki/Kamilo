@@ -357,7 +357,8 @@ public:
 		return true;
 	}
 	bool loadFromMetaFileName(const std::string &metafilename) {
-		KInputStream file = KInputStream::fromFileName(metafilename);
+		KInputStream file;
+		file.openFileName(metafilename);
 		std::string text = file.readBin();
 		if (text.empty()) {
 			return false;

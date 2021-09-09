@@ -154,8 +154,8 @@ void KNamedValues::setString(const std::string &name, const std::string &value) 
 }
 bool KNamedValues::loadFromFile(const std::string &filename) {
 	bool success = false;
-	KInputStream file = KInputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(filename)) {
 		std::string xml_bin = file.readBin();
 		std::string xml_u8 = K::strBinToUtf8(xml_bin);
 		if (! xml_u8.empty()) {

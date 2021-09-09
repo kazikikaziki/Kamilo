@@ -1254,7 +1254,8 @@ void Test_zip(const char *output_dir) {
 
 	// 復元
 	{
-		KInputStream file = KInputStream::fromFileName(name1.c_str());
+		KInputStream file;
+		file.openFileName(name1.c_str());
 		KUnzipper zr(file);
 		std::string bin;
 		std::string name;
@@ -1269,7 +1270,8 @@ void Test_zip(const char *output_dir) {
 
 	// 復元（パスワード付き）
 	{
-		KInputStream file = KInputStream::fromFileName(name2.c_str());
+		KInputStream file;
+		file.openFileName(name2.c_str());
 		KUnzipper zr(file);
 		std::string bin;
 		zr.getEntryData(0, "helloworld", &bin); K__VERIFY(bin.compare("This is file1.\n") == 0);
@@ -1279,7 +1281,8 @@ void Test_zip(const char *output_dir) {
 
 	// 復元（個別のパスワード）
 	{
-		KInputStream file = KInputStream::fromFileName(name3.c_str());
+		KInputStream file;
+		file.openFileName(name3.c_str());
 		KUnzipper zr(file);
 		std::string bin;
 		zr.getEntryData(0, "helloworld", &bin); K__VERIFY(bin.compare("This is file1.\n") == 0);

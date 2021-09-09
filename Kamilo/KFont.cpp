@@ -898,8 +898,8 @@ void Test_font_printInfo(const std::string &output_dir, const std::string &filen
 	std::string msg_u8;
 	std::string bin;
 	{
-		KInputStream file = KInputStream::fromFileName(filename);
-		if (file.isOpen()) {
+		KInputStream file;
+		if (file.openFileName(filename)) {
 			bin = file.readBin();
 		}
 	}
@@ -1056,7 +1056,8 @@ void KPlatformFonts::scan() {
 	std::vector<std::string> files = K::fileGetListInDir(font_dir);
 	for (auto it=files.begin(); it!=files.end(); ++it) {
 		std::string filename = K::pathJoin(font_dir, *it);
-		KInputStream file = KInputStream::fromFileName(filename);
+		KInputStream file;
+		file.openFileName(filename);
 		std::string bin = file.readBin();
 		int numfonts = KFont::getFontCollectionCount(bin.data(), bin.size());
 		for (int i=0; i<numfonts; i++) {

@@ -306,8 +306,8 @@ bool KEdgeDocument::loadFromStream(KInputStream &file) {
 }
 bool KEdgeDocument::loadFromFileName(const std::string &filename) {
 	bool success = false;
-	KInputStream file = KInputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(filename)) {
 		success = loadFromStream(file);
 	}
 	return success;
@@ -793,8 +793,8 @@ KImage KEdgePalFile::exportImage(bool index0_for_transparent) const {
 #pragma region KEdgePalReader
 bool KEdgePalReader::loadFromFileName(const std::string &filename) {
 	bool ok = false;
-	KInputStream file = KInputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(filename)) {
 		ok = loadFromStream(file);
 	}
 	return ok;

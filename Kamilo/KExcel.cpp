@@ -639,8 +639,8 @@ bool KExcelFile::loadFromStream(KInputStream &file, const std::string &xlsx_name
 }
 bool KExcelFile::loadFromFileName(const std::string &name) {
 	bool ok = false;
-	KInputStream file = KInputStream::fromFileName(name);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(name)) {
 		ok = m_Impl->loadFromFile(file, name);
 	}
 	if (!ok) {

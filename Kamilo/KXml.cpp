@@ -227,8 +227,9 @@ KXmlElement * KXmlElement::create(const std::string &tag) {
 }
 KXmlElement * KXmlElement::createFromFileName(const std::string &filename) {
 	KXmlElement *elm = nullptr;
-	KInputStream input = KInputStream::fromFileName(filename);
-	elm = createFromStream(input, filename);
+	KInputStream file;
+	file.openFileName(filename);
+	elm = createFromStream(file, filename);
 	return elm;
 }
 KXmlElement * KXmlElement::createFromStream(KInputStream &input, const std::string &filename) {

@@ -162,9 +162,10 @@ public:
 		return loadFromFileCompressEx(&m_Values, filename);
 	}
 	bool loadFromFileCompressEx(KNamedValues *nv, const std::string &filename) const {
-		KInputStream file = KInputStream::fromFileName(filename);
-		if (!file.isOpen()) return false;
-
+		KInputStream file;
+		if (!file.openFileName(filename)) {
+			return false;
+		}
 		uint16_t uzsize = file.readUint16();
 		uint16_t zsize  = file.readUint16();
 		std::string zbin = file.readBin(zsize);
@@ -183,8 +184,8 @@ public:
 	}
 	bool peekFile(const std::string &filename, const std::string &password, KNamedValues *nv) const {
 		bool ret = false;
-		KInputStream file = KInputStream::fromFileName(filename);
-		if (file.isOpen()) {
+		KInputStream file;
+		if (file.openFileName(filename)) {
 			std::string u8 = file.readBin();
 			if (!password.empty()) {
 				u8 = decryptString(u8, password);

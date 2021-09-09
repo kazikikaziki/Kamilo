@@ -116,8 +116,8 @@ public:
 		std::string realname = K::pathJoin(m_Dir, name);
 
 		// KInputStream を取得
-		KInputStream file = KInputStream::fromFileName(realname);
-		if (file.isOpen()) {
+		KInputStream file;
+		if (file.openFileName(realname)) {
 			K::outputDebugFmt("%s(%d): %s ==> OK", __FILE__, __LINE__, realname.c_str());
 			return file;
 		}
@@ -192,8 +192,8 @@ public:
 
 KArchive * KArchive::createZipReader(const std::string &zip, const std::string &password) {
 	KArchive *ar = nullptr;
-	KInputStream file = KInputStream::fromFileName(zip);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(zip)) {
 		int err = 0;
 		ar = new CZipArchive(file, password, &err);
 		if (err) {
@@ -255,7 +255,9 @@ public:
 };
 KArchive * KArchive::createPacReader(const std::string &filename) {
 	KArchive *archive = nullptr;
-	KInputStream file = KInputStream::fromFileName(filename);
+	KInputStream file;
+	file.openFileName(filename);
+	
 	KPacFileReader reader = KPacFileReader::fromStream(file);
 	if (reader.isOpen()) {
 		archive = new CPacFile(reader);
@@ -396,15 +398,16 @@ public:
 
 		// 絶対パスで指定されている場合は普通のファイルとして開く
 		if (!K::pathIsRelative(filename)) {
-			KInputStream file = KInputStream::fromFileName(filename);
+			KInputStream file;
+			file.openFileName(filename);
 			return file;
 		}
 
 		if (m_Archives.empty()) {
 			// ローダーが一つも設定されていない。
 			// 一番基本的な方法で開く
-			KInputStream file = KInputStream::fromFileName(filename);
-			if (file.isOpen()) {
+			KInputStream file;
+			if (file.openFileName(filename)) {
 				return file;
 			}
 		} else {

@@ -2855,9 +2855,9 @@ public:
 	}
 	virtual bool addFontFromFileName(const std::string &alias, const std::string &filename, int ttc_index, bool should_exists, KFont *out_font) override {
 		// ファイルをロード
-		KInputStream input = KInputStream::fromFileName(filename);
-		if (input.isOpen()) {
-			if (addFontFromStream(alias, input, filename, ttc_index, out_font)) {
+		KInputStream file;
+		if (file.openFileName(filename)) {
+			if (addFontFromStream(alias, file, filename, ttc_index, out_font)) {
 				return true;
 			}
 		}
@@ -4241,8 +4241,8 @@ private:
 				if (EXPORT_CONTENTS_DEBUG_DATA) {
 					if (K::pathHasExtension(name, ".png")) {
 						std::string path = K::pathJoin(dataDir, name);
-						KInputStream r = KInputStream::fromFileName(path);
-						if (r.isOpen()) {
+						KInputStream r;
+						if (r.openFileName(path)) {
 							uint8_t buf[32];
 							r.read(buf, sizeof(buf));
 							int w = 0, h = 0;
