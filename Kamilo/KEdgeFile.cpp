@@ -317,8 +317,8 @@ void KEdgeDocument::saveToStream(KOutputStream &file) {
 	writer.write(this, file);
 }
 void KEdgeDocument::saveToFileName(const std::string &filename) {
-	KOutputStream file = KOutputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KOutputStream file;
+	if (file.openFileName(filename)) {
 		saveToStream(file);
 	}
 }

@@ -266,8 +266,9 @@ public:
 	#ifdef _DEBUG
 		if (0) {
 			std::string png = img.saveToMemory();
-			KOutputStream output = KOutputStream::fromFileName("~gui_icons.png");
-			output.write(png.data(), png.size());
+			KOutputStream file;
+			file.openFileName("~gui_icons.png");
+			file.write(png.data(), png.size());
 		}
 	#endif
 		KTEXID texid = KVideo::createTexture(ICON_TEX_W, ICON_TEX_H);

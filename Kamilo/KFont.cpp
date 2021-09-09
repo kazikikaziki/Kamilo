@@ -918,8 +918,9 @@ void Test_font_printInfo(const std::string &output_dir, const std::string &filen
 		std::string outname = K::pathJoin(output_dir, K::pathGetLast(filename));
 		outname = K::pathRenameExtension(outname, ".txt");
 
-		KOutputStream output = KOutputStream::fromFileName(outname);
-		output.write(msg_u8.data(), msg_u8.size());
+		KOutputStream file;
+		file.openFileName(outname);
+		file.write(msg_u8.data(), msg_u8.size());
 	}
 }
 void Test_font_ex(const std::string &font_filename, float fontsize, const std::string &output_image_filename) {
@@ -1001,8 +1002,9 @@ void Test_font_ex(const std::string &font_filename, float fontsize, const std::s
 		}
 
 		std::string png = imgText.saveToMemory();
-		KOutputStream output = KOutputStream::fromFileName(output_image_filename);
-		output.write(png.data(), png.size());
+		KOutputStream file;
+		file.openFileName(output_image_filename);
+		file.write(png.data(), png.size());
 	}
 }
 void Test_font(const std::string &dir) {
@@ -1116,8 +1118,9 @@ void Test_fontscan(const std::string &output_dir) {
 			);
 		}
 	}
-	KOutputStream output = KOutputStream::fromFileName(K::pathJoin(output_dir, "Test_fontscan.txt"));
-	output.write(msg_u8.data(), msg_u8.size());
+	KOutputStream file;
+	file.openFileName(K::pathJoin(output_dir, "Test_fontscan.txt"));
+	file.write(msg_u8.data(), msg_u8.size());
 }
 } // Test
 

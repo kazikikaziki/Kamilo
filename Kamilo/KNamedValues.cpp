@@ -165,8 +165,8 @@ bool KNamedValues::loadFromFile(const std::string &filename) {
 	return success;
 }
 void KNamedValues::saveToFile(const std::string &filename, bool pack_in_attr) const {
-	KOutputStream file = KOutputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KOutputStream file;
+	if (file.openFileName(filename)) {
 		std::string xml_u8 = saveToString(pack_in_attr);
 		file.write(xml_u8.c_str(), xml_u8.size());
 	}

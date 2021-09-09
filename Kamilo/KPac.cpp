@@ -76,8 +76,9 @@ KPacFileWriter::KPacFileWriter() {
 	m_Impl = nullptr;
 }
 KPacFileWriter KPacFileWriter::fromFileName(const std::string &filename) {
-	KOutputStream output = KOutputStream::fromFileName(filename);
-	return fromStream(output);
+	KOutputStream file;
+	file.openFileName(filename);
+	return fromStream(file);
 }
 KPacFileWriter KPacFileWriter::fromStream(KOutputStream &output) {
 	KPacFileWriter ret;

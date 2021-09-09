@@ -119,14 +119,14 @@ public:
 	bool saveToFileEx(const KNamedValues *nv, const std::string &filename, const std::string &password) {
 		bool ret = false;
 	
-		KOutputStream output = KOutputStream::fromFileName(filename);
-		if (output.isOpen()) {
+		KOutputStream file;
+		if (file.openFileName(filename)) {
 			std::string u8 = nv->saveToString();
 			if (!password.empty()) {
 				u8 = encryptString(u8, password);
 			}
 			if (!u8.empty()) {
-				output.write(u8.data(), u8.size());
+				file.write(u8.data(), u8.size());
 			}
 			ret = true;
 		}
@@ -146,11 +146,11 @@ public:
 		std::string zbin = KZlib::compress_raw(u8, 1);
 		if (zbin.empty()) return false;
 
-		KOutputStream output = KOutputStream::fromFileName(filename);
-		if (output.isOpen()) {
-			output.writeUint16((uint16_t)u8.size());
-			output.writeUint16((uint16_t)zbin.size());
-			output.write(zbin.data(), zbin.size());
+		KOutputStream file;
+		if (file.openFileName(filename)) {
+			file.writeUint16((uint16_t)u8.size());
+			file.writeUint16((uint16_t)zbin.size());
+			file.write(zbin.data(), zbin.size());
 			return true;
 		}
 		return false;

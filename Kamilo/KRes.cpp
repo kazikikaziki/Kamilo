@@ -240,9 +240,9 @@ static void _MeshSaveToFile(const KMesh *mesh, KOutputStream &output) {
 	output.write(s.data(), s.size());
 }
 static bool _MeshSaveToFileName(const KMesh *mesh, const KPath &filename) {
-	KOutputStream output = KOutputStream::fromFileName(filename.u8());
-	if (output.isOpen()) {
-		_MeshSaveToFile(mesh, output);
+	KOutputStream file;
+	if (file.openFileName(filename.u8())) {
+		_MeshSaveToFile(mesh, file);
 		return true;
 	} else {
 		KLog::printError("_MeshSaveToFileName: file can not be opened");
@@ -648,8 +648,9 @@ void KClipRes::on_track_gui() {
 		}
 		s += '\n';
 
-		KOutputStream output = KOutputStream::fromFileName("~sprite_curve.txt");
-		output.write(s.data(), s.size());
+		KOutputStream file;
+		file.openFileName("~sprite_curve.txt");
+		file.write(s.data(), s.size());
 	}
 #endif // !NO_IMGUI
 }
@@ -4139,7 +4140,8 @@ public:
 
 		// 管理データを保存する
 		if (xDoc) {
-			KOutputStream file = KOutputStream::fromFileName(xmlBankName);
+			KOutputStream file;
+			file.openFileName(xmlBankName);
 			xDoc->writeDoc(file);
 		}
 		K__DROP(xDoc);
