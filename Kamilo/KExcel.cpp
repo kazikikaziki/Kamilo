@@ -650,8 +650,8 @@ bool KExcelFile::loadFromFileName(const std::string &name) {
 }
 bool KExcelFile::loadFromMemory(const void *bin, size_t size, const std::string &name) {
 	bool ok = false;
-	KInputStream file = KInputStream::fromMemory(bin, size);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openMemory(bin, size)) {
 		ok = m_Impl->loadFromFile(file, name);
 	}
 	if (!ok) {

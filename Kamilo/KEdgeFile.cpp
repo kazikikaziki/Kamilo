@@ -801,8 +801,8 @@ bool KEdgePalReader::loadFromFileName(const std::string &filename) {
 }
 bool KEdgePalReader::loadFromMemory(const void *data, size_t size) {
 	bool ok = false;
-	KInputStream file = KInputStream::fromMemory(data, size);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openMemory(data, size)) {
 		ok = loadFromStream(file);
 	}
 	return ok;

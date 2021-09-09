@@ -453,7 +453,8 @@ namespace Test {
 void Test_stream() {
 	{
 		const char *text = "hello, world.";
-		KInputStream r = KInputStream::fromMemory(text, strlen(text));
+		KInputStream r;
+		r.openMemory(text, strlen(text));
 		char s[32] = {0};
 	
 		K__ASSERT(r.read(s, 5) == 5);
@@ -470,7 +471,8 @@ void Test_stream() {
 	}
 	{
 		std::string s;
-		KOutputStream w = KOutputStream::fromMemory(&s);
+		KOutputStream w;
+		w.openMemory(&s);
 		K__ASSERT(w.write("abc", 3) == 3);
 		K__ASSERT(w.write(" ",   1) == 1);
 		K__ASSERT(w.write("def", 3) == 3);

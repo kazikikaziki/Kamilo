@@ -3874,8 +3874,8 @@ bool KGameEdgeBuilder::loadFromStream(KEdgeDocument *edge, KInputStream &file, c
 bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *data, size_t size, const std::string &debugname) {
 	K__ASSERT(edge);
 	bool ret = false;
-	KInputStream file = KInputStream::fromMemory(data, size);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openMemory(data, size)) {
 		ret = loadFromStream(edge, file, debugname);
 	} else {
 		KLog::printError("E_MEM_READER_FAIL: %s", debugname.c_str());
@@ -3885,8 +3885,8 @@ bool KGameEdgeBuilder::loadFromFileInMemory(KEdgeDocument *edge, const void *dat
 bool KGameEdgeBuilder::loadFromFileName(KEdgeDocument *edge, const std::string &filename) {
 	K__ASSERT(edge);
 	bool ret = false;
-	KInputStream file = KInputStream::fromFileName(filename);
-	if (file.isOpen()) {
+	KInputStream file;
+	if (file.openFileName(filename)) {
 		ret = loadFromStream(edge, file, filename);
 	} else {
 		KLog::printError("E_EDGE_FAIL: STREAM ERROR: %s", filename.c_str());

@@ -162,16 +162,16 @@ public:
 		return r.isOpen();
 	}
 	virtual KInputStream createFileReader(const std::string &filename) override {
+		KInputStream file;
 		for (int i=0; i<m_Unzipper.getEntryCount(); i++) {
 			const char *s = getFileName(i);
 			if (K::pathCompare(s, filename, false, false) == 0) {
 				std::string bin;
 				m_Unzipper.getEntryData(i, m_Password.c_str(), &bin);
-
-				return KInputStream::fromMemoryCopy(bin.data(), bin.size());
+				file.openMemoryCopy(bin.data(), bin.size());
 			}
 		}
-		return KInputStream();
+		return file;
 	}
 	virtual int getFileCount() override {
 		return m_Unzipper.getEntryCount();
@@ -234,15 +234,16 @@ public:
 		return m_PacReader.getIndexByName(name, false, false) >= 0;
 	}
 	virtual KInputStream createFileReader(const std::string &name) override {
+		KInputStream file;
 		if (PAC_CASE_CEHCK) {
 			check_filename_case(name);
 		}
 		int index = m_PacReader.getIndexByName(name, false, false);
-		if (index < 0) {
-			return KInputStream();
+		if (index >= 0) {
+			std::string bin = m_PacReader.getData(index);
+			file.openMemoryCopy(bin.data(), bin.size());
 		}
-		std::string bin = m_PacReader.getData(index);
-		return KInputStream::fromMemoryCopy(bin.data(), bin.size());
+		return file;
 	}
 	virtual int getFileCount() override {
 		return m_PacReader.getCount();

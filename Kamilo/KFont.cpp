@@ -531,12 +531,14 @@ bool KFont::loadFromStream(KInputStream &input, int ttc_index) {
 	return true;
 }
 bool KFont::loadFromFileName(const std::string &filename, int ttc_index) {
-	KInputStream input = KInputStream::fromFileName(filename);
-	return loadFromStream(input, ttc_index);
+	KInputStream file;
+	file.openFileName(filename);
+	return loadFromStream(file, ttc_index);
 }
 bool KFont::loadFromMemory(const void *data, int size, int ttc_index) {
-	KInputStream input = KInputStream::fromMemory(data, size);
-	return loadFromStream(input, ttc_index);
+	KInputStream file;
+	file.openMemory(data, size);
+	return loadFromStream(file, ttc_index);
 }
 
 
