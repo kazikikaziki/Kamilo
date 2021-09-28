@@ -141,13 +141,14 @@ public:
 	#pragma region print
 	static void print(const char *fmt_u8, ...);
 	static void printW(const wchar_t *wfmt, ...);
+	static void verbose(const char *fmt_u8, ...);
+	static void verboseW(const wchar_t *wfmt, ...);
 	static void debug(const char *fmt_u8, ...);
 	static void debugW(const wchar_t *wfmt, ...);
 	static void warning(const char *fmt_u8, ...);
 	static void warningW(const wchar_t *wfmt, ...);
 	static void error(const char *fmt_u8, ...);
 	static void errorW(const wchar_t *wfmt, ...);
-	static void verbose(const char *fmt_u8, ...); // KAMILO_VERBOSE が定義されているときのみ動作する
 	static void setDebugPrintHook(void (*hook)(const char *u8));
 	static void setPrintHook(void (*hook)(const char *u8));
 	static void setWarningHook(void (*hook)(const char *u8));

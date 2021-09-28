@@ -264,6 +264,36 @@ void K::printW(const wchar_t *wfmt, ...) {
 		outputDebugStringW(ws);
 	}
 }
+void K::verbose(const char *fmt_u8, ...) {
+#ifndef KAMILO_NOVERBOSE
+	char u8[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, fmt_u8);
+	vsnprintf(u8, sizeof(u8), fmt_u8, args);
+	va_end(args);
+	if (g_DebugPrintHook) {
+		g_DebugPrintHook(u8);
+	} else {
+		std::wstring ws = K::strUtf8ToWide(u8);
+		outputDebugStringW(ws);
+	}
+#endif
+}
+void K::verboseW(const wchar_t *wfmt, ...) {
+#ifndef KAMILO_NOVERBOSE
+	wchar_t ws[OUTPUT_STRING_SIZE] = {0};
+	va_list args;
+	va_start(args, wfmt);
+	vswprintf(ws, sizeof(ws)/sizeof(wchar_t), wfmt, args);
+	va_end(args);
+	if (g_DebugPrintHook) {
+		std::string u8 = K::strWideToUtf8(ws);
+		g_DebugPrintHook(u8.c_str());
+	} else {
+		outputDebugStringW(ws);
+	}
+#endif
+}
 void K::debug(const char *fmt_u8, ...) {
 	char u8[OUTPUT_STRING_SIZE] = {0};
 	va_list args;
@@ -341,21 +371,6 @@ void K::errorW(const wchar_t *wfmt, ...) {
 	} else {
 		outputDebugStringW(ws);
 	}
-}
-void K::verbose(const char *fmt_u8, ...) {
-#ifdef KAMILO_VERBOSE
-	char u8[OUTPUT_STRING_SIZE] = {0};
-	va_list args;
-	va_start(args, fmt_u8);
-	vsnprintf(u8, sizeof(u8), fmt_u8, args);
-	va_end(args);
-	if (g_WarningHook) {
-		g_WarningHook(u8);
-	} else {
-		std::wstring ws = K::strUtf8ToWide(u8);
-		outputDebugStringW(ws);
-	}
-#endif
 }
 #pragma endregion // print
 
