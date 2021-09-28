@@ -936,29 +936,30 @@ public:
 	}
 
 	void updateGui() {
-		ImGui::BeginTable("##pages", 2, ImGuiTableFlags_Resizable|ImGuiTableFlags_BordersV|ImGuiTableFlags_SizingFixedFit);
-		for (size_t i=0; i<m_Buttons.size(); i++) {
-			CActionButtonKeyElm *elm = m_Buttons[i];
-			ImVec4 color;
-			if (elm->m_RawCurr != 0) {
-			//	color = KImGui::COLOR_WARNING);
-				color = KImGui::COLOR_DEFAULT();
-			} else {
-				color = KImGui::COLOR_DISABLED();
+		if (ImGui::BeginTable("##pages", 2, ImGuiTableFlags_Resizable|ImGuiTableFlags_BordersV|ImGuiTableFlags_SizingFixedFit)) {
+			for (size_t i=0; i<m_Buttons.size(); i++) {
+				CActionButtonKeyElm *elm = m_Buttons[i];
+				ImVec4 color;
+				if (elm->m_RawCurr != 0) {
+				//	color = KImGui::COLOR_WARNING);
+					color = KImGui::COLOR_DEFAULT();
+				} else {
+					color = KImGui::COLOR_DISABLED();
+				}
+
+				ImGui::BeginGroup();
+				ImGui::TableNextColumn();
+				ImGui::TextColored(color, "%s", elm->m_Name.c_str());
+
+				ImGui::TableNextColumn();
+				ImGui::TextColored(color, "%.2f", elm->m_RawCurr);
+				ImGui::EndGroup();
+
+				if (ImGui::IsItemHovered()) { ImGui::SetTooltip("%s", typeid(*elm).name()); }
+
 			}
-
-			ImGui::BeginGroup();
-			ImGui::TableNextColumn();
-			ImGui::TextColored(color, "%s", elm->m_Name.c_str());
-
-			ImGui::TableNextColumn();
-			ImGui::TextColored(color, "%.2f", elm->m_RawCurr);
-			ImGui::EndGroup();
-
-			if (ImGui::IsItemHovered()) { ImGui::SetTooltip("%s", typeid(*elm).name()); }
-
+			ImGui::EndTable();
 		}
-		ImGui::EndTable();
 	}
 
 	// 入力状態を更新する
