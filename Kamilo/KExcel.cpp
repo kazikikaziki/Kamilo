@@ -562,15 +562,16 @@ private:
 std::string KExcelFile::encodeCellName(int col, int row) {
 	if (col < 0) return "";
 	if (row < 0) return "";
-	if (col < EXCEL_ALPHABET_NUM) {
+	if (col < EXCEL_ALPHABET_NUM) { // A～Z
 		char c = (char)('A' + col);
 		char s[256];
 		sprintf_s(s, sizeof(s), "%c%d", c, 1+row);
 		return s;
 	}
-	if (col < EXCEL_ALPHABET_NUM*EXCEL_ALPHABET_NUM) {
-		char c1 = (char)('A' + (col / EXCEL_ALPHABET_NUM));
-		char c2 = (char)('A' + (col % EXCEL_ALPHABET_NUM));
+	if (col < EXCEL_ALPHABET_NUM*EXCEL_ALPHABET_NUM) { // AA～ZZ
+		int off = col - EXCEL_ALPHABET_NUM; // AA=0 としたときのカラム番号
+		char c1 = (char)('A' + (off / EXCEL_ALPHABET_NUM));
+		char c2 = (char)('A' + (off % EXCEL_ALPHABET_NUM));
 		char s[256];
 		K__ASSERT(isalpha(c1));
 		K__ASSERT(isalpha(c2));
