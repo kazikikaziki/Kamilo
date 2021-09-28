@@ -1303,6 +1303,7 @@ public:
 				);
 				texres->setName(name);
 				m_Items[name.u8()] = texres;
+				K__VERBOSE("Add Render Texture: '%s'", name.c_str());
 			}
 			m_Mutex.unlock();
 			return texres->m_TexId;
@@ -1326,6 +1327,7 @@ public:
 				);
 				texres->setName(name);
 				m_Items[name.u8()] = texres;
+				K__VERBOSE("Add Render Texture: '%s'", name.c_str());
 				tex = texres->m_TexId;
 
 			} else {
@@ -1348,6 +1350,7 @@ public:
 						);
 						texres->setName(name);
 						m_Items[name.u8()] = texres;
+						K__VERBOSE("Add Render Texture: '%s'", name.c_str());
 						tex = texres->m_TexId;
 					
 					} else {
@@ -1374,6 +1377,7 @@ public:
 						texres->setName(name);
 						m_Items[name.u8()] = texres;
 						tex = texres->m_TexId;
+						K__VERBOSE("Add Render Texture: '%s'", name.c_str());
 
 					} else {
 						// 使いまわしできない
@@ -1422,6 +1426,7 @@ public:
 			texres->setName(name);
 			m_Items[name.u8()] = texres;
 			tex = texres->m_TexId;
+			K__VERBOSE("Add Texture: '%s'", name.c_str());
 		}
 		m_Mutex.unlock();
 
