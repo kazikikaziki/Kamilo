@@ -800,6 +800,7 @@ public:
 
 	// 仮想ボタンにジョイスティックの軸を割り当てる
 	// @param axis 割り当てる軸 (@K_JOYAXIS_X など)
+	// @halfrange  軸入力の正と負のどちらに割り当てるか。-1 か 1 のどちらかを指定する（正負の両方に割り当てることはできない）
 	IKeyElm * createJoystickAxis(KJoystick::Axis axis, int halfrange, float threshold) {
 		if (!KJoystick::isInit()) {
 			K__ERROR("no joystick support");
@@ -1756,10 +1757,14 @@ void KInputMap::bindJoystickKey(const std::string &button, KJoystick::Button joy
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickKey(button, joybtn, tag);
 }
+
+/// addButton で登録した仮想ボタンに対してジョイスティックの軸をバインドする
+/// ※軸の負方向または正方向のどちらかにしか割り当てられない。正負のどちらに割り当てるかを halfrange に -1 または 1 で指定する
 void KInputMap::bindJoystickAxis(const std::string &button, KJoystick::Axis axis, int halfrange, const std::string &tag, float threshold) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickAxis(button, axis, halfrange, tag, threshold);
 }
+
 void KInputMap::bindJoystickPov(const std::string &button, int xsign, int ysign, const std::string &tag) {
 	K__ASSERT(g_InputMap);
 	g_InputMap->bindJoystickPov(button, xsign, ysign, tag);

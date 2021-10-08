@@ -559,11 +559,11 @@ private:
 };
 
 
-// TComp は KComp の継承であること!!!
-template <class TComp> class KCompNodes {
-	std::unordered_map<KNode*, TComp*> m_Nodes;
+// Co は KComp の継承であること!!!
+template <class Co> class KCompNodes {
+	std::unordered_map<KNode*, Co*> m_Nodes;
 public:
-	typedef typename std::unordered_map<KNode*, TComp*>::iterator iterator;
+	typedef typename std::unordered_map<KNode*, Co*>::iterator iterator;
 
 	KCompNodes() {
 	}
@@ -582,7 +582,7 @@ public:
 	}
 	void clear() {
 		for (auto it=m_Nodes.begin(); it!=m_Nodes.end(); ++it) {
-			TComp *comp = it->second;
+			Co *comp = it->second;
 			comp->_setNode(nullptr); // ここでエラーが起きる場合、KComp を継承していない可能性がある
 			comp->drop();
 			KNode *node = it->first;
@@ -590,7 +590,7 @@ public:
 		}
 		m_Nodes.clear();
 	}
-	void attach(KNode *node, TComp *comp) {
+	void attach(KNode *node, Co *comp) {
 	//	assert(node);
 	//	assert(comp);
 		detach(node);
@@ -602,7 +602,7 @@ public:
 	void detach(KNode *node) {
 		auto it = m_Nodes.find(node);
 		if (it != m_Nodes.end()) {
-			TComp *comp = it->second;
+			Co *comp = it->second;
 			comp->_setNode(nullptr); // ここでエラーが起きる場合、KComp を継承していない可能性がある
 			comp->drop();
 			node->drop();
@@ -613,7 +613,7 @@ public:
 		auto it = m_Nodes.find(node);
 		return it != m_Nodes.end();
 	}
-	TComp * get(KNode *node) {
+	Co * get(KNode *node) {
 		auto it = m_Nodes.find(node);
 		if (it != m_Nodes.end()) {
 			return it->second;

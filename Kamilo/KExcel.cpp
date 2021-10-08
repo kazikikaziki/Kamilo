@@ -11,7 +11,7 @@ namespace Kamilo {
 
 
 #define EXCEL_ALPHABET_NUM 26
-#define EXCEL_COL_LIMIT    (EXCEL_ALPHABET_NUM * EXCEL_ALPHABET_NUM)
+#define EXCEL_COL_LIMIT    (EXCEL_ALPHABET_NUM + EXCEL_ALPHABET_NUM * EXCEL_ALPHABET_NUM) // A～Z + AA～ZZ
 #define EXCEL_ROW_LIMIT    1024
 #define HAS_CHAR(str, chr) (strchr(str, chr) != nullptr)
 
@@ -424,13 +424,20 @@ private:
 				const KXmlElement *xCell = xRow->getChild(c);
 				if (!xCell->hasTag("c")) continue;
 
-				const char *pos = xCell->getAttrString("r");
-				int cidx = -1;
-				int ridx = -1;
-				if (parse_cell_position(pos, &cidx, &ridx)) {
-					K__ASSERT(cidx >= 0 && ridx >= 0);
-					const char *val = get_cell_text(xCell);
-					cb->onCell(cidx, ridx, val);
+				// とんでもないセル番号が入っている場合がある "ZA1" とか
+				// しかし実際には空文字列が入っているだけだったりするので、
+				// 有効な文字列が入っているかどうかを先に調べる。
+				// 空文字列のセルだった場合は存在しないものとして扱う
+				const char *val = get_cell_text(xCell);
+
+				if (val && val[0]) {
+					const char *pos = xCell->getAttrString("r");
+					int cidx = -1;
+					int ridx = -1;
+					if (parse_cell_position(pos, &cidx, &ridx)) {
+						K__ASSERT(cidx >= 0 && ridx >= 0);
+						cb->onCell(cidx, ridx, val);
+					}
 				}
 			}
 		}
