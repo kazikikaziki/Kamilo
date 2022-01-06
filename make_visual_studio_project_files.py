@@ -16,11 +16,11 @@ import shutil
 import traceback
 
 # cmake 用の作業フォルダ名
-output_dir = "__cmake"
+g_OutputDir = "__cmake"
 
 
 # 最初のカレントフォルダ
-home_dir = os.getcwd()
+g_HomeDir = os.getcwd()
 
 
 
@@ -42,30 +42,30 @@ def execute(cmd):
 #----------------------------------------------------
 # cmake 用の作業フォルダを作成する
 def make_cmake_working_dir():
-	if not os.path.isdir(output_dir):
-		os.mkdir(output_dir)
+	if not os.path.isdir(g_OutputDir):
+		os.mkdir(g_OutputDir)
 
 
 #----------------------------------------------------
 # cmake 用の作業フォルダを削除する
 def remove_cmake_working_dir():
-	if os.path.isdir(output_dir):
+	if os.path.isdir(g_OutputDir):
 		# 安全のため、絶対パスでの指定は拒否する
-		if os.path.isabs(output_dir):
+		if os.path.isabs(g_OutputDir):
 			raise RuntimeError
 		
 		# 安全のため、上方向へのパスを含む相対パスを拒否する
-		if ".." in output_dir: # ..を含むフォルダ名も弾くことになるが、良い名前とは言えないので、それで良しとする
+		if ".." in g_OutputDir: # ..を含むフォルダ名も弾くことになるが、良い名前とは言えないので、それで良しとする
 			raise RuntimeError
 		
-		shutil.rmtree(output_dir)
+		shutil.rmtree(g_OutputDir)
 
 
 #----------------------------------------------------
 # cmake ファイルを作成。
 def execute_cmake(args):
 	# 初期フォルダに移動
-	os.chdir(home_dir)
+	os.chdir(g_HomeDir)
 
 	# 既存の cmake 作業フォルダを削除
 	remove_cmake_working_dir();
@@ -74,7 +74,7 @@ def execute_cmake(args):
 	make_cmake_working_dir();
 	
 	# cmake 作業フォルダ内に移動
-	os.chdir(output_dir) # 作業フォルダ内に移動
+	os.chdir(g_OutputDir) # 作業フォルダ内に移動
 
 	# cmake を実行
 	dir = ".." # CMakeLists.txt のあるフォルダ（現在のひとつ上のフォルダ）を指定する
