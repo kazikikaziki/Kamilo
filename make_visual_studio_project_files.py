@@ -41,14 +41,14 @@ def execute(cmd):
 
 #----------------------------------------------------
 # cmake 用の作業フォルダを作成する
-def make_cmake_working_dir():
+def make_cmake_output_dir():
 	if not os.path.isdir(g_OutputDir):
 		os.mkdir(g_OutputDir)
 
 
 #----------------------------------------------------
 # cmake 用の作業フォルダを削除する
-def remove_cmake_working_dir():
+def remove_cmake_output_dir():
 	if os.path.isdir(g_OutputDir):
 		# 安全のため、絶対パスでの指定は拒否する
 		if os.path.isabs(g_OutputDir):
@@ -64,35 +64,32 @@ def remove_cmake_working_dir():
 #----------------------------------------------------
 # cmake ファイルを作成。
 def execute_cmake(args):
-	# 初期フォルダに移動
-	os.chdir(g_HomeDir)
+	# 既存の cmake 出力フォルダを削除
+	remove_cmake_output_dir();
 
-	# 既存の cmake 作業フォルダを削除
-	remove_cmake_working_dir();
-
-	# cmake 作業フォルダを作成
-	make_cmake_working_dir();
+	# cmake 出力フォルダを作成
+	make_cmake_output_dir();
 	
-	# cmake 作業フォルダ内に移動
-	os.chdir(g_OutputDir) # 作業フォルダ内に移動
-
 	# cmake を実行
-	dir = ".." # CMakeLists.txt のあるフォルダ（現在のひとつ上のフォルダ）を指定する
-	if execute("cmake " + dir + " " + args):
-		# 成功
-		return True
-	
-	else:
-		# 失敗した。cmake 作業フォルダを消す
-		remove_cmake_working_dir();
-		return False
+	# cmake はカレントディレクトリに対して生成物を出力するため、
+	# まず最初に出力用フォルダを作っておき、そこにカレントディレクトリを移動してから実行する。
+	# 第1引数には入力用の CMakeLiists.txt が存在するフォルダを指定する
+	os.chdir(g_OutputDir)
+	result = execute("cmake .. " + args)
+	os.chdir(g_HomeDir) # 戻す
+
+	# 失敗したら cmake 出力フォルダを消す
+	if not result:
+		remove_cmake_output_dir();
+
+	return result
 
 
 #----------------------------------------------------
 def execute_cmake_try():
-	if execute_cmake("-G\"Visual Studio 16 2019\" -AWin32"): # 32ビット版を作成する
+	if execute_cmake('-G"Visual Studio 17 2022" -AWin32'): # 32ビット版を作成する
 		return True
-	if execute_cmake("-G\"Visual Studio 17 2022\" -AWin32"):
+	if execute_cmake('-G"Visual Studio 16 2019" -AWin32'): # 32ビット版を作成する
 		return True
 	return False
 
