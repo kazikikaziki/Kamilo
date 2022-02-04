@@ -48,9 +48,9 @@ int KXorShift::randInt(int range) {
 }
 int KXorShift::randIntRange(int a, int b) {
 	if (a < b) {
-		return a + randInt(b - a);
+		return a + randInt(b - a + 1);
 	} else {
-		return b + randInt(a - b);
+		return b + randInt(a - b + 1);
 	}
 }
 

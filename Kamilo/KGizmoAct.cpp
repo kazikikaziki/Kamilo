@@ -62,6 +62,31 @@ void KGizmoAct::addLine(const KVec3 &a, const KVec3 &b, const KColor32 &color_a,
 		m_MeshBuf.addToMesh(mesh, KPrimitive_LINES);
 	}
 }
+void KGizmoAct::addRegularPolygon(const KVec3 &pos, float radius, int count, float start_degrees, const KColor32 &border_color, const KColor32 &fill_color) {
+	KMeshDrawable *co = getGizmoMeshDrawable();
+	KMesh *mesh = co ? co->getMesh() : nullptr;
+	if (mesh && count >= 2) {
+		m_MeshBuf.resize2(mesh, count+1, 0);
+		for (int i=0; i<count+1; i++) { // 図形を閉じるため i=count までループする
+			float rad = KMath::degToRad(start_degrees + i * 360.0f / count);
+			KVec3 p;
+			p.x = pos.x + radius * cosf(rad);
+			p.y = pos.y + radius * sinf(rad);
+			m_MeshBuf.setPosition(i, p);
+			m_MeshBuf.setColor32(i, KColor32::WHITE);
+		}
+		if (fill_color != KColor32::ZERO) {
+			KMaterial m;
+			m.color = fill_color;
+			m_MeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
+		}
+		if (border_color != KColor32::ZERO) {
+			KMaterial m;
+			m.color = border_color;
+			m_MeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
+		}
+	}
+}
 void KGizmoAct::addConvexPolygon(const KVec3 &pos, const KVec3 points[], int count, const KColor32 &border_color, const KColor32 &fill_color) {
 	KMeshDrawable *co = getGizmoMeshDrawable();
 	KMesh *mesh = co ? co->getMesh() : nullptr;
@@ -92,31 +117,6 @@ void KGizmoAct::addRectangle(const KVec3 &pos, const KVec3 &halfsize, const KCol
 		KVec3(-halfsize.x, -halfsize.y, 0.0f),
 	}; 
 	addConvexPolygon(pos, points, 5, border_color, fill_color);
-}
-void KGizmoAct::addRegularPolygon(const KVec3 &pos, float radius, int count, float start_degrees, const KColor32 &border_color, const KColor32 &fill_color) {
-	KMeshDrawable *co = getGizmoMeshDrawable();
-	KMesh *mesh = co ? co->getMesh() : nullptr;
-	if (mesh && count >= 2) {
-		m_MeshBuf.resize2(mesh, count+1, 0);
-		for (int i=0; i<count+1; i++) { // 図形を閉じるため i=count までループする
-			float rad = KMath::degToRad(start_degrees + i * 360.0f / count);
-			KVec3 p;
-			p.x = pos.x + radius * cosf(rad);
-			p.y = pos.y + radius * sinf(rad);
-			m_MeshBuf.setPosition(i, p);
-			m_MeshBuf.setColor32(i, KColor32::WHITE);
-		}
-		if (fill_color != KColor32::ZERO) {
-			KMaterial m;
-			m.color = fill_color;
-			m_MeshBuf.addToMesh(mesh, KPrimitive_TRIANGLE_FAN, &m);
-		}
-		if (border_color != KColor32::ZERO) {
-			KMaterial m;
-			m.color = border_color;
-			m_MeshBuf.addToMesh(mesh, KPrimitive_LINE_STRIP, &m);
-		}
-	}
 }
 
 #pragma endregion // KGizmoAct
